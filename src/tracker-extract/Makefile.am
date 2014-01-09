@@ -42,6 +42,7 @@ rules_files = \
 	15-playlist.rule \
 	90-gstreamer-generic.rule \
 	90-text-generic.rule \
+        90-libav-generic.rule \
 	91-gstreamer-generic-dlna.rule \
 	92-xine-generic.rule \
 	93-mplayer-generic.rule \
@@ -171,6 +172,11 @@ endif
 if HAVE_ICON
 extractmodules_LTLIBRARIES += libextract-icon.la
 rules_DATA += 10-ico.rule
+endif
+
+if HAVE_LIBAV
+extractmodules_LTLIBRARIES += libextract-libav.la
+rules_DATA += 90-libav-generic.rule
 endif
 
 # ABW
@@ -490,6 +496,23 @@ libextract_iso_la_LIBADD = \
 	$(BUILD_LIBS) \
 	$(TRACKER_EXTRACT_MODULES_LIBS) \
 	$(LIBOSINFO_LIBS)
+
+# libav
+libextract_libav_la_SOURCES = tracker-extract-libav.c
+libextract_libav_la_CFLAGS = $(TRACKER_EXTRACT_MODULES_CFLAGS) \
+	$(AVFORMAT_CFLAGS) \
+	$(AVUTIL_CFLAGS) \
+	$(AVCODEC_CFLAGS)
+libextract_libav_la_LDFLAGS = $(module_flags)
+libextract_libav_la_LIBADD = \
+	$(top_builddir)/src/libtracker-extract/libtracker-extract-@TRACKER_API_VERSION@.la \
+	$(top_builddir)/src/libtracker-common/libtracker-common.la \
+	$(BUILD_LIBS) \
+	$(TRACKER_EXTRACT_MODULES_LIBS) \
+	$(AVFORMAT_LIBS) \
+	$(AVUTIL_LIBS) \
+	$(AVCODEC_LIBS)
+
 
 #
 # Binaries

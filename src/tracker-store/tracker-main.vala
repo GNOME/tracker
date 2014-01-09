@@ -59,6 +59,7 @@ License which can be viewed at:
 
 		message ("Store options:");
 		message ("  Readonly mode  ........................  %s", readonly_mode ? "yes" : "no");
+		message ("  GraphUpdated Delay ....................  %d", config.graphupdated_delay);
 	}
 
 	static void do_shutdown () {
@@ -205,7 +206,7 @@ License which can be viewed at:
 
 		sanity_check_option_values (config);
 
-		if (!Tracker.DBus.init ()) {
+		if (!Tracker.DBus.init (config)) {
 			return 1;
 		}
 

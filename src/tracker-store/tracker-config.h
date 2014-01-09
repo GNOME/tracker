@@ -51,6 +51,11 @@ gint           tracker_config_get_verbosity                        (TrackerConfi
 void           tracker_config_set_verbosity                        (TrackerConfig *config,
                                                                     gint           value);
 
+gint           tracker_config_get_graphupdated_delay               (TrackerConfig *config);
+
+void           tracker_config_set_graphupdated_delay               (TrackerConfig *config,
+                                                                    gint           value);
+
 G_END_DECLS
 
 #endif /* __TRACKER_STORE_CONFIG_H__ */

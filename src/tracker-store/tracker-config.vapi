@@ -22,5 +22,6 @@ namespace Tracker {
 	public class Config : ConfigFile {
 		public Config ();
 		public int verbosity { get; set; }
+		public int graphupdated_delay { get; set; }
 	}
 }

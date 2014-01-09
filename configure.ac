@@ -170,7 +170,8 @@ LIBNOTIFY_REQUIRED=0.4.3
 HAL_REQUIRED=0.5
 UPOWER_REQUIRED=0.9.0
 GDKPIXBUF_REQUIRED=2.12.0
-QT_REQUIRED=4.7.1
+QT5_REQUIRED=5.0.0
+QT4_REQUIRED=4.7.1
 MEEGOTOUCH_REQUIRED=0.20
 POPPLER_REQUIRED=0.16.0
 CAIRO_REQUIRED=1.0
@@ -620,6 +621,22 @@ AM_CONDITIONAL(HAVE_MAEMO, test "x$enable_maemo" = "xyes")
 
 if test "x$enable_maemo" = "xyes" ; then
    AC_DEFINE(HAVE_MAEMO, 1, [Define if we enable Maemo specific features])
+fi
+
+####################################################################
+# Check if we should install nemo specific features
+####################################################################
+
+AC_ARG_ENABLE(nemo,
+              AS_HELP_STRING([--enable-nemo],
+                             [enable nemo specific [[default=no]]]),
+             [enable_nemo="$enableval"],
+             [enable_nemo=no])
+
+AM_CONDITIONAL(HAVE_NEMO, test "x$enable_nemo" = "xyes")
+
+if test "x$enable_nemo" = "xyes" ; then
+   AC_DEFINE(HAVE_NEMO, 1, [Define if we enable Nemo specific features])
 fi
 
 ####################################################################
@@ -1591,29 +1608,53 @@ selected_for_media_art="no  (disabled)"
 ##################################################################
 
 if test "x$enable_qt" != "xno" && test "x$enable_gdkpixbuf" != "xyes"; then
-   PKG_CHECK_MODULES(QT,
-                     [QtGui >= $QT_REQUIRED],
-                     [have_qt=yes],
-                     [have_qt=no])
+   PKG_CHECK_MODULES(QT5,
+                     [Qt5Gui >= $QT5_REQUIRED],
+                     [have_qt5=yes],
+                     [have_qt5=no])
 
-   TRACKER_EXTRACT_CFLAGS="$TRACKER_EXTRACT_CFLAGS $QT_CFLAGS"
-   TRACKER_EXTRACT_LIBS="$TRACKER_EXTRACT_LIBS $QT_LIBS"
+   PKG_CHECK_MODULES(QT4,
+                     [QtGui >= $QT4_REQUIRED],
+                     [have_qt4=yes],
+                     [have_qt4=no])
 
-   if test "x$have_qt" = "xyes"; then
+
+   if test "x$have_qt5" = "xyes"; then
+      TRACKER_EXTRACT_CFLAGS="$TRACKER_EXTRACT_CFLAGS $QT5_CFLAGS -fPIC"
+      TRACKER_EXTRACT_LIBS="$TRACKER_EXTRACT_LIBS $QT5_LIBS"
+
+      AC_DEFINE(HAVE_QT5, [], [Define if we have Qt5])
       AC_DEFINE(HAVE_QT, [], [Define if we have Qt])
-      selected_for_media_art="yes (qt)"
+
+      selected_for_media_art="yes (qt5)"
+   else
+      if test "x$have_qt4" = "xyes"; then
+         TRACKER_EXTRACT_CFLAGS="$TRACKER_EXTRACT_CFLAGS $QT4_CFLAGS -fPIC"
+         TRACKER_EXTRACT_LIBS="$TRACKER_EXTRACT_LIBS $QT4_LIBS"
+
+         AC_DEFINE(HAVE_QT4, [], [Define if we have Qt4])
+         AC_DEFINE(HAVE_QT, [], [Define if we have Qt])
+
+         selected_for_media_art="yes (qt4)"
+      fi
    fi
 else
-   have_qt="no  (disabled)"
+   have_qt4="no  (disabled)"
+   have_qt5="no  (disabled)"
 fi
 
 if test "x$enable_qt" = "xyes"; then
-   if test "x$have_qt" != "xyes"; then
-      AC_MSG_ERROR([Couldn't find Qt >= $QT_REQUIRED.])
+   if test "x$have_qt5" != "xyes"; then
+      if test "x$have_qt4" != "xyes"; then
+         AC_MSG_ERROR([Couldn't find Qt4 >= $QT4_REQUIRED or Qt5 >= $QT5_REQUIRED.])
+      fi
    fi
 fi
 
-AM_CONDITIONAL(HAVE_QT, test "x$have_qt" = "xyes")
+AM_CONDITIONAL(HAVE_QT4, test "x$have_qt4" = "xyes")
+AM_CONDITIONAL(HAVE_QT5, test "x$have_qt5" = "xyes")
+AM_CONDITIONAL(HAVE_QT, test "x$have_qt5" = "xyes" || test "x$have_qt4" = "xyes")
+
 
 if test "x$enable_gdkpixbuf" != "xno" && test "x$enable_quill" != "xyes"; then
    PKG_CHECK_MODULES(GDKPIXBUF,
@@ -1646,7 +1687,7 @@ AM_CONDITIONAL(HAVE_GDKPIXBUF, test "x$have_gdkpixbuf" = "xyes")
 
 AC_ARG_ENABLE(generic-media-extractor,
               AS_HELP_STRING([--enable-generic-media-extractor=ARG],
-                             [enables one of the (gstreamer, xine, external, auto) generic media extractor backends [[default=auto]]]),,
+                             [enables one of the (gstreamer, libav, xine, external, auto) generic media extractor backends [[default=auto]]]),,
               [enable_generic_media_extractor=auto])
 
 PKG_CHECK_MODULES(GSTREAMER,
@@ -1666,10 +1707,37 @@ PKG_CHECK_MODULES(XINE,
 AC_SUBST(XINE_CFLAGS)
 AC_SUBST(XINE_LIBS)
 
+PKG_CHECK_MODULES(AVFORMAT,
+                  [libavformat >= 0.8.4],
+                  [have_libavformat=yes],
+                  [have_libavformat=no])
+
+AC_SUBST(AVFORMAT_CFLAGS)
+AC_SUBST(AVFORMAT_LIBS)
+
+PKG_CHECK_MODULES(AVCODEC,
+                  [libavcodec >= 0.8.4],
+                  [have_libavcodec=yes],
+                  [have_libavcodec=no])
+
+AC_SUBST(AVCODEC_CFLAGS)
+AC_SUBST(AVCODEC_LIBS)
+
+PKG_CHECK_MODULES(AVCODEC,
+                  [libavutil >= 0.8.4],
+                  [have_libavutil=yes],
+                  [have_libavutil=no])
+
+AC_SUBST(AVUTIL_CFLAGS)
+AC_SUBST(AVUTIL_LIBS)
+
 if test "x$enable_generic_media_extractor" = "xauto"; then
    if test "$have_libgstreamer" = "yes"; then
       have_generic_media_handler="yes"
       have_generic_media_handler_app="GStreamer"
+   elif test "$have_libav" = "yes"; then
+      have_generic_media_handler_app="libav"
+      have_generic_media_handler="yes"
    elif test "$have_libxine" = "yes"; then
       have_generic_media_handler_app="Xine"
       have_generic_media_handler="yes"
@@ -1691,6 +1759,13 @@ elif test "x$enable_generic_media_extractor" = "xxine"; then
    else
       AC_MSG_ERROR([Couldn't find libxine])
    fi
+elif test "x$enable_generic_media_extractor" = "xlibav"; then
+   if test "$have_libavformat" = "yes" && test "$have_libavcodec" = "yes" && test "$have_libavutil" = "yes"; then
+      have_generic_media_handler_app="libav"
+      have_generic_media_handler="yes"
+   else
+      AC_MSG_ERROR([Couldn't find libav])
+   fi
 else
    have_generic_media_handler="?"
    have_generic_media_handler_app="An external generic media player will be called"
@@ -1700,17 +1775,26 @@ if test "$have_generic_media_handler_app" = "GStreamer"; then
    AC_DEFINE(HAVE_GSTREAMER, [], [Define if we have GStreamer])
    AM_CONDITIONAL(HAVE_GSTREAMER, true)
    AM_CONDITIONAL(HAVE_LIBXINE, false)
+   AM_CONDITIONAL(HAVE_LIBAV, false)
    AM_CONDITIONAL(USING_EXTERNAL_GENERIC_MEDIA_PLAYER, false)
 elif test "$have_generic_media_handler_app" = "Xine"; then
    AC_DEFINE(HAVE_LIBXINE, [], [Define if we have Libxine])
    AM_CONDITIONAL(HAVE_LIBXINE, true)
    AM_CONDITIONAL(HAVE_GSTREAMER, false)
+   AM_CONDITIONAL(HAVE_LIBAV, false)
    AM_CONDITIONAL(USING_EXTERNAL_GENERIC_MEDIA_PLAYER, false)
+elif test "$have_generic_media_handler_app" = "libav"; then
+    AC_DEFINE(HAVE_GSTREAMER, [], [Define if we have libav])
+    AM_CONDITIONAL(HAVE_LIBAV, true)
+    AM_CONDITIONAL(HAVE_GSTREAMER, false)
+    AM_CONDITIONAL(HAVE_LIBXINE, false)
+    AM_CONDITIONAL(USING_EXTERNAL_GENERIC_MEDIA_PLAYER, false)
 else
    AC_DEFINE(USING_EXTERNAL_GENERIC_MEDIA_PLAYER, [], [Define that Tracker will try to use external generic media players])
    AM_CONDITIONAL(USING_EXTERNAL_GENERIC_MEDIA_PLAYER, true)
    AM_CONDITIONAL(HAVE_GSTREAMER, false)
    AM_CONDITIONAL(HAVE_LIBXINE, false)
+   AM_CONDITIONAL(HAVE_LIBAV, false)
 fi
 
 ###########################################################################
@@ -2649,6 +2733,7 @@ Writeback:
 Frameworks / Options:
 
 	Support Maemo                           $enable_maemo
+	Support Nemo                            $enable_nemo
 	Support libmeegotouch                   $have_meegotouch
 	Support Guaranteed Metadata             $enable_guarantee_metadata (e.g. guess nie:title from files)
 

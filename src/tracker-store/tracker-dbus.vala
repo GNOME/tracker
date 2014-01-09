@@ -34,6 +34,7 @@ public class Tracker.DBus {
 	static uint notifier_id;
 	static Tracker.Backup backup;
 	static uint backup_id;
+	static Tracker.Config config;
 
 	static bool dbus_register_service (string name) {
 		message ("Registering D-Bus service...\n  Name:'%s'", name);
@@ -85,8 +86,9 @@ public class Tracker.DBus {
 		return true;
 	}
 
-	public static bool init () {
+	public static bool init (Tracker.Config config_p) {
 		/* Don't reinitialize */
+		config = config_p;
 		if (connection != null) {
 			return true;
 		}
@@ -187,7 +189,7 @@ public class Tracker.DBus {
 		statistics_id = register_object (connection, statistics, Tracker.Statistics.PATH);
 
 		/* Add org.freedesktop.Tracker1.Resources */
-		resources = new Tracker.Resources (connection);
+		resources = new Tracker.Resources (connection, config);
 		if (resources == null) {
 			critical ("Could not create TrackerResources object to register");
 			return false;

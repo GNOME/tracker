@@ -20,31 +20,54 @@
  * Philip Van Hoof <philip@codeminded.be>
  */
 
+#include "config.h"
+
 #include "tracker-main.h"
 
 #include <QFile>
 #include <QBuffer>
 #include <QImageReader>
 #include <QImageWriter>
+#ifdef HAVE_QT5
+#include <QGuiApplication>
+#else
 #include <QApplication>
+#endif
 #include <QColor>
 #include <QPainter>
 
 #include <glib.h>
 
+#ifdef HAVE_NEMO
+#include <stdlib.h>
+#endif
+
 #include "tracker-media-art-generic.h"
 
 G_BEGIN_DECLS
 
-static QApplication *app = NULL;
+#ifdef HAVE_QT5
+static QGuiApplication *app = NULL;
+#else /* HAVE_QT4 */
+static QApplication *app = NULL
+#endif
 
 void
 tracker_media_art_plugin_init (void)
 {
-	int argc = 0;
-	char *argv[2] = { NULL, NULL };
+	int argc = 1;
+	char *argv[2] = { (char*) "tracker-extract", NULL };
 
+#ifdef HAVE_QT5
+
+#ifdef HAVE_NEMO
+	g_setenv("QT_QPA_PLATFORM", "minimal", 1);
+#endif
+
+	app = new QGuiApplication (argc, argv);
+#else /* HAVE_QT4 */
 	app = new QApplication (argc, argv, QApplication::Tty);
+#endif
 }
 
 void

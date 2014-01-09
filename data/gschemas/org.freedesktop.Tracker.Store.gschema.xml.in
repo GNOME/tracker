@@ -24,5 +24,10 @@ Boston, MA  02110-1301, USA.
       <_summary>Log verbosity</_summary>
       <_description>Log verbosity.</_description>
     </key>
+    <key name="graphupdated-delay" type="i">
+      <default>1000</default>
+      <_summary>GraphUpdated delay</_summary>
+      <_description>Period in milliseconds between GraphUpdated signals being emitted when indexed data has changed inside the database.</_description>
+    </key>
   </schema>
 </schemalist>

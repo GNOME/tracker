@@ -31,6 +31,8 @@
 
 #include "tracker-config.h"
 
+#define GRAPHUPDATED_DELAY_DEFAULT	1000
+
 static void config_set_property         (GObject       *object,
                                          guint          param_id,
                                          const GValue  *value,
@@ -45,10 +47,12 @@ static void config_constructed          (GObject       *object);
 enum {
 	PROP_0,
 	PROP_VERBOSITY,
+	PROP_GRAPHUPDATED_DELAY,
 };
 
 static TrackerConfigMigrationEntry migration[] = {
 	{ G_TYPE_ENUM, "General", "Verbosity", "verbosity", FALSE, FALSE },
+	{ G_TYPE_INT, "General", "GraphUpdatedDelay", "graphupdated-delay" },
 	{ 0 }
 };
 
@@ -72,6 +76,17 @@ tracker_config_class_init (TrackerConfigClass *klass)
 	                                                    TRACKER_TYPE_VERBOSITY,
 	                                                    TRACKER_VERBOSITY_ERRORS,
 	                                                    G_PARAM_READWRITE));
+
+	g_object_class_install_property (object_class,
+	                                 PROP_GRAPHUPDATED_DELAY,
+	                                 g_param_spec_int  ("graphupdated-delay",
+	                                                    "GraphUpdated delay",
+	                                                    "GraphUpdated delay in ms. (1000)",
+	                                                    0,
+	                                                    G_MAXINT,
+	                                                    GRAPHUPDATED_DELAY_DEFAULT,
+	                                                    G_PARAM_READWRITE));
+
 }
 
 static void
@@ -86,6 +101,11 @@ config_set_property (GObject      *object,
                      GParamSpec           *pspec)
 {
 	switch (param_id) {
+	case PROP_GRAPHUPDATED_DELAY:
+		tracker_config_set_graphupdated_delay (TRACKER_CONFIG (object),
+		                                       g_value_get_int (value));
+		break;
+
 	case PROP_VERBOSITY:
 		tracker_config_set_verbosity (TRACKER_CONFIG (object),
 		                              g_value_get_enum (value));
@@ -103,6 +123,10 @@ config_get_property (GObject    *object,
                      GParamSpec *pspec)
 {
 	switch (param_id) {
+	case PROP_GRAPHUPDATED_DELAY:
+		g_value_set_int (value, tracker_config_get_graphupdated_delay (TRACKER_CONFIG (object)));
+		break;
+
 		/* General */
 	case PROP_VERBOSITY:
 		g_value_set_enum (value, tracker_config_get_verbosity (TRACKER_CONFIG (object)));
@@ -168,3 +192,21 @@ tracker_config_set_verbosity (TrackerConfig *config,
 	g_object_notify (G_OBJECT (config), "verbosity");
 }
 
+
+gint
+tracker_config_get_graphupdated_delay (TrackerConfig *config)
+{
+	g_return_val_if_fail (TRACKER_IS_CONFIG (config), GRAPHUPDATED_DELAY_DEFAULT);
+
+	return g_settings_get_int (G_SETTINGS (config), "graphupdated-delay");
+}
+
+void
+tracker_config_set_graphupdated_delay (TrackerConfig *config,
+                                           gint           value)
+{
+	g_return_if_fail (TRACKER_IS_CONFIG (config));
+
+	g_settings_set_int(G_SETTINGS (config), "graphupdated-delay", value);
+	g_object_notify (G_OBJECT (config), "graphupdated-delay");
+}
