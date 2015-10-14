@@ -1,0 +1,10 @@
+PREFIX ex: <http://example/>
+PREFIX fn: <http://www.w3.org/2005/xpath-functions#>
+# Tests the replace function.
+# Trims whitespaces and punctuations.
+SELECT fn:replace(?name, "^[ ,'\".]*|[ ,'\".]*$", "")
+WHERE
+{
+    ?s  ex:name  ?name .
+}
+ORDER BY ?s

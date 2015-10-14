@@ -1,0 +1,54 @@
+@prefix : <http://example/> .
+
+:p1             a                       :Person ;
+                :name                   " Maximilian Muster " ;
+                :familyName             "Muster" ;
+                :givenName              "Maximilian" .
+
+:p2             a                       :Person ;
+                :name                   "Amelie Colbert" ;
+                :familyName             "Colbert" ;
+                :givenName              "Amelie" .
+
+:p3             a                       :Person ;
+                :name                   "Alice Hyatt" ;
+                :familyName             "Hyatt" ;
+                :givenName              "Alice" .
+
+:p4             a                       :Person ;
+                :name                   "  Mia Simpson  " ;
+                :familyName             "Simpson" ;
+                :givenName              "Mia" .
+
+:p5             a                       :Person ;
+                :name                   " Kathlene Beckmann " ;
+                :familyName             "Beckmann" ;
+                :givenName              "Kathlene" .
+
+:p6             a                       :Person ;
+                :name                   "'Jule Wolk'" ;
+                :familyName             "Wolk" ;
+                :givenName              "Jule" .
+
+:p7             a                       :Person ;
+                :name                   " Torie Baumeister " ;
+                :familyName             "Baumeister" ;
+                :givenName              "Torie" .
+
+:p8             a                       :Person ;
+                :name                   " Dell Quesada " ;
+                :familyName             "Queseda" ;
+                :givenName              "Dell" .
+
+:p9             a                       :Person ;
+                :name                   "Fritz Fischer" ;
+                :familyName             "Fischer" ;
+                :givenName              "Fritz" ;
+                :description            "Fischers Fritz fischt frische Fische." .
+
+:p10            a                       :Person ;
+                :name                   "Emily Schwartz" ;
+                :familyName             "Schwartz" ;
+                :givenName              "Emily" ;
+                :description            "Emily is a software engineer." .
+

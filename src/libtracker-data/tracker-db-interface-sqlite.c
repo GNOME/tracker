@@ -566,6 +566,78 @@ function_sparql_regex (sqlite3_context *context,
 	sqlite3_result_int (context, ret);
 }
 
+static void
+function_sparql_replace(sqlite3_context *context,
+                        int             argc,
+                        sqlite3_value   *argv[])
+{
+	const gchar *string_input;
+	const gchar *pattern;
+	const gchar *new_substring;
+	const gchar *flags;
+	gchar *string_output;
+	gchar *err_str;
+	GError *error = NULL;
+	GRegexCompileFlags regex_flags;
+	GRegex *regex;
+
+	if (argc != 4) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	string_input = sqlite3_value_text (argv[0]);
+	regex = sqlite3_get_auxdata (context, 1);
+	new_substring = sqlite3_value_text (argv[2]);
+	flags = sqlite3_value_text (argv[3]);
+
+	if (regex == NULL) {
+		pattern = sqlite3_value_text (argv[1]);
+		regex_flags = 0;
+		while (*flags) {
+			switch (*flags) {
+			case 's':
+				regex_flags |= G_REGEX_DOTALL;
+				break;
+			case 'm':
+				regex_flags |= G_REGEX_MULTILINE;
+				break;
+			case 'i':
+				regex_flags |= G_REGEX_CASELESS;
+				break;
+			case 'x':
+				regex_flags |= G_REGEX_EXTENDED;
+				break;
+			default:
+				err_str = g_strdup_printf ("Invalid SPARQL regex flag '%c'", *flags);
+				sqlite3_result_error (context, err_str, -1);
+				g_free (err_str);
+				return;
+			}
+			flags++;
+		}
+
+		regex = g_regex_new (pattern, regex_flags, 0, &error);
+
+		if (error) {
+			sqlite3_result_error (context, error->message, -1);
+			g_clear_error (&error);
+			return;
+		}
+
+		sqlite3_set_auxdata (context, 1, regex, (void (*) (void*)) g_regex_unref);
+	}
+
+	string_output = g_regex_replace (regex, string_input, -1, 0, new_substring, 0, &error);
+
+	if(error){
+		sqlite3_result_error (context, error->message, -1);
+		g_clear_error (&error);
+		return;
+	}
+	sqlite3_result_text (context, string_output, -1, free);
+}
+
 #ifdef HAVE_LIBUNISTRING
 
 static void
@@ -1004,6 +1076,10 @@ open_database (TrackerDBInterface  *db_interface,
 
 	sqlite3_create_function (db_interface->db, "SparqlFormatTime", 1, SQLITE_ANY,
 	                         db_interface, &function_sparql_format_time,
+	                         NULL, NULL);
+
+	sqlite3_create_function (db_interface->db, "SparqlReplace", 4, SQLITE_ANY,
+	                         db_interface, &function_sparql_replace,
 	                         NULL, NULL);
 
 	sqlite3_extended_result_codes (db_interface->db, 0);

@@ -1,0 +1,11 @@
+PREFIX ex: <http://example/>
+PREFIX fn: <http://www.w3.org/2005/xpath-functions#>
+# Tests the replace function.
+# Use of the regex flags.
+SELECT fn:replace(?desc_value, "fisch", "Lax", "i")
+WHERE
+{
+        ?s  ex:name           "Fritz Fischer" ;
+            ex:description    ?desc_value .
+}
+

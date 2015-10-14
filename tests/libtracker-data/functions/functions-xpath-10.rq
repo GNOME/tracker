@@ -1,0 +1,12 @@
+PREFIX ex: <http://example/>
+PREFIX fn: <http://www.w3.org/2005/xpath-functions#>
+
+# Tests the replace function.
+# The punctuation shall be removed to alphabetize
+# the names of the persons corectly.
+SELECT ?name
+WHERE
+{
+    ?s  ex:name   ?name .
+}
+ORDER BY fn:replace(?name, "^[ ,'\".]*", "")

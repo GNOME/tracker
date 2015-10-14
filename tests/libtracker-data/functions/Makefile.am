@@ -7,6 +7,8 @@ EXTRA_DIST += \
 	data-2.ttl                                     \
 	data-3.ontology                                \
 	data-3.ttl                                     \
+	data-4.ontology                                \
+	data-4.ttl                                     \
 	functions-property-1.out                       \
 	functions-property-1.rq                        \
 	functions-tracker-1.out                        \
@@ -32,4 +34,10 @@ EXTRA_DIST += \
 	functions-xpath-8.rq                           \
 	functions-xpath-8.out                          \
 	functions-xpath-9.rq                           \
-	functions-xpath-9.out
+	functions-xpath-9.out                          \
+	functions-xpath-10.rq                          \
+	functions-xpath-10.out                         \
+	functions-xpath-11.rq                          \
+	functions-xpath-11.out                         \
+	functions-xpath-12.rq                          \
+	functions-xpath-12.out

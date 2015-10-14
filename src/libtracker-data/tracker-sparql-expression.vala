@@ -679,7 +679,7 @@ class Tracker.Sparql.Expression : Object {
 
 			return PropertyType.INTEGER;
 		} else if (uri == FN_NS + "replace") {
-			sql.append ("replace(");
+			sql.append ("SparqlReplace(");
 			translate_expression_as_string (sql);
 			sql.append (", ");
 
@@ -689,10 +689,14 @@ class Tracker.Sparql.Expression : Object {
 
 			expect (SparqlTokenType.COMMA);
 			translate_expression_as_string (sql);
+			sql.append (", ");
 
-			// FIXME: No regex (nor its modifier flags) support
+			if (accept (SparqlTokenType.COMMA)) {
+				sql.append (escape_sql_string_literal (parse_string_literal ()));
+			} else {
+				sql.append ("''");
+			}
 			sql.append (")");
-
 			return PropertyType.STRING;
 		} else if (uri == FTS_NS + "rank") {
 			bool is_var;
