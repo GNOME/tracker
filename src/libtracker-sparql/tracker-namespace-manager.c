@@ -331,3 +331,23 @@ tracker_namespace_manager_print_turtle (TrackerNamespaceManager *self)
 
 	return g_string_free (result, FALSE);
 }
+
+/**
+ * tracker_namespace_manager_foreach:
+ * @self: a #TrackerNamespaceManager
+ * @func: the function to call for each prefix / URI pair
+ * @user_data: user data to pass to the function
+ *
+ * Calls @func for each known prefix / URI pair.
+ *
+ * Since: 1.10
+ */
+void
+tracker_namespace_manager_foreach (TrackerNamespaceManager *self,
+                                   GHFunc                   func,
+                                   gpointer                 user_data)
+{
+	TrackerNamespaceManagerPrivate *priv = GET_PRIVATE (self);
+
+	g_hash_table_foreach (priv->prefix_to_namespace, func, user_data);
+};

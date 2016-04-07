@@ -42,7 +42,7 @@ static GOptionEntry entries[] = {
 	  N_("Sets the logging verbosity to LEVEL (“debug”, “detailed”, “minimal”, “errors”) for all processes"),
 	  N_("LEVEL") },
 	{ "output-format", 'o', 0, G_OPTION_ARG_STRING, &output_format,
-	  N_("Output results format: “sparql”, or “turtle”"),
+	  N_("Output results format: 'sparql', 'turtle' or 'json-ld'"),
 	  N_("FORMAT") },
 	{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &filenames,
 	  N_("FILE"),
