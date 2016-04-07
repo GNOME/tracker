@@ -43,6 +43,8 @@ void tracker_namespace_manager_add_prefix (TrackerNamespaceManager *self, const 
 
 char *tracker_namespace_manager_print_turtle (TrackerNamespaceManager *self);
 
+void tracker_namespace_manager_foreach (TrackerNamespaceManager *self, GHFunc func, gpointer user_data);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_SPARQL_NAMESPACE_MANAGER_H__ */
