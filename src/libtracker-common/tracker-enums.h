@@ -38,6 +38,12 @@ typedef enum {
 typedef enum {
 	TRACKER_SERIALIZATION_FORMAT_SPARQL,
 	TRACKER_SERIALIZATION_FORMAT_TURTLE,
+	/* JSON and JSON_LD are treated as the same thing right now, but we could
+	 * treat them differently if we wanted. also it's nice to be able to pass
+	 * both 'json' and 'json-ld' to `tracker extract --output-format=`.
+	 */
+	TRACKER_SERIALIZATION_FORMAT_JSON,
+	TRACKER_SERIALIZATION_FORMAT_JSON_LD,
 } TrackerSerializationFormat;
 
 G_END_DECLS
