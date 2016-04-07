@@ -74,7 +74,7 @@ libtracker_sparql_c_public_headers = files(
 libtracker_sparql_intermediate_c = static_library('tracker-sparql-intermediate-c',
     enums_c, enums_h,
     libtracker_sparql_c_sources,
-    dependencies: [tracker_common_dep],
+    dependencies: [tracker_common_dep, json_glib],
 )
 
 tracker_sparql_intermediate_dep = declare_dependency(
