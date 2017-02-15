@@ -1,4 +1,4 @@
 [ExtractorRule]
 ModulePath=libextract-flac.so
-MimeTypes=audio/x-flac
+MimeTypes=audio/flac;audio/x-flac
 FallbackRdfTypes=nmm:MusicPiece;nfo:Audio;
