@@ -1,16 +1,5 @@
 noinst_LTLIBRARIES = libtracker-direct.la
 
-AM_VALAFLAGS =                                         \
-	--includedir=libtracker-direct                 \
-	--header tracker-direct.h                      \
-	--vapi tracker-direct.vapi                     \
-	--pkg gio-2.0                                  \
-	$(BUILD_VALAFLAGS)                             \
-	$(top_srcdir)/src/libtracker-data/libtracker-data.vapi \
-	$(top_srcdir)/src/libtracker-data/tracker-sparql-query.vapi \
-	$(top_srcdir)/src/libtracker-common/libtracker-common.vapi \
-	$(top_srcdir)/src/libtracker-sparql/tracker-sparql-$(TRACKER_API_VERSION).vapi
-
 AM_CPPFLAGS =                                          \
 	$(BUILD_VALACFLAGS)                            \
 	-I$(top_srcdir)/src                            \
@@ -19,8 +8,7 @@ AM_CPPFLAGS =                                          \
 	$(LIBTRACKER_DIRECT_CFLAGS)
 
 libtracker_direct_la_SOURCES =                         \
-	tracker-namespace.vala                         \
-	tracker-direct.vala
+	tracker-direct.c
 
 libtracker_direct_la_LIBADD =                          \
 	$(top_builddir)/src/libtracker-data/libtracker-data.la \
@@ -29,8 +17,5 @@ libtracker_direct_la_LIBADD =                          \
 
 noinst_HEADERS =                                       \
 	tracker-direct.h
-
-BUILT_SOURCES =                                        \
-	libtracker_direct_la_vala.stamp
 
 EXTRA_DIST = meson.build
