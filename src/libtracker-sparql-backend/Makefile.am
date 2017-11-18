@@ -5,6 +5,7 @@ AM_VALAFLAGS =                                         \
 	$(BUILD_VALAFLAGS)                             \
 	$(top_srcdir)/src/libtracker-sparql/tracker-sparql-$(TRACKER_API_VERSION).vapi \
 	$(top_srcdir)/src/libtracker-bus/tracker-bus.vapi \
+	$(top_srcdir)/src/libtracker-data/libtracker-data.vapi \
 	$(top_srcdir)/src/libtracker-direct/tracker-direct.vapi \
 	$(top_srcdir)/src/libtracker-remote/tracker-remote.vapi \
 	$(top_srcdir)/src/libtracker-common/libtracker-common.vapi

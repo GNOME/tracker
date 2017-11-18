@@ -828,3 +828,12 @@ tracker_direct_connection_new (TrackerSparqlConnectionFlags   flags,
 	                     "ontology-location", ontology,
 	                     NULL);
 }
+
+TrackerDataManager *
+tracker_direct_connection_get_data_manager (TrackerDirectConnection *conn)
+{
+	TrackerDirectConnectionPrivate *priv;
+
+	priv = tracker_direct_connection_get_instance_private (conn);
+	return priv->data_manager;
+}
