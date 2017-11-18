@@ -22,6 +22,7 @@
 #define __TRACKER_LOCAL_CONNECTION_H__
 
 #include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-data/tracker-data.h>
 
 #define TRACKER_TYPE_DIRECT_CONNECTION         (tracker_direct_connection_get_type())
 #define TRACKER_DIRECT_CONNECTION(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_DIRECT_CONNECTION, TrackerDirectConnection))
@@ -48,5 +49,7 @@ TrackerDirectConnection *tracker_direct_connection_new (TrackerSparqlConnectionF
                                                         GFile                         *journal,
                                                         GFile                         *ontology,
                                                         GError                       **error);
+
+TrackerDataManager *tracker_direct_connection_get_data_manager (TrackerDirectConnection *conn);
 
 #endif /* __TRACKER_LOCAL_CONNECTION_H__ */
