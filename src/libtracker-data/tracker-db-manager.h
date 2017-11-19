@@ -35,12 +35,10 @@ G_BEGIN_DECLS
 
 typedef enum {
 	TRACKER_DB_MANAGER_FORCE_REINDEX         = 1 << 1,
-	TRACKER_DB_MANAGER_REMOVE_CACHE          = 1 << 2,
-	/* 1 << 3 Was low mem mode */
-	TRACKER_DB_MANAGER_REMOVE_ALL            = 1 << 4,
-	TRACKER_DB_MANAGER_READONLY              = 1 << 5,
-	TRACKER_DB_MANAGER_DO_NOT_CHECK_ONTOLOGY = 1 << 6,
-	TRACKER_DB_MANAGER_ENABLE_MUTEXES        = 1 << 7,
+	TRACKER_DB_MANAGER_REMOVE_ALL            = 1 << 2,
+	TRACKER_DB_MANAGER_READONLY              = 1 << 3,
+	TRACKER_DB_MANAGER_DO_NOT_CHECK_ONTOLOGY = 1 << 4,
+	TRACKER_DB_MANAGER_ENABLE_MUTEXES        = 1 << 5,
 } TrackerDBManagerFlags;
 
 typedef struct _TrackerDBManager TrackerDBManager;

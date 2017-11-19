@@ -247,7 +247,7 @@ License which can be viewed at:
 		config_verbosity_changed_cb (config, null);
 		ulong config_verbosity_id = config.notify["verbosity"].connect (config_verbosity_changed_cb);
 
-		DBManagerFlags flags = DBManagerFlags.REMOVE_CACHE;
+		DBManagerFlags flags = 0;
 
 		if (force_reindex) {
 			/* TODO port backup support

@@ -78,7 +78,6 @@ namespace Tracker {
 	[CCode (cprefix = "TRACKER_DB_MANAGER_", cheader_filename = "libtracker-data/tracker-db-manager.h")]
 	public enum DBManagerFlags {
 		FORCE_REINDEX,
-		REMOVE_CACHE,
 		REMOVE_ALL,
 		READONLY,
 		DO_NOT_CHECK_ONTOLOGY,
