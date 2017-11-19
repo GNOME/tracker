@@ -23,6 +23,8 @@
 #include "tracker-direct.h"
 #include <libtracker-data/tracker-data.h>
 
+static TrackerDBManagerFlags default_flags = 0;
+
 typedef struct _TrackerDirectConnectionPrivate TrackerDirectConnectionPrivate;
 
 struct _TrackerDirectConnectionPrivate
@@ -274,7 +276,7 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 	if (priv->flags & TRACKER_SPARQL_CONNECTION_FLAGS_READONLY)
 		db_flags |= TRACKER_DB_MANAGER_READONLY;
 
-	priv->data_manager = tracker_data_manager_new (db_flags, priv->store,
+	priv->data_manager = tracker_data_manager_new (db_flags | default_flags, priv->store,
 	                                               priv->journal, priv->ontology,
 	                                               FALSE, FALSE, 100, 100);
 	if (!g_initable_init (G_INITABLE (priv->data_manager), cancellable, error))
@@ -836,4 +838,10 @@ tracker_direct_connection_get_data_manager (TrackerDirectConnection *conn)
 
 	priv = tracker_direct_connection_get_instance_private (conn);
 	return priv->data_manager;
+}
+
+void
+tracker_direct_connection_set_default_flags (TrackerDBManagerFlags flags)
+{
+	default_flags = flags;
 }
