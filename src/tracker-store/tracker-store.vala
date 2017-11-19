@@ -233,12 +233,7 @@ public class Tracker.Store {
 
 					var file = File.new_for_path (turtle_task.path);
 
-					Tracker.Events.freeze ();
-					try {
-						data.load_turtle_file (file);
-					} finally {
-						Tracker.Events.reset_pending ();
-					}
+					data.load_turtle_file (file);
 				}
 			}
 		} catch (Error e) {
