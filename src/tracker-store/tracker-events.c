@@ -27,7 +27,6 @@
 #include "tracker-events.h"
 
 typedef struct {
-	gboolean frozen;
 	guint total;
 	GPtrArray *notify_classes;
 } EventsPrivate;
@@ -64,10 +63,6 @@ tracker_events_add_insert (gint         graph_id,
 	g_return_if_fail (rdf_types != NULL);
 	g_return_if_fail (private != NULL);
 
-	if (private->frozen) {
-		return;
-	}
-
 	for (i = 0; i < rdf_types->len; i++) {
 		if (tracker_class_get_notify (rdf_types->pdata[i])) {
 			tracker_class_add_insert_event (rdf_types->pdata[i],
@@ -94,10 +89,6 @@ tracker_events_add_delete (gint         graph_id,
 	g_return_if_fail (rdf_types != NULL);
 	g_return_if_fail (private != NULL);
 
-	if (private->frozen) {
-		return;
-	}
-
 	for (i = 0; i < rdf_types->len; i++) {
 		if (tracker_class_get_notify (rdf_types->pdata[i])) {
 			tracker_class_add_delete_event (rdf_types->pdata[i],
@@ -122,16 +113,6 @@ tracker_events_reset_pending (void)
 
 		tracker_class_reset_pending_events (class);
 	}
-
-	private->frozen = FALSE;
-}
-
-void
-tracker_events_freeze (void)
-{
-	g_return_if_fail (private != NULL);
-
-	private->frozen = TRUE;
 }
 
 static void
