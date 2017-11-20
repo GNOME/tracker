@@ -54,4 +54,6 @@ TrackerDataManager *tracker_direct_connection_get_data_manager (TrackerDirectCon
 
 void tracker_direct_connection_set_default_flags (TrackerDBManagerFlags flags);
 
+void tracker_direct_connection_sync (TrackerDirectConnection *conn);
+
 #endif /* __TRACKER_LOCAL_CONNECTION_H__ */

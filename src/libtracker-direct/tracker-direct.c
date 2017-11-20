@@ -238,22 +238,12 @@ task_compare_func (GTask    *a,
 }
 
 static gboolean
-tracker_direct_connection_initable_init (GInitable     *initable,
-                                         GCancellable  *cancellable,
-                                         GError       **error)
+set_up_thread_pools (TrackerDirectConnection  *conn,
+		     GError                  **error)
 {
 	TrackerDirectConnectionPrivate *priv;
-	TrackerDirectConnection *conn;
-	TrackerDBManagerFlags db_flags = TRACKER_DB_MANAGER_ENABLE_MUTEXES;
-	TrackerDBInterface *iface;
-	GHashTable *namespaces;
-	GHashTableIter iter;
-	gchar *prefix, *ns;
 
-	conn = TRACKER_DIRECT_CONNECTION (initable);
 	priv = tracker_direct_connection_get_instance_private (conn);
-
-	tracker_locale_sanity_check ();
 
 	priv->select_pool = g_thread_pool_new (query_thread_pool_func,
 	                                       conn, 16, FALSE, error);
@@ -271,6 +261,29 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 	g_thread_pool_set_sort_function (priv->update_thread,
 	                                 (GCompareDataFunc) task_compare_func,
 	                                 conn);
+	return TRUE;
+}
+
+static gboolean
+tracker_direct_connection_initable_init (GInitable     *initable,
+                                         GCancellable  *cancellable,
+                                         GError       **error)
+{
+	TrackerDirectConnectionPrivate *priv;
+	TrackerDirectConnection *conn;
+	TrackerDBManagerFlags db_flags = TRACKER_DB_MANAGER_ENABLE_MUTEXES;
+	TrackerDBInterface *iface;
+	GHashTable *namespaces;
+	GHashTableIter iter;
+	gchar *prefix, *ns;
+
+	conn = TRACKER_DIRECT_CONNECTION (initable);
+	priv = tracker_direct_connection_get_instance_private (conn);
+
+	tracker_locale_sanity_check ();
+
+	if (!set_up_thread_pools (conn, error))
+		return FALSE;
 
 	/* Init data manager */
 	if (priv->flags & TRACKER_SPARQL_CONNECTION_FLAGS_READONLY)
@@ -844,4 +857,28 @@ void
 tracker_direct_connection_set_default_flags (TrackerDBManagerFlags flags)
 {
 	default_flags = flags;
+}
+
+void
+tracker_direct_connection_sync (TrackerDirectConnection *conn)
+{
+	TrackerDirectConnectionPrivate *priv;
+	TrackerDBInterface *wal_iface;
+
+	priv = tracker_direct_connection_get_instance_private (conn);
+
+	if (!priv->data_manager)
+		return;
+
+	/* Wait for pending updates. */
+	if (priv->update_thread)
+		g_thread_pool_free (priv->update_thread, TRUE, TRUE);
+	/* Selects are less important, readonly interfaces won't be bothersome */
+	if (priv->select_pool)
+		g_thread_pool_free (priv->select_pool, TRUE, FALSE);
+
+	set_up_thread_pools (conn, NULL);
+
+	wal_iface = tracker_data_manager_get_wal_db_interface (priv->data_manager);
+	tracker_db_interface_sqlite_wal_checkpoint (wal_iface, TRUE, NULL);
 }
