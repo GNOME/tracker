@@ -138,29 +138,6 @@ public class Tracker.Store {
 		}
 	}
 
-	static Tracker.Data.Update.CommitType commit_type (Task task) {
-		switch (task.type) {
-			case TaskType.UPDATE:
-			case TaskType.UPDATE_BLANK:
-				if (((UpdateTask) task).priority == Priority.HIGH) {
-					return Tracker.Data.Update.CommitType.REGULAR;
-				} else if (update_queues[Priority.LOW].get_length () > 0) {
-					return Tracker.Data.Update.CommitType.BATCH;
-				} else {
-					return Tracker.Data.Update.CommitType.BATCH_LAST;
-				}
-			case TaskType.TURTLE:
-				if (update_queues[Priority.TURTLE].get_length () > 0) {
-					return Tracker.Data.Update.CommitType.BATCH;
-				} else {
-					return Tracker.Data.Update.CommitType.BATCH_LAST;
-				}
-			default:
-				warn_if_reached ();
-				return Tracker.Data.Update.CommitType.REGULAR;
-		}
-	}
-
 	static bool task_finish_cb (Task task) {
 		var data = task.data_manager.get_data ();
 
@@ -180,7 +157,7 @@ public class Tracker.Store {
 			n_queries_running--;
 		} else if (task.type == TaskType.UPDATE || task.type == TaskType.UPDATE_BLANK) {
 			if (task.error == null) {
-				data.notify_transaction (commit_type (task));
+				data.notify_transaction ();
 			}
 
 			task.callback ();
@@ -189,7 +166,7 @@ public class Tracker.Store {
 			update_running = false;
 		} else if (task.type == TaskType.TURTLE) {
 			if (task.error == null) {
-				data.notify_transaction (commit_type (task));
+				data.notify_transaction ();
 			}
 
 			task.callback ();

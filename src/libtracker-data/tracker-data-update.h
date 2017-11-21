@@ -47,12 +47,6 @@ typedef struct _TrackerDataClass TrackerDataClass;
 typedef struct _TrackerData TrackerData;
 typedef struct _TrackerDataClass TrackerDataClass;
 
-typedef enum {
-	TRACKER_DATA_COMMIT_REGULAR,
-	TRACKER_DATA_COMMIT_BATCH,
-	TRACKER_DATA_COMMIT_BATCH_LAST
-} TrackerDataCommitType;
-
 typedef struct _TrackerData TrackerData;
 typedef struct _TrackerData TrackerDataUpdate;
 
@@ -65,8 +59,7 @@ typedef void (*TrackerStatementCallback) (gint                  graph_id,
                                           const gchar          *object,
                                           GPtrArray            *rdf_types,
                                           gpointer              user_data);
-typedef void (*TrackerCommitCallback)    (TrackerDataCommitType commit_type,
-                                          gpointer              user_data);
+typedef void (*TrackerCommitCallback)    (gpointer              user_data);
 
 GQuark   tracker_data_error_quark                   (void);
 
@@ -110,8 +103,7 @@ void     tracker_data_begin_transaction_for_replay  (TrackerData               *
                                                      GError                   **error);
 void     tracker_data_commit_transaction            (TrackerData               *data,
                                                      GError                   **error);
-void     tracker_data_notify_transaction            (TrackerData               *data,
-                                                     TrackerDataCommitType      commit_type);
+void     tracker_data_notify_transaction            (TrackerData               *data);
 void     tracker_data_rollback_transaction          (TrackerData               *data);
 void     tracker_data_update_sparql                 (TrackerData               *data,
                                                      const gchar               *update,
