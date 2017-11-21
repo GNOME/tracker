@@ -147,8 +147,6 @@ public class Tracker.Store {
 	}
 
 	static bool task_finish_cb (Task task) {
-		var data = task.data_manager.get_data ();
-
 		if (task.type == TaskType.QUERY) {
 			var query_task = (QueryTask) task;
 
@@ -164,19 +162,11 @@ public class Tracker.Store {
 			running_tasks.remove (task);
 			n_queries_running--;
 		} else if (task.type == TaskType.UPDATE || task.type == TaskType.UPDATE_BLANK) {
-			if (task.error == null) {
-				data.notify_transaction ();
-			}
-
 			task.callback ();
 			task.error = null;
 
 			update_running = false;
 		} else if (task.type == TaskType.TURTLE) {
-			if (task.error == null) {
-				data.notify_transaction ();
-			}
-
 			task.callback ();
 			task.error = null;
 
