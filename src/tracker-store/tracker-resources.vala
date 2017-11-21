@@ -51,7 +51,6 @@ public class Tracker.Resources : Object {
 
 	DBusConnection connection;
 	uint signal_timeout;
-	bool regular_commit_pending;
 	Tracker.Config config;
 
 	public signal void writeback ([DBus (signature = "a{iai}")] Variant subjects);
@@ -268,49 +267,26 @@ public class Tracker.Resources : Object {
 
 		Tracker.Writeback.reset_ready ();
 
-		regular_commit_pending = false;
 		signal_timeout = 0;
 		return false;
 	}
 
-	void on_statements_committed (Tracker.Data.Update.CommitType commit_type) {
+	void on_statements_committed () {
 		/* Class signal feature */
 
 		foreach (var cl in Tracker.Events.get_classes ()) {
 			cl.transact_events ();
 		}
 
-		if (!regular_commit_pending) {
-			// never cancel timeout for non-batch commits as we want
-			// to ensure that the signal corresponding to a certain
-			// update arrives within a fixed time limit
-
-			// cancel it in all other cases
-			// in the BATCH_LAST case, the timeout will be reenabled
-			// further down but it's important to cancel it first
-			// to reset the timeout to 1 s starting now
-			if (signal_timeout != 0) {
-				Source.remove (signal_timeout);
-				signal_timeout = 0;
-			}
-		}
-
-		if (commit_type == Tracker.Data.Update.CommitType.REGULAR) {
-			regular_commit_pending = true;
-		}
-
-		if (regular_commit_pending || commit_type == Tracker.Data.Update.CommitType.BATCH_LAST) {
-			// timer wanted for non-batch commits and the last in a series of batch commits
-			if (signal_timeout == 0) {
-				signal_timeout = Timeout.add (config.graphupdated_delay, on_emit_signals);
-			}
+		if (signal_timeout == 0) {
+			signal_timeout = Timeout.add (config.graphupdated_delay, on_emit_signals);
 		}
 
 		/* Writeback feature */
 		Tracker.Writeback.transact ();
 	}
 
-	void on_statements_rolled_back (Tracker.Data.Update.CommitType commit_type) {
+	void on_statements_rolled_back () {
 		Tracker.Events.reset_pending ();
 		Tracker.Writeback.reset_pending ();
 	}
