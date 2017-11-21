@@ -103,7 +103,6 @@ void     tracker_data_begin_transaction_for_replay  (TrackerData               *
                                                      GError                   **error);
 void     tracker_data_commit_transaction            (TrackerData               *data,
                                                      GError                   **error);
-void     tracker_data_notify_transaction            (TrackerData               *data);
 void     tracker_data_rollback_transaction          (TrackerData               *data);
 void     tracker_data_update_sparql                 (TrackerData               *data,
                                                      const gchar               *update,

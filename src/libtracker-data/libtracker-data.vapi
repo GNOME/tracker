@@ -192,7 +192,6 @@ namespace Tracker {
 		public void update_sparql (string update) throws Sparql.Error;
 		public GLib.Variant update_sparql_blank (string update) throws Sparql.Error;
 		public void load_turtle_file (GLib.File file) throws Sparql.Error;
-		public void notify_transaction ();
 		public void delete_statement (string? graph, string subject, string predicate, string object) throws Sparql.Error, DateError;
 		public void update_statement (string? graph, string subject, string predicate, string? object) throws Sparql.Error, DateError;
 		public void insert_statement (string? graph, string subject, string predicate, string object) throws Sparql.Error, DateError;
