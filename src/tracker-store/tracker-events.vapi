@@ -20,12 +20,21 @@
 namespace Tracker {
 	[CCode (cheader_filename = "tracker-store/tracker-events.h")]
 	namespace Events {
-		public void init (Tracker.Data.Manager data_manager);
+		public void init ();
 		public void shutdown ();
 		public void add_insert (int graph_id, int subject_id, string subject, int pred_id, int object_id, string object, GLib.PtrArray rdf_types);
 		public void add_delete (int graph_id, int subject_id, string subject, int pred_id, int object_id, string object, GLib.PtrArray rdf_types);
 		public uint get_total (bool and_reset);
 		public void reset_pending ();
-		public unowned Class[] get_classes ();
+
+		public void transact ();
+		public GLib.HashTable<Tracker.Class, Batch> get_pending ();
+
+		[CCode (lower_case_cprefix="tracker_event_batch_", cname = "TrackerEventBatch")]
+		public class Batch {
+			public delegate void EventsForeach (int graph_id, int subject_id, int pred_id, int object_id);
+			public void foreach_delete_event (EventsForeach func);
+			public void foreach_insert_event (EventsForeach func);
+                }
 	}
 }

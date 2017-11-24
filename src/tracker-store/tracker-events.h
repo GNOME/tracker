@@ -28,9 +28,15 @@
 
 G_BEGIN_DECLS
 
-typedef GStrv (*TrackerNotifyClassGetter)   (void);
+typedef struct _TrackerEventBatch TrackerEventBatch;
 
-void           tracker_events_init              (TrackerDataManager *data_manager);
+typedef void (*TrackerEventsForeach) (gint     graph_id,
+                                      gint     subject_id,
+                                      gint     pred_id,
+                                      gint     object_id,
+                                      gpointer user_data);
+
+void           tracker_events_init              (void);
 void           tracker_events_shutdown          (void);
 void           tracker_events_add_insert        (gint         graph_id,
                                                  gint         subject_id,
@@ -48,7 +54,17 @@ void           tracker_events_add_delete        (gint         graph_id,
                                                  GPtrArray   *rdf_types);
 guint          tracker_events_get_total         (gboolean     and_reset);
 void           tracker_events_reset_pending     (void);
-TrackerClass** tracker_events_get_classes       (guint       *length);
+
+void           tracker_events_transact          (void);
+
+GHashTable *   tracker_events_get_pending       (void);
+
+void           tracker_event_batch_foreach_insert_event (TrackerEventBatch    *events,
+                                                         TrackerEventsForeach  foreach,
+                                                         gpointer              user_data);
+void           tracker_event_batch_foreach_delete_event (TrackerEventBatch    *events,
+                                                         TrackerEventsForeach  foreach,
+                                                         gpointer              user_data);
 
 G_END_DECLS
 
