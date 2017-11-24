@@ -319,7 +319,7 @@ License which can be viewed at:
 		if (!shutdown) {
 			Tracker.DBus.register_prepare_class_signal ();
 
-			Tracker.Events.init (data_manager);
+			Tracker.Events.init ();
 			Tracker.Writeback.init (data_manager, get_writeback_predicates);
 			Tracker.Store.resume ();
 

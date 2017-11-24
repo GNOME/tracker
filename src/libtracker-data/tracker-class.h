@@ -51,12 +51,6 @@ struct _TrackerClassClass {
 	GObjectClass parent_class;
 };
 
-typedef void    (*TrackerEventsForeach)                (gint                 graph_id,
-                                                        gint                 subject_id,
-                                                        gint                 pred_id,
-                                                        gint                 object_id,
-                                                        gpointer             user_data);
-
 GType             tracker_class_get_type               (void) G_GNUC_CONST;
 TrackerClass *    tracker_class_new                    (gboolean             use_gvdb);
 const gchar *     tracker_class_get_uri                (TrackerClass        *service);
@@ -95,29 +89,6 @@ void              tracker_class_set_notify             (TrackerClass        *ser
 
 void              tracker_class_set_ontologies         (TrackerClass        *class,
                                                         TrackerOntologies   *ontologies);
-
-/* For signals API */
-void              tracker_class_foreach_delete_event   (TrackerClass        *class,
-                                                        TrackerEventsForeach foreach,
-                                                        gpointer             user_data);
-void              tracker_class_foreach_insert_event   (TrackerClass        *class,
-                                                        TrackerEventsForeach foreach,
-                                                        gpointer             user_data);
-gboolean          tracker_class_has_insert_events      (TrackerClass        *class);
-gboolean          tracker_class_has_delete_events      (TrackerClass        *class);
-void              tracker_class_reset_ready_events     (TrackerClass        *class);
-void              tracker_class_reset_pending_events   (TrackerClass        *class);
-void              tracker_class_transact_events        (TrackerClass        *class);
-void              tracker_class_add_delete_event       (TrackerClass        *class,
-                                                        gint                 graph_id,
-                                                        gint                 subject_id,
-                                                        gint                 pred_id,
-                                                        gint                 object_id);
-void              tracker_class_add_insert_event       (TrackerClass        *class,
-                                                        gint                 graph_id,
-                                                        gint                 subject_id,
-                                                        gint                 pred_id,
-                                                        gint                 object_id);
 
 G_END_DECLS
 

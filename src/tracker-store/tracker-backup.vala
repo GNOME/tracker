@@ -57,7 +57,7 @@ public class Tracker.Backup : Object {
 			throw e;
 		} finally {
 			if (resources != null) {
-				Tracker.Events.init (Tracker.Main.get_data_manager ());
+				Tracker.Events.init ();
 				resources.enable_signals ();
 			}
 
@@ -95,7 +95,7 @@ public class Tracker.Backup : Object {
 			throw e;
 		} finally {
 			if (resources != null) {
-				Tracker.Events.init (Tracker.Main.get_data_manager ());
+				Tracker.Events.init ();
 				resources.enable_signals ();
 			}
 

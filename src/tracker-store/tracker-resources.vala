@@ -207,32 +207,33 @@ public class Tracker.Resources : Object {
 		/* no longer needed, just return */
 	}
 
-	bool emit_graph_updated (Class cl) {
-		if (cl.has_insert_events () || cl.has_delete_events ()) {
-			var builder = new VariantBuilder ((VariantType) "a(iiii)");
-			cl.foreach_delete_event ((graph_id, subject_id, pred_id, object_id) => {
-				builder.add ("(iiii)", graph_id, subject_id, pred_id, object_id);
-			});
-			var deletes = builder.end ();
+	void emit_graph_updated (Class cl, Events.Batch events) {
+		var builder = new VariantBuilder ((VariantType) "a(iiii)");
+		events.foreach_delete_event ((graph_id, subject_id, pred_id, object_id) => {
+			builder.add ("(iiii)", graph_id, subject_id, pred_id, object_id);
+		});
+		var deletes = builder.end ();
 
-			builder = new VariantBuilder ((VariantType) "a(iiii)");
-			cl.foreach_insert_event ((graph_id, subject_id, pred_id, object_id) => {
-				builder.add ("(iiii)", graph_id, subject_id, pred_id, object_id);
-			});
-			var inserts = builder.end ();
+		builder = new VariantBuilder ((VariantType) "a(iiii)");
+		events.foreach_insert_event ((graph_id, subject_id, pred_id, object_id) => {
+			builder.add ("(iiii)", graph_id, subject_id, pred_id, object_id);
+		});
+		var inserts = builder.end ();
 
-			graph_updated (cl.uri, deletes, inserts);
-
-			cl.reset_ready_events ();
-
-			return true;
-		}
-		return false;
+		graph_updated (cl.uri, deletes, inserts);
 	}
 
 	bool on_emit_signals () {
-		foreach (var cl in Tracker.Events.get_classes ()) {
-			emit_graph_updated (cl);
+		var events = Tracker.Events.get_pending ();
+
+		if (events != null) {
+			var iter = HashTableIter<Tracker.Class, Tracker.Events.Batch> (events);
+			unowned Events.Batch class_events;
+			unowned Class cl;
+
+			while (iter.next (out cl, out class_events)) {
+				emit_graph_updated (cl, class_events);
+			}
 		}
 
 		/* Reset counter */
@@ -272,18 +273,12 @@ public class Tracker.Resources : Object {
 	}
 
 	void on_statements_committed () {
-		/* Class signal feature */
-
-		foreach (var cl in Tracker.Events.get_classes ()) {
-			cl.transact_events ();
-		}
+		Tracker.Events.transact ();
+		Tracker.Writeback.transact ();
 
 		if (signal_timeout == 0) {
 			signal_timeout = Timeout.add (config.graphupdated_delay, on_emit_signals);
 		}
-
-		/* Writeback feature */
-		Tracker.Writeback.transact ();
 	}
 
 	void on_statements_rolled_back () {
