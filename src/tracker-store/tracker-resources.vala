@@ -223,6 +223,29 @@ public class Tracker.Resources : Object {
 		graph_updated (cl.uri, deletes, inserts);
 	}
 
+	void emit_writeback (HashTable<int, Array<int>> events) {
+		var builder = new VariantBuilder ((VariantType) "a{iai}");
+		var wb_iter = HashTableIter<int, GLib.Array<int>> (events);
+
+		int subject_id;
+		unowned Array<int> types;
+		while (wb_iter.next (out subject_id, out types)) {
+			builder.open ((VariantType) "{iai}");
+
+			builder.add ("i", subject_id);
+
+			builder.open ((VariantType) "ai");
+			for (int i = 0; i < types.length; i++) {
+				builder.add ("i", types.index (i));
+			}
+			builder.close ();
+
+			builder.close ();
+		}
+
+		writeback (builder.end ());
+	}
+
 	bool on_emit_signals () {
 		var events = Tracker.Events.get_pending ();
 
@@ -240,27 +263,7 @@ public class Tracker.Resources : Object {
 		var writebacks = Tracker.Writeback.get_ready ();
 
 		if (writebacks != null) {
-			var builder = new VariantBuilder ((VariantType) "a{iai}");
-
-			var wb_iter = HashTableIter<int, GLib.Array<int>> (writebacks);
-
-			int subject_id;
-			unowned Array<int> types;
-			while (wb_iter.next (out subject_id, out types)) {
-				builder.open ((VariantType) "{iai}");
-
-				builder.add ("i", subject_id);
-
-				builder.open ((VariantType) "ai");
-				for (int i = 0; i < types.length; i++) {
-					builder.add ("i", types.index (i));
-				}
-				builder.close ();
-
-				builder.close ();
-			}
-
-			writeback (builder.end ());
+			emit_writeback (writebacks);
 		}
 
 		signal_timeout = 0;
