@@ -27,8 +27,12 @@
 #include "tracker-writeback.h"
 
 typedef struct {
+	/* Accessed by updates thread */
 	GHashTable *allowances;
 	GHashTable *pending_events;
+
+	/* Accessed by both updates and dbus threads */
+	GMutex mutex;
 	GHashTable *ready_events;
 } WritebackPrivate;
 
@@ -119,8 +123,10 @@ tracker_writeback_get_ready (void)
 
 	g_return_val_if_fail (private != NULL, NULL);
 
+	g_mutex_lock (&private->mutex);
 	events = private->ready_events;
 	private->ready_events = NULL;
+	g_mutex_unlock (&private->mutex);
 
 	return events;
 }
@@ -150,6 +156,7 @@ tracker_writeback_init (TrackerDataManager                *data_manager,
 	g_return_if_fail (private == NULL);
 
 	private = g_new0 (WritebackPrivate, 1);
+	g_mutex_init (&private->mutex);
 
 	private->allowances = g_hash_table_new_full (g_direct_hash,
 	                                             g_direct_equal,
@@ -196,6 +203,8 @@ tracker_writeback_transact (void)
 	if (!private->pending_events)
 		return;
 
+	g_mutex_lock (&private->mutex);
+
 	if (!private->ready_events) {
 		private->ready_events = g_hash_table_new_full (g_direct_hash, g_direct_equal,
 		                                               (GDestroyNotify) NULL,
@@ -208,6 +217,8 @@ tracker_writeback_transact (void)
 		g_hash_table_insert (private->ready_events, key, value);
 		g_hash_table_iter_remove (&iter);
 	}
+
+	g_mutex_unlock (&private->mutex);
 }
 
 void
