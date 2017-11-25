@@ -52,7 +52,7 @@ void           tracker_events_add_delete        (gint         graph_id,
                                                  gint         object_id,
                                                  const gchar *object,
                                                  GPtrArray   *rdf_types);
-guint          tracker_events_get_total         (gboolean     and_reset);
+guint          tracker_events_get_total         (void);
 void           tracker_events_reset_pending     (void);
 
 void           tracker_events_transact          (void);

@@ -41,9 +41,13 @@ struct _TrackerEventBatch
 };
 
 typedef struct {
-	guint total;
-	GHashTable *pending;
+	/* Accessed by updates/dbus threads */
+	GMutex mutex;
 	GHashTable *ready;
+
+	/* Only accessed by updates thread */
+	GHashTable *pending;
+	guint total;
 } EventsPrivate;
 
 static EventsPrivate *private;
@@ -219,19 +223,11 @@ tracker_event_batch_merge (TrackerEventBatch *dest,
 }
 
 guint
-tracker_events_get_total (gboolean and_reset)
+tracker_events_get_total (void)
 {
-	guint total;
-
 	g_return_val_if_fail (private != NULL, 0);
 
-	total = private->total;
-
-	if (and_reset) {
-		private->total = 0;
-	}
-
-	return total;
+	return private->total;
 }
 
 static inline TrackerEventBatch *
@@ -326,6 +322,8 @@ tracker_events_transact (void)
 	if (!private->pending || g_hash_table_size (private->pending) == 0)
 		return;
 
+	g_mutex_lock (&private->mutex);
+
 	if (!private->ready) {
 		private->ready = tracker_event_batch_hashtable_new ();
 	}
@@ -349,6 +347,10 @@ tracker_events_transact (void)
 			g_object_unref (rdf_type);
 		}
 	}
+
+	private->total = 0;
+
+	g_mutex_unlock (&private->mutex);
 }
 
 void
@@ -370,6 +372,7 @@ void
 tracker_events_init (void)
 {
 	private = g_new0 (EventsPrivate, 1);
+	g_mutex_init (&private->mutex);
 }
 
 void
@@ -390,8 +393,10 @@ tracker_events_get_pending (void)
 
 	g_return_val_if_fail (private != NULL, NULL);
 
+	g_mutex_lock (&private->mutex);
 	pending = private->ready;
 	private->ready = NULL;
+	g_mutex_unlock (&private->mutex);
 
 	return pending;
 }

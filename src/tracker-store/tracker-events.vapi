@@ -24,7 +24,7 @@ namespace Tracker {
 		public void shutdown ();
 		public void add_insert (int graph_id, int subject_id, string subject, int pred_id, int object_id, string object, GLib.PtrArray rdf_types);
 		public void add_delete (int graph_id, int subject_id, string subject, int pred_id, int object_id, string object, GLib.PtrArray rdf_types);
-		public uint get_total (bool and_reset);
+		public uint get_total ();
 		public void reset_pending ();
 
 		public void transact ();
