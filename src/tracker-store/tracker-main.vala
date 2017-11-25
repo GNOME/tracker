@@ -39,6 +39,7 @@ License which can be viewed at:
 
 	static bool shutdown;
 
+	static Tracker.Direct.Connection connection;
 	static Tracker.Data.Manager data_manager;
 
 	/* Private command line parameters */
@@ -175,6 +176,10 @@ License which can be viewed at:
 		return data_manager;
 	}
 
+	public static unowned Tracker.Direct.Connection get_sparql_connection () {
+		return connection;
+	}
+
 	static int main (string[] args) {
 		Intl.setlocale (LocaleCategory.ALL, "");
 
@@ -256,6 +261,8 @@ License which can be viewed at:
 			flags |= DBManagerFlags.FORCE_REINDEX;
 		}
 
+		Tracker.Direct.Connection.set_default_flags (flags);
+
 		var notifier = Tracker.DBus.register_notifier ();
 
 		Tracker.Store.init (config);
@@ -281,38 +288,18 @@ License which can be viewed at:
 
 		Tracker.DBJournal.set_rotating (do_rotating, chunk_size, rotate_to);
 
-		int select_cache_size, update_cache_size;
-		string cache_size_s;
-
-		cache_size_s = Environment.get_variable ("TRACKER_STORE_SELECT_CACHE_SIZE");
-		if (cache_size_s != null && cache_size_s != "") {
-			select_cache_size = int.parse (cache_size_s);
-		} else {
-			select_cache_size = SELECT_CACHE_SIZE;
-		}
-
-		cache_size_s = Environment.get_variable ("TRACKER_STORE_UPDATE_CACHE_SIZE");
-		if (cache_size_s != null && cache_size_s != "") {
-			update_cache_size = int.parse (cache_size_s);
-		} else {
-			update_cache_size = UPDATE_CACHE_SIZE;
-		}
-
 		try {
-			data_manager = new Tracker.Data.Manager (flags,
-			                                         cache_location,
-			                                         data_location,
-			                                         ontology_location,
-			                                         true,
-			                                         false,
-			                                         select_cache_size,
-			                                         update_cache_size);
-			data_manager.init (null);
+			connection = new Tracker.Direct.Connection (Sparql.ConnectionFlags.NONE,
+			                                            cache_location,
+			                                            data_location,
+			                                            ontology_location);
+			connection.init (null);
 		} catch (GLib.Error e) {
 			critical ("Cannot initialize database: %s", e.message);
 			return 1;
 		}
 
+		data_manager = connection.get_data_manager ();
 		db_config = null;
 		notifier = null;
 
