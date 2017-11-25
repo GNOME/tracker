@@ -239,7 +239,7 @@ License which can be viewed at:
 
 		sanity_check_option_values (config);
 
-		if (!Tracker.DBus.init (config)) {
+		if (!Tracker.DBus.init ()) {
 			return 1;
 		}
 
@@ -258,7 +258,7 @@ License which can be viewed at:
 
 		var notifier = Tracker.DBus.register_notifier ();
 
-		Tracker.Store.init ();
+		Tracker.Store.init (config);
 
 		/* Make Tracker available for introspection */
 		if (!Tracker.DBus.register_objects ()) {

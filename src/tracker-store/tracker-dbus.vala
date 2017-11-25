@@ -34,7 +34,6 @@ public class Tracker.DBus {
 	static uint notifier_id;
 	static Tracker.Backup backup;
 	static uint backup_id;
-	static Tracker.Config config;
 	static uint domain_watch_id;
 	static MainLoop watch_main_loop;
 
@@ -108,9 +107,8 @@ public class Tracker.DBus {
 		}
 	}
 
-	public static bool init (Tracker.Config config_p) {
+	public static bool init () {
 		/* Don't reinitialize */
-		config = config_p;
 		if (connection != null) {
 			return true;
 		}
@@ -216,7 +214,7 @@ public class Tracker.DBus {
 		statistics_id = register_object (connection, statistics, Tracker.Statistics.PATH);
 
 		/* Add org.freedesktop.Tracker1.Resources */
-		resources = new Tracker.Resources (connection, config);
+		resources = new Tracker.Resources (connection);
 		if (resources == null) {
 			critical ("Could not create TrackerResources object to register");
 			return false;
@@ -261,7 +259,7 @@ public class Tracker.DBus {
 			return false;
 		}
 
-		resources.enable_signals ();
+		Tracker.Store.enable_signals ();
 
 		return true;
 	}
