@@ -263,8 +263,6 @@ public class Tracker.Resources : Object {
 			writeback (builder.end ());
 		}
 
-		Tracker.Writeback.reset_ready ();
-
 		signal_timeout = 0;
 		return false;
 	}
