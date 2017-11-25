@@ -39,6 +39,7 @@ tracker_store_VALAFLAGS = \
 	$(top_srcdir)/src/libtracker-sparql/tracker-sparql-$(TRACKER_API_VERSION).vapi \
 	$(top_srcdir)/src/libtracker-data/tracker-sparql-query.vapi \
 	$(top_srcdir)/src/libtracker-data/libtracker-data.vapi \
+	$(top_srcdir)/src/libtracker-direct/tracker-direct.vapi \
 	$(top_srcdir)/src/tracker-store/tracker-config.vapi \
 	$(top_srcdir)/src/tracker-store/tracker-events.vapi \
 	$(top_srcdir)/src/tracker-store/tracker-locale-change.vapi \
@@ -47,6 +48,7 @@ tracker_store_VALAFLAGS = \
 
 tracker_store_LDADD =                                  \
 	$(top_builddir)/src/libtracker-data/libtracker-data.la \
+	$(top_builddir)/src/libtracker-direct/libtracker-direct.la \
 	$(top_builddir)/src/libtracker-common/libtracker-common.la \
 	$(top_builddir)/src/libtracker-sparql-backend/libtracker-sparql-@TRACKER_API_VERSION@.la \
 	$(BUILD_LIBS)                                  \

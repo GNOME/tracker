@@ -29,9 +29,9 @@ public class Tracker.Steroids : Object {
 		request.debug ("query: %s", query);
 		try {
 			string[] variable_names = null;
-			var data_manager = Tracker.Main.get_data_manager ();
+			var sparql_conn = Tracker.Main.get_sparql_connection ();
 
-			yield Tracker.Store.sparql_query (data_manager, query, Tracker.Store.Priority.HIGH, cursor => {
+			yield Tracker.Store.sparql_query (sparql_conn, query, Priority.HIGH, cursor => {
 				var data_output_stream = new DataOutputStream (new BufferedOutputStream.sized (output_stream, BUFFER_SIZE));
 				data_output_stream.set_byte_order (DataStreamByteOrder.HOST_ENDIAN);
 
@@ -90,10 +90,10 @@ public class Tracker.Steroids : Object {
 		}
 	}
 
-	async Variant? update_internal (BusName sender, Tracker.Store.Priority priority, bool blank, UnixInputStream input_stream) throws Error {
+	async Variant? update_internal (BusName sender, int priority, bool blank, UnixInputStream input_stream) throws Error {
 		var request = DBusRequest.begin (sender,
 			"Steroids.%sUpdate%s",
-			priority != Tracker.Store.Priority.HIGH ? "Batch" : "",
+			priority != Priority.HIGH ? "Batch" : "",
 			blank ? "Blank" : "");
 		try {
 			size_t bytes_read;
@@ -112,16 +112,16 @@ public class Tracker.Steroids : Object {
 			data_input_stream = null;
 
 			request.debug ("query: %s", (string) query);
-			var data_manager = Tracker.Main.get_data_manager ();
+			var sparql_conn = Tracker.Main.get_sparql_connection ();
 
 			if (!blank) {
-				yield Tracker.Store.sparql_update (data_manager, (string) query, priority, sender);
+				yield Tracker.Store.sparql_update (sparql_conn, (string) query, priority, sender);
 
 				request.end ();
 
 				return null;
 			} else {
-				var variant = yield Tracker.Store.sparql_update_blank (data_manager, (string) query, priority, sender);
+				var variant = yield Tracker.Store.sparql_update_blank (sparql_conn, (string) query, priority, sender);
 
 				request.end ();
 
@@ -140,21 +140,21 @@ public class Tracker.Steroids : Object {
 	}
 
 	public async void update (BusName sender, UnixInputStream input_stream) throws Error {
-		yield update_internal (sender, Tracker.Store.Priority.HIGH, false, input_stream);
+		yield update_internal (sender, Priority.HIGH, false, input_stream);
 	}
 
 	public async void batch_update (BusName sender, UnixInputStream input_stream) throws Error {
-		yield update_internal (sender, Tracker.Store.Priority.LOW, false, input_stream);
+		yield update_internal (sender, Priority.LOW, false, input_stream);
 	}
 
 	[DBus (signature = "aaa{ss}")]
 	public async Variant update_blank (BusName sender, UnixInputStream input_stream) throws Error {
-		return yield update_internal (sender, Tracker.Store.Priority.HIGH, true, input_stream);
+		return yield update_internal (sender, Priority.HIGH, true, input_stream);
 	}
 
 	[DBus (signature = "aaa{ss}")]
 	public async Variant batch_update_blank (BusName sender, UnixInputStream input_stream) throws Error {
-		return yield update_internal (sender, Tracker.Store.Priority.LOW, true, input_stream);
+		return yield update_internal (sender, Priority.LOW, true, input_stream);
 	}
 
 	[DBus (signature = "as")]
@@ -188,11 +188,11 @@ public class Tracker.Steroids : Object {
 			data_input_stream = null;
 
 			var builder = new VariantBuilder ((VariantType) "as");
-			var data_manager = Tracker.Main.get_data_manager ();
+			var sparql_conn = Tracker.Main.get_sparql_connection ();
 
 			// first try combined query for best possible performance
 			try {
-				yield Tracker.Store.sparql_update (data_manager, combined_query.str, Tracker.Store.Priority.LOW, sender);
+				yield Tracker.Store.sparql_update (sparql_conn, combined_query.str, Priority.LOW, sender);
 
 				// combined query was successful
 				for (i = 0; i < query_count; i++) {
@@ -213,7 +213,7 @@ public class Tracker.Steroids : Object {
 				request.debug ("query: %s", query_array[i]);
 
 				try {
-					yield Tracker.Store.sparql_update (data_manager, query_array[i], Tracker.Store.Priority.LOW, sender);
+					yield Tracker.Store.sparql_update (sparql_conn, query_array[i], Priority.LOW, sender);
 					builder.add ("s", "");
 					builder.add ("s", "");
 				} catch (Error e1) {
