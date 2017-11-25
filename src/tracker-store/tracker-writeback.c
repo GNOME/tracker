@@ -115,9 +115,14 @@ tracker_writeback_reset_ready ()
 GHashTable *
 tracker_writeback_get_ready (void)
 {
+	GHashTable *events;
+
 	g_return_val_if_fail (private != NULL, NULL);
 
-	return private->ready_events;
+	events = private->ready_events;
+	private->ready_events = NULL;
+
+	return events;
 }
 
 static void
@@ -214,7 +219,8 @@ tracker_writeback_shutdown (void)
 
 	/* Perhaps hurry an emit of the ready events here? We're shutting down,
 	 * so I guess we're not required to do that here ... ? */
-	tracker_writeback_reset_ready ();
+	g_clear_pointer (&private->ready_events,
+	                 (GDestroyNotify) g_hash_table_unref);
 
 	free_private (private);
 	private = NULL;
