@@ -275,6 +275,7 @@ public class Tracker.Resources : Object {
 	void on_statements_committed () {
 		Tracker.Events.transact ();
 		Tracker.Writeback.transact ();
+		check_graph_updated_signal ();
 
 		if (signal_timeout == 0) {
 			signal_timeout = Timeout.add (config.graphupdated_delay, on_emit_signals);
@@ -298,20 +299,21 @@ public class Tracker.Resources : Object {
 			}
 
 			// immediately emit signals for already committed transaction
-			on_emit_signals ();
+			Idle.add (() => {
+				on_emit_signals ();
+				return false;
+			});
 		}
 	}
 
 	void on_statement_inserted (int graph_id, string? graph, int subject_id, string subject, int pred_id, int object_id, string? object, PtrArray rdf_types) {
 		Tracker.Events.add_insert (graph_id, subject_id, subject, pred_id, object_id, object, rdf_types);
 		Tracker.Writeback.check (graph_id, graph, subject_id, subject, pred_id, object_id, object, rdf_types);
-		check_graph_updated_signal ();
 	}
 
 	void on_statement_deleted (int graph_id, string? graph, int subject_id, string subject, int pred_id, int object_id, string? object, PtrArray rdf_types) {
 		Tracker.Events.add_delete (graph_id, subject_id, subject, pred_id, object_id, object, rdf_types);
 		Tracker.Writeback.check (graph_id, graph, subject_id, subject, pred_id, object_id, object, rdf_types);
-		check_graph_updated_signal ();
 	}
 
 	[DBus (visible = false)]
