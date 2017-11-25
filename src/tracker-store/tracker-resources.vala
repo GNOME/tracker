@@ -236,9 +236,6 @@ public class Tracker.Resources : Object {
 			}
 		}
 
-		/* Reset counter */
-		Tracker.Events.get_total (true);
-
 		/* Writeback feature */
 		var writebacks = Tracker.Writeback.get_ready ();
 
@@ -289,7 +286,7 @@ public class Tracker.Resources : Object {
 
 	void check_graph_updated_signal () {
 		/* Check for whether we need an immediate emit */
-		if (Tracker.Events.get_total (false) > GRAPH_UPDATED_IMMEDIATE_EMIT_AT) {
+		if (Tracker.Events.get_total () > GRAPH_UPDATED_IMMEDIATE_EMIT_AT) {
 			// possibly active timeout no longer necessary as signals
 			// for committed transactions will be emitted by the following on_emit_signals call
 			// do this before actually calling on_emit_signals as on_emit_signals sets signal_timeout to 0
