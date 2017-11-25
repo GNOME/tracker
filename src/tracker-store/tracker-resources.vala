@@ -22,8 +22,6 @@
 public class Tracker.Resources : Object {
 	public const string PATH = "/org/freedesktop/Tracker1/Resources";
 
-	const int GRAPH_UPDATED_IMMEDIATE_EMIT_AT = 50000;
-
 	/* I *know* that this is some arbitrary number that doesn't seem to
 	 * resemble anything. In fact it's what I experimentally measured to
 	 * be a good value on a default Debian testing which has
@@ -50,15 +48,13 @@ public class Tracker.Resources : Object {
 	const int DBUS_ARBITRARY_MAX_MSG_SIZE = 10000000;
 
 	DBusConnection connection;
-	uint signal_timeout;
-	Tracker.Config config;
 
 	public signal void writeback ([DBus (signature = "a{iai}")] Variant subjects);
 	public signal void graph_updated (string classname, [DBus (signature = "a(iiii)")] Variant deletes, [DBus (signature = "a(iiii)")] Variant inserts);
 
-	public Resources (DBusConnection connection, Tracker.Config config_p) {
+	public Resources (DBusConnection connection) {
 		this.connection = connection;
-		this.config = config_p;
+		Tracker.Store.set_signal_callback (on_emit_signals);
 	}
 
 	public async void load (BusName sender, string uri) throws Error {
@@ -246,9 +242,7 @@ public class Tracker.Resources : Object {
 		writeback (builder.end ());
 	}
 
-	bool on_emit_signals () {
-		var events = Tracker.Events.get_pending ();
-
+	void on_emit_signals (HashTable<Tracker.Class, Tracker.Events.Batch>? events, HashTable<int, GLib.Array<int>>? writebacks) {
 		if (events != null) {
 			var iter = HashTableIter<Tracker.Class, Tracker.Events.Batch> (events);
 			unowned Events.Batch class_events;
@@ -259,88 +253,13 @@ public class Tracker.Resources : Object {
 			}
 		}
 
-		/* Writeback feature */
-		var writebacks = Tracker.Writeback.get_ready ();
-
 		if (writebacks != null) {
 			emit_writeback (writebacks);
-		}
-
-		signal_timeout = 0;
-		return false;
-	}
-
-	void on_statements_committed () {
-		Tracker.Events.transact ();
-		Tracker.Writeback.transact ();
-		check_graph_updated_signal ();
-
-		if (signal_timeout == 0) {
-			signal_timeout = Timeout.add (config.graphupdated_delay, on_emit_signals);
-		}
-	}
-
-	void on_statements_rolled_back () {
-		Tracker.Events.reset_pending ();
-		Tracker.Writeback.reset_pending ();
-	}
-
-	void check_graph_updated_signal () {
-		/* Check for whether we need an immediate emit */
-		if (Tracker.Events.get_total () > GRAPH_UPDATED_IMMEDIATE_EMIT_AT) {
-			// possibly active timeout no longer necessary as signals
-			// for committed transactions will be emitted by the following on_emit_signals call
-			// do this before actually calling on_emit_signals as on_emit_signals sets signal_timeout to 0
-			if (signal_timeout != 0) {
-				Source.remove (signal_timeout);
-				signal_timeout = 0;
-			}
-
-			// immediately emit signals for already committed transaction
-			Idle.add (() => {
-				on_emit_signals ();
-				return false;
-			});
-		}
-	}
-
-	void on_statement_inserted (int graph_id, string? graph, int subject_id, string subject, int pred_id, int object_id, string? object, PtrArray rdf_types) {
-		Tracker.Events.add_insert (graph_id, subject_id, subject, pred_id, object_id, object, rdf_types);
-		Tracker.Writeback.check (graph_id, graph, subject_id, subject, pred_id, object_id, object, rdf_types);
-	}
-
-	void on_statement_deleted (int graph_id, string? graph, int subject_id, string subject, int pred_id, int object_id, string? object, PtrArray rdf_types) {
-		Tracker.Events.add_delete (graph_id, subject_id, subject, pred_id, object_id, object, rdf_types);
-		Tracker.Writeback.check (graph_id, graph, subject_id, subject, pred_id, object_id, object, rdf_types);
-	}
-
-	[DBus (visible = false)]
-	public void enable_signals () {
-		var data_manager = Tracker.Main.get_data_manager ();
-		var data = data_manager.get_data ();
-		data.add_insert_statement_callback (on_statement_inserted);
-		data.add_delete_statement_callback (on_statement_deleted);
-		data.add_commit_statement_callback (on_statements_committed);
-		data.add_rollback_statement_callback (on_statements_rolled_back);
-	}
-
-	[DBus (visible = false)]
-	public void disable_signals () {
-		var data_manager = Tracker.Main.get_data_manager ();
-		var data = data_manager.get_data ();
-		data.remove_insert_statement_callback (on_statement_inserted);
-		data.remove_delete_statement_callback (on_statement_deleted);
-		data.remove_commit_statement_callback (on_statements_committed);
-		data.remove_rollback_statement_callback (on_statements_rolled_back);
-
-		if (signal_timeout != 0) {
-			Source.remove (signal_timeout);
-			signal_timeout = 0;
 		}
 	}
 
 	~Resources () {
-		this.disable_signals ();
+		Tracker.Store.set_signal_callback (null);
 	}
 
 	[DBus (visible = false)]
