@@ -3172,8 +3172,8 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 		if (!multiple_values) {
 			guint r;
 
-			for (r = 0; r < resource_buffer->types->len; r++) {
-				TrackerClass *m_class = g_ptr_array_index (resource_buffer->types, r);
+			for (r = 0; r < data->resource_buffer->types->len; r++) {
+				TrackerClass *m_class = g_ptr_array_index (data->resource_buffer->types, r);
 
 				/* We only do the old_values for GraphUpdated in tracker-store.
 				 * The subject's known classes are in resource_buffer->types
@@ -3337,7 +3337,7 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 	if (!check_property_domain (data, property)) {
 		g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CONSTRAINT,
 		             "Subject `%s' is not in domain `%s' of property `%s'",
-		             resource_buffer->subject,
+		             data->resource_buffer->subject,
 		             tracker_class_get_name (tracker_property_get_domain (property)),
 		             tracker_property_get_name (property));
 		return;

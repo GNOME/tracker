@@ -221,7 +221,8 @@ LIBSOUP_REQUIRED=2.40
 # 3.7.0 for WAL
 # 3.7.9 for FTS4 content= support
 # 3.7.15 for sqlite3_errstr() support
-SQLITE_REQUIRED=3.7.15
+# 3.8.4 for SQLITE_DETERMINISTIC
+SQLITE_REQUIRED=3.8.4
 
 # Needed to generate .gir files,
 # see http://live.gnome.org/GnomeGoals/AddGObjectIntrospectionSupport
