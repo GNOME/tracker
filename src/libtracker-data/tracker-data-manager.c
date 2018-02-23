@@ -48,6 +48,7 @@
 #include "tracker-property.h"
 #include "tracker-sparql-query.h"
 #include "tracker-data-query.h"
+#include "tracker-sparql-parser.h"
 
 #define RDF_PROPERTY                    TRACKER_PREFIX_RDF "Property"
 #define RDF_TYPE                        TRACKER_PREFIX_RDF "type"
