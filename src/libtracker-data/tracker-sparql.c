@@ -1642,6 +1642,29 @@ tracker_sparql_add_select_var (TrackerSparql       *sparql,
 }
 
 static gboolean
+handle_as (TrackerSparql        *sparql,
+	   TrackerPropertyType   type,
+	   GError              **error)
+{
+	TrackerBinding *binding;
+	TrackerVariable *var;
+
+	_call_rule (sparql, NAMED_RULE_Var, error);
+	var = _last_node_variable (sparql);
+
+	binding = tracker_variable_binding_new (var, NULL, NULL);
+	tracker_binding_set_data_type (binding, type);
+	tracker_variable_set_sample_binding (var, TRACKER_VARIABLE_BINDING (binding));
+	_append_string_printf (sparql, "AS %s ",
+			       tracker_variable_get_sql_expression (var));
+
+	if (sparql->current_state.select_context == sparql->context)
+		tracker_sparql_add_select_var (sparql, var->name, type);
+
+	return TRUE;
+}
+
+static gboolean
 translate_SelectClause (TrackerSparql  *sparql,
                         GError        **error)
 {
@@ -1650,6 +1673,10 @@ translate_SelectClause (TrackerSparql  *sparql,
 	gboolean first = TRUE;
 
 	/* SelectClause ::= 'SELECT' ( 'DISTINCT' | 'REDUCED' )? ( ( Var | ( '(' Expression 'AS' Var ')' ) )+ | '*' )
+	 *
+	 * TRACKER EXTENSION:
+	 * Variable set also accepts the following syntax:
+	 *   Expression ('AS' Var)?
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_SELECT);
 	_append_string (sparql, "SELECT ");
@@ -1717,13 +1744,17 @@ translate_SelectClause (TrackerSparql  *sparql,
 
 				select_context->type = binding->data_type;
 
-				if (sparql->current_state.select_context == sparql->context) {
+				if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_AS)) {
+					if (!handle_as (sparql, binding->data_type, error))
+						return FALSE;
+				} else if (sparql->current_state.select_context == sparql->context) {
 					convert_expression_to_string (sparql, binding->data_type);
 					tracker_sparql_add_select_var (sparql, var->name, binding->data_type);
 				}
 
 				tracker_sparql_swap_builder (sparql, old);
-			} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS)) {
+			} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS) ||
+			           _check_in_rule (sparql, NAMED_RULE_Expression)) {
 				if (!first)
 					_append_string (sparql, ", ");
 
@@ -1738,22 +1769,15 @@ translate_SelectClause (TrackerSparql  *sparql,
 
 				select_context->type = sparql->current_state.expression_type;
 
-				_expect (sparql, RULE_TYPE_LITERAL, LITERAL_AS);
-				_call_rule (sparql, NAMED_RULE_Var, error);
-				var = _last_node_variable (sparql);
-
-				if (sparql->current_state.select_context == sparql->context) {
-					_append_string_printf (sparql, "AS \"%s\" ", var->name);
+				if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_AS)) {
+					if (!handle_as (sparql, sparql->current_state.expression_type, error))
+						return FALSE;
 				} else {
-					binding = tracker_variable_binding_new (var, NULL, NULL);
-					tracker_binding_set_data_type (binding, sparql->current_state.expression_type);
-					tracker_variable_set_sample_binding (var, TRACKER_VARIABLE_BINDING (binding));
-					_append_string_printf (sparql, "AS %s ",
-					                       tracker_variable_get_sql_expression (var));
+					tracker_sparql_add_select_var (sparql, "", sparql->current_state.expression_type);
 				}
 
 				tracker_sparql_swap_builder (sparql, old);
-				_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+				_accept (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 			} else {
 				break;
 			}
