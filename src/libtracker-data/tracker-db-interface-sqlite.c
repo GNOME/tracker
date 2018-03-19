@@ -509,11 +509,11 @@ function_sparql_regex (sqlite3_context *context,
                        sqlite3_value   *argv[])
 {
 	gboolean ret;
-	const gchar *text, *pattern, *flags;
+	const gchar *text, *pattern, *flags = "";
 	GRegexCompileFlags regex_flags;
 	GRegex *regex;
 
-	if (argc != 3) {
+	if (argc != 2 && argc != 3) {
 		sqlite3_result_error (context, "Invalid argument count", -1);
 		return;
 	}
@@ -521,7 +521,9 @@ function_sparql_regex (sqlite3_context *context,
 	regex = sqlite3_get_auxdata (context, 1);
 
 	text = (gchar *)sqlite3_value_text (argv[0]);
-	flags = (gchar *)sqlite3_value_text (argv[2]);
+
+	if (argc == 3)
+		flags = (gchar *)sqlite3_value_text (argv[2]);
 
 	if (regex == NULL) {
 		gchar *err_str;
@@ -1396,7 +1398,7 @@ initialize_functions (TrackerDBInterface *db_interface)
 		{ "SparqlEncodeForUri", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_encode_for_uri },
 		/* Strings */
-		{ "SparqlRegex", 3, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		{ "SparqlRegex", -1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_regex },
 		{ "SparqlStringJoin", -1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_string_join },
