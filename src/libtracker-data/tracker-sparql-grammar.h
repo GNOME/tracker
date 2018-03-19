@@ -1399,10 +1399,19 @@ static const TrackerGrammarRule helper_ConstructQuery_or[] = { S (helper_Constru
 static const TrackerGrammarRule rule_ConstructQuery[] = { L(CONSTRUCT), OR(helper_ConstructQuery_or), NIL };
 
 /* SelectClause ::= 'SELECT' ( 'DISTINCT' | 'REDUCED' )? ( ( Var | ( '(' Expression 'AS' Var ')' ) )+ | '*' )
+ *
+ * TRACKER EXTENSION:
+ * Variable set also accepts the following syntax:
+ *   Expression ('AS' Var)?
+ *   Var ('AS' Var)?
  */
-static const TrackerGrammarRule helper_SelectClause_seq[] = { L(OPEN_PARENS), R(Expression), L(AS), R(Var), L(CLOSE_PARENS), NIL };
+static const TrackerGrammarRule ext_SelectClause_seq_1[] = { L(AS), R(Var), NIL };
+static const TrackerGrammarRule ext_SelectClause_opt[] = { S(ext_SelectClause_seq_1), NIL };
+static const TrackerGrammarRule ext_SelectClause_seq_2[] = { R(Var), OPT(ext_SelectClause_opt), NIL };
+static const TrackerGrammarRule ext_SelectClause_seq_3[] = { R(Expression), OPT(ext_SelectClause_opt), NIL };
+static const TrackerGrammarRule helper_SelectClause_seq_1[] = { L(OPEN_PARENS), R(Expression), L(AS), R(Var), L(CLOSE_PARENS), NIL };
 static const TrackerGrammarRule helper_SelectClause_or_1[] = { L(DISTINCT), L(REDUCED), NIL };
-static const TrackerGrammarRule helper_SelectClause_or_2[] = { R(Var), S(helper_SelectClause_seq), NIL };
+static const TrackerGrammarRule helper_SelectClause_or_2[] = { S(ext_SelectClause_seq_2), S(ext_SelectClause_seq_3), R(Var), S(helper_SelectClause_seq_1), NIL };
 static const TrackerGrammarRule helper_SelectClause_gt0[] = { OR(helper_SelectClause_or_2), NIL };
 static const TrackerGrammarRule helper_SelectClause_opt[] = { OR(helper_SelectClause_or_1), NIL };
 static const TrackerGrammarRule helper_SelectClause_or_3[] = { L(GLOB), GT0(helper_SelectClause_gt0), NIL };
