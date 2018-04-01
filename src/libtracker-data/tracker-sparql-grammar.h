@@ -765,8 +765,13 @@ static const TrackerGrammarRule helper_BuiltInCall_or_2[] = { S(helper_BuiltInCa
 static const TrackerGrammarRule rule_BuiltInCall[] = { OR(helper_BuiltInCall_or_2), NIL };
 
 /* BrackettedExpression ::= '(' Expression ')'
+ *
+ * TRACKER EXTENSION:
+ * SubSelect is accepted too, thus the grammar results in:
+ * '(' ( Expression | SubSelect) ')'
  */
-static const TrackerGrammarRule rule_BrackettedExpression[] = { L(OPEN_PARENS), R(Expression), L(CLOSE_PARENS), NIL };
+static const TrackerGrammarRule ext_BrackettedExpression_or[] = { R(Expression), R(SubSelect), NIL };
+static const TrackerGrammarRule rule_BrackettedExpression[] = { L(OPEN_PARENS), OR(ext_BrackettedExpression_or), L(CLOSE_PARENS), NIL };
 
 /* iriOrFunction ::= iri ArgList?
  */

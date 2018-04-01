@@ -4715,11 +4715,29 @@ static gboolean
 translate_BrackettedExpression (TrackerSparql  *sparql,
                                 GError        **error)
 {
+	TrackerGrammarNamedRule rule;
+
 	/* BrackettedExpression ::= '(' Expression ')'
+	 *
+	 * TRACKER EXTENSION:
+	 * SubSelect is accepted too, thus the grammar results in:
+	 * '(' ( Expression | SubSelect) ')'
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
-	_call_rule (sparql, NAMED_RULE_Expression, error);
+	_append_string (sparql, "(");
+	rule = _current_rule (sparql);
+
+	switch (rule) {
+	case NAMED_RULE_Expression:
+	case NAMED_RULE_SubSelect:
+		_call_rule (sparql, rule, error);
+		break;
+	default:
+		g_assert_not_reached ();
+	}
+
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+	_append_string (sparql, ") ");
 
 	return TRUE;
 }
