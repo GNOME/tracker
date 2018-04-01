@@ -5050,16 +5050,9 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 		_append_string (sparql, "ELSE NULL END ");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_BOUND)) {
-		TrackerVariable *var;
-
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "(");
-		_call_rule (sparql, NAMED_RULE_Var, error);
-
-		var = _last_node_variable (sparql);
-		_append_string_printf (sparql, "%s ",
-		                       tracker_variable_get_sql_expression (var));
-
+		_call_rule (sparql, NAMED_RULE_Expression, error);
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 		_append_string (sparql, "IS NOT NULL) ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
