@@ -685,6 +685,10 @@ static const TrackerGrammarRule rule_RegexExpression[] = { L(REGEX), L(OPEN_PARE
  *                 | RegexExpression
  *                 | ExistsFunc
  *                 | NotExistsFunc
+ *
+ * TRACKER EXTENSION:
+ * BOUND accepts the more generic Expression rule, resulting in:
+ *    'BOUND' '(' Expression ')'
  */
 static const TrackerGrammarRule helper_BuiltInCall_seq_1[] = { L(OPEN_PARENS), R(Expression), L(CLOSE_PARENS), NIL };
 static const TrackerGrammarRule helper_BuiltInCall_or_1[] = { T(NIL), S(helper_BuiltInCall_seq_1), NIL };
@@ -692,7 +696,7 @@ static const TrackerGrammarRule helper_BuiltInCall_seq_2[] = { L(STR), S(helper_
 static const TrackerGrammarRule helper_BuiltInCall_seq_3[] = { L(LANG), S(helper_BuiltInCall_seq_1), NIL };
 static const TrackerGrammarRule helper_BuiltInCall_seq_4[] = { L(LANGMATCHES), L(OPEN_PARENS), R(Expression), L(COMMA), R(Expression), L(CLOSE_PARENS), NIL };
 static const TrackerGrammarRule helper_BuiltInCall_seq_5[] = { L(DATATYPE), S(helper_BuiltInCall_seq_1), NIL };
-static const TrackerGrammarRule helper_BuiltInCall_seq_6[] = { L(BOUND), L(OPEN_PARENS), R(Var), L(CLOSE_PARENS), NIL };
+static const TrackerGrammarRule helper_BuiltInCall_seq_6[] = { L(BOUND), L(OPEN_PARENS), R(Expression), L(CLOSE_PARENS), NIL };
 static const TrackerGrammarRule helper_BuiltInCall_seq_7[] = { L(IRI), S(helper_BuiltInCall_seq_1), NIL };
 static const TrackerGrammarRule helper_BuiltInCall_seq_8[] = { L(URI), S(helper_BuiltInCall_seq_1), NIL };
 static const TrackerGrammarRule helper_BuiltInCall_seq_9[] = { L(BNODE), OR(helper_BuiltInCall_or_1), NIL };
