@@ -1325,6 +1325,10 @@ function_sparql_checksum (sqlite3_context *context,
 		checksum = G_CHECKSUM_SHA1;
 	else if (g_ascii_strcasecmp (checksumstr, "sha256") == 0)
 		checksum = G_CHECKSUM_SHA256;
+#if GLIB_CHECK_VERSION (2, 51, 0)
+	else if (g_ascii_strcasecmp (checksumstr, "sha384") == 0)
+		checksum = G_CHECKSUM_SHA384;
+#endif
 	else if (g_ascii_strcasecmp (checksumstr, "sha512") == 0)
 		checksum = G_CHECKSUM_SHA512;
 	else {

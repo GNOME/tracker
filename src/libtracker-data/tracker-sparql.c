@@ -4921,7 +4921,12 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_append_string (sparql, ", \"sha256\") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SHA384)) {
-		_unimplemented ("SHA384");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		_append_string (sparql, "SparqlChecksum (");
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+		_append_string (sparql, ", \"sha384\") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SHA512)) {
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "SparqlChecksum (");
