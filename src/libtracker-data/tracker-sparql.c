@@ -3073,7 +3073,12 @@ translate_MinusGraphPattern (TrackerSparql  *sparql,
 {
 	/* MinusGraphPattern ::= 'MINUS' GroupGraphPattern
 	 */
-	_unimplemented ("MINUS");
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_MINUS);
+	_prepend_string (sparql, "SELECT * FROM (");
+	_append_string (sparql, ") EXCEPT ");
+	_call_rule (sparql, NAMED_RULE_GroupGraphPattern, error);
+
+	return TRUE;
 }
 
 static void
