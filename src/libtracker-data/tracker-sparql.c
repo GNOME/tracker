@@ -103,6 +103,7 @@ struct _TrackerSparql
 		TrackerStringBuilder *sql;
 		TrackerParserNode *node;
 		TrackerParserNode *prev_node;
+		TrackerParserNode *object_list;
 
 		TrackerToken graph;
 		TrackerToken subject;
@@ -3517,6 +3518,7 @@ translate_PropertyListPathNotEmpty (TrackerSparql  *sparql,
 {
 	TrackerGrammarNamedRule rule;
 	TrackerToken old_predicate;
+	TrackerParserNode *verb;
 
 	/* PropertyListPathNotEmpty ::= ( VerbPath | VerbSimple ) ObjectListPath ( ';' ( ( VerbPath | VerbSimple ) ObjectList )? )*
 	 */
@@ -3524,12 +3526,14 @@ translate_PropertyListPathNotEmpty (TrackerSparql  *sparql,
 	old_predicate = sparql->current_state.predicate;
 
 	if (rule == NAMED_RULE_VerbPath || rule == NAMED_RULE_VerbSimple) {
-		_call_rule (sparql, rule, error);
+		verb = _skip_rule (sparql, rule);
 	} else {
 		g_assert_not_reached ();
 	}
 
-	_call_rule (sparql, NAMED_RULE_ObjectListPath, error);
+	sparql->current_state.object_list = _skip_rule (sparql, NAMED_RULE_ObjectListPath);
+	if (!_postprocess_rule (sparql, verb, NULL, error))
+		return FALSE;
 
 	tracker_token_unset (&sparql->current_state.predicate);
 
@@ -3537,12 +3541,15 @@ translate_PropertyListPathNotEmpty (TrackerSparql  *sparql,
 		rule = _current_rule (sparql);
 
 		if (rule == NAMED_RULE_VerbPath || rule == NAMED_RULE_VerbSimple) {
-			_call_rule (sparql, rule, error);
+			verb = _skip_rule (sparql, rule);
 		} else {
 			break;
 		}
 
-		_call_rule (sparql, NAMED_RULE_ObjectList, error);
+		sparql->current_state.object_list = _skip_rule (sparql, NAMED_RULE_ObjectList);
+		if (!_postprocess_rule (sparql, verb, NULL, error))
+			return FALSE;
+
 		tracker_token_unset (&sparql->current_state.predicate);
 	}
 
@@ -3571,6 +3578,10 @@ translate_VerbSimple (TrackerSparql  *sparql,
 	_call_rule (sparql, NAMED_RULE_Var, error);
 	_init_token (&sparql->current_state.predicate,
 	             sparql->current_state.prev_node, sparql);
+
+	if (!_postprocess_rule (sparql, sparql->current_state.object_list,
+				NULL, error))
+		return FALSE;
 
 	return TRUE;
 }
@@ -3669,6 +3680,10 @@ translate_PathElt (TrackerSparql  *sparql,
 	if (_check_in_rule (sparql, NAMED_RULE_PathMod)) {
 		_call_rule (sparql, NAMED_RULE_PathMod, error);
 	}
+
+	if (!_postprocess_rule (sparql, sparql->current_state.object_list,
+				NULL, error))
+		return FALSE;
 
 	return TRUE;
 }
