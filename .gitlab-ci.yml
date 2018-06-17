@@ -10,6 +10,6 @@ test-autotools-fedora28:
     - dnf builddep -y tracker
 
   script:
-    - ./autogen.sh
+    - ./autogen.sh --disable-functional-tests
     - make
     - make check
