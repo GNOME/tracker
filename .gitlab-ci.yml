@@ -1,9 +1,13 @@
 stages:
   - test
 
-test-autotools:
+test-autotools-fedora28:
   stage: test
-  image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.28
+  image: fedora:28
+
+  before_script:
+    - dnf install -y 'dnf-command(builddep)' redhat-rpm-config libseccomp-devel         - dnf builddep -y nautilus
+    - dnf builddep -y tracker
 
   script:
     - ./autogen.sh
