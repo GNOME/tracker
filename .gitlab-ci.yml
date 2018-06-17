@@ -1,0 +1,11 @@
+stages:
+  - test
+
+test-autotools:
+  stage: test
+  image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.28
+
+  script:
+    - ./configure
+    - make
+    - make check
