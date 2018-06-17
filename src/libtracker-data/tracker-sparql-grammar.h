@@ -486,6 +486,7 @@ typedef enum {
 	TERMINAL_TYPE_STRING_LITERAL_LONG2,
 	TERMINAL_TYPE_NIL,
 	TERMINAL_TYPE_ANON,
+	TERMINAL_TYPE_PARAMETERIZED_VAR,
 	N_TERMINAL_TYPES
 } TrackerGrammarTerminalType;
 
@@ -548,28 +549,43 @@ static const TrackerGrammarRule helper_iri_or[] = { T(IRIREF), R(PrefixedName), 
 static const TrackerGrammarRule rule_iri[] = { OR(helper_iri_or), NIL };
 
 /* String ::= STRING_LITERAL1 | STRING_LITERAL2 | STRING_LITERAL_LONG1 | STRING_LITERAL_LONG2
+ *
+ * TRACKER EXTENSION:
+ * The terminal PARAMETERIZED_VAR is additionally accepted
  */
-static const TrackerGrammarRule helper_String_or[] = { T(STRING_LITERAL1), T(STRING_LITERAL2), T(STRING_LITERAL_LONG1), T(STRING_LITERAL_LONG2), NIL };
+static const TrackerGrammarRule helper_String_or[] = { T(STRING_LITERAL1), T(STRING_LITERAL2), T(STRING_LITERAL_LONG1), T(STRING_LITERAL_LONG2), T(PARAMETERIZED_VAR), NIL };
 static const TrackerGrammarRule rule_String[] = { OR(helper_String_or), NIL };
 
 /* BooleanLiteral ::= 'true' | 'false'
+ *
+ * TRACKER EXTENSION:
+ * The terminal PARAMETERIZED_VAR is additionally accepted
  */
-static const TrackerGrammarRule helper_BooleanLiteral_or[] = { L(TRUE), L(FALSE), NIL };
+static const TrackerGrammarRule helper_BooleanLiteral_or[] = { L(TRUE), L(FALSE), T(PARAMETERIZED_VAR), NIL };
 static const TrackerGrammarRule rule_BooleanLiteral[] = { OR(helper_BooleanLiteral_or), NIL };
 
 /* NumericLiteralNegative ::= INTEGER_NEGATIVE | DECIMAL_NEGATIVE | DOUBLE_NEGATIVE
+ *
+ * TRACKER EXTENSION:
+ * The terminal PARAMETERIZED_VAR is additionally accepted
  */
-static const TrackerGrammarRule helper_NumericLiteralNegative_or[] = { T(DECIMAL_NEGATIVE), T(DOUBLE_NEGATIVE), T(INTEGER_NEGATIVE), NIL };
+static const TrackerGrammarRule helper_NumericLiteralNegative_or[] = { T(DECIMAL_NEGATIVE), T(DOUBLE_NEGATIVE), T(INTEGER_NEGATIVE), T(PARAMETERIZED_VAR), NIL };
 static const TrackerGrammarRule rule_NumericLiteralNegative[] = { OR(helper_NumericLiteralNegative_or), NIL };
 
 /* NumericLiteralPositive ::= INTEGER_POSITIVE | DECIMAL_POSITIVE | DOUBLE_POSITIVE
+ *
+ * TRACKER EXTENSION:
+ * The terminal PARAMETERIZED_VAR is additionally accepted
  */
-static const TrackerGrammarRule helper_NumericLiteralPositive_or[] = { T(DECIMAL_POSITIVE), T(DOUBLE_POSITIVE), T(INTEGER_POSITIVE), NIL };
+static const TrackerGrammarRule helper_NumericLiteralPositive_or[] = { T(DECIMAL_POSITIVE), T(DOUBLE_POSITIVE), T(INTEGER_POSITIVE), T(PARAMETERIZED_VAR), NIL };
 static const TrackerGrammarRule rule_NumericLiteralPositive[] = { OR(helper_NumericLiteralPositive_or), NIL };
 
 /* NumericLiteralUnsigned ::= INTEGER | DECIMAL | DOUBLE
+ *
+ * TRACKER EXTENSION:
+ * The terminal PARAMETERIZED_VAR is additionally accepted
  */
-static const TrackerGrammarRule helper_NumericLiteralUnsigned_or[] = { T(DECIMAL), T(DOUBLE), T(INTEGER), NIL };
+static const TrackerGrammarRule helper_NumericLiteralUnsigned_or[] = { T(DECIMAL), T(DOUBLE), T(INTEGER), T(PARAMETERIZED_VAR), NIL };
 static const TrackerGrammarRule rule_NumericLiteralUnsigned[] = { OR(helper_NumericLiteralUnsigned_or), NIL };
 
 /* NumericLiteral ::= NumericLiteralUnsigned | NumericLiteralPositive | NumericLiteralNegative
@@ -1821,6 +1837,17 @@ terminal_VAR2 (const gchar  *str,
 	return terminal_VARNAME (str, end, str_out);
 }
 
+/* PARAMETERIZED_VAR ::= '~' VARNAME
+ */
+static inline gboolean
+terminal_PARAMETERIZED_VAR (const gchar  *str,
+			    const gchar  *end,
+			    const gchar **str_out)
+{
+	ACCEPT_CHAR((ch == '~'));
+	return terminal_VARNAME (str, end, str_out);
+}
+
 /* LANGTAG ::= '@' [a-zA-Z]+ ('-' [a-zA-Z0-9]+)*
  */
 static inline gboolean
@@ -2272,6 +2299,7 @@ static const TrackerTerminalFunc terminal_funcs[N_TERMINAL_TYPES] = {
 	terminal_STRING_LITERAL_LONG2,
 	terminal_NIL,
 	terminal_ANON,
+	terminal_PARAMETERIZED_VAR,
 };
 
 static inline const TrackerGrammarRule *
