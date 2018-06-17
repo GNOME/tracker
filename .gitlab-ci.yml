@@ -1,9 +1,25 @@
 stages:
   - test
 
-test-autotools-fedora28:
+# Using Fedora 27 as F28 has some weird compiler bug:
+#
+#   GISCAN   Tracker_C-2.0.gir
+#   annobin: Tracker_2.0.c: Error: plugin built for compiler version (8.0.1) but run with compiler version (8.1.1)
+#   cc1: error: fail to initialize plugin /usr/lib/gcc/x86_64-redhat-linux/8/plugin/annobin.so
+#   Traceback (most recent call last):
+#     File "/usr/lib64/python3.6/distutils/unixccompiler.py", line 127, in _compile
+#       extra_postargs)
+#     File "/usr/lib64/python3.6/distutils/ccompiler.py", line 909, in spawn
+#       spawn(cmd, dry_run=self.dry_run)
+#     File "/usr/lib64/python3.6/distutils/spawn.py", line 36, in spawn
+#       _spawn_posix(cmd, search_path, dry_run=dry_run)
+#     File "/usr/lib64/python3.6/distutils/spawn.py", line 159, in _spawn_posix
+#       % (cmd, exit_status))
+#   distutils.errors.DistutilsExecError: command 'gcc' failed with exit status 1
+#
+test-autotools-fedora27:
   stage: test
-  image: fedora:28
+  image: fedora:27
 
   before_script:
     - dnf install -y 'dnf-command(builddep)' redhat-rpm-config libseccomp-devel make
