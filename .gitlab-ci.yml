@@ -6,7 +6,7 @@ test-autotools-fedora28:
   image: fedora:28
 
   before_script:
-    - dnf install -y 'dnf-command(builddep)' redhat-rpm-config libseccomp-devel
+    - dnf install -y 'dnf-command(builddep)' redhat-rpm-config libseccomp-devel make
     - dnf builddep -y tracker
 
   script:
