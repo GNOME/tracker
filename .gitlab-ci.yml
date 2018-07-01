@@ -25,7 +25,13 @@ test-autotools-fedora27:
     - dnf install -y 'dnf-command(builddep)' redhat-rpm-config libseccomp-devel make
     - dnf builddep -y tracker
 
+    # tests/libtracker-common/tracker-file-utils-test will fail if run as root,
+    # as it makes assertions about a path being unwritable. Better to test as a
+    # normal user in any case.
+    - useradd -Um tracker
+    - chown -R tracker:tracker .
+
   script:
-    - ./autogen.sh --disable-functional-tests
-    - make
-    - make check
+    - su tracker -c './autogen.sh --disable-functional-tests'
+    - su tracker -c 'make'
+    - su tracker -c 'make check'
