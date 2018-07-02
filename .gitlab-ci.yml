@@ -42,7 +42,7 @@ test-autotools-fedora27:
     - chown -R tracker:tracker .
 
   script:
-    - su tracker -c './autogen.sh --disable-functional-tests --prefix=/usr'
+    - su tracker -c './autogen.sh --prefix=/usr'
     - su tracker -c 'make -j'
     - LANG=en_US.UTF8 su tracker -c 'dbus-launch make check'
 
@@ -72,6 +72,6 @@ test-meson-fedora27:
 
   script:
     - su tracker -c 'mkdir build'
-    - su tracker -c 'cd build; meson .. -Dfunctional_tests=false'
+    - su tracker -c 'cd build; meson ..'
     - su tracker -c 'cd build; ninja'
     - su tracker -c 'cd build; LANG=en_US.UTF8 dbus-launch meson test --print-errorlogs'
