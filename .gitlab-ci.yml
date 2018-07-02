@@ -6,9 +6,10 @@ test-autotools-fedora-latest:
   image: registry.gitlab.gnome.org/sthursfield/tracker-oci-images/amd64/fedora:latest
 
   script:
-    - su tracker -c './autogen.sh --disable-functional-tests --prefix=/usr'
+    - su tracker -c './autogen.sh --prefix=/usr'
     - su tracker -c 'make -j'
     - LANG=en_US.UTF8 VERBOSE=1 su tracker -c 'dbus-launch make check'
+    - su tracker -c 'make functional-test'
 
 test-meson-fedora28:
   stage: test
@@ -16,7 +17,7 @@ test-meson-fedora28:
 
   script:
     - su tracker -c 'mkdir build'
-    - su tracker -c 'cd build; meson .. -Dfunctional_tests=false'
+    - su tracker -c 'cd build; meson ..'
     - su tracker -c 'cd build; ninja'
     - |
       # Remove the many "CI_" variables from the environment. Meson dumps the
