@@ -24,7 +24,7 @@ test-autotools-fedora27:
   before_script:
     # This takes a long time, we could prebuild a Docker image that already
     # contains this stuff instead, and use that.
-    - dnf install -y 'dnf-command(builddep)' dbus-devel dbus-x11 libseccomp-devel make redhat-rpm-config
+    - dnf install -y 'dnf-command(builddep)' dbus-devel dbus-x11 libseccomp-devel make python3-gobject redhat-rpm-config
     - dnf builddep -y tracker
 
     # This shouldn't be needed, but currently is.
@@ -42,9 +42,10 @@ test-autotools-fedora27:
     - chown -R tracker:tracker .
 
   script:
-    - su tracker -c './autogen.sh --disable-functional-tests --prefix=/usr'
+    - su tracker -c './autogen.sh --prefix=/usr'
     - su tracker -c 'make -j'
     - LANG=en_US.UTF8 su tracker -c 'dbus-launch make check'
+    - su tracker -c 'make functional-test'
 
 test-meson-fedora27:
   stage: test
@@ -53,7 +54,7 @@ test-meson-fedora27:
   before_script:
     # This takes a long time, we could prebuild a Docker image that already
     # contains this stuff instead, and use that.
-    - dnf install -y 'dnf-command(builddep)' dbus-devel dbus-x11 libseccomp-devel meson redhat-rpm-config
+    - dnf install -y 'dnf-command(builddep)' dbus-devel dbus-x11 libseccomp-devel meson python3-gobject redhat-rpm-config
     - dnf builddep -y tracker
 
     # This shouldn't be needed, but currently is.
@@ -72,6 +73,6 @@ test-meson-fedora27:
 
   script:
     - su tracker -c 'mkdir build'
-    - su tracker -c 'cd build; meson .. -Dfunctional_tests=false'
+    - su tracker -c 'cd build; meson ..'
     - su tracker -c 'cd build; ninja'
     - su tracker -c 'cd build; LANG=en_US.UTF8 dbus-launch meson test --print-errorlogs'
