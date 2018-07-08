@@ -169,6 +169,7 @@ main (gint argc, gchar **argv)
 
 	generate_ontology_class_docs (ontology, output_file);
 
+	ttl_loader_free_ontology(ontology);
 	g_option_context_free (context);
 
 	return 0;
