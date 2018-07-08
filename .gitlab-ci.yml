@@ -5,6 +5,10 @@ test-fedora-latest:
   stage: test
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
 
+  before_script:
+    # FIXME: add these to the Docker images (https://gitlab.gnome.org/sthursfield/tracker-oci-images/)
+    - dnf install -y libasan libubsan
+
   script:
     - su tracker -c 'mkdir build'
     - su tracker -c 'cd build; meson ..'
