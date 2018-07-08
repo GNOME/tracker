@@ -55,6 +55,7 @@ test-meson-fedora27:
     # contains this stuff instead, and use that.
     - dnf install -y 'dnf-command(builddep)' dbus-devel dbus-x11 libseccomp-devel meson redhat-rpm-config
     - dnf builddep -y tracker
+    - dnf install -y libasan libubsan
 
     # This shouldn't be needed, but currently is.
     #
@@ -72,6 +73,6 @@ test-meson-fedora27:
 
   script:
     - su tracker -c 'mkdir build'
-    - su tracker -c 'cd build; meson .. -Dfunctional_tests=false'
+    - su tracker -c 'cd build; meson .. -Dfunctional_tests=false -Db_sanitize=address,undefined'
     - su tracker -c 'cd build; ninja'
     - su tracker -c 'cd build; LANG=en_US.UTF8 dbus-launch meson test --print-errorlogs'
