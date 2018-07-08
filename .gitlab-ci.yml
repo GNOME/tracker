@@ -24,7 +24,7 @@ test-autotools-fedora27:
   before_script:
     # This takes a long time, we could prebuild a Docker image that already
     # contains this stuff instead, and use that.
-    - dnf install -y 'dnf-command(builddep)' dbus-devel dbus-x11 libseccomp-devel make python3-gobject redhat-rpm-config
+    - dnf install -y 'dnf-command(builddep)' dbus-devel dbus-x11 libseccomp-devel make python2-gobject redhat-rpm-config
     - dnf builddep -y tracker
 
     # This shouldn't be needed, but currently is.
@@ -54,7 +54,7 @@ test-meson-fedora27:
   before_script:
     # This takes a long time, we could prebuild a Docker image that already
     # contains this stuff instead, and use that.
-    - dnf install -y 'dnf-command(builddep)' dbus-devel dbus-x11 libseccomp-devel meson python3-gobject redhat-rpm-config
+    - dnf install -y 'dnf-command(builddep)' dbus-devel dbus-x11 libseccomp-devel meson python2-gobject redhat-rpm-config
     - dnf builddep -y tracker
 
     # This shouldn't be needed, but currently is.
