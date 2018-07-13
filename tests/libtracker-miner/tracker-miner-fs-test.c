@@ -1945,6 +1945,7 @@ main (gint    argc,
 
 	g_test_message ("Testing filesystem miner");
 
+#if 0
 	ADD_TEST ("/indexing-tree/recursive-indexing",
 	          test_recursive_indexing);
 	ADD_TEST ("/indexing-tree/non-recursive-indexing",
@@ -1996,6 +1997,7 @@ main (gint    argc,
 	          test_monitored_update);
 	ADD_TEST ("/monitored/delete",
 	          test_monitored_delete);
+#endif
 	ADD_TEST ("/monitored/move",
 	          test_monitored_move);
 	ADD_TEST ("/monitored/atomic-replace",
