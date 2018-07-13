@@ -28,7 +28,7 @@
 
 /* -------------- COMMON FOR ALL FILE EVENT TESTS ----------------- */
 
-#define TEST_TIMEOUT 5 /* seconds */
+#define TEST_TIMEOUT 10 /* seconds */
 
 typedef enum {
 	MONITOR_SIGNAL_NONE                   = 0,
