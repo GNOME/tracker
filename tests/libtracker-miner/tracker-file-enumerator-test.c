@@ -28,15 +28,12 @@
 static void
 test_enumerator_and_provider (void)
 {
-	GFileEnumerator *fe;
 	TrackerDataProvider *data_provider;
 	GFileEnumerator *enumerator;
 	GFileInfo *info;
 	GFile *url;
-	GSList *files, *l;
 	GError *error = NULL;
 	gint count = 0;
-	const gchar *path;
 
 	data_provider = tracker_file_data_provider_new ();
 	g_assert_nonnull (data_provider);
