@@ -1,56 +1,28 @@
-test_c_args = tracker_c_args + [
-    '-DTOP_BUILDDIR="@0@"'.format(build_root),
-    '-DTOP_SRCDIR="@0@"'.format(source_root),
+libtracker_common_tests = [
+    'date-time',
+    'dbus',
+    'file-utils',
+    'parser',
+    'sched',
+    'type-utils',
+    'utils',
 ]
 
-date_time_test = executable('tracker-date-time-test',
-    'tracker-date-time-test.c',
-    dependencies: tracker_common_dep,
-    c_args: test_c_args,
-)
-test('common-date-time', date_time_test)
+libtracker_common_test_deps = [
+    tracker_common_dep, tracker_testcommon_dep
+]
 
-dbus_test = executable('tracker-dbus-test',
-    'tracker-dbus-test.c',
-    dependencies: [tracker_common_dep, tracker_testcommon_dep],
-    c_args: test_c_args,
-)
-test('common-dbus', dbus_test)
+foreach base_name: libtracker_common_tests
+    source = 'tracker-@0@-test.c'.format(base_name)
+    binary_name = 'tracker-@0@-test'.format(base_name)
+    test_name = 'common-@0@'.format(base_name)
 
-file_utils_test = executable('tracker-file-utils-test',
-    'tracker-file-utils-test.c',
-    dependencies: [tracker_common_dep, tracker_testcommon_dep],
-    c_args: test_c_args,
-)
-test('common-file-utils', file_utils_test)
+    binary = executable(binary_name, source,
+      dependencies: libtracker_common_test_deps,
+      c_args: test_c_args)
 
-parser_test = executable('tracker-parser-test',
-    'tracker-parser-test.c',
-    dependencies: [tracker_common_dep, tracker_testcommon_dep],
-    c_args: test_c_args,
-)
-test('common-parser', parser_test)
-
-sched_test = executable('tracker-sched-test',
-    'tracker-sched-test.c',
-    dependencies: [tracker_common_dep, tracker_testcommon_dep],
-    c_args: test_c_args,
-)
-test('common-sched', sched_test)
-
-type_utils_test = executable('tracker-type-utils-test',
-    'tracker-type-utils-test.c',
-    dependencies: tracker_common_dep,
-    c_args: test_c_args,
-)
-test('common-type-utils', type_utils_test)
-
-utils_test = executable('tracker-utils-test',
-    'tracker-utils-test.c',
-    dependencies: tracker_common_dep,
-    c_args: test_c_args,
-)
-test('common-utils', utils_test)
+    test(test_name, binary)
+endforeach
 
 # This is a manual test case
 parser_testcase = executable('tracker-parser',

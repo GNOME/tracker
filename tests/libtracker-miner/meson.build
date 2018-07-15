@@ -1,4 +1,20 @@
-test_c_args = [
+libtracker_miner_tests = [
+    'crawler',
+    'file-enumerator',
+    'file-notifier',
+    'file-system',
+    'indexing-tree',
+    'priority-queue',
+    'task-pool',
+    'thumbnailer',
+]
+
+libtracker_miner_slow_tests = [
+    'miner-fs',
+    'monitor',
+]
+
+libtracker_miner_test_c_args = [
   '-DLIBEXEC_PATH="@0@/@1@"'.format(get_option('prefix'), get_option('libexecdir')),
   '-DTEST',
   '-DTEST_DATA_DIR="@0@/data"'.format(meson.current_source_dir()),
@@ -6,84 +22,34 @@ test_c_args = [
   '-DTEST_ONTOLOGIES_DIR="@0@/src/ontologies/nepomuk"'.format(meson.source_root()),
 ]
 
-environment = environment()
-environment.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', '@0@/src/libtracker-common/stop-words'.format(meson.source_root()))
+libtracker_miner_test_environment = environment()
+libtracker_miner_test_environment.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', '@0@/src/libtracker-common/stop-words'.format(meson.source_root()))
 
-crawler_test = executable('tracker-crawler-test',
-  'tracker-crawler-test.c',
-  shared_libtracker_miner_crawler_sources,
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
-test('miner-crawler', crawler_test)
+libtracker_miner_test_deps = [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep]
 
-file_enumerator_test = executable('tracker-file-enumerator-test',
-  'tracker-file-enumerator-test.c',
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
-test('miner-file-enumerator', file_enumerator_test,
-     env: environment)
+foreach base_name: libtracker_miner_tests
+    source = 'tracker-@0@-test.c'.format(base_name)
+    binary_name = 'tracker-@0@-test'.format(base_name)
+    test_name = 'miner-@0@'.format(base_name)
 
-file_notifier_test = executable('tracker-file-notifier-test',
-  'tracker-file-notifier-test.c',
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
-test('miner-file-notifier', file_notifier_test,
-     env: environment)
+    binary = executable(binary_name, source,
+      dependencies: libtracker_miner_test_deps,
+      c_args: libtracker_miner_test_c_args)
 
-file_system_test = executable('tracker-file-system-test',
-  'tracker-file-system-test.c',
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
-test('miner-file-system', file_system_test)
+    test(test_name, binary,
+      env: libtracker_miner_test_environment)
+endforeach
 
-indexing_tree_test = executable('tracker-indexing-tree-test',
-  'tracker-indexing-tree-test.c',
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
-test('miner-indexing-tree', indexing_tree_test)
+foreach base_name: libtracker_miner_slow_tests
+    source = 'tracker-@0@-test.c'.format(base_name)
+    binary_name = 'tracker-@0@-test'.format(base_name)
+    test_name = 'miner-@0@'.format(base_name)
 
-miner_fs_test = executable('tracker-miner-fs-test',
-  'tracker-miner-fs-test.c',
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
-test('miner-fs', miner_fs_test,
-  timeout: 180)
+    binary = executable(binary_name, source,
+      dependencies: libtracker_miner_test_deps,
+      c_args: libtracker_miner_test_c_args)
 
-monitor_test = executable('tracker-monitor-test',
-  'tracker-monitor-test.c',
-  shared_libtracker_miner_monitor_sources,
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
-test('miner-monitor', monitor_test,
-  # FIXME: why is this test so slow?
-  timeout: 180)
-
-priority_queue_test = executable('tracker-priority-queue-test',
-  'tracker-priority-queue-test.c',
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
-test('miner-priority-queue', priority_queue_test)
-
-task_pool_test = executable('tracker-task-pool-test',
-  'tracker-task-pool-test.c',
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
-test('miner-task-pool', task_pool_test)
-
-thumbnailer_test = executable('tracker-thumbnailer-test',
-  'empty-gobject.c',
-  'thumbnailer-mock.c',
-  'tracker-thumbnailer-test.c',
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
-test('miner-thumbnailer', thumbnailer_test)
+    test(test_name, binary,
+      env: libtracker_miner_test_environment,
+      timeout: 180)
+endforeach

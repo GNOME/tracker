@@ -1,50 +1,44 @@
-test_c_args = tracker_c_args + [
-    '-DTOP_BUILDDIR="@0@"'.format(build_root),
-    '-DTOP_SRCDIR="@0@"'.format(source_root),
+libtracker_data_tests = [
+    'backup',
+    'crc32',
+    'db-journal',
+    'ontology-change',
+    'sparql-blank',
 ]
 
-backup_test = executable('tracker-backup-test',
-    'tracker-backup-test.c',
-    dependencies: [tracker_common_dep, tracker_data_dep],
-    c_args: test_c_args)
-test('data-backup', backup_test)
+libtracker_data_slow_tests = [
+    'ontology',
+    'sparql'
+]
 
-crc32_test = executable('tracker-crc32-test',
-    'tracker-crc32-test.c',
-    dependencies: [tracker_common_dep, tracker_data_dep],
-    c_args: test_c_args)
-test('data-crc32', crc32_test)
+libtracker_data_test_environment = environment()
+libtracker_data_test_environment.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', '@0@/src/libtracker-common/stop-words'.format(meson.source_root()))
 
-db_journal_test = executable('tracker-db-journal-test',
-    'tracker-db-journal-test.c',
-    dependencies: [tracker_common_dep, tracker_data_dep],
-    c_args: test_c_args)
-test('data-db-journal', db_journal_test)
+libtracker_data_test_deps = [tracker_common_dep, tracker_data_dep]
 
-ontology_test = executable('tracker-ontology-test',
-    'tracker-ontology-test.c',
-    dependencies: [tracker_common_dep, tracker_data_dep],
-    c_args: test_c_args)
-test('data-ontology', ontology_test,
-    # FIXME: why is this test so slow?
-    timeout: 180)
+foreach base_name: libtracker_data_tests
+    source = 'tracker-@0@-test.c'.format(base_name)
+    binary_name = 'tracker-@0@-test'.format(base_name)
+    test_name = 'data-@0@'.format(base_name)
 
-ontology_change_test = executable('tracker-ontology-change-test',
-    'tracker-ontology-change-test.c',
-    dependencies: [tracker_common_dep, tracker_data_dep],
-    c_args: test_c_args)
-test('data-ontology-change', ontology_change_test)
+    binary = executable(binary_name, source,
+      dependencies: libtracker_data_test_deps,
+      c_args: test_c_args)
 
-sparql_test = executable('tracker-data-sparql-test',
-    'tracker-sparql-test.c',
-    dependencies: [tracker_common_dep, tracker_data_dep],
-    c_args: test_c_args)
-test('data-sparql', sparql_test,
-    # FIXME: why is this test so slow?
-    timeout: 180)
+    test(test_name, binary,
+      env: libtracker_data_test_environment)
+endforeach
 
-sparql_blank_test = executable('tracker-sparql-blank-test',
-    'tracker-sparql-blank-test.c',
-    dependencies: [tracker_common_dep, tracker_data_dep],
-    c_args: test_c_args)
-test('data-sparql-blank', sparql_blank_test)
+foreach base_name: libtracker_data_slow_tests
+    source = 'tracker-@0@-test.c'.format(base_name)
+    binary_name = 'tracker-@0@-test'.format(base_name)
+    test_name = 'data-@0@'.format(base_name)
+
+    binary = executable(binary_name, source,
+      dependencies: libtracker_data_test_deps,
+      c_args: test_c_args)
+
+    test(test_name, binary,
+      timeout: 180,
+      env: libtracker_data_test_environment)
+endforeach

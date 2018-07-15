@@ -1,26 +1,27 @@
 libtracker_sparql_tests = [
+    'gb-737023',
+    'resource',
+    'sparql',
+]
 
-l
-test_c_args = [
+libtracker_sparql_test_c_args = tracker_c_args + [
   '-DTEST',
   '-DTEST_DOMAIN_ONTOLOGY_RULE="@0@/src/tracker-store/default.rule"'.format(source_root),
   '-DTEST_ONTOLOGIES_DIR="@0@/src/ontologies/nepomuk"'.format(source_root),
 ]
 
-resource_test = executable('tracker-resource-test',
-  'tracker-resource-test.c',
-  dependencies: [tracker_common_dep, tracker_sparql_dep],
-  c_args: tracker_c_args)
-test('sparql-resource', resource_test)
+libtracker_sparql_test_deps = [
+    tracker_common_dep, tracker_sparql_dep
+]
 
-sparql_test = executable('tracker-sparql-test',
-  'tracker-sparql-test.c',
-  dependencies: [tracker_common_dep, tracker_sparql_dep],
-  c_args: [tracker_c_args, test_c_args])
-test('sparql', sparql_test)
+foreach base_name: libtracker_sparql_tests
+    source = 'tracker-@0@-test.c'.format(base_name)
+    binary_name = 'tracker-@0@-test'.format(base_name)
+    test_name = 'sparql-@0@'.format(base_name)
 
-gb_737023_test = executable('tracker-gb-737023-test',
-  'tracker-gb-737023-test.c',
-  dependencies: [tracker_common_dep, tracker_sparql_dep],
-  c_args: [tracker_c_args, test_c_args])
-test('gb_737023', gb_737023_test)
+    binary = executable(binary_name, source,
+      dependencies: libtracker_sparql_test_deps,
+      c_args: libtracker_sparql_test_c_args)
+
+    test(test_name, binary)
+endforeach
