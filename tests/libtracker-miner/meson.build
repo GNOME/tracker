@@ -17,6 +17,14 @@ crawler_test = executable('tracker-crawler-test',
 )
 test('miner-crawler', crawler_test)
 
+file_enumerator_test = executable('tracker-file-enumerator-test',
+  'tracker-file-enumerator-test.c',
+  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
+  c_args: test_c_args
+)
+test('miner-file-enumerator', file_enumerator_test,
+     env: environment)
+
 file_notifier_test = executable('tracker-file-notifier-test',
   'tracker-file-notifier-test.c',
   dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
