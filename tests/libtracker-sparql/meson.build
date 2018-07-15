@@ -23,4 +23,4 @@ gb_737023_test = executable('tracker-gb-737023-test',
   'tracker-gb-737023-test.c',
   dependencies: [tracker_common_dep, tracker_sparql_dep],
   c_args: [tracker_c_args, test_c_args])
-test('gb_737023', sparql_test)
+test('gb_737023', gb_737023_test)
