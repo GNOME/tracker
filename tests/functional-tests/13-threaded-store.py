@@ -21,11 +21,10 @@
 Test that the threads in the daemon are working:
  A very long query shouldn't block smaller queries.
 """
-import os, dbus
+import os
 from gi.repository import GObject
 from gi.repository import GLib
 import time
-from dbus.mainloop.glib import DBusGMainLoop
 
 from common.utils import configuration as cfg
 import unittest2 as ut
