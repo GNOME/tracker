@@ -25,10 +25,12 @@ functional_tests = [
 
 subdir('ttl')
 functional_tests_with_test_data = [
-  '10-sqlite-misused',
-  '11-sqlite-batch-misused',
   '13-threaded-store',
 ]
+
+# These tests are disabled by default as they are really slow.
+# '10-sqlite-misused',
+# '11-sqlite-batch-misused',
 
 config_json_full_path = join_paths(meson.current_build_dir(), 'configuration.json')
 dconf_profile_full_path = join_paths(meson.current_source_dir(), 'trackertest')
@@ -50,8 +52,7 @@ foreach t: functional_tests + functional_tests_with_test_data
     args: './' + t + '.py',
     env: test_env,
     workdir: meson.current_source_dir(),
-    # FIXME: these tests are all too slow
-    timeout: 180)
+    timeout: 60)
 endforeach
 
 subdir('ipc')
