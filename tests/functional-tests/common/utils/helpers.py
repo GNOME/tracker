@@ -77,7 +77,7 @@ class Helper:
             sys.exit(1)
         sys.excepthook = new_hook
 
-    def _start_process (self):
+    def _start_process (self, env=None):
         path = self.PROCESS_PATH
         flags = getattr (self,
                          "FLAGS",
@@ -87,7 +87,10 @@ class Helper:
 
         if not options.is_verbose ():
             FNULL = open ('/dev/null', 'w')
-            kws = { 'stdout': FNULL, 'stderr': subprocess.PIPE }
+            kws.update({ 'stdout': FNULL, 'stderr': subprocess.PIPE })
+
+        if env:
+            kws['env'] = env
 
         command = [path] + flags
         log ("Starting %s" % ' '.join(command))
@@ -132,7 +135,7 @@ class Helper:
         self.timeout_id = None
         return False
 
-    def start (self):
+    def start (self, env=None):
         """
         Start an instance of process and wait for it to appear on the bus.
         """
@@ -153,7 +156,7 @@ class Helper:
                 raise Exception ("Unable to start test instance of %s: "
                                  "already running " % self.PROCESS_NAME)
 
-            self.process = self._start_process ()
+            self.process = self._start_process (env=env)
             log ('[%s] Started process %i' % (self.PROCESS_NAME, self.process.pid))
             self.process_watch_timeout = GLib.timeout_add (200, self._process_watch_cb)
 
@@ -222,8 +225,8 @@ class StoreHelper (Helper):
 
     graph_updated_handler_id = 0
 
-    def start (self):
-        Helper.start (self)
+    def start (self, env=None):
+        Helper.start (self, env=env)
 
         self.resources = Gio.DBusProxy.new_sync(
             self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START, None,
