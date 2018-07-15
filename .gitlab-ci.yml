@@ -44,7 +44,7 @@ test-autotools-fedora27:
   script:
     - su tracker -c './autogen.sh --disable-functional-tests --prefix=/usr'
     - su tracker -c 'make -j'
-    - LANG=en_US.UTF8 VERBOSE=1 su tracker -c 'TESTS_ENVIRONMENT=dbus-launch make check'
+    - LANG=en_US.UTF8 VERBOSE=1 su tracker -c 'dbus-launch make check'
 
 test-meson-fedora27:
   stage: test
