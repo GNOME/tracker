@@ -32,8 +32,7 @@ standard_tests += \
 	14-signals.py \
 	15-statistics.py \
 	16-collation.py \
-	17-ontology-changes.py  \
-	200-backup-restore.py
+	17-ontology-changes.py
 
 slow_tests = \
 	10-sqlite-misused.py \
