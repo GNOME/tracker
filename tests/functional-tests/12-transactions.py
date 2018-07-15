@@ -73,8 +73,8 @@ class TrackerTransactionsTest (CommonTrackerStoreTest):
             NUMBER_OF_INSTANCES = 1000
             self.insert_and_commit (NUMBER_OF_INSTANCES)
 
-            self.system.tracker_store_stop_brutally ()
-            self.system.tracker_store_start ()
+            self.tracker.kill()
+            self.tracker.start()
             try:
                 results = self.tracker.count_instances ("nmo:Email")
             except:
