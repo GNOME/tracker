@@ -75,4 +75,10 @@ test-meson-fedora27:
     - su tracker -c 'mkdir build'
     - su tracker -c 'cd build; meson ..'
     - su tracker -c 'cd build; ninja'
-    - su tracker -c 'cd build; LANG=en_US.UTF8 dbus-launch meson test --print-errorlogs'
+    - |
+      # Remove the many "CI_" variables from the environment. Meson dumps the
+      # whole environment for every failed test, and that gives a whole
+      # screenful of junk each time unless we strip these.
+      unset $(env|grep -o '^CI_[^=]*')
+
+      su tracker -c 'cd build; LANG=en_US.UTF8 dbus-launch meson test --print-errorlogs'
