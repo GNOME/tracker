@@ -120,7 +120,10 @@ class Helper:
             return True    # continue
         else:
             self.process_watch_timeout = 0
-            error = self.process.stderr.read()
+            if options.is_verbose():
+                error = ""
+            else:
+                error = self.process.stderr.read()
             raise RuntimeError("%s exited with status: %i\n%s" % (self.PROCESS_NAME, status, error))
 
     def _timeout_on_idle_cb (self):
