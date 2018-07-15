@@ -39,6 +39,14 @@ indexing_tree_test = executable('tracker-indexing-tree-test',
 )
 test('miner-indexing-tree', indexing_tree_test)
 
+miner_fs_test = executable('tracker-miner-fs-test',
+  'tracker-miner-fs-test.c',
+  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
+  c_args: test_c_args
+)
+test('miner-fs', miner_fs_test,
+  timeout: 180)
+
 monitor_test = executable('tracker-monitor-test',
   'tracker-monitor-test.c',
   shared_libtracker_miner_monitor_sources,
@@ -48,12 +56,6 @@ monitor_test = executable('tracker-monitor-test',
 test('miner-monitor', monitor_test,
   # FIXME: why is this test so slow?
   timeout: 180)
-
-monitor_test = executable('tracker-miner-fs-test',
-  'tracker-miner-fs-test.c',
-  dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
-  c_args: test_c_args
-)
 
 priority_queue_test = executable('tracker-priority-queue-test',
   'tracker-priority-queue-test.c',
