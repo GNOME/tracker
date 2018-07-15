@@ -41,6 +41,7 @@ test_env = environment()
 test_env.set('DCONF_PROFILE', dconf_profile_full_path)
 
 test_env.set('TRACKER_DB_ONTOLOGIES_DIR', tracker_nepomuk_ontologies)
+test_env.set('TRACKER_FUNCTIONAL_TEST_BUILD_DIR', build_root)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
 test_env.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', tracker_stop_words_dir)
 test_env.set('TRACKER_TEST_DOMAIN_ONTOLOGY_RULE', tracker_test_domain_ontology)
