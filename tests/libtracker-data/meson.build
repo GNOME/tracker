@@ -16,7 +16,7 @@ crc32_test = executable('tracker-crc32-test',
 test('data-crc32', crc32_test)
 
 db_journal_test = executable('tracker-db-journal-test',
-    'tracker-db-journal.c',
+    'tracker-db-journal-test.c',
     dependencies: [tracker_common_dep, tracker_data_dep],
     c_args: test_c_args)
 test('data-db-journal', db_journal_test)

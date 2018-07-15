@@ -1,3 +1,6 @@
+libtracker_sparql_tests = [
+
+l
 test_c_args = [
   '-DTEST',
   '-DTEST_DOMAIN_ONTOLOGY_RULE="@0@/src/tracker-store/default.rule"'.format(source_root),
@@ -17,7 +20,7 @@ sparql_test = executable('tracker-sparql-test',
 test('sparql', sparql_test)
 
 gb_737023_test = executable('tracker-gb-737023-test',
-  'tracker-gb-737023.c',
+  'tracker-gb-737023-test.c',
   dependencies: [tracker_common_dep, tracker_sparql_dep],
   c_args: [tracker_c_args, test_c_args])
 test('gb_737023', sparql_test)

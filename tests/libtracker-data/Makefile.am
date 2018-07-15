@@ -59,7 +59,7 @@ tracker_ontology_SOURCES = tracker-ontology-test.c
 tracker_ontology_change_SOURCES = tracker-ontology-change-test.c
 tracker_backup_SOURCES = tracker-backup-test.c
 tracker_crc32_test_SOURCES = tracker-crc32-test.c
-tracker_db_journal_SOURCES = tracker-db-journal.c
+tracker_db_journal_SOURCES = tracker-db-journal-test.c
 
 EXTRA_DIST += \
 	dawg-testcases                                 \
