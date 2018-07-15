@@ -21,7 +21,6 @@ functional_tests = [
   '15-statistics',
   '16-collation',
   '17-ontology-changes',
-  '200-backup-restore',
 ]
 
 subdir('ttl')
