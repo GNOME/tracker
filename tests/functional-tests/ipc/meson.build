@@ -1,3 +1,8 @@
+functional_ipc_test_c_args = [
+  '-DTEST_DOMAIN_ONTOLOGY_RULE="@0@/src/tracker-store/default.rule"'.format(source_root),
+  '-DTEST_ONTOLOGIES_DIR="@0@/src/ontologies/nepomuk"'.format(source_root),
+]
+
 insert_or_replace_test = executable('test-insert-or-replace',
   'test-insert-or-replace.vala',
   dependencies: [tracker_common_dep, tracker_sparql_dep])
@@ -52,4 +57,14 @@ update_array_performance_test = executable('test-update-array-performance',
   'test-update-array-performance.c',
   dependencies: [tracker_common_dep, tracker_sparql_dep])
 test('functional-ipc-update-array-performance', update_array_performance_test,
+  env: test_env)
+
+bus_query_cancellation_test = executable('test-bus-query-cancellation',
+  'test-bus-query-cancellation.c',
+  c_args: functional_ipc_test_c_args,
+  dependencies: [tracker_common_dep, tracker_sparql_dep])
+
+test('functional-ipc-bus-query-cancellation',
+  test_runner,
+  args: bus_query_cancellation_test,
   env: test_env)

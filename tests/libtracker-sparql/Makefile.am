@@ -4,8 +4,7 @@ noinst_PROGRAMS += $(test_programs)
 
 test_programs = \
 	tracker-resource-test                          \
-	tracker-sparql-test                            \
-	tracker-gb-737023-test
+	tracker-sparql-test
 
 AM_CPPFLAGS =                                          \
 	$(BUILD_CFLAGS)                                \

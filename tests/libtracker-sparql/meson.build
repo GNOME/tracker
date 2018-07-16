@@ -1,5 +1,4 @@
 libtracker_sparql_tests = [
-    'gb-737023',
     'resource',
     'sparql',
 ]
