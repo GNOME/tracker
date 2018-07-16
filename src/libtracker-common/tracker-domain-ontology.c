@@ -378,16 +378,21 @@ tracker_domain_ontology_initable_init (GInitable     *initable,
 	if (!priv->ontology_location) {
 		gchar *ontology_path;
 
-		ontology_path = g_build_filename (SHAREDIR, "tracker", "ontologies",
-		                                  priv->ontology_name, NULL);
+		if (g_getenv ("TRACKER_DB_ONTOLOGIES_DIR") != NULL) {
+			/* Override for use only by testcases */
+			priv->ontology_location = g_file_new_for_path (g_getenv ("TRACKER_DB_ONTOLOGIES_DIR"));
+		} else {
+			ontology_path = g_build_filename (SHAREDIR, "tracker", "ontologies",
+			                                  priv->ontology_name, NULL);
 
-		if (!g_file_test (ontology_path, G_FILE_TEST_IS_DIR)) {
+			if (!g_file_test (ontology_path, G_FILE_TEST_IS_DIR)) {
+				g_error ("Unable to find ontologies in the configured location %s", ontology_path);
+			}
+
+			priv->ontology_location = g_file_new_for_path (ontology_path);
+
 			g_free (ontology_path);
-			ontology_path = g_strdup (g_getenv ("TRACKER_DB_ONTOLOGIES_DIR"));
 		}
-
-		priv->ontology_location = g_file_new_for_path (ontology_path);
-		g_free (ontology_path);
 	}
 
 end:
