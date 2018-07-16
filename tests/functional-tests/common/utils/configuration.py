@@ -65,7 +65,9 @@ def expandvars (variable):
     result = variable
     for var, value in [("${datarootdir}", RAW_DATAROOT_DIR),
                        ("${exec_prefix}", RAW_EXEC_PREFIX),
-                       ("${prefix}", PREFIX)]:
+                       ("${prefix}", PREFIX),
+                       ("@top_srcdir@", TOP_SRCDIR),
+                       ("@top_builddir@", TOP_BUILDDIR)]:
         result = result.replace (var, value)
 
     return result
@@ -74,6 +76,9 @@ def expandvars (variable):
 PREFIX = config['PREFIX']
 RAW_EXEC_PREFIX = config['RAW_EXEC_PREFIX']
 RAW_DATAROOT_DIR = config['RAW_DATAROOT_DIR']
+
+TOP_SRCDIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+TOP_BUILDDIR = os.environ['TRACKER_FUNCTIONAL_TEST_BUILD_DIR']
 
 TEST_ONTOLOGIES_DIR = os.path.normpath(expandvars(config['TEST_ONTOLOGIES_DIR']))
 
@@ -94,10 +99,8 @@ if TEST_TMP_DIR.startswith('/tmp'):
 		       "ignored.")
 
 
-BUILD_DIR = os.environ.get('TRACKER_FUNCTIONAL_TEST_BUILD_DIR')
-
 def generated_ttl_dir():
-    if BUILD_DIR:
-        return os.path.join(BUILD_DIR, 'tests', 'functional-tests', 'ttl')
+    if TOP_BUILDDIR:
+        return os.path.join(TOP_BUILDDIR, 'tests', 'functional-tests', 'ttl')
     else:
         return 'ttl'

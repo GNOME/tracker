@@ -445,8 +445,8 @@ fi
 
 AM_CONDITIONAL(DIST_FUNCTIONAL_TESTS, test "x$enable_functional_tests" != "xno")
 
-AC_SUBST(FUNCTIONAL_TESTS_ONTOLOGIES_DIR, "${datadir}/tracker-tests/test-ontologies")
-AC_SUBST(FUNCTIONAL_TESTS_TRACKER_STORE_PATH, "${libexecdir}/tracker-store")
+AC_SUBST(FUNCTIONAL_TESTS_ONTOLOGIES_DIR, "@top_srcdir@/tests/functional-tests/test-ontologies")
+AC_SUBST(FUNCTIONAL_TESTS_TRACKER_STORE_PATH, "@top_builddir@/src/tracker-store/tracker-store")
 
 ####################################################################
 # Check for gtk-doc and docbook-tools
