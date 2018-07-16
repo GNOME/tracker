@@ -51,12 +51,14 @@ TEST_RUNNER = $(top_srcdir)/tests/functional-tests/test-runner.sh
 
 functional-test: ${standard_tests}
 	for test in ${standard_tests} ; do \
+		export TRACKER_FUNCTIONAL_TEST_BUILD_DIR=$(top_builddir) ; \
 		export TRACKER_FUNCTIONAL_TEST_CONFIG=$(top_builddir)/tests/functional-tests/configuration.json ; \
 		$(TEST_RUNNER) python $(top_srcdir)/tests/functional-tests/$$test; \
 	done
 
 functional-test-slow: ${slow_tests}
 	@for test in ${slow_tests} ; do \
+		export TRACKER_FUNCTIONAL_TEST_BUILD_DIR=$(top_builddir) ; \
 		export TRACKER_FUNCTIONAL_TEST_CONFIG=$(top_builddir)/tests/functional-tests/configuration.json \
 		$(TEST_RUNNER) python $(top_srcdir)/tests/functional-tests/$$test; \
 	done
