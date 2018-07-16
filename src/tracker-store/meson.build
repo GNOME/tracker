@@ -16,6 +16,7 @@ tracker_store_sources = [
     'tracker-writeback.vapi',
     '../libtracker-common/libtracker-common.vapi',
     '../libtracker-data/libtracker-data.vapi',
+    '../libtracker-direct/tracker-direct.vapi',
 ]
 
 tracker_store = executable('tracker-store',
@@ -25,7 +26,7 @@ tracker_store = executable('tracker-store',
     ],
     vala_args: [ '--pkg', 'posix' ],
     dependencies: [
-        tracker_common_dep, tracker_data_dep,
+        tracker_common_dep, tracker_data_dep, tracker_sparql_direct_dep,
         gio_unix
     ],
     install: true,
