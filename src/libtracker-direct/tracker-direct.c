@@ -522,7 +522,6 @@ tracker_direct_connection_update (TrackerSparqlConnection  *self,
 	TrackerDirectConnectionPrivate *priv;
 	TrackerDirectConnection *conn;
 	TrackerData *data;
-	GTask *task;
 
 	conn = TRACKER_DIRECT_CONNECTION (self);
 	priv = tracker_direct_connection_get_instance_private (conn);
@@ -624,7 +623,7 @@ tracker_direct_connection_update_array_async (TrackerSparqlConnection  *self,
 {
 	GTask *task;
 	gchar **copy;
-	gint i = 0, idx = 0;
+	gint i = 0;
 
 	copy = g_new0 (gchar*, n_updates + 1);
 
