@@ -1055,14 +1055,20 @@ tracker_db_manager_get_db_interface (TrackerDBManager *db_manager)
 		interface = tracker_db_manager_create_db_interface (db_manager,
 		                                                    TRUE, &internal_error);
 
-		if (internal_error) {
-			g_critical ("Error opening database: %s", internal_error->message);
-			g_error_free (internal_error);
-			g_async_queue_unlock (db_manager->interfaces);
-			return NULL;
+		if (interface) {
+			tracker_data_manager_init_fts (interface, FALSE);
+		} else {
+			if (g_async_queue_length_unlocked (db_manager->interfaces) == 0) {
+				g_critical ("Error opening database: %s", internal_error->message);
+				g_error_free (internal_error);
+				g_async_queue_unlock (db_manager->interfaces);
+				return NULL;
+			} else {
+				g_error_free (internal_error);
+				/* Fetch the first interface back. Oh well */
+				interface = g_async_queue_try_pop_unlocked (db_manager->interfaces);
+			}
 		}
-
-		tracker_data_manager_init_fts (interface, FALSE);
 	}
 
 	g_async_queue_push_unlocked (db_manager->interfaces, interface);
@@ -1102,7 +1108,8 @@ tracker_db_manager_get_writable_db_interface (TrackerDBManager *db_manager)
 TrackerDBInterface *
 tracker_db_manager_get_wal_db_interface (TrackerDBManager *db_manager)
 {
-	if (db_manager->db.wal_iface == NULL) {
+	if (db_manager->db.wal_iface == NULL &&
+	    (db_manager->flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 		db_manager->db.wal_iface = init_writable_db_interface (db_manager);
 	}
 
