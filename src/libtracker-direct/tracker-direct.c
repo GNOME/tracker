@@ -217,6 +217,9 @@ wal_hook (TrackerDBInterface *iface,
 	TrackerDataManager *data_manager = tracker_db_interface_get_user_data (iface);
 	TrackerDBInterface *wal_iface = tracker_data_manager_get_wal_db_interface (data_manager);
 
+	if (!wal_iface)
+		return;
+
 	if (n_pages >= 10000) {
 		/* Do immediate checkpointing (blocking updates) to
 		 * prevent excessive WAL file growth.
@@ -383,7 +386,8 @@ tracker_direct_connection_finalize (GObject *object)
 	if (priv->data_manager) {
 		TrackerDBInterface *wal_iface;
 		wal_iface = tracker_data_manager_get_wal_db_interface (priv->data_manager);
-		tracker_db_interface_sqlite_wal_checkpoint (wal_iface, TRUE, NULL);
+		if (wal_iface)
+			tracker_db_interface_sqlite_wal_checkpoint (wal_iface, TRUE, NULL);
 	}
 
 	g_clear_object (&priv->store);
@@ -879,5 +883,6 @@ tracker_direct_connection_sync (TrackerDirectConnection *conn)
 	set_up_thread_pools (conn, NULL);
 
 	wal_iface = tracker_data_manager_get_wal_db_interface (priv->data_manager);
-	tracker_db_interface_sqlite_wal_checkpoint (wal_iface, TRUE, NULL);
+	if (wal_iface)
+		tracker_db_interface_sqlite_wal_checkpoint (wal_iface, TRUE, NULL);
 }
