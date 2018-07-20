@@ -22,7 +22,7 @@
 #define __TRACKER_LOCAL_CONNECTION_H__
 
 #include <libtracker-sparql/tracker-sparql.h>
-#include <libtracker-data/tracker-data.h>
+#include <libtracker-data/tracker-data-manager.h>
 
 #define TRACKER_TYPE_DIRECT_CONNECTION         (tracker_direct_connection_get_type())
 #define TRACKER_DIRECT_CONNECTION(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_DIRECT_CONNECTION, TrackerDirectConnection))
