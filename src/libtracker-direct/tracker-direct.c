@@ -22,6 +22,7 @@
 
 #include "tracker-direct.h"
 #include <libtracker-data/tracker-data.h>
+#include <libtracker-data/tracker-sparql.h>
 
 static TrackerDBManagerFlags default_flags = 0;
 
@@ -428,16 +429,17 @@ tracker_direct_connection_query (TrackerSparqlConnection  *self,
 {
 	TrackerDirectConnectionPrivate *priv;
 	TrackerDirectConnection *conn;
-	TrackerSparqlQuery *query;
+	TrackerSparql *query;
 	TrackerSparqlCursor *cursor;
 
 	conn = TRACKER_DIRECT_CONNECTION (self);
 	priv = tracker_direct_connection_get_instance_private (conn);
 
 	g_mutex_lock (&priv->mutex);
-	query = tracker_sparql_query_new (priv->data_manager, sparql);
-	cursor = TRACKER_SPARQL_CURSOR (tracker_sparql_query_execute_cursor (query, error));
+	query = tracker_sparql_new (priv->data_manager, sparql);
+	cursor = tracker_sparql_execute_cursor (query, error);
 	g_object_unref (query);
+
 	if (cursor)
 		tracker_sparql_cursor_set_connection (cursor, self);
 	g_mutex_unlock (&priv->mutex);
