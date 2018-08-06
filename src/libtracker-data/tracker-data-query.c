@@ -31,7 +31,7 @@
 #include "tracker-db-interface-sqlite.h"
 #include "tracker-db-manager.h"
 #include "tracker-ontologies.h"
-#include "tracker-sparql-query.h"
+#include "tracker-sparql.h"
 
 GPtrArray*
 tracker_data_query_rdf_type (TrackerDataManager *manager,
@@ -169,17 +169,17 @@ tracker_data_query_sparql_cursor (TrackerDataManager  *manager,
                                   const gchar         *query,
                                   GError             **error)
 {
-	TrackerSparqlQuery *sparql_query;
-	TrackerDBCursor *cursor;
+	TrackerSparql *sparql_query;
+	TrackerSparqlCursor *cursor;
 
 	g_return_val_if_fail (query != NULL, NULL);
 
-	sparql_query = tracker_sparql_query_new (manager, query);
+	sparql_query = tracker_sparql_new (manager, query);
 
-	cursor = tracker_sparql_query_execute_cursor (sparql_query, error);
+	cursor = tracker_sparql_execute_cursor (sparql_query, error);
 
 	g_object_unref (sparql_query);
 
-	return cursor;
+	return TRACKER_DB_CURSOR (cursor);
 }
 
