@@ -1518,7 +1518,7 @@ tracker_resource_print_sparql_update (TrackerResource         *resource,
 	context.done_list = NULL;
 
 	/* Finally insert the data */
-	g_string_append (context.string, "INSERT {\n");
+	g_string_append (context.string, "INSERT DATA {\n");
 	if (graph_id) {
 		g_string_append_printf (context.string, "GRAPH <%s> {\n", graph_id);
 	}
