@@ -38,4 +38,10 @@ TrackerSparql *       tracker_sparql_new (TrackerDataManager *manager,
 TrackerSparqlCursor * tracker_sparql_execute_cursor (TrackerSparql  *sparql,
                                                      GError        **error);
 
+TrackerSparql * tracker_sparql_new_update (TrackerDataManager *manager,
+					   const gchar        *query);
+GVariant *      tracker_sparql_execute_update (TrackerSparql  *sparql,
+					       gboolean        blank,
+					       GError        **error);
+
 #endif /* __TRACKER_SPARQL_H__ */

@@ -97,6 +97,8 @@ struct _TrackerSparql
 	GPtrArray *var_names;
 	GArray *var_types;
 
+	GVariantBuilder *blank_nodes;
+
 	struct {
 		TrackerContext *context;
 		TrackerContext *select_context;
@@ -142,6 +144,9 @@ tracker_sparql_finalize (GObject *object)
 
 	g_ptr_array_unref (sparql->var_names);
 	g_array_unref (sparql->var_types);
+
+	if (sparql->blank_nodes)
+		g_variant_builder_unref (sparql->blank_nodes);
 
 	G_OBJECT_CLASS (tracker_sparql_parent_class)->finalize (object);
 }
@@ -5883,4 +5888,53 @@ tracker_sparql_execute_cursor (TrackerSparql  *sparql,
 	g_object_unref (stmt);
 
 	return TRACKER_SPARQL_CURSOR (cursor);
+}
+
+TrackerSparql *
+tracker_sparql_new_update (TrackerDataManager *manager,
+                           const gchar        *query)
+{
+	TrackerNodeTree *tree;
+	TrackerSparql *sparql;
+
+	g_return_val_if_fail (TRACKER_IS_DATA_MANAGER (manager), NULL);
+	g_return_val_if_fail (query != NULL, NULL);
+
+	sparql = g_object_new (TRACKER_TYPE_SPARQL, NULL);
+	sparql->data_manager = g_object_ref (manager);
+	sparql->sparql = query;
+
+	tree = tracker_sparql_parse_update (sparql->sparql, -1, NULL,
+	                                    &sparql->parser_error);
+	if (tree) {
+		sparql->tree = tree;
+		sparql->sql = tracker_string_builder_new ();
+
+		sparql->current_state.node = tracker_node_tree_get_root (sparql->tree);
+		sparql->current_state.sql = sparql->sql;
+	}
+
+	return sparql;
+}
+
+GVariant *
+tracker_sparql_execute_update (TrackerSparql  *sparql,
+                               gboolean        blank,
+                               GError        **error)
+{
+	GVariant *result = NULL;
+	GVariantBuilder *blank_nodes = NULL;
+
+	if (sparql->parser_error) {
+		g_propagate_error (error, sparql->parser_error);
+		return NULL;
+	}
+
+	if (blank)
+		sparql->blank_nodes = g_variant_builder_new ((GVariantType *) "aaa{ss}");
+
+	if (!_call_rule_func (sparql, NAMED_RULE_Update, error))
+		return NULL;
+
+	return sparql->blank_nodes ? g_variant_builder_end (sparql->blank_nodes) : NULL;
 }
