@@ -38,6 +38,7 @@
 #include "tracker-ontologies.h"
 #include "tracker-property.h"
 #include "tracker-sparql-query.h"
+#include "tracker-sparql.h"
 
 typedef struct _TrackerDataUpdateBuffer TrackerDataUpdateBuffer;
 typedef struct _TrackerDataUpdateBufferResource TrackerDataUpdateBufferResource;
@@ -3687,7 +3688,7 @@ update_sparql (TrackerData  *data,
                GError      **error)
 {
 	GError *actual_error = NULL;
-	TrackerSparqlQuery *sparql_query;
+	TrackerSparql *sparql_query;
 	GVariant *blank_nodes;
 
 	g_return_val_if_fail (update != NULL, NULL);
@@ -3698,8 +3699,8 @@ update_sparql (TrackerData  *data,
 		return NULL;
 	}
 
-	sparql_query = tracker_sparql_query_new_update (data->manager, update);
-	blank_nodes = tracker_sparql_query_execute_update (sparql_query, blank, &actual_error);
+	sparql_query = tracker_sparql_new_update (data->manager, update);
+	blank_nodes = tracker_sparql_execute_update (sparql_query, blank, &actual_error);
 	g_object_unref (sparql_query);
 
 	if (actual_error) {
