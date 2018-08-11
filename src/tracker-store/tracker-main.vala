@@ -320,7 +320,7 @@ License which can be viewed at:
 			main_loop = new MainLoop ();
 
 			if (domain != null)
-				Tracker.DBus.watch_domain (domain_ontology, main_loop);
+				Tracker.DBus.watch_domain (domain_ontology_config.get_domain(), main_loop);
 
 			initialize_signal_handler ();
 

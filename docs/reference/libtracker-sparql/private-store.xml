@@ -75,6 +75,10 @@ Miners=Miner.Files;Miner.Extract;
     <programlisting>
 tracker_sparql_connection_set_domain ("org.example.App");
     </programlisting>
+    <para>
+      It is also possible to pass a full path to the domain rule. If the first
+      character of the domain name is / it will be treated as a full path.
+    </para>
   </chapter>
   <chapter id="recommendations">
     <title>Additional precautions and recommendations</title>

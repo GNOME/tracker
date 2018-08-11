@@ -302,7 +302,17 @@ tracker_domain_ontology_initable_init (GInitable     *initable,
 	domain_ontology = TRACKER_DOMAIN_ONTOLOGY (initable);
 	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
 
-	if (priv->name) {
+	if (priv->name && priv->name[0] == '/') {
+		if (!g_file_test (priv->name, G_FILE_TEST_IS_REGULAR)) {
+			inner_error = g_error_new (G_KEY_FILE_ERROR,
+			                           G_KEY_FILE_ERROR_NOT_FOUND,
+			                           "Could not find rule at '%s'",
+			                           priv->name);
+			goto end;
+		}
+
+		path = g_strdup (priv->name);
+	} else if (priv->name) {
 		path = find_rule_in_data_dirs (priv->name);
 
 		if (!path) {
