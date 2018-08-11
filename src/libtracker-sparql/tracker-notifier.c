@@ -715,7 +715,7 @@ tracker_notifier_initable_init (GInitable     *initable,
 	if (!domain_ontology)
 		return FALSE;
 
-	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, NULL);
+	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, "Tracker1");
 
 	priv->has_arg0_filter =
 		priv->expanded_classes && g_strv_length (priv->expanded_classes) == 1;

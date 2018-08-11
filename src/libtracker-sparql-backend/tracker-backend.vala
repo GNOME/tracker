@@ -193,7 +193,7 @@ class Tracker.Sparql.Backend : Connection {
 
 		switch (backend) {
 		case Backend.AUTO:
-			bus = new Tracker.Bus.Connection (domain_ontology.get_domain (), global_dbus_connection);
+			bus = new Tracker.Bus.Connection (domain_ontology.get_domain ("Tracker1"), global_dbus_connection);
 
 			try {
 				direct = create_readonly_direct ();
@@ -208,7 +208,7 @@ class Tracker.Sparql.Backend : Connection {
 			break;
 
 		case Backend.BUS:
-			bus = new Tracker.Bus.Connection (domain_ontology.get_domain (), global_dbus_connection);
+			bus = new Tracker.Bus.Connection (domain_ontology.get_domain ("Tracker1"), global_dbus_connection);
 			break;
 
 		default:

@@ -696,7 +696,7 @@ tracker_miner_manager_get_running (TrackerMinerManager *manager)
 		return NULL;
 	}
 
-	prefix = tracker_domain_ontology_get_domain (priv->domain_ontology, "Miner");
+	prefix = tracker_domain_ontology_get_domain (priv->domain_ontology, "Tracker1.Miner");
 
 	g_variant_get (v, "(as)", &iter);
 	while (g_variant_iter_loop (iter, "&s", &str)) {
@@ -723,7 +723,7 @@ check_file (GFile    *file,
 	TrackerMinerManager *manager;
 	TrackerMinerManagerPrivate *priv;
 	GKeyFile *key_file;
-	gchar *path, *dbus_path, *display_name, *name_suffix, *description;
+	gchar *path, *dbus_path, *display_name, *name_suffix, *full_name_suffix, *description;
 	GError *error = NULL;
 	MinerData *data;
 
@@ -768,8 +768,12 @@ check_file (GFile    *file,
 	data = g_slice_new0 (MinerData);
 	data->dbus_path = dbus_path;
 	data->name_suffix = name_suffix;
+
+	full_name_suffix = g_strconcat ("Tracker1.", name_suffix, NULL);
 	data->dbus_name = tracker_domain_ontology_get_domain (priv->domain_ontology,
-	                                                      name_suffix);
+	                                                      full_name_suffix);
+	g_free (full_name_suffix);
+
 	data->display_name = display_name;
 	data->description = description;    /* In .desktop file as _comment */
 

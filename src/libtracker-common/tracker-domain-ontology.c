@@ -459,9 +459,9 @@ tracker_domain_ontology_get_domain (TrackerDomainOntology *domain_ontology,
 
 	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
 	if (suffix)
-		return g_strconcat (priv->domain, ".Tracker1.", suffix, NULL);
+		return g_strconcat (priv->domain, ".", suffix, NULL);
 	else
-		return g_strconcat (priv->domain, ".Tracker1", NULL);
+		return g_strconcat (priv->domain, NULL);
 }
 
 gboolean

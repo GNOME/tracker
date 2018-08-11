@@ -240,7 +240,7 @@ License which can be viewed at:
 		cache_location = domain_ontology_config.get_cache ();
 		data_location = domain_ontology_config.get_journal ();
 		ontology_location = domain_ontology_config.get_ontology ();
-		domain = domain_ontology_config.get_domain ();
+		domain = domain_ontology_config.get_domain ("Tracker1");
 
 		sanity_check_option_values (config);
 
