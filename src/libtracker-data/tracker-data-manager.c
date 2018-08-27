@@ -2899,49 +2899,81 @@ schedule_copy (GPtrArray *schedule,
 }
 
 static void
-create_triggers_on_rowid (TrackerDBInterface  *iface,
-                          TrackerClass        *klass,
-                          TrackerProperty     *property,
-                          GError             **error)
+create_insert_delete_triggers (TrackerDBInterface  *iface,
+                               const gchar         *table_name,
+                               const gchar * const *properties,
+                               gint                 n_properties,
+                               GError             **error)
 {
 	GError *internal_error = NULL;
-	gchar *table_name;
+	GString *trigger_query;
+	gint i;
 
-	if (property) {
-		table_name = g_strdup_printf ("%s_%s",
-		                              tracker_class_get_name (klass),
-		                              tracker_property_get_name (property));
-	} else {
-		table_name = g_strdup (tracker_class_get_name (klass));
-	}
-
+	/* Insert trigger */
 	tracker_db_interface_execute_query (iface, &internal_error,
-	                                    "CREATE TRIGGER IF NOT EXISTS \"trigger_insert_%s\" "
-	                                    "AFTER INSERT ON \"%s\" "
-	                                    "FOR EACH ROW BEGIN "
-	                                    "UPDATE Resource SET Refcount = Refcount + 1 WHERE Resource.rowid = NEW.ID;"
-	                                    "END",
-	                                    table_name, table_name);
+	                                    "DROP TRIGGER IF EXISTS \"trigger_insert_%s\" ",
+	                                    table_name);
 	if (internal_error) {
 		g_propagate_error (error, internal_error);
-		g_free (table_name);
 		return;
 	}
 
+	trigger_query = g_string_new (NULL);
+	g_string_append_printf (trigger_query,
+	                        "CREATE TRIGGER \"trigger_insert_%s\" "
+	                        "AFTER INSERT ON \"%s\" "
+	                        "FOR EACH ROW BEGIN ",
+	                        table_name, table_name);
+	for (i = 0; i < n_properties; i++) {
+		g_string_append_printf (trigger_query,
+		                        "UPDATE Resource "
+		                        "SET Refcount = Refcount + 1 "
+		                        "WHERE Resource.rowid = NEW.\"%s\"; ",
+		                        properties[i]);
+	}
+
+	g_string_append (trigger_query, "END; ");
 	tracker_db_interface_execute_query (iface, &internal_error,
-	                                    "CREATE TRIGGER IF NOT EXISTS \"trigger_delete_%s\" "
-	                                    "AFTER DELETE ON \"%s\" "
-	                                    "FOR EACH ROW BEGIN "
-	                                    "UPDATE Resource SET Refcount = Refcount - 1 WHERE Resource.rowid = OLD.ID;"
-	                                    "END",
-	                                    table_name, table_name);
+	                                    trigger_query->str);
+	g_string_free (trigger_query, TRUE);
+
 	if (internal_error) {
 		g_propagate_error (error, internal_error);
-		g_free (table_name);
 		return;
 	}
 
-	g_free (table_name);
+	/* Delete trigger */
+	tracker_db_interface_execute_query (iface, &internal_error,
+	                                    "DROP TRIGGER IF EXISTS \"trigger_delete_%s\" ",
+	                                    table_name);
+	if (internal_error) {
+		g_propagate_error (error, internal_error);
+		return;
+	}
+
+	trigger_query = g_string_new (NULL);
+	g_string_append_printf (trigger_query,
+	                        "CREATE TRIGGER \"trigger_delete_%s\" "
+	                        "AFTER DELETE ON \"%s\" "
+	                        "FOR EACH ROW BEGIN ",
+	                        table_name, table_name);
+	for (i = 0; i < n_properties; i++) {
+		g_string_append_printf (trigger_query,
+		                        "UPDATE Resource "
+		                        "SET Refcount = Refcount - 1 "
+		                        "WHERE Resource.rowid = OLD.\"%s\"; ",
+		                        properties[i]);
+	}
+
+	g_string_append (trigger_query, "END; ");
+	tracker_db_interface_execute_query (iface, &internal_error,
+	                                    trigger_query->str);
+	g_string_free (trigger_query, TRUE);
+
+	if (internal_error) {
+		g_propagate_error (error, internal_error);
+		return;
+	}
 }
 
 static void
@@ -2953,13 +2985,11 @@ create_table_triggers (TrackerDataManager  *manager,
 	const gchar *property_name;
 	TrackerProperty **properties, *property;
 	GError *internal_error = NULL;
+	GPtrArray *trigger_properties;
 	guint i, n_props;
 
-	create_triggers_on_rowid (iface, klass, NULL, &internal_error);
-	if (internal_error) {
-		g_propagate_error (error, internal_error);
-		return;
-	}
+	trigger_properties = g_ptr_array_new ();
+	g_ptr_array_add (trigger_properties, "ROWID");
 
 	properties = tracker_ontologies_get_properties (manager->ontologies, &n_props);
 
@@ -2977,21 +3007,39 @@ create_table_triggers (TrackerDataManager  *manager,
 		multivalued = tracker_property_get_multiple_values (property);
 
 		if (multivalued) {
-			create_triggers_on_rowid (iface, klass, property, &internal_error);
-			if (internal_error) {
-				g_propagate_error (error, internal_error);
-				return;
-			}
+			const gchar * const properties[] = { "ID", property_name };
 
 			table_name = g_strdup_printf ("%s_%s",
 			                              tracker_class_get_name (klass),
 			                              property_name);
+
+			create_insert_delete_triggers (iface, table_name, properties,
+			                               G_N_ELEMENTS (properties),
+			                               &internal_error);
+			if (internal_error) {
+				g_propagate_error (error, internal_error);
+				g_ptr_array_unref (trigger_properties);
+				g_free (table_name);
+				return;
+			}
 		} else {
 			table_name = g_strdup (tracker_class_get_name (klass));
+			g_ptr_array_add (trigger_properties, (gchar *) property_name);
 		}
 
 		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "CREATE TRIGGER IF NOT EXISTS \"trigger_update_%s_%s\" "
+		                                    "DROP TRIGGER IF EXISTS \"trigger_update_%s_%s\"",
+		                                    tracker_class_get_name (klass),
+		                                    property_name);
+		if (internal_error) {
+			g_propagate_error (error, internal_error);
+			g_ptr_array_unref (trigger_properties);
+			g_free (table_name);
+			return;
+		}
+
+		tracker_db_interface_execute_query (iface, &internal_error,
+		                                    "CREATE TRIGGER \"trigger_update_%s_%s\" "
 		                                    "AFTER UPDATE OF \"%s\" ON \"%s\" "
 		                                    "FOR EACH ROW BEGIN "
 		                                    "UPDATE Resource SET Refcount = Refcount + 1 WHERE Resource.rowid = NEW.\"%s\";"
@@ -3005,8 +3053,21 @@ create_table_triggers (TrackerDataManager  *manager,
 
 		if (internal_error) {
 			g_propagate_error (error, internal_error);
+			g_ptr_array_unref (trigger_properties);
 			return;
 		}
+	}
+
+	create_insert_delete_triggers (iface,
+	                               tracker_class_get_name (klass),
+	                               (const gchar * const *) trigger_properties->pdata,
+	                               trigger_properties->len,
+	                               &internal_error);
+	g_ptr_array_unref (trigger_properties);
+
+	if (internal_error) {
+		g_propagate_error (error, internal_error);
+		return;
 	}
 }
 
