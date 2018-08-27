@@ -3373,10 +3373,6 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 		g_debug ("Creating: '%s'", create_sql->str);
 		tracker_db_interface_execute_query (iface, &internal_error,
 		                                    "%s", create_sql->str);
-
-		if (!internal_error)
-			create_table_triggers (manager, iface, service, &internal_error);
-
 		if (internal_error) {
 			g_propagate_error (error, internal_error);
 			goto error_out;
@@ -3486,6 +3482,19 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 			g_propagate_error (error, internal_error);
 			goto error_out;
 		}
+	}
+
+	if (!in_update || in_change || tracker_class_get_is_new (service)) {
+		/* FIXME: We are trusting object refcount will stay intact across
+		 * ontology changes. One situation where this is not true are
+		 * removal or properties with rdfs:Resource range.
+		 */
+		create_table_triggers (manager, iface, service, &internal_error);
+	}
+
+	if (internal_error) {
+		g_propagate_error (error, internal_error);
+		goto error_out;
 	}
 
 	if (copy_schedule) {
