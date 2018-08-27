@@ -4774,7 +4774,8 @@ data_manager_check_perform_cleanup (TrackerDataManager *manager)
 	count = 0;
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, NULL,
 	                                              "SELECT COUNT(*) FROM Resource WHERE Refcount <= 0 "
-						      "AND Resource.ID NOT IN (SELECT ID FROM Graph)");
+	                                              "AND Resource.ID > %d AND Resource.ID NOT IN (SELECT ID FROM Graph)",
+	                                              TRACKER_ONTOLOGIES_MAX_ID);
 	if (stmt) {
 		cursor = tracker_db_statement_start_cursor (stmt, NULL);
 		g_object_unref (stmt);
@@ -4808,7 +4809,8 @@ tracker_data_manager_dispose (GObject *object)
 			stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE,
 			                                              &error,
 			                                              "DELETE FROM Resource WHERE Refcount <= 0 "
-			                                              "AND Resource.ID NOT IN (SELECT ID FROM Graph)");
+			                                              "AND Resource.ID > %d AND Resource.ID NOT IN (SELECT ID FROM Graph)",
+			                                              TRACKER_ONTOLOGIES_MAX_ID);
 
 			if (stmt) {
 				tracker_db_statement_execute (stmt, &error);
