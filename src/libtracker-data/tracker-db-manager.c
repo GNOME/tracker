@@ -61,7 +61,7 @@
 #define TRACKER_DB_PAGE_SIZE_DONT_SET -1
 
 /* Set current database version we are working with */
-#define TRACKER_DB_VERSION_NOW        TRACKER_DB_VERSION_0_15_2
+#define TRACKER_DB_VERSION_NOW        TRACKER_DB_VERSION_2_1_3
 #define TRACKER_DB_VERSION_FILE       "db-version.txt"
 #define TRACKER_DB_LOCALE_FILE        "db-locale.txt"
 
@@ -99,7 +99,8 @@ typedef enum {
 	TRACKER_DB_VERSION_0_9_24,  /* nmo:PhoneMessage class */
 	TRACKER_DB_VERSION_0_9_34,  /* ontology cache */
 	TRACKER_DB_VERSION_0_9_38,  /* nie:url an inverse functional property */
-	TRACKER_DB_VERSION_0_15_2   /* fts4 */
+	TRACKER_DB_VERSION_0_15_2,  /* fts4 */
+	TRACKER_DB_VERSION_2_1_3,   /* Fix for https://gitlab.gnome.org/GNOME/tracker/issues/32 */
 } TrackerDBVersion;
 
 typedef struct {
