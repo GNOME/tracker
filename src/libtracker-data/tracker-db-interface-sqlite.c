@@ -55,6 +55,7 @@
 #include "tracker-db-interface-sqlite.h"
 #include "tracker-db-manager.h"
 #include "tracker-data-enum-types.h"
+#include "tracker-uuid.h"
 
 typedef struct {
 	TrackerDBStatement *head;
@@ -1366,6 +1367,50 @@ stmt_step (sqlite3_stmt *stmt)
 	return result;
 }
 
+static void
+function_sparql_uuid (sqlite3_context *context,
+                      int              argc,
+                      sqlite3_value   *argv[])
+{
+	gchar *uuid = NULL;
+	sqlite3_stmt *stmt;
+	sqlite3 *db;
+	gint result;
+
+	if (argc > 1) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	db = sqlite3_context_db_handle (context);
+
+	result = sqlite3_prepare_v2 (db, "SELECT ID FROM Resource WHERE Uri=?",
+				     -1, &stmt, NULL);
+	if (result != SQLITE_OK) {
+		sqlite3_result_error (context, sqlite3_errstr (result), -1);
+		return;
+	}
+
+	do {
+		g_clear_pointer (&uuid, g_free);
+		uuid = tracker_generate_uuid ();
+
+		sqlite3_reset (stmt);
+		sqlite3_bind_text (stmt, 1, uuid, -1, SQLITE_TRANSIENT);
+		result = stmt_step (stmt);
+	} while (result == SQLITE_ROW);
+
+	sqlite3_finalize (stmt);
+
+	if (result != SQLITE_DONE) {
+		sqlite3_result_error (context, sqlite3_errstr (result), -1);
+		g_free (uuid);
+		return;
+	}
+
+	sqlite3_result_text (context, uuid, -1, g_free);
+}
+
 static int
 check_interrupt (void *user_data)
 {
@@ -1430,6 +1475,8 @@ initialize_functions (TrackerDBInterface *db_interface)
 		{ "SparqlFloor", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_floor },
 		{ "SparqlRand", 0, SQLITE_ANY, function_sparql_rand },
+		/* UUID */
+		{ "SparqlUUID", 0, SQLITE_ANY, function_sparql_uuid },
 	};
 
 	for (i = 0; i < G_N_ELEMENTS (functions); i++) {
