@@ -37,6 +37,9 @@ G_BEGIN_DECLS
 gint                 tracker_data_query_resource_id   (TrackerDataManager  *manager,
                                                        TrackerDBInterface  *iface,
                                                        const gchar         *uri);
+gchar               *tracker_data_query_unused_uuid   (TrackerDataManager  *manager,
+                                                       TrackerDBInterface  *iface);
+
 TrackerDBCursor     *tracker_data_query_sparql_cursor (TrackerDataManager  *manager,
                                                        const gchar         *query,
                                                        GError             **error);

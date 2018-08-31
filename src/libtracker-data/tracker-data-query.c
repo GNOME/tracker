@@ -130,6 +130,39 @@ tracker_data_query_resource_id (TrackerDataManager *manager,
 	return id;
 }
 
+gchar *
+tracker_data_query_unused_uuid (TrackerDataManager *manager,
+                                TrackerDBInterface *iface)
+{
+	TrackerDBCursor *cursor = NULL;
+	TrackerDBStatement *stmt;
+	GError *error = NULL;
+	gchar *uuid = NULL;
+
+	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &error,
+	                                              "SELECT SparqlUUID()");
+
+	if (stmt) {
+		cursor = tracker_db_statement_start_cursor (stmt, &error);
+		g_object_unref (stmt);
+	}
+
+	if (cursor) {
+		if (tracker_db_cursor_iter_next (cursor, NULL, &error)) {
+			uuid = g_strdup (tracker_db_cursor_get_string (cursor, 0, NULL));
+		}
+
+		g_object_unref (cursor);
+	}
+
+	if (G_UNLIKELY (error)) {
+		g_critical ("Could not query resource ID: %s\n", error->message);
+		g_error_free (error);
+	}
+
+	return uuid;
+}
+
 
 TrackerDBCursor *
 tracker_data_query_sparql_cursor (TrackerDataManager  *manager,
