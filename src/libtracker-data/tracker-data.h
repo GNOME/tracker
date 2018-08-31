@@ -42,6 +42,7 @@
 #include "tracker-property.h"
 #include "tracker-sparql-query.h"
 #include "tracker-sparql.h"
+#include "tracker-uuid.h"
 
 #undef __LIBTRACKER_DATA_INSIDE__
 
