@@ -1647,6 +1647,9 @@ translate_Update (TrackerSparql  *sparql,
                   GError        **error)
 {
 	/* Update ::= Prologue ( Update1 ( ';' Update )? )?
+	 *
+	 * TRACKER EXTENSION:
+	 * ';' separator is made optional.
 	 */
 	_call_rule (sparql, NAMED_RULE_Prologue, error);
 
@@ -1659,9 +1662,10 @@ translate_Update (TrackerSparql  *sparql,
 		if (sparql->blank_nodes)
 			g_variant_builder_close (sparql->blank_nodes);
 
-		if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SEMICOLON)) {
+		_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SEMICOLON);
+
+		if (_check_in_rule (sparql, NAMED_RULE_Update))
 			_call_rule (sparql, NAMED_RULE_Update, error);
-		}
 	}
 
 	return TRUE;
