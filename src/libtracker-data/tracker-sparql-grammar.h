@@ -1451,8 +1451,12 @@ static const TrackerGrammarRule helper_Prologue_gte0[] = { OR(helper_Prologue_or
 static const TrackerGrammarRule rule_Prologue[] = { GTE0 (helper_Prologue_gte0), NIL };
 
 /* Update ::= Prologue ( Update1 ( ';' Update )? )?
+ *
+ * TRACKER EXTENSION:
+ * ';' separator is made optional.
  */
-static const TrackerGrammarRule helper_Update_seq_1[] = { L(SEMICOLON), R(Update), NIL };
+static const TrackerGrammarRule helper_Update_opt_3[] = { L(SEMICOLON), NIL };
+static const TrackerGrammarRule helper_Update_seq_1[] = { OPT(helper_Update_opt_3), R(Update), NIL };
 static const TrackerGrammarRule helper_Update_opt_1[] = { S (helper_Update_seq_1), NIL };
 static const TrackerGrammarRule helper_Update_seq_2[] = { R(Update1), OPT (helper_Update_opt_1), NIL };
 static const TrackerGrammarRule helper_Update_opt_2[] = { S(helper_Update_seq_2), NIL };
