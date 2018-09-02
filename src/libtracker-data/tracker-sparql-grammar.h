@@ -1245,6 +1245,10 @@ static const TrackerGrammarRule helper_DeleteClause_opt_1[] = { L(SILENT), NIL }
 static const TrackerGrammarRule rule_DeleteClause[] = { L(DELETE), OPT(helper_DeleteClause_opt_1), R(QuadPattern), NIL };
 
 /* Modify ::= ( 'WITH' iri )? ( DeleteClause InsertClause? | InsertClause ) UsingClause* 'WHERE' GroupGraphPattern
+ *
+ * TRACKER EXTENSION:
+ * Last part of the clause is:
+ * ('WHERE' GroupGraphPattern)?
  */
 static const TrackerGrammarRule helper_Modify_seq_1[] = { L(WITH), R(iri), NIL };
 static const TrackerGrammarRule helper_Modify_opt_1[] = { S(helper_Modify_seq_1), NIL };
@@ -1252,7 +1256,9 @@ static const TrackerGrammarRule helper_Modify_opt_2[] = { R(InsertClause), NIL }
 static const TrackerGrammarRule helper_Modify_seq_2[] = { R(DeleteClause), OPT(helper_Modify_opt_2), NIL };
 static const TrackerGrammarRule helper_Modify_or[] = { S(helper_Modify_seq_2), R(InsertClause), NIL };
 static const TrackerGrammarRule helper_Modify_gte0[] = { R(UsingClause), NIL };
-static const TrackerGrammarRule rule_Modify[] = { OPT(helper_Modify_opt_1), OR(helper_Modify_or), GTE0(helper_Modify_gte0), L(WHERE), R(GroupGraphPattern), NIL };
+static const TrackerGrammarRule helper_Modify_seq_3[] = { L(WHERE), R(GroupGraphPattern), NIL };
+static const TrackerGrammarRule helper_Modify_opt_3[] = { S(helper_Modify_seq_3), NIL };
+static const TrackerGrammarRule rule_Modify[] = { OPT(helper_Modify_opt_1), OR(helper_Modify_or), GTE0(helper_Modify_gte0), OPT(helper_Modify_opt_3), NIL };
 
 /* DeleteWhere ::= 'DELETE WHERE' QuadPattern
  */
