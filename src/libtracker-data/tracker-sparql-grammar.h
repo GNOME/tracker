@@ -1339,9 +1339,13 @@ static const TrackerGrammarRule rule_LimitOffsetClauses[] = { OR(helper_LimitOff
 
 /* OrderCondition ::= ( ( 'ASC' | 'DESC' ) BrackettedExpression )
  *                    | ( Constraint | Var )
+ *
+ * TRACKER EXTENSION:
+ * The first rule is turned into the more generic:
+ * ( ( 'ASC' | 'DESC' ) Expression )
  */
 static const TrackerGrammarRule helper_OrderCondition_or_1[] = { L(ASC), L(DESC), NIL };
-static const TrackerGrammarRule helper_OrderCondition_seq[] = { OR(helper_OrderCondition_or_1), R(BrackettedExpression), NIL };
+static const TrackerGrammarRule helper_OrderCondition_seq[] = { OR(helper_OrderCondition_or_1), R(Expression), NIL };
 static const TrackerGrammarRule helper_OrderCondition_or_2[] = { S(helper_OrderCondition_seq), R(Constraint), R(Var), NIL };
 static const TrackerGrammarRule rule_OrderCondition[] = { OR(helper_OrderCondition_or_2), NIL };
 
