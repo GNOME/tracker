@@ -2274,12 +2274,16 @@ translate_OrderCondition (TrackerSparql  *sparql,
 
 	/* OrderCondition ::= ( ( 'ASC' | 'DESC' ) BrackettedExpression )
 	 *                    | ( Constraint | Var )
+	 *
+	 * TRACKER EXTENSION:
+	 * plain Expression is also accepted, the last group is:
+	 * ( Constraint | Var | Expression )
 	 */
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ASC)) {
-		_call_rule (sparql, NAMED_RULE_BrackettedExpression, error);
+		_call_rule (sparql, NAMED_RULE_Expression, error);
 		order_str = "ASC ";
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DESC)) {
-		_call_rule (sparql, NAMED_RULE_BrackettedExpression, error);
+		_call_rule (sparql, NAMED_RULE_Expression, error);
 		order_str = "DESC ";
 	} else if (_check_in_rule (sparql, NAMED_RULE_Constraint)) {
 		_call_rule (sparql, NAMED_RULE_Constraint, error);
@@ -2656,8 +2660,7 @@ iterate_solution (TrackerSparql      *sparql,
 
 		sparql->solution_var_map = tracker_solution_get_bindings (solution);
 		retval = _postprocess_rule (sparql, node, NULL, error);
-		g_clear_pointer (&sparql->solution_var_map,
-		                 (GDestroyNotify) g_hash_table_unref);
+		g_clear_pointer (&sparql->solution_var_map, g_hash_table_unref);
 
 		tracker_data_update_buffer_might_flush (tracker_data_manager_get_data (sparql->data_manager),
 		                                        &flush_error);
