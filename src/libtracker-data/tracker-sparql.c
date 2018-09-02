@@ -2790,15 +2790,18 @@ static gboolean
 translate_InsertClause (TrackerSparql  *sparql,
                         GError        **error)
 {
+	TrackerToken old_graph;
+
 	/* InsertClause ::= 'INSERT' QuadPattern
 	 *
 	 * TRACKER EXTENSION:
 	 * Clause may start with:
-	 * 'INSERT' ('OR' 'REPLACE')? ('SILENT')?
+	 * 'INSERT' ('OR' 'REPLACE')? ('SILENT')? ('INTO' iri)?
 	 */
 	sparql->current_state.blank_node_map =
 		g_hash_table_new_full (g_str_hash, g_str_equal,
 		                       g_free, g_free);
+	old_graph = sparql->current_state.graph;
 
 	sparql->current_state.type = TRACKER_SPARQL_TYPE_INSERT;
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_INSERT);
@@ -2812,7 +2815,16 @@ translate_InsertClause (TrackerSparql  *sparql,
 
 	sparql->silent = _accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT);
 
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_INTO)) {
+		_call_rule (sparql, NAMED_RULE_iri, error);
+		_init_token (&sparql->current_state.graph,
+		             sparql->current_state.prev_node, sparql);
+	}
+
 	_call_rule (sparql, NAMED_RULE_QuadPattern, error);
+
+	tracker_token_unset (&sparql->current_state.graph);
+	sparql->current_state.graph = old_graph;
 
 	if (sparql->blank_nodes) {
 		GHashTableIter iter;
