@@ -1225,8 +1225,14 @@ static const TrackerGrammarRule helper_UsingClause_or[] = { R(iri), S(helper_Usi
 static const TrackerGrammarRule rule_UsingClause[] = { L(USING), OR(helper_UsingClause_or), NIL };
 
 /* InsertClause ::= 'INSERT' QuadPattern
+ *
+ * TRACKER EXTENSION:
+ * Clause may start with:
+ * 'INSERT' ('OR' 'REPLACE')?
  */
-static const TrackerGrammarRule rule_InsertClause[] = { L(INSERT), R(QuadPattern), NIL };
+static const TrackerGrammarRule helper_InsertClause_seq_1[] = { L(OR), L(REPLACE), NIL };
+static const TrackerGrammarRule helper_InsertClause_opt_1[] = { S(helper_InsertClause_seq_1), NIL };
+static const TrackerGrammarRule rule_InsertClause[] = { L(INSERT), OPT(helper_InsertClause_opt_1), R(QuadPattern), NIL };
 
 /* DeleteClause ::= 'DELETE' QuadPattern
  */
