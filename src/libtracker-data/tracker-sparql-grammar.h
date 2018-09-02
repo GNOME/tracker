@@ -1228,15 +1228,21 @@ static const TrackerGrammarRule rule_UsingClause[] = { L(USING), OR(helper_Using
  *
  * TRACKER EXTENSION:
  * Clause may start with:
- * 'INSERT' ('OR' 'REPLACE')?
+ * 'INSERT' ('OR' 'REPLACE')? ('SILENT')?
  */
 static const TrackerGrammarRule helper_InsertClause_seq_1[] = { L(OR), L(REPLACE), NIL };
 static const TrackerGrammarRule helper_InsertClause_opt_1[] = { S(helper_InsertClause_seq_1), NIL };
-static const TrackerGrammarRule rule_InsertClause[] = { L(INSERT), OPT(helper_InsertClause_opt_1), R(QuadPattern), NIL };
+static const TrackerGrammarRule helper_InsertClause_opt_2[] = { L(SILENT), NIL };
+static const TrackerGrammarRule rule_InsertClause[] = { L(INSERT), OPT(helper_InsertClause_opt_1), OPT(helper_InsertClause_opt_2), R(QuadPattern), NIL };
 
 /* DeleteClause ::= 'DELETE' QuadPattern
+ *
+ * TRACKER EXTENSION:
+ * Clause may start too with:
+ * 'DELETE' 'SILENT'
  */
-static const TrackerGrammarRule rule_DeleteClause[] = { L(DELETE), R(QuadPattern), NIL };
+static const TrackerGrammarRule helper_DeleteClause_opt_1[] = { L(SILENT), NIL };
+static const TrackerGrammarRule rule_DeleteClause[] = { L(DELETE), OPT(helper_DeleteClause_opt_1), R(QuadPattern), NIL };
 
 /* Modify ::= ( 'WITH' iri )? ( DeleteClause InsertClause? | InsertClause ) UsingClause* 'WHERE' GroupGraphPattern
  */

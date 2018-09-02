@@ -112,6 +112,8 @@ struct _TrackerSparql
 	GVariantBuilder *blank_nodes;
 	GHashTable *solution_var_map;
 
+	gboolean silent;
+
 	struct {
 		TrackerContext *context;
 		TrackerContext *select_context;
@@ -2759,9 +2761,15 @@ translate_DeleteClause (TrackerSparql  *sparql,
                         GError        **error)
 {
 	/* DeleteClause ::= 'DELETE' QuadPattern
+	 *
+	 * TRACKER EXTENSION:
+	 * Clause may start too with:
+	 * 'DELETE' 'SILENT'
 	 */
 	sparql->current_state.type = TRACKER_SPARQL_TYPE_DELETE;
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_DELETE);
+	sparql->silent = _accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT);
+
 	_call_rule (sparql, NAMED_RULE_QuadPattern, error);
 
 	return TRUE;
@@ -2775,7 +2783,7 @@ translate_InsertClause (TrackerSparql  *sparql,
 	 *
 	 * TRACKER EXTENSION:
 	 * Clause may start with:
-	 * 'INSERT' ('OR' 'REPLACE')?
+	 * 'INSERT' ('OR' 'REPLACE')? ('SILENT')?
 	 */
 	sparql->current_state.blank_node_map =
 		g_hash_table_new_full (g_str_hash, g_str_equal,
@@ -2790,6 +2798,8 @@ translate_InsertClause (TrackerSparql  *sparql,
 	} else {
 		sparql->current_state.type = TRACKER_SPARQL_TYPE_INSERT;
 	}
+
+	sparql->silent = _accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT);
 
 	_call_rule (sparql, NAMED_RULE_QuadPattern, error);
 
@@ -4218,10 +4228,11 @@ translate_GraphNode (TrackerSparql  *sparql,
 
 	tracker_token_unset (&sparql->current_state.object);
 
-	if (inner_error) {
+	if (inner_error && !sparql->silent) {
 		g_propagate_error (error, inner_error);
 		return FALSE;
 	} else {
+		g_clear_error (&inner_error);
 		return TRUE;
 	}
 }
