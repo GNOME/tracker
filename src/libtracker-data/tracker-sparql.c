@@ -2706,6 +2706,10 @@ translate_Modify (TrackerSparql  *sparql,
 	gboolean retval = TRUE;
 
 	/* Modify ::= ( 'WITH' iri )? ( DeleteClause InsertClause? | InsertClause ) UsingClause* 'WHERE' GroupGraphPattern
+	 *
+	 * TRACKER EXTENSION:
+	 * Last part of the clause is:
+	 * ('WHERE' GroupGraphPattern)?
 	 */
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_WITH)) {
 		_call_rule (sparql, NAMED_RULE_iri, error);
@@ -2725,11 +2729,15 @@ translate_Modify (TrackerSparql  *sparql,
 		_call_rule (sparql, NAMED_RULE_UsingClause, error);
 	}
 
-	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_WHERE);
-	where = _skip_rule (sparql, NAMED_RULE_GroupGraphPattern);
-	solution = get_solution_for_pattern (sparql, where, error);
-	if (!solution)
-		return FALSE;
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_WHERE)) {
+		where = _skip_rule (sparql, NAMED_RULE_GroupGraphPattern);
+		solution = get_solution_for_pattern (sparql, where, error);
+		if (!solution)
+			return FALSE;
+	} else {
+		solution = tracker_solution_new (1);
+		tracker_solution_add_value (solution, "");
+	}
 
 	if (delete) {
 		retval = iterate_solution (sparql, solution, delete, error);
