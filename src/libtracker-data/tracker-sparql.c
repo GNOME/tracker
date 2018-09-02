@@ -2772,6 +2772,10 @@ translate_InsertClause (TrackerSparql  *sparql,
                         GError        **error)
 {
 	/* InsertClause ::= 'INSERT' QuadPattern
+	 *
+	 * TRACKER EXTENSION:
+	 * Clause may start with:
+	 * 'INSERT' ('OR' 'REPLACE')?
 	 */
 	sparql->current_state.blank_node_map =
 		g_hash_table_new_full (g_str_hash, g_str_equal,
@@ -2779,6 +2783,14 @@ translate_InsertClause (TrackerSparql  *sparql,
 
 	sparql->current_state.type = TRACKER_SPARQL_TYPE_INSERT;
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_INSERT);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OR)) {
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_REPLACE);
+		sparql->current_state.type = TRACKER_SPARQL_TYPE_UPDATE;
+	} else {
+		sparql->current_state.type = TRACKER_SPARQL_TYPE_INSERT;
+	}
+
 	_call_rule (sparql, NAMED_RULE_QuadPattern, error);
 
 	if (sparql->blank_nodes) {
