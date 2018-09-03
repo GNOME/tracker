@@ -3,9 +3,6 @@
 # libtracker-sparql-query.
 libtracker_data_vala = static_library('tracker-sparql-query',
     'tracker-vala-namespace.vala',
-    'tracker-sparql-query.vala',
-    'tracker-sparql-expression.vala',
-    'tracker-sparql-pattern.vala',
     'tracker-sparql-scanner.vala',
     'tracker-turtle-reader.vala',
     '../libtracker-common/libtracker-common.vapi',
