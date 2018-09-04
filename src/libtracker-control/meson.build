@@ -31,6 +31,13 @@ tracker_control_gir = gnome.generate_gir(libtracker_control,
     install: true,
     extra_args: '--c-include=libtracker-control/tracker-control.h')
 
+gnome.generate_vapi(
+      'tracker-control-' + tracker_api_version,
+      sources : tracker_control_gir[0],
+      packages : 'gio-2.0',
+      install : true,
+    )
+
 configure_file(
     input: 'tracker-control.pc.in',
     output: 'tracker-control-@0@.pc'.format(tracker_api_version),
