@@ -52,6 +52,9 @@ if have_network_manager
     tracker_miner_dependencies += network_manager
 endif
 
+mapfile = 'tracker-miner-2.map'
+vflag = '-Wl,--version-script,@0@/@1@'.format(meson.current_source_dir(), mapfile)
+
 libtracker_miner = library(
     'tracker-miner-' + tracker_api_version,
     miner_enums[0], miner_enums[1], miner_sources,
@@ -63,6 +66,7 @@ libtracker_miner = library(
     # https://github.com/mesonbuild/meson/issues/671
     include_directories: [commoninc, configinc, srcinc],
     dependencies: [tracker_sparql_dep] + tracker_miner_dependencies,
+    link_args: vflag,
     link_with: [libtracker_miner_private],
 )
 

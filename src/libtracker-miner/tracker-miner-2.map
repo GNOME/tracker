@@ -1,0 +1,13 @@
+{
+global:
+  tracker_data_provider_*;
+  tracker_miner_*;
+  tracker_indexing_tree_*;
+  tracker_directory_flags_*;
+  tracker_filter_type_*;
+  tracker_filter_policy_*;
+  tracker_network_type_*;
+  tracker_decorator_*;
+local:
+  *;
+};
