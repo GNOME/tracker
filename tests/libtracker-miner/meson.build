@@ -19,11 +19,11 @@ libtracker_miner_test_c_args = [
   '-DTEST',
   '-DTEST_DATA_DIR="@0@/data"'.format(meson.current_source_dir()),
   '-DTEST_MINERS_DIR="@0@/mock-miners"'.format(meson.current_source_dir()),
-  '-DTEST_ONTOLOGIES_DIR="@0@/src/ontologies/nepomuk"'.format(meson.source_root()),
+  '-DTEST_ONTOLOGIES_DIR="@0@/src/ontologies/nepomuk"'.format(source_root),
 ]
 
 libtracker_miner_test_environment = environment()
-libtracker_miner_test_environment.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', '@0@/src/libtracker-common/stop-words'.format(meson.source_root()))
+libtracker_miner_test_environment.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', '@0@/src/libtracker-common/stop-words'.format(source_root))
 
 libtracker_miner_test_deps = [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep]
 

@@ -12,7 +12,7 @@ libtracker_data_slow_tests = [
 ]
 
 libtracker_data_test_environment = environment()
-libtracker_data_test_environment.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', '@0@/src/libtracker-common/stop-words'.format(meson.source_root()))
+libtracker_data_test_environment.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', '@0@/src/libtracker-common/stop-words'.format(source_root))
 
 libtracker_data_test_deps = [tracker_common_dep, tracker_data_dep]
 
