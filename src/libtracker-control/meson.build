@@ -2,6 +2,9 @@ sources = ['tracker-miner-manager.c']
 
 headers = ['tracker-control.h', 'tracker-miner-manager.h']
 
+mapfile = 'tracker-control-2.map'
+vflag = '-Wl,--version-script,@0@/@1@'.format(meson.current_source_dir(), mapfile)
+
 libtracker_control = library('tracker-control-' + tracker_api_version,
     sources,
     tracker_common_enum_header,
@@ -13,6 +16,7 @@ libtracker_control = library('tracker-control-' + tracker_api_version,
     # https://github.com/mesonbuild/meson/issues/671
     dependencies: [gio, tracker_sparql_dep, tracker_miner_dep],
     include_directories: [commoninc, configinc, srcinc],
+    link_args: vflag,
     link_with: libtracker_common,
 )
 
