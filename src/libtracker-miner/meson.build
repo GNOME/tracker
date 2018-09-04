@@ -86,6 +86,13 @@ tracker_miner_gir = gnome.generate_gir(libtracker_miner,
         '--c-include=libtracker-miner/tracker-miner.h',
     ])
 
+gnome.generate_vapi(
+      'tracker-miner-' + tracker_api_version,
+      sources : tracker_miner_gir[0],
+      packages : 'gio-2.0',
+      install : true,
+    )
+
 configure_file(
     input: 'tracker-miner.pc.in',
     output: 'tracker-miner-@0@.pc'.format(tracker_api_version),
