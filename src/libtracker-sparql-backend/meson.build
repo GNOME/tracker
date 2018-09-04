@@ -1,3 +1,6 @@
+mapfile = 'tracker-sparql-2.map'
+vflag = '-Wl,--version-script,@0@/@1@'.format(meson.current_source_dir(), mapfile)
+
 libtracker_sparql = library('tracker-sparql-' + tracker_api_version,
     '../libtracker-common/libtracker-common.vapi',
     '../libtracker-data/libtracker-data.vapi',
@@ -9,6 +12,7 @@ libtracker_sparql = library('tracker-sparql-' + tracker_api_version,
     install: true,
     install_rpath: tracker_internal_libs_dir,
 
+    link_args: vflag,
     link_whole: [libtracker_sparql_intermediate_c, libtracker_sparql_intermediate_vala],
 
     # We need to pass this because link_whole doesn't trigger the .vapi

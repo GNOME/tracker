@@ -1,0 +1,15 @@
+{
+global:
+  tracker_sparql_connection_*;
+  tracker_sparql_cursor_*;
+  tracker_sparql_builder_*;
+  tracker_sparql_escape_*;
+  tracker_sparql_error_*;
+  tracker_sparql_value_*;
+  tracker_sparql_get_*;
+  tracker_namespace_manager_*;
+  tracker_resource_*;
+  tracker_notifier_*;
+local:
+  *;
+};
