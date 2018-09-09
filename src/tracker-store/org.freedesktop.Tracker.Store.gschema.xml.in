@@ -21,13 +21,13 @@ Boston, MA  02110-1301, USA.
   <schema id="org.freedesktop.Tracker.Store" path="/org/freedesktop/tracker/store/" gettext-domain="tracker">
     <key name="verbosity" enum="org.freedesktop.Tracker.TrackerVerbosity">
       <default>'errors'</default>
-      <_summary>Log verbosity</_summary>
-      <_description>Log verbosity.</_description>
+      <summary>Log verbosity</summary>
+      <description>Log verbosity.</description>
     </key>
     <key name="graphupdated-delay" type="i">
       <default>1000</default>
-      <_summary>GraphUpdated delay</_summary>
-      <_description>Period in milliseconds between GraphUpdated signals being emitted when indexed data has changed inside the database.</_description>
+      <summary>GraphUpdated delay</summary>
+      <description>Period in milliseconds between GraphUpdated signals being emitted when indexed data has changed inside the database.</description>
     </key>
   </schema>
 </schemalist>

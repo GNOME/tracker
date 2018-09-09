@@ -1,6 +1,6 @@
 [Desktop Entry]
-_Name=Tracker Store
-_Comment=Metadata database store and lookup manager
+Name=Tracker Store
+Comment=Metadata database store and lookup manager
 Exec=gdbus call -e -d org.freedesktop.DBus -o /org/freedesktop/DBus -m org.freedesktop.DBus.StartServiceByName org.freedesktop.Tracker1 0
 Terminal=false
 Type=Application

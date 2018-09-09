@@ -23,37 +23,37 @@ Boston, MA  02110-1301, USA.
     <key name="max-word-length" type="i">
       <default>30</default>
       <range min="0" max="200"/>
-      <_summary>Maximum length of a word to be indexed</_summary>
-      <_description>Words with more characters than this length will be ignored by the indexer.</_description>
+      <summary>Maximum length of a word to be indexed</summary>
+      <description>Words with more characters than this length will be ignored by the indexer.</description>
     </key>
 
     <key name="max-words-to-index" type="i">
       <default>10000</default>
-      <_summary>Maximum number of words to index in a document</_summary>
-      <_description>Indexer will read only this maximum number of words from a single document.</_description>
+      <summary>Maximum number of words to index in a document</summary>
+      <description>Indexer will read only this maximum number of words from a single document.</description>
     </key>
 
     <key name="enable-stemmer" type="b">
-      <_summary>Enable stemmer</_summary>
-      <_description>Simplify the words to their root to provide more results. E.g. “shelves” and “shelf” to “shel”</_description>
+      <summary>Enable stemmer</summary>
+      <description>Simplify the words to their root to provide more results. E.g. “shelves” and “shelf” to “shel”</description>
       <default>false</default>
     </key>
 
     <key name="enable-unaccent" type="b">
-      <_summary>Enable unaccent</_summary>
-      <_description>Translate accented characters to the equivalent unaccented. E.g. “Idéa” to “Idea” for improved matching. </_description>
+      <summary>Enable unaccent</summary>
+      <description>Translate accented characters to the equivalent unaccented. E.g. “Idéa” to “Idea” for improved matching. </description>
       <default>true</default>
     </key>
 
     <key name="ignore-numbers" type="b">
-      <_summary>Ignore numbers</_summary>
-      <_description>If enabled, numbers will not be indexed.</_description>
+      <summary>Ignore numbers</summary>
+      <description>If enabled, numbers will not be indexed.</description>
       <default>true</default>
     </key>
 
     <key name="ignore-stop-words" type="b">
-      <_summary>Ignore stop words</_summary>
-      <_description>If enabled, the words listed in the stop-words list are ignored. E.g. common words like “the”, “yes”, “no”, etc.</_description>
+      <summary>Ignore stop words</summary>
+      <description>If enabled, the words listed in the stop-words list are ignored. E.g. common words like “the”, “yes”, “no”, etc.</description>
       <default>true</default>
     </key>
 

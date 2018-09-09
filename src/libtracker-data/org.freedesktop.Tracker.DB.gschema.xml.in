@@ -21,13 +21,13 @@ Boston, MA  02110-1301, USA.
   <schema id="org.freedesktop.Tracker.DB" path="/org/freedesktop/tracker/db/" gettext-domain="tracker">
     <key name="journal-chunk-size" type="i">
       <default>50</default>
-      <_summary>Maximum size of journal</_summary>
-      <_description>Size of the journal at rotation in MB. Use -1 to disable rotating.</_description>
+      <summary>Maximum size of journal</summary>
+      <description>Size of the journal at rotation in MB. Use -1 to disable rotating.</description>
     </key>
     <key name="journal-rotate-destination" type="s">
       <default>''</default>
-      <_summary>Location of journal pieces</_summary>
-      <_description>Where to store a journal chunk when it hits the max size.</_description>
+      <summary>Location of journal pieces</summary>
+      <description>Where to store a journal chunk when it hits the max size.</description>
     </key>
   </schema>
 </schemalist>
