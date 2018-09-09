@@ -1,19 +1,4 @@
 # List of source files that should NOT be translated.
 # Please keep this file sorted alphabetically.
-src/tracker-needle/tracker-needle.c
-src/tracker-needle/tracker-needle.desktop.in
-src/tracker-needle/tracker-query.c
-src/tracker-needle/tracker-stats.c
-src/tracker-needle/tracker-tags-view.c
-src/tracker-needle/tracker-utils.c
-src/tracker-needle/tracker-view.c
-src/tracker-preferences/tracker-preferences.c
-src/tracker-preferences/tracker-preferences.desktop.in
-src/tracker-search-bar/GNOME_Search_Bar_Applet.server.in
-src/tracker-status-icon/tracker-status-icon.desktop.in
 src/tracker-store/tracker-main.c
 src/tracker-store/tracker-store.desktop.in
-src/tracker-extract/tracker-extract.desktop.in
-src/miners/apps/tracker-miner-apps.desktop.in
-src/miners/fs/tracker-miner-fs.desktop.in
-src/miners/rss/tracker-miner-rss.desktop.in
