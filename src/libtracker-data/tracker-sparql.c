@@ -95,7 +95,7 @@ struct _TrackerSparql
 {
 	GObject parent_instance;
 	TrackerDataManager *data_manager;
-	const gchar *sparql;
+	gchar *sparql;
 
 	TrackerNodeTree *tree;
 	GError *parser_error;
@@ -165,6 +165,8 @@ tracker_sparql_finalize (GObject *object)
 
 	if (sparql->blank_nodes)
 		g_variant_builder_unref (sparql->blank_nodes);
+
+	g_free (sparql->sparql);
 
 	G_OBJECT_CLASS (tracker_sparql_parent_class)->finalize (object);
 }
@@ -6210,7 +6212,7 @@ tracker_sparql_new (TrackerDataManager *manager,
 
 	sparql = g_object_new (TRACKER_TYPE_SPARQL, NULL);
 	sparql->data_manager = g_object_ref (manager);
-	sparql->sparql = query;
+	sparql->sparql = tracker_unescape_unichars (query, -1);
 
 	tree = tracker_sparql_parse_query (sparql->sparql, -1, NULL,
 					   &sparql->parser_error);
@@ -6353,7 +6355,7 @@ tracker_sparql_new_update (TrackerDataManager *manager,
 
 	sparql = g_object_new (TRACKER_TYPE_SPARQL, NULL);
 	sparql->data_manager = g_object_ref (manager);
-	sparql->sparql = query;
+	sparql->sparql = tracker_unescape_unichars (query, -1);
 
 	tree = tracker_sparql_parse_update (sparql->sparql, -1, &len,
 	                                    &sparql->parser_error);
