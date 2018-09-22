@@ -589,6 +589,11 @@ static const TrackerGrammarRule rule_RDFLiteral[] = { R(String), OPT(helper_RDFL
  *               | 'AVG' '(' 'DISTINCT'? Expression ')'
  *               | 'SAMPLE' '(' 'DISTINCT'? Expression ')'
  *               | 'GROUP_CONCAT' '(' 'DISTINCT'? Expression ( ';' 'SEPARATOR' '=' String )? ')'
+ *
+ * TRACKER EXTENSION:
+ *
+ * GROUP_CONCAT accepts a comma separator, so effectively:
+ * 'GROUP_CONCAT' '(' 'DISTINCT'? Expression ( ( ';' 'SEPARATOR' '=' | ',') String )? ')'
  */
 static const TrackerGrammarRule helper_Aggregate_opt_1[] = { L(DISTINCT), NIL };
 static const TrackerGrammarRule helper_Aggregate_or_1[] = { L(GLOB), R(Expression), NIL };
@@ -598,7 +603,9 @@ static const TrackerGrammarRule helper_Aggregate_seq_3[] = { L(MIN), L(OPEN_PARE
 static const TrackerGrammarRule helper_Aggregate_seq_4[] = { L(MAX), L(OPEN_PARENS), OPT(helper_Aggregate_opt_1), R(Expression), L(CLOSE_PARENS), NIL };
 static const TrackerGrammarRule helper_Aggregate_seq_5[] = { L(AVG), L(OPEN_PARENS), OPT(helper_Aggregate_opt_1), R(Expression), L(CLOSE_PARENS), NIL };
 static const TrackerGrammarRule helper_Aggregate_seq_6[] = { L(SAMPLE), L(OPEN_PARENS), OPT(helper_Aggregate_opt_1), R(Expression), L(CLOSE_PARENS), NIL };
-static const TrackerGrammarRule helper_Aggregate_seq_in_opt[] = { L(SEMICOLON), L(SEPARATOR), L(OP_EQ), R(String), NIL };
+static const TrackerGrammarRule helper_Aggregate_seq_8[] = { L(SEMICOLON), L(SEPARATOR), L(OP_EQ), NIL };
+static const TrackerGrammarRule helper_Aggregate_or_3[] = { S(helper_Aggregate_seq_8), L(COMMA), NIL };
+static const TrackerGrammarRule helper_Aggregate_seq_in_opt[] = { OR(helper_Aggregate_or_3), R(String), NIL };
 static const TrackerGrammarRule helper_Aggregate_opt_2[] = { S(helper_Aggregate_seq_in_opt), NIL };
 static const TrackerGrammarRule helper_Aggregate_seq_7[] = { L(GROUP_CONCAT), L(OPEN_PARENS), OPT(helper_Aggregate_opt_1), R(Expression), OPT(helper_Aggregate_opt_2), L(CLOSE_PARENS), NIL };
 static const TrackerGrammarRule helper_Aggregate_or_2[] = { S(helper_Aggregate_seq_1), S(helper_Aggregate_seq_2), S(helper_Aggregate_seq_3), S(helper_Aggregate_seq_4), S(helper_Aggregate_seq_5), S(helper_Aggregate_seq_6), S(helper_Aggregate_seq_7), NIL };
