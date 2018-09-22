@@ -5678,20 +5678,44 @@ translate_Aggregate (TrackerSparql  *sparql,
 
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GROUP_CONCAT)) {
+		TrackerStringBuilder *str, *old;
+		gboolean separator = FALSE;
+
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "GROUP_CONCAT(");
 
 		if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DISTINCT))
 			_append_string (sparql, "DISTINCT ");
 
+		str = _append_placeholder (sparql);
+		old = tracker_sparql_swap_builder (sparql, str);
+
 		_call_rule (sparql, NAMED_RULE_Expression, error);
+
+		if (sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_RESOURCE)
+			convert_expression_to_string (sparql, sparql->current_state.expression_type);
+
+		tracker_sparql_swap_builder (sparql, old);
 
 		if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SEMICOLON)) {
 			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_SEPARATOR);
 			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OP_EQ);
-			_append_string (sparql, ", ");
+			separator = TRUE;
+		} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA)) {
+			separator = TRUE;
+		}
 
+		if (separator) {
+			TrackerBinding *binding;
+
+			_append_string (sparql, ", ");
 			_call_rule (sparql, NAMED_RULE_String, error);
+
+			binding = _convert_terminal (sparql);
+			tracker_select_context_add_literal_binding (TRACKER_SELECT_CONTEXT (sparql->context),
+								    TRACKER_LITERAL_BINDING (binding));
+			_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+			g_object_unref (binding);
 		}
 
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
