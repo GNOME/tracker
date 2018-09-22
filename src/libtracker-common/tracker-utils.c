@@ -236,3 +236,92 @@ tracker_utf8_truncate (const gchar  *str,
 
 	return retv;
 }
+
+static gboolean
+range_is_xdigit (const gchar *str,
+                 gssize       start,
+                 gssize       end)
+{
+	gssize i;
+
+	g_assert (end > start);
+
+	for (i = start; i < end; i++) {
+		if (!g_ascii_isxdigit (str[i]))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+static gunichar
+xdigit_to_unichar (const gchar *str,
+		   gssize       start,
+		   gssize       end)
+{
+	gunichar ch = 0;
+	gssize i;
+
+	g_assert (end > start);
+
+	for (i = start; i < end; i++) {
+		ch |= g_ascii_xdigit_value (str[i]);
+		if (i < end - 1)
+			ch <<= 4;
+	}
+
+	return ch;
+}
+
+/*
+ * tracker_unescape_unichars:
+ * @str: Input string
+ * @len: Length
+ *
+ * Unescapes \u and \U sequences into their respective unichars.
+ *
+ * Returns: a string with no \u nor \U sequences
+ */
+gchar *
+tracker_unescape_unichars (const gchar  *str,
+                           gssize        len)
+{
+	GString *copy;
+	gunichar ch;
+	gssize i = 0;
+
+	if (len < 0)
+		len = strlen (str);
+
+	copy = g_string_new (NULL);
+
+	while (i < len) {
+		if (len - i >= 2 &&
+		    str[i] == '\\' &&
+		    g_ascii_tolower (str[i + 1]) != 'u') {
+			/* Not an unicode escape sequence */
+			g_string_append_c (copy, str[i]);
+			g_string_append_c (copy, str[i + 1]);
+			i += 2;
+		} if (len - i >= 6 &&
+		    strncmp (&str[i], "\\u", 2) == 0 &&
+		    range_is_xdigit (&str[i], 2, 6)) {
+			ch = xdigit_to_unichar (&str[i], 2, 6);
+			g_string_append_unichar (copy, ch);
+			i += 6;
+			continue;
+		} else if (len - i >= 10 &&
+		           strncmp (&str[i], "\\U", 2) == 0 &&
+		           range_is_xdigit (&str[i], 2, 10)) {
+			ch = xdigit_to_unichar (&str[i], 2, 10);
+			g_string_append_unichar (copy, ch);
+			i += 10;
+			continue;
+		} else {
+			g_string_append_c (copy, str[i]);
+			i++;
+		}
+	}
+
+	return g_string_free (copy, FALSE);
+}
