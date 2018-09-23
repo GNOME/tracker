@@ -3553,6 +3553,9 @@ translate_ArgList (TrackerSparql  *sparql,
 	 */
 	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL)) {
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS)) {
+		if (_check_in_rule (sparql, NAMED_RULE_ArgList))
+			_raise (PARSE, "Recursive ArgList is not allowed", "ArgList");
+
 		if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DISTINCT)) {
 			_unimplemented ("DISTINCT in ArgList");
 		}
@@ -4870,7 +4873,20 @@ handle_xpath_function (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (g_str_equal (function, FN_NS "string-join")) {
 		_append_string (sparql, "SparqlStringJoin (");
+		_step (sparql);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+
+		if (!_check_in_rule (sparql, NAMED_RULE_ArgList))
+			_raise (PARSE, "List of strings to join must be surrounded by parentheses", "fn:string-join");
+
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
+
+		while (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA)) {
+			_append_string (sparql, ", ");
+			_call_rule (sparql, NAMED_RULE_Expression, error);
+		}
+
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 		_append_string (sparql, ") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (g_str_equal (function, FN_NS "replace")) {
