@@ -243,6 +243,7 @@ typedef enum {
 	LITERAL_NAMED,
 	LITERAL_NOT,
 	LITERAL_NOW,
+	LITERAL_NULL, /* TRACKER EXTENSION */
 	LITERAL_OFFSET,
 	LITERAL_OP_AND,
 	LITERAL_OP_EQ,
@@ -392,6 +393,7 @@ static const gchar literals[][N_LITERALS] = {
 	"named", /* LITERAL_NAMED */
 	"not", /* LITERAL_NOT */
 	"now", /* LITERAL_NOW */
+	"null", /* LITERAL_NULL (TRACKER EXTENSION) */
 	"offset", /* LITERAL_OFFSET */
 	"&&", /* LITERAL_OP_AND */
 	"=", /* LITERAL_OP_EQ */
@@ -891,8 +893,12 @@ static const TrackerGrammarRule helper_GraphNodePath_or[] = { R(VarOrTerm), R(Tr
 static const TrackerGrammarRule rule_GraphNodePath[] = { OR(helper_GraphNodePath_or), NIL };
 
 /* GraphNode ::= VarOrTerm | TriplesNode
+ *
+ * TRACKER EXTENSION:
+ * Literal 'NULL' is also accepted, rule is effectively:
+ *   VarOrTerm | TriplesNode | 'NULL'
  */
-static const TrackerGrammarRule helper_GraphNode_or[] = { R(VarOrTerm), R(TriplesNode), NIL };
+static const TrackerGrammarRule helper_GraphNode_or[] = { R(VarOrTerm), R(TriplesNode), L(NULL), NIL };
 static const TrackerGrammarRule rule_GraphNode[] = { OR(helper_GraphNode_or), NIL };
 
 /* CollectionPath ::= '(' GraphNodePath+ ')'
