@@ -4204,6 +4204,10 @@ translate_GraphNode (TrackerSparql  *sparql,
 	GError *inner_error = NULL;
 
 	/* GraphNode ::= VarOrTerm | TriplesNode
+	 *
+	 * TRACKER EXTENSION:
+	 * Literal 'NULL' is also accepted, rule is effectively:
+	 *   VarOrTerm | TriplesNode | 'NULL'
 	 */
 	if (_check_in_rule (sparql, NAMED_RULE_VarOrTerm)) {
 		sparql->current_state.token = &sparql->current_state.object;
@@ -4213,6 +4217,10 @@ translate_GraphNode (TrackerSparql  *sparql,
 		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_TriplesNode, error);
 		g_assert (!tracker_token_is_empty (&sparql->current_state.object));
+	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_NULL)) {
+		if (sparql->current_state.type != TRACKER_SPARQL_TYPE_UPDATE)
+			_raise (PARSE, "«NULL» literal is not allowed in this mode", "NULL");
+		/* Object token is left unset on purpose */
 	} else {
 		g_assert_not_reached ();
 	}
