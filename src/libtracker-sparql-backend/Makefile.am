@@ -35,7 +35,7 @@ libtracker_sparql_@TRACKER_API_VERSION@_la_LDFLAGS =   \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-export-symbols-regex '^(tracker_sparql_(connection|cursor|builder|escape|error|value|get)_.*|tracker_namespace_manager_.*|tracker_resource_.*|tracker_notifier_.*)'
 
-EXTRA_DIST = meson.build
+EXTRA_DIST = meson.build tracker-sparql-2.map
 
 # Introspection foo
 -include $(INTROSPECTION_MAKEFILE)
