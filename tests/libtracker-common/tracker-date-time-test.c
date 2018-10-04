@@ -172,6 +172,11 @@ test_date_time_from_string ()
         g_assert_cmpint (tracker_date_time_get_time (&value), ==, 1319812980);
         g_assert_cmpint (tracker_date_time_get_offset (&value), ==, 10800);
 
+        /* Single-digit hour offset */
+        tracker_date_time_set_from_string (&value, "2011-10-28T17:43:00+3:00", &error);
+        g_assert (!error);
+        g_assert_cmpint (tracker_date_time_get_time (&value), ==, 1319812980);
+        g_assert_cmpint (tracker_date_time_get_offset (&value), ==, 10800);
 
         /* Negative offset */
         tracker_date_time_set_from_string (&value, "2011-10-28T17:43:00-03:00", &error);
@@ -239,7 +244,7 @@ test_date_time_get_local_time ()
 }
 
 gint
-main (gint argc, gchar **argv) 
+main (gint argc, gchar **argv)
 {
         g_test_init (&argc, &argv, NULL);
 
