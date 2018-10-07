@@ -37,6 +37,9 @@
 #define XSD_NS "http://www.w3.org/2001/XMLSchema#"
 #define FN_NS "http://www.w3.org/2005/xpath-functions#"
 
+/* FIXME: This should be dependent on SQLITE_LIMIT_VARIABLE_NUMBER */
+#define MAX_VARIABLES 999
+
 enum {
 	TIME_FORMAT_SECONDS,
 	TIME_FORMAT_MINUTES,
@@ -57,6 +60,7 @@ static gboolean helper_translate_time (TrackerSparql  *sparql,
 static TrackerDBStatement * prepare_query (TrackerDBInterface    *iface,
                                            TrackerStringBuilder  *str,
                                            GPtrArray             *literals,
+                                           gboolean               cached,
                                            GError               **error);
 static inline TrackerVariable * _ensure_variable (TrackerSparql *sparql,
                                                   const gchar   *name);
@@ -113,6 +117,7 @@ struct _TrackerSparql
 	GHashTable *solution_var_map;
 
 	gboolean silent;
+	gboolean cacheable;
 
 	struct {
 		TrackerContext *context;
@@ -405,6 +410,32 @@ _append_placeholder (TrackerSparql *sparql)
 	return tracker_string_builder_append_placeholder (sparql->current_state.sql);
 }
 
+static inline gchar *
+_escape_sql_string (const gchar *str)
+{
+	int i, j, len;
+	gchar *copy;
+
+	len = strlen (str);
+	copy = g_new (char, (len * 2) + 1);
+	i = j = 0;
+
+	while (i < len) {
+		if (str[i] == '\'') {
+			copy[j] = '\'';
+			j++;
+		}
+
+		copy[j] = str[i];
+		i++;
+		j++;
+	}
+
+	copy[j] = '\0';
+
+	return copy;
+}
+
 static inline void
 _append_literal_sql (TrackerSparql         *sparql,
                      TrackerLiteralBinding *binding)
@@ -414,14 +445,53 @@ _append_literal_sql (TrackerSparql         *sparql,
 	idx = tracker_select_context_get_literal_binding_index (TRACKER_SELECT_CONTEXT (sparql->context),
 	                                                        binding);
 
+	if (idx >= MAX_VARIABLES) {
+		sparql->cacheable = FALSE;
+	}
+
 	if (TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_RESOURCE) {
 		_append_string_printf (sparql,
-		                       "COALESCE ((SELECT ID FROM Resource WHERE Uri = ?%d), 0) ",
-		                       idx + 1);
+		                       "COALESCE ((SELECT ID FROM Resource WHERE Uri = ");
+	}
+
+	if (!sparql->cacheable) {
+		gchar *escaped, *full_str;
+
+		switch (TRACKER_BINDING (binding)->data_type) {
+		case TRACKER_PROPERTY_TYPE_DATE:
+			full_str = g_strdup_printf ("%sT00:00:00Z", binding->literal);
+			escaped = _escape_sql_string (full_str);
+			_append_string (sparql, escaped);
+			g_free (escaped);
+			g_free (full_str);
+			break;
+		case TRACKER_PROPERTY_TYPE_DATETIME:
+		case TRACKER_PROPERTY_TYPE_STRING:
+		case TRACKER_PROPERTY_TYPE_RESOURCE:
+			escaped = _escape_sql_string (binding->literal);
+			_append_string (sparql, escaped);
+			g_free (escaped);
+			break;
+		case TRACKER_PROPERTY_TYPE_BOOLEAN:
+			if (g_str_equal (binding->literal, "1") ||
+			    g_ascii_strcasecmp (binding->literal, "true") == 0) {
+				_append_string (sparql, "1");
+			} else {
+				_append_string (sparql, "0");
+			}
+			break;
+		case TRACKER_PROPERTY_TYPE_UNKNOWN:
+		case TRACKER_PROPERTY_TYPE_INTEGER:
+		case TRACKER_PROPERTY_TYPE_DOUBLE:
+			_append_string (sparql, binding->literal);
+			break;
+		}
 	} else {
 		_append_string_printf (sparql, "?%d ", idx + 1);
 	}
 
+	if (TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_RESOURCE)
+		_append_string_printf (sparql, "), 0) ");
 	if (TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_STRING)
 		_append_string (sparql, "COLLATE " TRACKER_COLLATION_NAME " ");
 }
@@ -2612,6 +2682,7 @@ get_solution_for_pattern (TrackerSparql      *sparql,
 	iface = tracker_data_manager_get_writable_db_interface (sparql->data_manager);
 	stmt = prepare_query (iface, sparql->sql,
 	                      TRACKER_SELECT_CONTEXT (sparql->context)->literal_bindings,
+	                      FALSE,
 	                      error);
 	g_clear_object (&sparql->context);
 
@@ -6222,6 +6293,7 @@ tracker_sparql_init (TrackerSparql *sparql)
 	                                            g_free, g_free);
 	sparql->var_names = g_ptr_array_new_with_free_func (g_free);
 	sparql->var_types = g_array_new (FALSE, FALSE, sizeof (TrackerPropertyType));
+	sparql->cacheable = TRUE;
 }
 
 TrackerSparql*
@@ -6255,6 +6327,7 @@ static TrackerDBStatement *
 prepare_query (TrackerDBInterface    *iface,
                TrackerStringBuilder  *str,
                GPtrArray             *literals,
+               gboolean               cached,
                GError               **error)
 {
 	TrackerDBStatement *stmt;
@@ -6263,7 +6336,9 @@ prepare_query (TrackerDBInterface    *iface,
 
 	query = tracker_string_builder_to_string (str);
 	stmt = tracker_db_interface_create_statement (iface,
-	                                              TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT,
+	                                              cached ?
+	                                              TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT :
+	                                              TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
 	                                              error, query);
 	g_free (query);
 
@@ -6348,6 +6423,7 @@ tracker_sparql_execute_cursor (TrackerSparql  *sparql,
 	iface = tracker_data_manager_get_db_interface (sparql->data_manager);
 	stmt = prepare_query (iface, sparql->sql,
 	                      TRACKER_SELECT_CONTEXT (sparql->context)->literal_bindings,
+	                      sparql->cacheable,
 	                      error);
 	if (!stmt)
 		return NULL;
