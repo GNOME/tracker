@@ -63,16 +63,16 @@ libtracker_data = library('tracker-data',
     tracker_data_enums[1],
     tracker_gresources[0],
     tracker_gresources[1],
+    # We do *not* want --no-undefined here, this library uses
+    # symbols from libtracker-sparql, but does not mean it should
+    # be linked to it.
+    override_options: ['b_lundef=false'],
     c_args: tracker_c_args,
     install: true,
     install_dir: tracker_internal_libs_dir,
     # This doesn't depend on tracker_common_dep because of
     # https://github.com/mesonbuild/meson/issues/671
     link_with: [libtracker_data_vala],
-    # We do *not* want --no-undefined here, this library uses
-    # symbols from libtracker-sparql, but does not mean it should
-    # be linked to it.
-    override_options: ['b_lundef=false'],
     dependencies: tracker_data_dependencies + [unicode_library],
     include_directories: [commoninc, configinc, srcinc],
 )
