@@ -72,7 +72,7 @@ libtracker_data = library('tracker-data',
     # We do *not* want --no-undefined here, this library uses
     # symbols from libtracker-sparql, but does not mean it should
     # be linked to it.
-    override_options: ['b_lundef=false'],
+    #override_options: ['b_lundef=false'],
     dependencies: tracker_data_dependencies + [unicode_library],
     include_directories: [commoninc, configinc, srcinc],
 )
