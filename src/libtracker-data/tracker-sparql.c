@@ -60,6 +60,7 @@ static gboolean helper_translate_time (TrackerSparql  *sparql,
 static TrackerDBStatement * prepare_query (TrackerDBInterface    *iface,
                                            TrackerStringBuilder  *str,
                                            GPtrArray             *literals,
+                                           GHashTable            *parameters,
                                            gboolean               cached,
                                            GError               **error);
 static inline TrackerVariable * _ensure_variable (TrackerSparql *sparql,
@@ -119,6 +120,8 @@ struct _TrackerSparql
 	gboolean silent;
 	gboolean cacheable;
 
+	GHashTable *parameters;
+
 	struct {
 		TrackerContext *context;
 		TrackerContext *select_context;
@@ -151,6 +154,7 @@ tracker_sparql_finalize (GObject *object)
 
 	g_object_unref (sparql->data_manager);
 	g_hash_table_destroy (sparql->prefix_map);
+	g_hash_table_destroy (sparql->parameters);
 
 	if (sparql->sql)
 		tracker_string_builder_free (sparql->sql);
@@ -555,6 +559,7 @@ _extract_node_string (TrackerParserNode *node,
 		switch (rule->data.terminal) {
 		case TERMINAL_TYPE_VAR1:
 		case TERMINAL_TYPE_VAR2:
+		case TERMINAL_TYPE_PARAMETERIZED_VAR:
 			add_start = 1;
 			break;
 		case TERMINAL_TYPE_STRING_LITERAL1:
@@ -618,14 +623,22 @@ _dup_last_string (TrackerSparql *sparql)
 static inline TrackerBinding *
 _convert_terminal (TrackerSparql *sparql)
 {
+	const TrackerGrammarRule *rule;
 	TrackerBinding *binding;
 	gchar *str;
 
 	str = _dup_last_string (sparql);
 	g_assert (str != NULL);
 
-	binding = tracker_literal_binding_new (str, NULL);
-	tracker_binding_set_data_type (binding, sparql->current_state.expression_type);
+	rule = tracker_parser_node_get_rule (sparql->current_state.prev_node);
+
+	if (tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR)) {
+		binding = tracker_parameter_binding_new (str);
+	} else {
+		binding = tracker_literal_binding_new (str, NULL);
+		tracker_binding_set_data_type (binding, sparql->current_state.expression_type);
+	}
+
 	g_free (str);
 
 	return binding;
@@ -669,18 +682,18 @@ _ensure_variable (TrackerSparql *sparql,
 	TrackerVariable *var;
 
 	var = tracker_select_context_ensure_variable (TRACKER_SELECT_CONTEXT (sparql->context),
-						      name);
+	                                              name);
 	tracker_context_add_variable_ref (sparql->current_state.context, var);
 
 	return var;
 }
 
 static inline TrackerVariable *
-_extract_node_variable (TrackerParserNode *node,
-			TrackerSparql     *sparql)
+_extract_node_variable (TrackerParserNode  *node,
+                        TrackerSparql      *sparql)
 {
 	const TrackerGrammarRule *rule = tracker_parser_node_get_rule (node);
-	TrackerVariable *variable;
+	TrackerVariable *variable = NULL;
 	gchar *str;
 
 	if (!tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL, TERMINAL_TYPE_VAR1) &&
@@ -2682,7 +2695,7 @@ get_solution_for_pattern (TrackerSparql      *sparql,
 	iface = tracker_data_manager_get_writable_db_interface (sparql->data_manager);
 	stmt = prepare_query (iface, sparql->sql,
 	                      TRACKER_SELECT_CONTEXT (sparql->context)->literal_bindings,
-	                      FALSE,
+	                      NULL, FALSE,
 	                      error);
 	g_clear_object (&sparql->context);
 
@@ -5916,12 +5929,17 @@ translate_NumericLiteralUnsigned (TrackerSparql  *sparql,
                                   GError        **error)
 {
 	/* NumericLiteralUnsigned ::= INTEGER | DECIMAL | DOUBLE
+	 *
+	 * TRACKER EXTENSION:
+	 * The terminal PARAMETERIZED_VAR is additionally accepted
 	 */
 	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER)) {
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 	} else if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_DOUBLE) ||
 	           _accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_DECIMAL)) {
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DOUBLE;
+	} else if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR)) {
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_UNKNOWN;
 	} else {
 		g_assert_not_reached ();
 	}
@@ -5934,12 +5952,17 @@ translate_NumericLiteralPositive (TrackerSparql  *sparql,
                                   GError        **error)
 {
 	/* NumericLiteralPositive ::= INTEGER_POSITIVE | DECIMAL_POSITIVE | DOUBLE_POSITIVE
+	 *
+	 * TRACKER EXTENSION:
+	 * The terminal PARAMETERIZED_VAR is additionally accepted
 	 */
 	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER_POSITIVE)) {
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 	} else if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_DECIMAL_POSITIVE) ||
 	           _accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_DOUBLE_POSITIVE)) {
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DOUBLE;
+	} else if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR)) {
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_UNKNOWN;
 	} else {
 		g_assert_not_reached ();
 	}
@@ -5952,12 +5975,17 @@ translate_NumericLiteralNegative (TrackerSparql  *sparql,
                                   GError        **error)
 {
 	/* NumericLiteralNegative ::= INTEGER_NEGATIVE | DECIMAL_NEGATIVE | DOUBLE_NEGATIVE
+	 *
+	 * TRACKER EXTENSION:
+	 * The terminal PARAMETERIZED_VAR is additionally accepted
 	 */
 	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER_NEGATIVE)) {
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 	} else if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_DECIMAL_NEGATIVE) ||
 	           _accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_DOUBLE_NEGATIVE)) {
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DOUBLE;
+	} else if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR)) {
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_UNKNOWN;
 	} else {
 		g_assert_not_reached ();
 	}
@@ -5970,11 +5998,16 @@ translate_BooleanLiteral (TrackerSparql  *sparql,
                           GError        **error)
 {
 	/* BooleanLiteral ::= 'true' | 'false'
+	 *
+	 * TRACKER EXTENSION:
+	 * The terminal PARAMETERIZED_VAR is additionally accepted
 	 */
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_TRUE) ||
 	    _accept (sparql, RULE_TYPE_LITERAL, LITERAL_FALSE)) {
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 		return TRUE;
+	} else if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR)) {
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_UNKNOWN;
 	} else {
 		g_assert_not_reached ();
 	}
@@ -5987,6 +6020,9 @@ translate_String (TrackerSparql  *sparql,
                   GError        **error)
 {
 	/* String ::= STRING_LITERAL1 | STRING_LITERAL2 | STRING_LITERAL_LONG1 | STRING_LITERAL_LONG2
+	 *
+	 * TRACKER EXTENSION:
+	 * The terminal PARAMETERIZED_VAR is additionally accepted
 	 */
 	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_STRING_LITERAL1) ||
 	    _accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_STRING_LITERAL2) ||
@@ -5994,6 +6030,8 @@ translate_String (TrackerSparql  *sparql,
 	    _accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_STRING_LITERAL_LONG2)) {
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 		return TRUE;
+	} else if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR)) {
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_UNKNOWN;
 	} else {
 		g_assert_not_reached ();
 	}
@@ -6291,6 +6329,7 @@ tracker_sparql_init (TrackerSparql *sparql)
 {
 	sparql->prefix_map = g_hash_table_new_full (g_str_hash, g_str_equal,
 	                                            g_free, g_free);
+	sparql->parameters = g_hash_table_new (g_str_hash, g_str_equal);
 	sparql->var_names = g_ptr_array_new_with_free_func (g_free);
 	sparql->var_types = g_array_new (FALSE, FALSE, sizeof (TrackerPropertyType));
 	sparql->cacheable = TRUE;
@@ -6327,6 +6366,7 @@ static TrackerDBStatement *
 prepare_query (TrackerDBInterface    *iface,
                TrackerStringBuilder  *str,
                GPtrArray             *literals,
+	       GHashTable            *parameters,
                gboolean               cached,
                GError               **error)
 {
@@ -6352,7 +6392,23 @@ prepare_query (TrackerDBInterface    *iface,
 		binding = g_ptr_array_index (literals, i);
 		prop_type = TRACKER_BINDING (binding)->data_type;
 
-		if (prop_type == TRACKER_PROPERTY_TYPE_BOOLEAN) {
+		if (TRACKER_IS_PARAMETER_BINDING (binding)) {
+			const gchar *name;
+			GValue *value = NULL;
+
+			name = TRACKER_PARAMETER_BINDING (binding)->name;
+
+			if (parameters)
+				value = g_hash_table_lookup (parameters, name);
+
+			if (value) {
+				tracker_db_statement_bind_value (stmt, i, value);
+			} else {
+				g_set_error (error, TRACKER_SPARQL_ERROR,
+					     TRACKER_SPARQL_ERROR_TYPE,
+					     "Parameter '%s' has no given value", name);
+			}
+		} else if (prop_type == TRACKER_PROPERTY_TYPE_BOOLEAN) {
 			if (g_str_equal (binding->literal, "1") ||
 			    g_ascii_strcasecmp (binding->literal, "true") == 0) {
 				tracker_db_statement_bind_int (stmt, i, 1);
@@ -6403,6 +6459,7 @@ prepare_query (TrackerDBInterface    *iface,
 
 TrackerSparqlCursor *
 tracker_sparql_execute_cursor (TrackerSparql  *sparql,
+                               GHashTable     *parameters,
                                GError        **error)
 {
 	TrackerDBStatement *stmt;
@@ -6423,6 +6480,7 @@ tracker_sparql_execute_cursor (TrackerSparql  *sparql,
 	iface = tracker_data_manager_get_db_interface (sparql->data_manager);
 	stmt = prepare_query (iface, sparql->sql,
 	                      TRACKER_SELECT_CONTEXT (sparql->context)->literal_bindings,
+			      parameters,
 	                      sparql->cacheable,
 	                      error);
 	if (!stmt)

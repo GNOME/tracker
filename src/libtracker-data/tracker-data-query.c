@@ -176,7 +176,7 @@ tracker_data_query_sparql_cursor (TrackerDataManager  *manager,
 
 	sparql_query = tracker_sparql_new (manager, query);
 
-	cursor = tracker_sparql_execute_cursor (sparql_query, error);
+	cursor = tracker_sparql_execute_cursor (sparql_query, NULL, error);
 
 	g_object_unref (sparql_query);
 
