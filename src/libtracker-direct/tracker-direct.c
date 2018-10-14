@@ -437,7 +437,7 @@ tracker_direct_connection_query (TrackerSparqlConnection  *self,
 
 	g_mutex_lock (&priv->mutex);
 	query = tracker_sparql_new (priv->data_manager, sparql);
-	cursor = tracker_sparql_execute_cursor (query, error);
+	cursor = tracker_sparql_execute_cursor (query, NULL, error);
 	g_object_unref (query);
 
 	if (cursor)

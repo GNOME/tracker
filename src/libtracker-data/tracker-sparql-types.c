@@ -25,7 +25,8 @@
 enum {
 	TOKEN_TYPE_NONE,
 	TOKEN_TYPE_LITERAL,
-	TOKEN_TYPE_VARIABLE
+	TOKEN_TYPE_VARIABLE,
+	TOKEN_TYPE_PARAMETER,
 };
 
 /* Helper structs */
@@ -189,10 +190,20 @@ tracker_token_variable_init (TrackerToken    *token,
 }
 
 void
+tracker_token_parameter_init (TrackerToken *token,
+			      const gchar  *parameter)
+{
+	token->type = TOKEN_TYPE_PARAMETER;
+	token->content.parameter = g_strdup (parameter);
+}
+
+void
 tracker_token_unset (TrackerToken *token)
 {
 	if (token->type == TOKEN_TYPE_LITERAL)
 		g_clear_pointer (&token->content.literal, g_free);
+	else if (token->type == TOKEN_TYPE_PARAMETER)
+		g_clear_pointer (&token->content.parameter, g_free);
 	token->type = TOKEN_TYPE_NONE;
 }
 
@@ -215,6 +226,14 @@ tracker_token_get_variable (TrackerToken *token)
 {
 	if (token->type == TOKEN_TYPE_VARIABLE)
 		return token->content.var;
+	return NULL;
+}
+
+const gchar *
+tracker_token_get_parameter (TrackerToken *token)
+{
+	if (token->type == TOKEN_TYPE_PARAMETER)
+		return token->content.parameter;
 	return NULL;
 }
 
@@ -419,6 +438,45 @@ tracker_literal_binding_new (const gchar      *literal,
 	return binding;
 }
 
+/* Parameter binding */
+G_DEFINE_TYPE (TrackerParameterBinding, tracker_parameter_binding, TRACKER_TYPE_LITERAL_BINDING)
+
+static void
+tracker_parameter_binding_finalize (GObject *object)
+{
+	TrackerParameterBinding *binding = TRACKER_PARAMETER_BINDING (object);
+
+	g_free (binding->name);
+
+	G_OBJECT_CLASS (tracker_parameter_binding_parent_class)->finalize (object);
+}
+
+static void
+tracker_parameter_binding_class_init (TrackerParameterBindingClass *klass)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+	object_class->finalize = tracker_parameter_binding_finalize;
+}
+
+static void
+tracker_parameter_binding_init (TrackerParameterBinding *binding)
+{
+}
+
+TrackerBinding *
+tracker_parameter_binding_new (const gchar      *name,
+			       TrackerDataTable *table)
+{
+	TrackerBinding *binding;
+
+	binding = g_object_new (TRACKER_TYPE_PARAMETER_BINDING, NULL);
+	binding->table = table;
+	TRACKER_PARAMETER_BINDING (binding)->name = g_strdup (name);
+
+	return binding;
+}
+
 /* Variable binding */
 G_DEFINE_TYPE (TrackerVariableBinding, tracker_variable_binding, TRACKER_TYPE_BINDING)
 
@@ -590,6 +648,15 @@ TrackerContext *
 tracker_select_context_new (void)
 {
 	return g_object_new (TRACKER_TYPE_SELECT_CONTEXT, NULL);
+}
+
+TrackerVariable *
+tracker_select_context_lookup_variable (TrackerSelectContext *context,
+                                        const gchar          *name)
+{
+	if (!context->variables)
+		return NULL;
+	return g_hash_table_lookup (context->variables, name);
 }
 
 TrackerVariable *

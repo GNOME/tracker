@@ -31,6 +31,10 @@
 #define TRACKER_LITERAL_BINDING(o)    (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_LITERAL_BINDING, TrackerLiteralBinding))
 #define TRACKER_IS_LITERAL_BINDING(o) (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_LITERAL_BINDING))
 
+#define TRACKER_TYPE_PARAMETER_BINDING  (tracker_parameter_binding_get_type ())
+#define TRACKER_PARAMETER_BINDING(o)    (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_PARAMETER_BINDING, TrackerParameterBinding))
+#define TRACKER_IS_PARAMETER_BINDING(o) (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_PARAMETER_BINDING))
+
 #define TRACKER_TYPE_VARIABLE_BINDING  (tracker_variable_binding_get_type ())
 #define TRACKER_VARIABLE_BINDING(o)    (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_VARIABLE_BINDING, TrackerVariableBinding))
 #define TRACKER_IS_VARIABLE_BINDING(o) (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_VARIABLE_BINDING))
@@ -51,6 +55,8 @@ typedef struct _TrackerBinding TrackerBinding;
 typedef struct _TrackerBindingClass TrackerBindingClass;
 typedef struct _TrackerLiteralBinding TrackerLiteralBinding;
 typedef struct _TrackerLiteralBindingClass TrackerLiteralBindingClass;
+typedef struct _TrackerParameterBinding TrackerParameterBinding;
+typedef struct _TrackerParameterBindingClass TrackerParameterBindingClass;
 typedef struct _TrackerVariableBinding TrackerVariableBinding;
 typedef struct _TrackerVariableBindingClass TrackerVariableBindingClass;
 typedef struct _TrackerContext TrackerContext;
@@ -95,6 +101,16 @@ struct _TrackerLiteralBindingClass {
 	TrackerBindingClass parent_class;
 };
 
+/* Represents a mapping of a SPARQL parameter variable to a user-provided value */
+struct _TrackerParameterBinding {
+	TrackerLiteralBinding parent_instance;
+	gchar *name;
+};
+
+struct _TrackerParameterBindingClass {
+	TrackerLiteralBindingClass parent_class;
+};
+
 /* Represents a mapping of a SPARQL variable to a SQL table and column */
 struct _TrackerVariableBinding {
 	TrackerBinding parent_instance;
@@ -117,6 +133,7 @@ struct _TrackerToken {
 	guint type;
 	union {
 		gchar *literal;
+		gchar *parameter;
 		TrackerVariable *var;
 	} content;
 };
@@ -225,6 +242,11 @@ GType            tracker_literal_binding_get_type (void) G_GNUC_CONST;
 TrackerBinding * tracker_literal_binding_new (const gchar      *literal,
 					      TrackerDataTable *table);
 
+/* Parameter binding */
+GType            tracker_parameter_binding_get_type (void) G_GNUC_CONST;
+TrackerBinding * tracker_parameter_binding_new (const gchar      *name,
+						TrackerDataTable *table);
+
 /* Variable binding */
 GType            tracker_variable_binding_get_type (void) G_GNUC_CONST;
 TrackerBinding * tracker_variable_binding_new (TrackerVariable  *variable,
@@ -249,15 +271,18 @@ TrackerVariableBinding * tracker_variable_get_sample_binding (TrackerVariable *v
 
 /* Token */
 void tracker_token_literal_init  (TrackerToken    *token,
-                                  const gchar     *literal);
+				  const gchar     *literal);
 void tracker_token_variable_init (TrackerToken    *token,
                                   TrackerVariable *variable);
-void tracker_token_unset         (TrackerToken *token);
+void tracker_token_parameter_init (TrackerToken   *token,
+				   const gchar    *pameter);
+void tracker_token_unset (TrackerToken *token);
 
 gboolean           tracker_token_is_empty     (TrackerToken *token);
 const gchar      * tracker_token_get_literal  (TrackerToken *token);
 TrackerVariable  * tracker_token_get_variable (TrackerToken *token);
 const gchar      * tracker_token_get_idstring (TrackerToken *token);
+const gchar      * tracker_token_get_parameter (TrackerToken *token);
 
 /* Predicate variable */
 TrackerPredicateVariable *tracker_predicate_variable_new (void);
@@ -298,6 +323,8 @@ gboolean tracker_context_lookup_variable_ref (TrackerContext  *context,
 /* Select context */
 GType            tracker_select_context_get_type (void) G_GNUC_CONST;
 TrackerContext * tracker_select_context_new (void);
+TrackerVariable * tracker_select_context_lookup_variable (TrackerSelectContext *context,
+                                                          const gchar          *name);
 TrackerVariable * tracker_select_context_ensure_variable (TrackerSelectContext *context,
 							  const gchar          *name);
 TrackerVariable * tracker_select_context_add_generated_variable (TrackerSelectContext *context);
