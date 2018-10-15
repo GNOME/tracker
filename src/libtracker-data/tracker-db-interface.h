@@ -128,6 +128,9 @@ void                    tracker_db_statement_bind_null               (TrackerDBS
 void                    tracker_db_statement_bind_text               (TrackerDBStatement         *stmt,
                                                                       int                         index,
                                                                       const gchar                *value);
+void                    tracker_db_statement_bind_value              (TrackerDBStatement         *stmt,
+                                                                      int                         index,
+								      const GValue               *value);
 void                    tracker_db_statement_execute                 (TrackerDBStatement         *stmt,
                                                                       GError                    **error);
 TrackerDBCursor *       tracker_db_statement_start_cursor            (TrackerDBStatement         *stmt,
