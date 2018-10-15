@@ -21,6 +21,7 @@
 #include "config.h"
 
 #include "tracker-direct.h"
+#include "tracker-direct-statement.h"
 #include <libtracker-data/tracker-data.h>
 #include <libtracker-data/tracker-sparql.h>
 
@@ -479,6 +480,15 @@ tracker_direct_connection_query_finish (TrackerSparqlConnection  *self,
 	return g_task_propagate_pointer (G_TASK (res), error);
 }
 
+static TrackerSparqlStatement *
+tracker_direct_connection_query_statement (TrackerSparqlConnection  *self,
+                                           const gchar              *query,
+                                           GCancellable             *cancellable,
+                                           GError                  **error)
+{
+	return TRACKER_SPARQL_STATEMENT (tracker_direct_statement_new (self, query, error));
+}
+
 static void
 tracker_direct_connection_update (TrackerSparqlConnection  *self,
                                   const gchar              *sparql,
@@ -744,6 +754,7 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 	sparql_connection_class->query = tracker_direct_connection_query;
 	sparql_connection_class->query_async = tracker_direct_connection_query_async;
 	sparql_connection_class->query_finish = tracker_direct_connection_query_finish;
+	sparql_connection_class->query_statement = tracker_direct_connection_query_statement;
 	sparql_connection_class->update = tracker_direct_connection_update;
 	sparql_connection_class->update_async = tracker_direct_connection_update_async;
 	sparql_connection_class->update_finish = tracker_direct_connection_update_finish;
