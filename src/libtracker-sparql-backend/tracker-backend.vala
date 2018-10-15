@@ -81,6 +81,16 @@ class Tracker.Sparql.Backend : Connection {
 		}
 	}
 
+	public override Statement? query_statement (string sparql, Cancellable? cancellable = null) throws Sparql.Error {
+		debug ("%s(): '%s'", GLib.Log.METHOD, sparql);
+		if (direct != null) {
+			return direct.query_statement (sparql, cancellable);
+		} else {
+			warning ("Interface 'query_statement' not implemented on dbus interface");
+			return null;
+		}
+	}
+
 	public override void update (string sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError, GLib.Error {
 		debug ("%s(priority:%d): '%s'", GLib.Log.METHOD, priority, sparql);
 		if (bus == null) {
