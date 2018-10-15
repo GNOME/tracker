@@ -18,6 +18,7 @@ libtracker_sparql_intermediate_vala = static_library('tracker-sparql-intermediat
     'tracker-builder.vala',
     'tracker-connection.vala',
     'tracker-cursor.vala',
+    'tracker-statement.vala',
     'tracker-utils.vala',
     vala_header: 'tracker-generated-no-checks.h',
     c_args: tracker_c_args,

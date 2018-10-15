@@ -6,6 +6,7 @@ global:
   tracker_sparql_escape_*;
   tracker_sparql_error_*;
   tracker_sparql_value_*;
+  tracker_sparql_statement_*;
   tracker_sparql_get_*;
   tracker_namespace_manager_*;
   tracker_resource_*;

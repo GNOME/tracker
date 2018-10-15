@@ -635,4 +635,16 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * Since: 2.0
 	 */
 	public extern static DBusConnection? get_dbus_connection ();
+
+	/**
+	 * tracker_sparql_connection_query_statement:
+	 *
+	 * Prepares the given @sparql as a #TrackerSparqlStatement.
+	 *
+	 * Since: 2.2
+	 */
+	public virtual Statement query_statement (string sparql, Cancellable? cancellable = null) throws Sparql.Error {
+		warning ("Interface 'query_statement' not implemented");
+		return null;
+	}
 }
