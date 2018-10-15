@@ -2719,6 +2719,49 @@ tracker_db_statement_bind_text (TrackerDBStatement *stmt,
 }
 
 void
+tracker_db_statement_bind_value (TrackerDBStatement *stmt,
+				 int                 index,
+				 const GValue       *value)
+{
+	GType type;
+
+	g_return_if_fail (TRACKER_IS_DB_STATEMENT (stmt));
+
+	g_assert (!stmt->stmt_is_used);
+
+	tracker_db_interface_lock (stmt->db_interface);
+
+	type = G_VALUE_TYPE (value);
+
+	if (type == G_TYPE_INT) {
+		sqlite3_bind_int64 (stmt->stmt, index + 1, g_value_get_int (value));
+	} else if (type == G_TYPE_INT64) {
+		sqlite3_bind_int64 (stmt->stmt, index + 1, g_value_get_int64 (value));
+	} else if (type == G_TYPE_DOUBLE) {
+		sqlite3_bind_double (stmt->stmt, index + 1, g_value_get_double (value));
+	} else if (type == G_TYPE_FLOAT) {
+		sqlite3_bind_double (stmt->stmt, index + 1, g_value_get_float (value));
+	} else if (type == G_TYPE_STRING) {
+		sqlite3_bind_text (stmt->stmt, index + 1,
+				   g_value_get_string (value), -1, SQLITE_TRANSIENT);
+	} else {
+		GValue dest = G_VALUE_INIT;
+
+		g_value_init (&dest, G_TYPE_STRING);
+
+		if (g_value_transform (value, &dest)) {
+			sqlite3_bind_text (stmt->stmt, index + 1,
+					   g_value_get_string (&dest), -1, SQLITE_TRANSIENT);
+			g_value_unset (&dest);
+		} else {
+			g_assert_not_reached ();
+		}
+	}
+
+	tracker_db_interface_unlock (stmt->db_interface);
+}
+
+void
 tracker_db_cursor_rewind (TrackerDBCursor *cursor)
 {
 	TrackerDBInterface *iface;
