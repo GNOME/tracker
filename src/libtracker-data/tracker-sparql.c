@@ -3761,21 +3761,23 @@ translate_TriplesSameSubject (TrackerSparql  *sparql,
 	/* TriplesSameSubject ::= VarOrTerm PropertyListNotEmpty | TriplesNode PropertyList
 	 */
 	rule = _current_rule (sparql);
+	sparql->current_state.token = &sparql->current_state.subject;
 
 	if (rule == NAMED_RULE_VarOrTerm) {
-		sparql->current_state.token = &sparql->current_state.subject;
 		_call_rule (sparql, rule, error);
 		g_assert (!tracker_token_is_empty (&sparql->current_state.subject));
+		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_PropertyListNotEmpty, error);
 	} else if (rule == NAMED_RULE_TriplesNode) {
-		sparql->current_state.token = &sparql->current_state.subject;
 		_call_rule (sparql, rule, error);
 		g_assert (!tracker_token_is_empty (&sparql->current_state.subject));
+		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_PropertyList, error);
 	}
 
 	tracker_token_unset (&sparql->current_state.subject);
 	sparql->current_state.subject = old_subject;
+	sparql->current_state.token = NULL;
 
 	return TRUE;
 }
@@ -3826,9 +3828,11 @@ static gboolean
 translate_PropertyListNotEmpty (TrackerSparql  *sparql,
                                 GError        **error)
 {
-	TrackerToken old_pred;
+	TrackerToken old_pred, *prev_token;
 
 	old_pred = sparql->current_state.predicate;
+	prev_token = sparql->current_state.token;
+	sparql->current_state.token = &sparql->current_state.object;
 
 	/* PropertyListNotEmpty ::= Verb ObjectList ( ';' ( Verb ObjectList )? )*
 	 */
@@ -3853,6 +3857,7 @@ translate_PropertyListNotEmpty (TrackerSparql  *sparql,
 	}
 
 	sparql->current_state.predicate = old_pred;
+	sparql->current_state.token = prev_token;
 
 	return TRUE;
 }
@@ -3906,23 +3911,23 @@ translate_TriplesSameSubjectPath (TrackerSparql  *sparql,
 	/* TriplesSameSubjectPath ::= VarOrTerm PropertyListPathNotEmpty | TriplesNodePath PropertyListPath
 	 */
 	rule = _current_rule (sparql);
+	sparql->current_state.token = &sparql->current_state.subject;
 
 	if (rule == NAMED_RULE_VarOrTerm) {
-		sparql->current_state.token = &sparql->current_state.subject;
 		_call_rule (sparql, rule, error);
 		g_assert (!tracker_token_is_empty (&sparql->current_state.subject));
-
+		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_PropertyListPathNotEmpty, error);
 	} else if (rule == NAMED_RULE_TriplesNodePath) {
-		sparql->current_state.token = &sparql->current_state.subject;
 		_call_rule (sparql, rule, error);
 		g_assert (!tracker_token_is_empty (&sparql->current_state.subject));
-
+		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_PropertyListPath, error);
 	}
 
 	tracker_token_unset (&sparql->current_state.subject);
 	sparql->current_state.subject = old_subject;
+	sparql->current_state.token = NULL;
 
 	return TRUE;
 }
@@ -3945,13 +3950,15 @@ translate_PropertyListPathNotEmpty (TrackerSparql  *sparql,
                                     GError        **error)
 {
 	TrackerGrammarNamedRule rule;
-	TrackerToken old_predicate;
+	TrackerToken old_predicate, *prev_token;
 	TrackerParserNode *verb;
 
 	/* PropertyListPathNotEmpty ::= ( VerbPath | VerbSimple ) ObjectListPath ( ';' ( ( VerbPath | VerbSimple ) ObjectList )? )*
 	 */
 	rule = _current_rule (sparql);
 	old_predicate = sparql->current_state.predicate;
+	prev_token = sparql->current_state.token;
+	sparql->current_state.token = &sparql->current_state.object;
 
 	if (rule == NAMED_RULE_VerbPath || rule == NAMED_RULE_VerbSimple) {
 		verb = _skip_rule (sparql, rule);
@@ -3982,6 +3989,7 @@ translate_PropertyListPathNotEmpty (TrackerSparql  *sparql,
 	}
 
 	sparql->current_state.predicate = old_predicate;
+	sparql->current_state.token = prev_token;
 
 	return TRUE;
 }
@@ -4047,6 +4055,7 @@ translate_Path (TrackerSparql  *sparql,
 	/* Path ::= PathAlternative
 	 */
 	_call_rule (sparql, NAMED_RULE_PathAlternative, error);
+
 	return TRUE;
 }
 
@@ -4109,11 +4118,17 @@ translate_PathElt (TrackerSparql  *sparql,
 		_call_rule (sparql, NAMED_RULE_PathMod, error);
 	}
 
-	if (!_postprocess_rule (sparql, sparql->current_state.object_list,
-				NULL, error))
-		return FALSE;
-
-	return TRUE;
+	if (!tracker_token_is_empty (sparql->current_state.token)) {
+		return _add_quad (sparql,
+				  &sparql->current_state.graph,
+				  &sparql->current_state.subject,
+				  &sparql->current_state.predicate,
+				  &sparql->current_state.object,
+				  error);
+	} else {
+		return _postprocess_rule (sparql, sparql->current_state.object_list,
+					  NULL, error);
+	}
 }
 
 static gboolean
@@ -4320,11 +4335,9 @@ translate_GraphNode (TrackerSparql  *sparql,
 	 *   VarOrTerm | TriplesNode | 'NULL'
 	 */
 	if (_check_in_rule (sparql, NAMED_RULE_VarOrTerm)) {
-		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_VarOrTerm, error);
 		g_assert (!tracker_token_is_empty (&sparql->current_state.object));
 	} else if (_check_in_rule (sparql, NAMED_RULE_TriplesNode)) {
-		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_TriplesNode, error);
 		g_assert (!tracker_token_is_empty (&sparql->current_state.object));
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_NULL)) {
@@ -4390,11 +4403,9 @@ translate_GraphNodePath (TrackerSparql  *sparql,
 	/* GraphNodePath ::= VarOrTerm | TriplesNodePath
 	 */
 	if (_check_in_rule (sparql, NAMED_RULE_VarOrTerm)) {
-		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_VarOrTerm, error);
 		g_assert (!tracker_token_is_empty (&sparql->current_state.object));
 	} else if (_check_in_rule (sparql, NAMED_RULE_TriplesNodePath)) {
-		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_TriplesNodePath, error);
 		g_assert (!tracker_token_is_empty (&sparql->current_state.object));
 	} else {
