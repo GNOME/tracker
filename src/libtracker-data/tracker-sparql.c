@@ -4068,7 +4068,7 @@ translate_PathAlternative (TrackerSparql  *sparql,
 	_call_rule (sparql, NAMED_RULE_PathSequence, error);
 
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_PATH_ALTERNATIVE)) {
-		_unimplemented ("Property paths");
+		_unimplemented ("Alternative property path");
 	}
 
 	return TRUE;
@@ -4170,7 +4170,7 @@ translate_PathMod (TrackerSparql  *sparql,
 {
 	/* PathMod ::= '?' | '*' | '+'
 	 */
-	_unimplemented ("Property paths");
+	_unimplemented ("Path modifiers");
 }
 
 static gboolean
@@ -4202,7 +4202,8 @@ translate_PathNegatedPropertySet (TrackerSparql  *sparql,
 {
 	/* PathNegatedPropertySet ::= PathOneInPropertySet | '(' ( PathOneInPropertySet ( '|' PathOneInPropertySet )* )? ')'
 	 */
-	_unimplemented ("Property paths");
+	_unimplemented ("Negated property set in property paths");
+	return FALSE;
 }
 
 static gboolean
@@ -4211,7 +4212,7 @@ translate_PathOneInPropertySet (TrackerSparql  *sparql,
 {
 	/* PathOneInPropertySet ::= iri | 'a' | '^' ( iri | 'a' )
 	 */
-	_unimplemented ("Property paths");
+	return FALSE;
 }
 
 static gboolean
