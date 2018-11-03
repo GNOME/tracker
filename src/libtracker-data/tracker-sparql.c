@@ -4091,13 +4091,25 @@ static gboolean
 translate_PathEltOrInverse (TrackerSparql  *sparql,
                             GError        **error)
 {
+	TrackerToken old_object, old_subject, *old_token;
+
 	/* PathEltOrInverse ::= PathElt | '^' PathElt
 	 */
+	old_object = sparql->current_state.object;
+	old_subject = sparql->current_state.subject;
+	old_token = sparql->current_state.token;
+
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_PATH_INVERSE)) {
-		_unimplemented ("Property paths");
+		sparql->current_state.object = old_subject;
+		sparql->current_state.subject = old_object;
+		sparql->current_state.token = &sparql->current_state.subject;
 	}
 
 	_call_rule (sparql, NAMED_RULE_PathElt, error);
+
+	sparql->current_state.subject = old_subject;
+	sparql->current_state.object = old_object;
+	sparql->current_state.token = old_token;
 
 	return TRUE;
 }
