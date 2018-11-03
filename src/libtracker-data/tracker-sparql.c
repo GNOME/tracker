@@ -4078,13 +4078,34 @@ static gboolean
 translate_PathSequence (TrackerSparql  *sparql,
                         GError        **error)
 {
+	TrackerToken old_object, old_subject;
+	TrackerVariable *var;
+	TrackerParserNode *rule;
+
 	/* PathSequence ::= PathEltOrInverse ( '/' PathEltOrInverse )*
 	 */
-	_call_rule (sparql, NAMED_RULE_PathEltOrInverse, error);
+	old_object = sparql->current_state.object;
+	old_subject = sparql->current_state.subject;
 
-	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_PATH_SEQUENCE)) {
-		_unimplemented ("Property paths");
+	rule = _skip_rule (sparql, NAMED_RULE_PathEltOrInverse);
+
+	while (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_PATH_SEQUENCE)) {
+		var = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+		tracker_token_variable_init (&sparql->current_state.object, var);
+
+		if (!_postprocess_rule (sparql, rule, NULL, error))
+			return FALSE;
+
+		rule = _skip_rule (sparql, NAMED_RULE_PathEltOrInverse);
+		sparql->current_state.subject = sparql->current_state.object;
+		tracker_token_unset (&sparql->current_state.object);
 	}
+
+	if (!_postprocess_rule (sparql, rule, NULL, error))
+		return FALSE;
+
+	sparql->current_state.subject = old_subject;
+	sparql->current_state.object = old_object;
 
 	return TRUE;
 }
