@@ -1,0 +1,1 @@
+select foaf:name(?u) { _:foo a foaf:Person . ?u foaf:knows _:foo } order by foaf:name(?u)

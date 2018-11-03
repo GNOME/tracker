@@ -1,0 +1,1 @@
+select ?u { [ a foaf:Person ; foaf:name ?u ] } order by ?u
