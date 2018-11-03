@@ -1,0 +1,1 @@
+select ?s { test:31 fts:match 'three' ; test:p ?s }
