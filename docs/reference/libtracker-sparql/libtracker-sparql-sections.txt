@@ -143,6 +143,7 @@ tracker_sparql_connection_remote_new
 tracker_sparql_connection_query
 tracker_sparql_connection_query_async
 tracker_sparql_connection_query_finish
+tracker_sparql_connection_query_statement
 tracker_sparql_connection_update
 tracker_sparql_connection_update_async
 tracker_sparql_connection_update_finish
@@ -185,6 +186,30 @@ tracker_sparql_error_quark
 tracker_sparql_connection_construct
 </SECTION>
 
+<SECTION>
+<FILE>tracker-sparql-statement</FILE>
+<TITLE>TrackerSparqlStatement</TITLE>
+TrackerSparqlStatement
+tracker_sparql_statement_execute
+tracker_sparql_statement_execute_async
+tracker_sparql_statement_execute_finish
+tracker_sparql_statement_bind_int
+tracker_sparql_statement_bind_double
+tracker_sparql_statement_bind_string
+tracker_sparql_statement_bind_boolean
+<SUBSECTION Standard>
+TrackerSparqlStatementClass
+TRACKER_SPARQL_STATEMENT
+TRACKER_SPARQL_STATEMENT_CLASS
+TRACKER_SPARQL_STATEMENT_GET_CLASS
+TRACKER_SPARQL_IS_STATEMENT
+TRACKER_SPARQL_IS_STATEMENT_CLASS
+TRACKER_SPARQL_TYPE_STATEMENT
+tracker_sparql_statement_get_type
+<SUBSECTION Private>
+TrackerSparqlStatementPrivate
+tracker_sparql_statement_construct
+</SECTION>
 
 <SECTION>
 <FILE>tracker-sparql-cursor</FILE>
