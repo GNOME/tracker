@@ -1,0 +1,1 @@
+select foaf:name(?u) { ?u foaf:knows/^foaf:knows/foaf:name 'Eve' }

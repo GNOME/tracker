@@ -1,0 +1,1 @@
+select foaf:name(?a) foaf:name(?b) { ?a foaf:knows/foaf:knows ?b }
