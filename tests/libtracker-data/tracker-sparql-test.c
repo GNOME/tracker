@@ -146,6 +146,14 @@ const TestInfo tests[] = {
 	{ "bind/bind2", "bind/data", FALSE },
 	{ "bind/bind3", "bind/data", FALSE },
 	{ "bind/bind4", "bind/data", FALSE },
+	/* Property paths */
+	{ "property-paths/inverse-path-1", "property-paths/data", FALSE },
+	{ "property-paths/inverse-path-2", "property-paths/data", FALSE },
+	{ "property-paths/sequence-path-1", "property-paths/data", FALSE },
+	{ "property-paths/sequence-path-2", "property-paths/data", FALSE },
+	{ "property-paths/sequence-path-3", "property-paths/data", FALSE },
+	{ "property-paths/mixed-inverse-and-sequence-1", "property-paths/data", FALSE },
+	{ "property-paths/mixed-inverse-and-sequence-2", "property-paths/data", FALSE },
 	/* Update tests */
 	{ "update/insert-data-query-1", "update/insert-data-1", FALSE, FALSE },
 	{ "update/insert-data-query-2", "update/insert-data-2", FALSE, TRUE },

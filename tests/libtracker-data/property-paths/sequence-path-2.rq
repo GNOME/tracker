@@ -1,0 +1,1 @@
+select ?s foaf:name(?a) foaf:name(?b) { { select ('1' as ?s) ?a ?b { ?a foaf:knows/foaf:knows ?b } } union { select ('2' as ?s) ?a ?b { ?a foaf:knows ?y . ?y foaf:knows ?b } } } order by ?s foaf:name(?a) foaf:name(?b)
