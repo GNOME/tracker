@@ -134,7 +134,7 @@ test_path_evaluate_name (void)
 	gchar *result, *expected;
 
 	const gchar *home = g_getenv ("HOME");
-	const gchar *pwd = g_getenv ("PWD");
+	const gchar *pwd = g_get_tmp_dir ();
 
 	const gchar *test = "/one/two";
 	gchar *parent_dir;
@@ -433,6 +433,8 @@ main (int argc, char **argv)
 	g_test_init (&argc, &argv, NULL);
 
 	setlocale (LC_ALL, "");
+
+	chdir (g_get_tmp_dir ());
 
         ensure_file_exists (TEST_FILENAME);
         ensure_file_exists (TEST_HIDDEN_FILENAME);
