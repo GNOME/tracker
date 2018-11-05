@@ -434,6 +434,8 @@ main (int argc, char **argv)
 
 	setlocale (LC_ALL, "");
 
+	chdir (g_get_tmp_dir ());
+
         ensure_file_exists (TEST_FILENAME);
         ensure_file_exists (TEST_HIDDEN_FILENAME);
 
