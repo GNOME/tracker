@@ -15,7 +15,8 @@ tracker_interface_age = 0
 tracker_binary_age = 100 * tracker_minor_version + tracker_micro_version - tracker_interface_age
 
 # This the .Z used in libtracker-sparql-2.0.so.Z
-soversion = '0.@0@.@1@'.format(tracker_binary_age - tracker_interface_age, tracker_interface_age)
+soversion = '0'
+libversion = '@0@.@1@.@2@'.format(soversion, tracker_binary_age - tracker_interface_age, tracker_interface_age)
 
 libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))

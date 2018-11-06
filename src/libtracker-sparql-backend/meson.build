@@ -8,6 +8,7 @@ libtracker_sparql = library('tracker-sparql-' + tracker_api_version,
     'tracker-backend.vala',
 
     soversion: soversion,
+    version: libversion,
 
     install: true,
     install_rpath: tracker_internal_libs_dir,
