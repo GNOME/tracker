@@ -341,32 +341,7 @@ reset_run (void)
 	}
 
 	if (remove_config) {
-		GFile *file;
-		const gchar *home_conf_dir;
-		gchar *path;
 		GSList *all, *l;
-
-		/* Check the default XDG_DATA_HOME location */
-		home_conf_dir = g_getenv ("XDG_CONFIG_HOME");
-
-		if (home_conf_dir && tracker_path_has_write_access_or_was_created (home_conf_dir)) {
-			path = g_build_path (G_DIR_SEPARATOR_S, home_conf_dir, "tracker", NULL);
-		} else {
-			home_conf_dir = g_getenv ("HOME");
-
-			if (!home_conf_dir || !tracker_path_has_write_access_or_was_created (home_conf_dir)) {
-				home_conf_dir = g_get_home_dir ();
-			}
-			path = g_build_path (G_DIR_SEPARATOR_S, home_conf_dir, ".config", "tracker", NULL);
-		}
-
-		file = g_file_new_for_path (path);
-		g_free (path);
-
-		g_print ("%s\n", _("Removing configuration files…"));
-
-		directory_foreach (file, ".cfg", (GFunc) delete_file, NULL);
-		g_object_unref (file);
 
 		g_print ("%s\n", _("Resetting existing configuration…"));
 
