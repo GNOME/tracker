@@ -704,34 +704,6 @@ path_has_write_access (const gchar *path,
 }
 
 gboolean
-tracker_path_has_write_access_or_was_created (const gchar *path)
-{
-	gboolean writable;
-	gboolean exists = FALSE;
-
-	writable = path_has_write_access (path, &exists);
-	if (exists) {
-		if (writable) {
-			g_message ("  Path is OK");
-			return TRUE;
-		}
-
-		g_message ("  Path can not be written to");
-	} else {
-		g_message ("  Path does not exist, attempting to create...");
-
-		if (g_mkdir_with_parents (path, 0700) == 0) {
-			g_message ("  Path was created");
-			return TRUE;
-		}
-
-		g_message ("  Path could not be created");
-	}
-
-	return FALSE;
-}
-
-gboolean
 tracker_file_is_hidden (GFile *file)
 {
 	GFileInfo *file_info;

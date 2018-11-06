@@ -52,7 +52,6 @@ GSList * tracker_path_list_filter_duplicates                (GSList      *roots,
                                                              const gchar *basename_exception_prefix,
                                                              gboolean     is_recursive);
 gchar *  tracker_path_evaluate_name                         (const gchar *uri);
-gboolean tracker_path_has_write_access_or_was_created       (const gchar *path);
 gboolean tracker_filename_casecmp_without_extension         (const gchar *a,
                                                              const gchar *b);
 
