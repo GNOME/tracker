@@ -90,46 +90,6 @@ log_handler (const gchar    *domain,
 	}
 }
 
-static void
-delete_file (GFile    *file,
-             gpointer  user_data)
-{
-	if (g_file_delete (file, NULL, NULL)) {
-		gchar *path;
-
-		path = g_file_get_path (file);
-		g_print ("  %s\n", path);
-		g_free (path);
-	}
-}
-
-static void
-directory_foreach (GFile    *file,
-                   gchar    *suffix,
-                   GFunc     func,
-                   gpointer  user_data)
-{
-	GFileEnumerator *enumerator;
-	GFileInfo *info;
-	GFile *child;
-
-	enumerator = g_file_enumerate_children (file, G_FILE_ATTRIBUTE_STANDARD_NAME,
-	                                        G_FILE_QUERY_INFO_NONE, NULL, NULL);
-
-	while ((info = g_file_enumerator_next_file (enumerator, NULL, NULL)) != NULL) {
-
-		if (!suffix || g_str_has_suffix (g_file_info_get_name (info), suffix)) {
-			child = g_file_enumerator_get_child (enumerator, info);
-			(func) (child, user_data);
-			g_object_unref (child);
-		}
-
-		g_object_unref (info);
-	}
-
-	g_object_unref (enumerator);
-}
-
 static int
 delete_info_recursively (GFile *file)
 {
@@ -341,32 +301,7 @@ reset_run (void)
 	}
 
 	if (remove_config) {
-		GFile *file;
-		const gchar *home_conf_dir;
-		gchar *path;
 		GSList *all, *l;
-
-		/* Check the default XDG_DATA_HOME location */
-		home_conf_dir = g_getenv ("XDG_CONFIG_HOME");
-
-		if (home_conf_dir && tracker_path_has_write_access_or_was_created (home_conf_dir)) {
-			path = g_build_path (G_DIR_SEPARATOR_S, home_conf_dir, "tracker", NULL);
-		} else {
-			home_conf_dir = g_getenv ("HOME");
-
-			if (!home_conf_dir || !tracker_path_has_write_access_or_was_created (home_conf_dir)) {
-				home_conf_dir = g_get_home_dir ();
-			}
-			path = g_build_path (G_DIR_SEPARATOR_S, home_conf_dir, ".config", "tracker", NULL);
-		}
-
-		file = g_file_new_for_path (path);
-		g_free (path);
-
-		g_print ("%s\n", _("Removing configuration files…"));
-
-		directory_foreach (file, ".cfg", (GFunc) delete_file, NULL);
-		g_object_unref (file);
 
 		g_print ("%s\n", _("Resetting existing configuration…"));
 
