@@ -368,33 +368,6 @@ test_file_system_has_enough_space ()
 }
 
 static void
-test_file_exists_and_writable ()
-{
-        const gchar *path = "./test-dir-remove-afterwards";
-
-        if (g_file_test (path, G_FILE_TEST_EXISTS)) {
-		g_assert_cmpint (g_remove (path), ==, 0);
-        }
-
-        /* This should create the directory with write access*/
-        g_assert (tracker_path_has_write_access_or_was_created (path));
-        g_assert (g_file_test (path, G_FILE_TEST_EXISTS));
-
-        /* This time exists and has write access */
-        g_assert (tracker_path_has_write_access_or_was_created (path));
-
-        g_assert_cmpint (chmod (path, S_IRUSR & S_IRGRP), ==, 0);
-
-        /* Exists but is not writable */
-        g_assert (!tracker_path_has_write_access_or_was_created (path));
-
-        /* Doesn't exist and cannot be created */
-        g_assert (!tracker_path_has_write_access_or_was_created ("/var/log/tracker-test"));
-
-        g_assert_cmpint (g_remove (path), ==, 0);
-}
-
-static void
 test_file_utils_is_hidden ()
 {
         GFile *f;
@@ -460,8 +433,6 @@ main (int argc, char **argv)
                          test_file_system_get_remaining_space_percentage);
         g_test_add_func ("/libtracker-common/file-utils/has_enough_space",
                          test_file_system_has_enough_space);
-        g_test_add_func ("/libtracker-common/file-utils/has_write_access_or_was_created",
-                         test_file_exists_and_writable);
         g_test_add_func ("/libtracker-common/file-utils/is_hidden",
                          test_file_utils_is_hidden);
         g_test_add_func ("/libtracker-common/file-utils/cmp",
