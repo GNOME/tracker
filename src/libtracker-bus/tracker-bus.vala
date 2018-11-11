@@ -29,15 +29,6 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		else
 			bus = dbus_connection;
 
-		debug ("Waiting for service to become available...");
-
-		// do not use proxy to work around race condition in GDBus
-		// NB#259760
-		var msg = new DBusMessage.method_call (dbus_name, Tracker.DBUS_OBJECT_STATUS, Tracker.DBUS_INTERFACE_STATUS, "Wait");
-		bus.send_message_with_reply_sync (msg, 0, /* timeout */ int.MAX, null).to_gerror ();
-
-		debug ("Service is ready");
-
 		// ensure that error domain is registered with GDBus
 		new Sparql.Error.INTERNAL ("");
 	}
