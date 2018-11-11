@@ -5098,7 +5098,7 @@ tracker_data_manager_get_data (TrackerDataManager *manager)
 void
 tracker_data_manager_shutdown (TrackerDataManager *manager)
 {
-	g_object_run_dispose (G_OBJECT (manager));
+//	g_object_run_dispose (G_OBJECT (manager));
 }
 
 GHashTable *
