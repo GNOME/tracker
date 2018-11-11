@@ -51,9 +51,7 @@ typedef struct {
 	GDBusNodeInfo *introspection_data;
 	gchar *dbus_path;
 	guint registration_id;
-	guint watch_name_id;
 	GHashTable *pauses;
-	gint availability_cookie;
 } TrackerMinerProxyPrivate;
 
 typedef struct {
@@ -221,10 +219,6 @@ tracker_miner_proxy_finalize (GObject *object)
 	g_clear_object (&priv->miner);
 	g_free (priv->dbus_path);
 	g_hash_table_unref (priv->pauses);
-
-	if (priv->watch_name_id != 0) {
-		g_bus_unwatch_name (priv->watch_name_id);
-	}
 
 	if (priv->registration_id != 0) {
 		g_dbus_connection_unregister_object (priv->d_connection,
@@ -732,55 +726,6 @@ miner_progress_cb (TrackerMiner      *miner,
 	emit_dbus_signal (proxy, "Progress", variant);
 }
 
-static void
-on_tracker_store_appeared (GDBusConnection *connection,
-                           const gchar     *name,
-                           const gchar     *name_owner,
-                           gpointer         user_data)
-
-{
-	TrackerMinerProxy *proxy = user_data;
-	TrackerMinerProxyPrivate *priv = tracker_miner_proxy_get_instance_private (proxy);
-
-	g_debug ("Miner:'%s' noticed store availability has changed to AVAILABLE",
-	         priv->dbus_path);
-
-	if (priv->availability_cookie != 0) {
-		g_hash_table_remove (priv->pauses,
-		                     GINT_TO_POINTER (priv->availability_cookie));
-		sync_miner_pause_state (proxy);
-		priv->availability_cookie = 0;
-	}
-}
-
-static void
-on_tracker_store_disappeared (GDBusConnection *connection,
-                              const gchar     *name,
-                              gpointer         user_data)
-{
-	TrackerMinerProxy *proxy = user_data;
-	TrackerMinerProxyPrivate *priv = tracker_miner_proxy_get_instance_private (proxy);
-
-	g_debug ("Miner:'%s' noticed store availability has changed to UNAVAILABLE",
-	         priv->dbus_path);
-
-	if (priv->availability_cookie == 0) {
-		GError *error = NULL;
-		gint cookie_id;
-
-		cookie_id = pause_miner (proxy, NULL,
-		                         _("Data store is not available"),
-		                         NULL, &error);
-
-		if (error) {
-			g_warning ("Could not pause, %s", error->message);
-			g_error_free (error);
-		} else {
-			priv->availability_cookie = cookie_id;
-		}
-	}
-}
-
 static gboolean
 tracker_miner_proxy_initable_init (GInitable     *initable,
                                    GCancellable  *cancellable,
@@ -790,7 +735,6 @@ tracker_miner_proxy_initable_init (GInitable     *initable,
 	TrackerMinerProxyPrivate *priv = tracker_miner_proxy_get_instance_private (proxy);
 	GError *inner_error = NULL;
 	TrackerDomainOntology *domain_ontology;
-	gchar *store_name;
 	GDBusInterfaceVTable interface_vtable = {
 		handle_method_call,
 		handle_get_property,
@@ -823,18 +767,6 @@ tracker_miner_proxy_initable_init (GInitable     *initable,
 		g_propagate_error (error, inner_error);
 		return FALSE;
 	}
-
-	store_name = tracker_domain_ontology_get_domain (domain_ontology, "Tracker1");
-
-	priv->watch_name_id =
-		g_bus_watch_name_on_connection (priv->d_connection,
-		                                store_name,
-		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
-		                                on_tracker_store_appeared,
-		                                on_tracker_store_disappeared,
-		                                proxy,
-		                                NULL);
-	g_free (store_name);
 
 	g_signal_connect (priv->miner, "started",
 	                  G_CALLBACK (miner_started_cb), proxy);
