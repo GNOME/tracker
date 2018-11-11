@@ -193,12 +193,22 @@ class Tracker.Sparql.Backend : Connection {
 
 		switch (backend) {
 		case Backend.AUTO:
-			bus = new Tracker.Bus.Connection (domain_ontology.get_domain ("Tracker1"), global_dbus_connection);
+			bool direct_failed = false;
 
 			try {
 				direct = create_readonly_direct ();
-			} catch (GLib.Error e) {
-				warning ("Falling back to bus backend, the direct backend failed to initialize: " + e.message);
+			} catch (DBInterfaceError e) {
+				direct_failed = true;
+			}
+
+			bus = new Tracker.Bus.Connection (domain_ontology.get_domain ("Tracker1"), global_dbus_connection, direct_failed);
+
+			if (direct_failed) {
+				try {
+					direct = create_readonly_direct ();
+				} catch (DBInterfaceError e) {
+					warning ("Falling back to bus backend, the direct backend failed to initialize: " + e.message);
+				}
 			}
 
 			break;
@@ -208,7 +218,7 @@ class Tracker.Sparql.Backend : Connection {
 			break;
 
 		case Backend.BUS:
-			bus = new Tracker.Bus.Connection (domain_ontology.get_domain ("Tracker1"), global_dbus_connection);
+			bus = new Tracker.Bus.Connection (domain_ontology.get_domain ("Tracker1"), global_dbus_connection, false);
 			break;
 
 		default:
