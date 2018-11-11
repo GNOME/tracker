@@ -37,6 +37,7 @@ License which can be viewed at:
 	static MainLoop main_loop;
 	static string log_filename;
 
+	static uint shutdown_timeout_id;
 	static bool shutdown;
 
 	static Tracker.Direct.Connection connection;
@@ -52,11 +53,13 @@ License which can be viewed at:
 	static File data_location;
 	static File ontology_location;
 	static string domain;
+	static bool disable_shutdown;
 
 	const OptionEntry entries[] = {
 		/* Daemon options */
 		{ "version", 'V', 0, OptionArg.NONE, ref version, N_("Displays version information"), null },
 		{ "verbosity", 'v', 0, OptionArg.INT, ref verbosity, N_("Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default = 0)"), null },
+		{ "disable-shutdown", 's', 0, OptionArg.NONE, ref disable_shutdown, N_("Disable automatic shutdown"), null },
 
 		/* Indexer options */
 		{ "force-reindex", 'r', 0, OptionArg.NONE, ref force_reindex, N_("Force a re-index of all content"), null },
@@ -180,6 +183,33 @@ License which can be viewed at:
 		return connection;
 	}
 
+	private static bool shutdown_timeout () {
+		message ("Store shutting down after timeout");
+		do_shutdown ();
+		return GLib.Source.REMOVE;
+	}
+
+	private static void idle_cb () {
+		/* Do not perform shutdown in case of exotic buses */
+		if (Tracker.IPC.bus () != GLib.BusType.SESSION)
+			return;
+		if (shutdown_timeout_id != 0)
+			return;
+		if (disable_shutdown)
+			return;
+
+		message ("Store is idle, setting shutdown timeout");
+		shutdown_timeout_id = GLib.Timeout.add_seconds (30, shutdown_timeout);
+	}
+
+	private static void busy_cb () {
+		if (shutdown_timeout_id == 0)
+			return;
+		message ("Store is busy, removing shutdown timeout");
+		GLib.Source.remove (shutdown_timeout_id);
+		shutdown_timeout_id = 0;
+	}
+
 	static int main (string[] args) {
 		Intl.setlocale (LocaleCategory.ALL, "");
 
@@ -265,7 +295,7 @@ License which can be viewed at:
 
 		var notifier = Tracker.DBus.register_notifier ();
 
-		Tracker.Store.init (config);
+		Tracker.Store.init (config, idle_cb, busy_cb);
 
 		/* Make Tracker available for introspection */
 		if (!Tracker.DBus.register_objects ()) {
