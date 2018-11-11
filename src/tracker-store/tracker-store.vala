@@ -39,6 +39,11 @@ public class Tracker.Store {
 
 	public delegate void SparqlQueryInThread (Sparql.Cursor cursor) throws Error;
 
+	public delegate void StateCallback ();
+	static unowned StateCallback idle_cb;
+	static unowned StateCallback busy_cb;
+	static bool busy;
+
 	class CursorTask {
 		public Sparql.Cursor cursor;
 		public unowned SourceFunc callback;
@@ -61,11 +66,12 @@ public class Tracker.Store {
 
 		Idle.add (() => {
 			task.callback ();
+			update_state ();
 			return false;
 		});
 	}
 
-	public static void init (Tracker.Config config_p) {
+	public static void init (Tracker.Config config_p, StateCallback idle, StateCallback busy) {
 		string max_task_time_env = Environment.get_variable ("TRACKER_STORE_MAX_TASK_TIME");
 		if (max_task_time_env != null) {
 			max_task_time = int.parse (max_task_time_env);
@@ -88,6 +94,9 @@ public class Tracker.Store {
 		ThreadPool.set_max_unused_threads (2);
 
 		config = config_p;
+		idle_cb = idle;
+		busy_cb = busy;
+		idle_cb ();
 	}
 
 	public static void shutdown () {
@@ -158,30 +167,41 @@ public class Tracker.Store {
 			// Ignore harmless error
 		}
 
+		update_state ();
+
 		yield;
 
 		if (task.error != null)
 			throw task.error;
 	}
 
+	private static void pre_update () {
+		n_updates++;
+		update_state ();
+		ensure_signal_timeout ();
+	}
+
+	private static void post_update () {
+		n_updates--;
+		update_state ();
+	}
+
 	public static async void sparql_update (Tracker.Direct.Connection conn, string sparql, int priority, string client_id) throws Error {
 		if (!active)
 			throw new Sparql.Error.UNSUPPORTED ("Store is not active");
-		n_updates++;
-		ensure_signal_timeout ();
+		pre_update ();
 		var cancellable = create_cancellable (client_id);
 		yield conn.update_async (sparql, priority, cancellable);
-		n_updates--;
+		post_update ();
 	}
 
 	public static async Variant sparql_update_blank (Tracker.Direct.Connection conn, string sparql, int priority, string client_id) throws Error {
 		if (!active)
 			throw new Sparql.Error.UNSUPPORTED ("Store is not active");
-		n_updates++;
-		ensure_signal_timeout ();
+		pre_update ();
 		var cancellable = create_cancellable (client_id);
 		var nodes = yield conn.update_blank_async (sparql, priority, cancellable);
-		n_updates--;
+		post_update ();
 
 		return nodes;
 	}
@@ -189,11 +209,10 @@ public class Tracker.Store {
 	public static async void queue_turtle_import (Tracker.Direct.Connection conn, File file, string client_id) throws Error {
 		if (!active)
 			throw new Sparql.Error.UNSUPPORTED ("Store is not active");
-		n_updates++;
-		ensure_signal_timeout ();
+		pre_update ();
 		var cancellable = create_cancellable (client_id);
 		yield conn.load_async (file, cancellable);
-		n_updates--;
+		post_update ();
 	}
 
 	public static void unreg_batches (string client_id) {
@@ -202,6 +221,7 @@ public class Tracker.Store {
 		if (cancellable != null) {
 			cancellable.cancel ();
 			client_cancellables.remove (client_id);
+			update_state ();
 		}
 	}
 
@@ -216,10 +236,29 @@ public class Tracker.Store {
 		Tracker.Store.active = true;
 	}
 
+	private static void update_state () {
+		bool cur_busy;
+
+		cur_busy = (!Tracker.Store.active ||          /* Keep busy while paused */
+		            n_updates != 0 ||                 /* There are updates */
+		            cursor_pool.unprocessed () > 0 || /* Select cursor pool is busy */
+		            cursor_pool.get_num_threads () > 0);
+
+		if (busy == cur_busy)
+			return;
+
+		busy = cur_busy;
+		if (busy)
+			busy_cb ();
+		else
+			idle_cb ();
+	}
+
 	private static void on_statements_committed () {
 		Tracker.Events.transact ();
 		Tracker.Writeback.transact ();
 		check_graph_updated_signal ();
+		update_state ();
 	}
 
 	private static void on_statements_rolled_back () {
