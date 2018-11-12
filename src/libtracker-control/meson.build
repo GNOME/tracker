@@ -10,6 +10,7 @@ libtracker_control = library('tracker-control-' + tracker_api_version,
     tracker_common_enum_header,
     c_args: tracker_c_args,
     soversion: soversion,
+    version: libversion,
     install: true,
     install_rpath: tracker_internal_libs_dir,
     # This doesn't depend on tracker_common_dep because of
