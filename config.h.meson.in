@@ -24,6 +24,9 @@
 /* Define the gettext package to be used */
 #mesondefine GETTEXT_PACKAGE
 
+/* Define the GLib log domain */
+#mesondefine G_LOG_DOMAIN
+
 /* Define that GStreamer Discoverer should be used */
 #mesondefine GSTREAMER_BACKEND_DISCOVERER
 

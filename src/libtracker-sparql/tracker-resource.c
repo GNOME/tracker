@@ -17,12 +17,13 @@
  * Boston, MA  02110-1301, USA.
  */
 
+#include "config.h"
+
 #include <glib.h>
 #include <json-glib/json-glib.h>
 
 #include <string.h>
 
-#include "config.h"
 #include <tracker-uri.h>
 #include <tracker-resource.h>
 #include <tracker-ontologies.h>
