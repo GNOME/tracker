@@ -5255,9 +5255,11 @@ handle_custom_function (TrackerSparql  *sparql,
 		_append_string (sparql, ") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (g_str_equal (function, TRACKER_NS "coalesce")) {
+		sparql->current_state.convert_to_string = TRUE;
 		_append_string (sparql, "COALESCE (");
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, ") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (g_str_equal (function, FTS_NS "rank")) {
 		node = _skip_rule (sparql, NAMED_RULE_ArgList);
 		variable = find_fts_variable (sparql, node, "ftsRank");
@@ -5738,10 +5740,12 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		tracker_sparql_swap_current_expression_list_separator (sparql, old_sep);
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_COALESCE)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_append_string (sparql, "COALESCE ");
 		old_sep = tracker_sparql_swap_current_expression_list_separator (sparql, ", ");
 		_call_rule (sparql, NAMED_RULE_ExpressionList, error);
 		tracker_sparql_swap_current_expression_list_separator (sparql, old_sep);
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	}
 
 	sparql->current_state.convert_to_string = convert_to_string;
