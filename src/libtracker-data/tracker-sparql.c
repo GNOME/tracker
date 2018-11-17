@@ -142,6 +142,8 @@ struct _TrackerSparql
 		const gchar *expression_list_separator;
 		TrackerPropertyType expression_type;
 		guint type;
+
+		gboolean convert_to_string;
 	} current_state;
 };
 
@@ -4609,9 +4611,27 @@ static gboolean
 translate_Expression (TrackerSparql  *sparql,
                       GError        **error)
 {
+	TrackerStringBuilder *str, *old;
+	gboolean convert_to_string;
+
 	/* Expression ::= ConditionalOrExpression
 	 */
+	convert_to_string = sparql->current_state.convert_to_string;
+	sparql->current_state.convert_to_string = FALSE;
+
+	if (convert_to_string) {
+		str = _append_placeholder (sparql);
+		old = tracker_sparql_swap_builder (sparql, str);
+	}
+
 	_call_rule (sparql, NAMED_RULE_ConditionalOrExpression, error);
+
+	if (convert_to_string) {
+		convert_expression_to_string (sparql, sparql->current_state.expression_type);
+		tracker_sparql_swap_builder (sparql, old);
+	}
+
+	sparql->current_state.convert_to_string = convert_to_string;
 
 	return TRUE;
 
