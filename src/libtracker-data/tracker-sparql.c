@@ -4965,6 +4965,8 @@ handle_type_cast (TrackerSparql  *sparql,
 		  const gchar    *function,
 		  GError        **error)
 {
+	sparql->current_state.convert_to_string = TRUE;
+
 	if (g_str_equal (function, XSD_NS "string")) {
 		_append_string (sparql, "CAST (");
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
@@ -4994,14 +4996,17 @@ handle_xpath_function (TrackerSparql  *sparql,
 {
 	if (g_str_equal (function, FN_NS "lower-case")) {
 		_append_string (sparql, "SparqlLowerCase (");
+		sparql->current_state.convert_to_string = TRUE;
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, ") ");
 	} else if (g_str_equal (function, FN_NS "upper-case")) {
 		_append_string (sparql, "SparqlUpperCase (");
+		sparql->current_state.convert_to_string = TRUE;
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, ") ");
 	} else if (g_str_equal (function, FN_NS "contains")) {
 		/* contains('A','B') => 'A' GLOB '*B*' */
+		sparql->current_state.convert_to_string = TRUE;
 		_step (sparql);
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "(");
@@ -5020,6 +5025,7 @@ handle_xpath_function (TrackerSparql  *sparql,
 		 * 0010fffd always sorts last.
 		 */
 
+		sparql->current_state.convert_to_string = TRUE;
 		_step (sparql);
 		_append_string (sparql, "( ");
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
@@ -5041,6 +5047,7 @@ handle_xpath_function (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (g_str_equal (function, FN_NS "ends-with")) {
 		/* strends('A','B') => 'A' GLOB '*B' */
+		sparql->current_state.convert_to_string = TRUE;
 		_step (sparql);
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "(");
@@ -5053,6 +5060,7 @@ handle_xpath_function (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (g_str_equal (function, FN_NS "substring")) {
 		_append_string (sparql, "SUBSTR (");
+		sparql->current_state.convert_to_string = TRUE;
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, ") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
@@ -5060,10 +5068,12 @@ handle_xpath_function (TrackerSparql  *sparql,
 		const gchar *old_sep;
 
 		old_sep = tracker_sparql_swap_current_expression_list_separator (sparql, " || ");
+		sparql->current_state.convert_to_string = TRUE;
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		tracker_sparql_swap_current_expression_list_separator (sparql, old_sep);
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (g_str_equal (function, FN_NS "string-join")) {
+		sparql->current_state.convert_to_string = TRUE;
 		_append_string (sparql, "SparqlStringJoin (");
 		_step (sparql);
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
@@ -5082,6 +5092,7 @@ handle_xpath_function (TrackerSparql  *sparql,
 		_append_string (sparql, ") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (g_str_equal (function, FN_NS "replace")) {
+		sparql->current_state.convert_to_string = TRUE;
 		_append_string (sparql, "SparqlReplace (");
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, ") ");
@@ -5182,6 +5193,7 @@ handle_custom_function (TrackerSparql  *sparql,
 	TrackerParserNode *node;
 
 	if (g_str_equal (function, TRACKER_NS "case-fold")) {
+		sparql->current_state.convert_to_string = TRUE;
 		_append_string (sparql, "SparqlCaseFold (");
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, ") ");
@@ -5189,14 +5201,17 @@ handle_custom_function (TrackerSparql  *sparql,
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, "COLLATE " TRACKER_TITLE_COLLATION_NAME " ");
 	} else if (g_str_equal (function, TRACKER_NS "ascii-lower-case")) {
+		sparql->current_state.convert_to_string = TRUE;
 		_append_string (sparql, "lower (");
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, ") ");
 	} else if (g_str_equal (function, TRACKER_NS "normalize")) {
+		sparql->current_state.convert_to_string = TRUE;
 		_append_string (sparql, "SparqlNormalize (");
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, ") ");
 	} else if (g_str_equal (function, TRACKER_NS "unaccent")) {
+		sparql->current_state.convert_to_string = TRUE;
 		_append_string (sparql, "SparqlUnaccent (");
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, ") ");
@@ -5279,7 +5294,10 @@ handle_function_call (TrackerSparql  *sparql,
                       GError        **error)
 {
 	gchar *function = _dup_last_string (sparql);
-	gboolean handled;
+	gboolean handled, convert_to_string;
+
+	convert_to_string = sparql->current_state.convert_to_string;
+	sparql->current_state.convert_to_string = FALSE;
 
 	if (g_str_has_prefix (function, XSD_NS)) {
 		handled = handle_type_cast (sparql, function, error);
@@ -5299,6 +5317,7 @@ handle_function_call (TrackerSparql  *sparql,
 		}
 	}
 
+	sparql->current_state.convert_to_string = convert_to_string;
 	g_free (function);
 
 	return handled;
@@ -5407,7 +5426,11 @@ static gboolean
 translate_BuiltInCall (TrackerSparql  *sparql,
                        GError        **error)
 {
+	gboolean convert_to_string;
 	const gchar *old_sep;
+
+	convert_to_string = sparql->current_state.convert_to_string;
+	sparql->current_state.convert_to_string = FALSE;
 
 	if (_check_in_rule (sparql, NAMED_RULE_Aggregate)) {
 		_call_rule (sparql, NAMED_RULE_Aggregate, error);
@@ -5464,6 +5487,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 		_append_string (sparql, ") ");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRLEN)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "LENGTH (");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5471,12 +5495,14 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_append_string (sparql, ") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_UCASE)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "SparqlUpperCase (");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 		_append_string (sparql, ") ");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_LCASE)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "SparqlLowerCase (");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5518,6 +5544,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_TZ)) {
 		_unimplemented ("TZ");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_MD5)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "SparqlChecksum (");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5525,6 +5552,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_append_string (sparql, ", \"md5\") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SHA1)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "SparqlChecksum (");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5532,6 +5560,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_append_string (sparql, ", \"sha1\") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SHA256)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "SparqlChecksum (");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5539,6 +5568,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_append_string (sparql, ", \"sha256\") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SHA384)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "SparqlChecksum (");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5546,6 +5576,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_append_string (sparql, ", \"sha384\") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SHA512)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "SparqlChecksum (");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5580,6 +5611,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_unimplemented ("LANGMATCHES");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_CONTAINS)) {
 		/* contains('A','B') => 'A' GLOB '*B*' */
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "(");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5596,6 +5628,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		/* strstarts('A','B') => 'A' BETWEEN 'B' AND 'B\u0010fffd'
 		 * 0010fffd always sorts last.
 		 */
+		sparql->current_state.convert_to_string = TRUE;
 		_append_string (sparql, "( ");
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5616,6 +5649,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRENDS)) {
 		/* strends('A','B') => 'A' GLOB '*B' */
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "(");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5626,6 +5660,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_append_string (sparql, ") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRBEFORE)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "SparqlStringBefore (");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5635,6 +5670,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 		_append_string (sparql, ") ");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRAFTER)) {
+		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "SparqlStringAfter (");
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -5696,6 +5732,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL);
 		_unimplemented ("STRUUID");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_CONCAT)) {
+		sparql->current_state.convert_to_string = TRUE;
 		old_sep = tracker_sparql_swap_current_expression_list_separator (sparql, " || ");
 		_call_rule (sparql, NAMED_RULE_ExpressionList, error);
 		tracker_sparql_swap_current_expression_list_separator (sparql, old_sep);
@@ -5706,6 +5743,8 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_call_rule (sparql, NAMED_RULE_ExpressionList, error);
 		tracker_sparql_swap_current_expression_list_separator (sparql, old_sep);
 	}
+
+	sparql->current_state.convert_to_string = convert_to_string;
 
 	return TRUE;
 }
