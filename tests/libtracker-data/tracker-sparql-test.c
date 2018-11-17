@@ -110,6 +110,7 @@ const TestInfo tests[] = {
 	{ "functions/functions-xpath-12", "functions/data-4", FALSE },
 	{ "functions/functions-xpath-13", "functions/data-4", FALSE },
 	{ "functions/functions-xpath-14", "functions/data-4", FALSE },
+	{ "functions/functions-coalesce-1", "functions/data-1", FALSE },
 	{ "graph/graph-1", "graph/data-1", FALSE },
 	{ "graph/graph-2", "graph/data-2", FALSE },
 	{ "graph/graph-3", "graph/data-3", FALSE },

@@ -1,0 +1,1 @@
+SELECT COALESCE(xsd:string, "foo") COALESCE("foo", xsd:string) tracker:coalesce(xsd:string, "bar") tracker:coalesce("bar", xsd:string) {}
