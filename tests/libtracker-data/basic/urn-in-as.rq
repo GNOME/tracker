@@ -1,0 +1,1 @@
+SELECT (xsd:string AS ?a) xsd:string AS ?b xsd:string {}

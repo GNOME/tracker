@@ -73,6 +73,7 @@ const TestInfo tests[] = {
 	{ "basic/predicate-variable-2", "basic/data-1", FALSE },
 	{ "basic/predicate-variable-3", "basic/data-1", FALSE },
 	{ "basic/predicate-variable-4", "basic/data-1", FALSE },
+	{ "basic/urn-in-as", "basic/data-1", FALSE },
 	{ "bnode/query-1", "bnode/data", FALSE },
 	{ "bnode/query-2", "bnode/data", FALSE },
 	{ "bnode/query-3", "bnode/data", FALSE },
