@@ -15,4 +15,4 @@ test-fedora-latest:
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
 
-      su tracker -c 'cd build; LANG=en_US.UTF8 dbus-launch meson test --print-errorlogs'
+      su tracker -c 'cd build; LANG=en_US.UTF8 dbus-run-session -- meson test --print-errorlogs'
