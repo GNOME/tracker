@@ -4,4 +4,7 @@ gvdb_test = executable('gvdb-test',
     include_directories: configinc,
 )
 
-test('gvdb', gvdb_test)
+tests += {
+  'name': 'gvdb',
+  'exe': gvdb_test,
+}

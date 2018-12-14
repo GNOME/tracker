@@ -20,7 +20,10 @@ foreach base_name: libtracker_common_tests
       dependencies: libtracker_common_test_deps,
       c_args: test_c_args)
 
-    test(test_name, binary)
+    tests += {
+        'name': test_name,
+        'exe': binary
+    }
 endforeach
 
 # This is a manual test case
