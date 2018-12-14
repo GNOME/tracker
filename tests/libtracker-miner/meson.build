@@ -22,10 +22,6 @@ libtracker_miner_test_c_args = [
   '-DTEST_ONTOLOGIES_DIR="@0@/src/ontologies/nepomuk"'.format(source_root),
 ]
 
-libtracker_miner_test_environment = environment()
-libtracker_miner_test_environment.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', '@0@/src/libtracker-common/stop-words'.format(source_root))
-libtracker_miner_test_environment.set('GSETTINGS_SCHEMA_DIR', join_paths(meson.build_root(), 'data'))
-
 libtracker_miner_test_deps = [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep]
 
 foreach base_name: libtracker_miner_tests
@@ -38,8 +34,7 @@ foreach base_name: libtracker_miner_tests
       c_args: libtracker_miner_test_c_args,
       link_with: [libtracker_miner_private])
 
-    test(test_name, binary,
-      env: libtracker_miner_test_environment)
+    tests += [[test_name, binary]]
 endforeach
 
 foreach base_name: libtracker_miner_slow_tests
@@ -52,7 +47,5 @@ foreach base_name: libtracker_miner_slow_tests
       c_args: libtracker_miner_test_c_args,
       link_with: [libtracker_miner_private])
 
-    test(test_name, binary,
-      env: libtracker_miner_test_environment,
-      timeout: 180)
+    tests += [[test_name, binary, 180]]
 endforeach
