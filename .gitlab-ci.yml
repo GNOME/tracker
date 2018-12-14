@@ -15,7 +15,10 @@ test-fedora-latest:
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
 
-      su tracker -c 'cd build; dbus-run-session -- env LANG=en_US.UTF8 meson test --print-errorlogs'
+      su tracker -c 'cd build; GSETTINGS_SCHEMA_DIR=./data \
+                               TRACKER_TEST_DOMAIN_ONTOLOGY_RULE=../src/tracker-store/default.rule \
+                               TRACKER_DB_ONTOLOGIES_DIR=../src/ontologies/nepomuk \
+                               dbus-run-session --config-file=./tests/test-bus.conf -- env LANG=en_US.UTF8 meson test --print-errorlogs'
 
   artifacts:
     when: always

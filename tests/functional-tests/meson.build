@@ -1,4 +1,8 @@
-test_runner = find_program('test-runner.sh')
+test_runner = configure_file(
+    input: 'test-runner.sh.in',
+    output: 'test-runner.sh',
+    configuration: conf)
+test_runner = find_program(test_runner)
 
 config_json = configure_file(
   input: 'configuration.json.in',
