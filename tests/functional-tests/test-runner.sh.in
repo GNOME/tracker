@@ -4,8 +4,6 @@
 
 set -e
 
-SCRIPT=$1
-
 export TEMP_DIR=`mktemp --tmpdir -d tracker-test-XXXX`
 
 # We need to use the actual home directory for some tests because
@@ -17,6 +15,6 @@ export REAL_HOME=`echo ~`
 HOME=$TEMP_DIR
 
 echo "Running $@"
-dbus-run-session -- "$@"
+dbus-run-session --config-file=@abs_top_builddir@/tests/test-bus.conf -- "$@"
 
 rm -R $TEMP_DIR
