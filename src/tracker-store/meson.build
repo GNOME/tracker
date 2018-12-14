@@ -63,25 +63,5 @@ if install_systemd_user_services
       install_dir: systemd_user_services_dir)
 endif
 
-install_data('org.freedesktop.Tracker.Store.gschema.xml',
-    install_dir: gsettings_schema_dir)
-
-install_data('org.freedesktop.Tracker.gschema.xml',
-    install_dir: gsettings_schema_dir)
-
-custom_target('tracker-store-settings-enums',
-    input: '../libtracker-common/tracker-enums.h',
-    output: 'org.freedesktop.Tracker.enums.xml',
-    command: [glib_mkenums,
-              '--comments', '<!-- @comment@ -->',
-              '--fhead', '<schemalist>',
-              '--vhead', '<@type@ id="org.freedesktop.Tracker.@EnumName@">',
-              '--vprod', '    <value nick="@valuenick@" value="@valuenum@"/>',
-              '--vtail', '  </@type@>',
-              '--ftail', '</schemalist>', '@INPUT@'],
-    capture: true,
-    install: true,
-    install_dir: gsettings_schema_dir)
-
 install_data('default.rule',
     install_dir: join_paths(get_option('datadir'), 'tracker', 'domain-ontologies'))

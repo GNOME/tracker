@@ -85,6 +85,3 @@ tracker_data_dep = declare_dependency(
     include_directories: include_directories('.'),
     sources: enums[1],
 )
-
-install_data('org.freedesktop.Tracker.DB.gschema.xml',
-    install_dir: gsettings_schema_dir)

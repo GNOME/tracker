@@ -327,6 +327,7 @@ typelib_dir = gobject_introspection.get_pkgconfig_variable('typelibdir',
                                                            define_variable:  [ 'libdir', libdir ])
 
 subdir('src')
+subdir('data')
 
 if get_option('docs')
   subdir('docs')

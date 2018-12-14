@@ -21,6 +21,3 @@ tracker_fts_dep = declare_dependency(
     link_whole: libtracker_fts,
     dependencies: libtracker_fts_dependencies
 )
-
-install_data('org.freedesktop.Tracker.FTS.gschema.xml',
-    install_dir: gsettings_schema_dir)

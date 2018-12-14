@@ -24,6 +24,7 @@ libtracker_miner_test_c_args = [
 
 libtracker_miner_test_environment = environment()
 libtracker_miner_test_environment.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', '@0@/src/libtracker-common/stop-words'.format(source_root))
+libtracker_miner_test_environment.set('GSETTINGS_SCHEMA_DIR', join_paths(meson.build_root(), 'data'))
 
 libtracker_miner_test_deps = [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep]
 
