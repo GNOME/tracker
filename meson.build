@@ -270,6 +270,7 @@ conf.set('TRACKER_INTERFACE_AGE', 0)
 conf.set('TRACKER_BINARY_AGE', 100 * tracker_minor_version + tracker_micro_version)
 
 # Config that goes in some other generated files (.desktop, .pc, etc)
+conf.set('abs_top_builddir', meson.current_build_dir())
 conf.set('exec_prefix', get_option('prefix'))
 conf.set('bindir', join_paths(get_option('prefix'), get_option('bindir')))
 conf.set('datadir', datadir)
@@ -331,6 +332,7 @@ vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi
 glib_mkenums = find_program('glib-mkenums')
 g_ir_compiler = find_program('g-ir-compiler', gobject_introspection.get_pkgconfig_variable('g_ir_compiler'))
 g_ir_merge = find_program('g-ir-merge', join_paths(meson.current_source_dir(), 'utils', 'g-ir-merge', 'g-ir-merge'))
+dbus_run_session = find_program('dbus-run-session')
 
 gir_dir = gobject_introspection.get_pkgconfig_variable('girdir',
                                                        define_variable:  [ 'datadir', datadir ])
