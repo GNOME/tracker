@@ -23,7 +23,7 @@ are emitted. Theses tests are not extensive (only few selected signals
 are tested)
 """
 
-import unittest2 as ut
+import unittest as ut
 from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 from common.utils import configuration as cfg
 

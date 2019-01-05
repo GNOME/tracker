@@ -34,7 +34,7 @@ from common.utils import configuration as cfg
 from common.utils import helpers
 from common.utils.dconf import DConfClient
 from common.utils.expectedFailure import expectedFailureJournal
-import unittest2 as ut
+import unittest as ut
 
 
 
