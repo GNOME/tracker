@@ -27,7 +27,7 @@ from gi.repository import GLib
 import time
 
 from common.utils import configuration as cfg
-import unittest2 as ut
+import unittest as ut
 #import unittest as ut
 from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
