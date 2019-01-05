@@ -64,6 +64,12 @@ class TrackerSystemAbstraction (object):
     def __init__(self, settings=None):
         self.store = None
 
+    def xdg_data_home(self):
+        return os.path.join(self._basedir, 'data')
+
+    def xdg_cache_home(self):
+        return os.path.join(self._basedir, 'cache')
+
     def set_up_environment (self, settings=None, ontodir=None):
         """
         Sets up the XDG_*_HOME variables and make sure the directories exist
@@ -73,14 +79,17 @@ class TrackerSystemAbstraction (object):
         should map key->value, where key is a key name and value is a suitable
         GLib.Variant instance.
         """
+        self._basedir = tempfile.mkdtemp()
 
-        for var, directory in TEST_ENV_DIRS.iteritems ():
-            helpers.log ("export %s=%s" %(var, directory))
-            self.__recreate_directory (directory)
+        self._dirs = {
+            "XDG_DATA_HOME" : self.xdg_data_home(),
+            "XDG_CACHE_HOME": self.xdg_cache_home()
+        }
+
+        for var, directory in self._dirs.items():
+            os.makedirs (directory)
+            os.makedirs (os.path.join(directory, 'tracker'))
             os.environ [var] = directory
-
-        for directory in EXTRA_DIRS:
-            self.__recreate_directory (directory)
 
         if ontodir:
             helpers.log ("export %s=%s" % ("TRACKER_DB_ONTOLOGIES_DIR", ontodir))
@@ -120,17 +129,17 @@ class TrackerSystemAbstraction (object):
         except GLib.Error:
             raise UnableToBootException ("Unable to boot the store \n(" + str(e) + ")")
 
-    def tracker_store_testing_stop (self):
+    def finish (self):
         """
-        Stops a running tracker-store
+        Stop all running processes and remove all test data.
         """
-        assert self.store
-        self.store.stop ()
 
-    def __recreate_directory (self, directory):
-        if (os.path.exists (directory)):
-            shutil.rmtree (directory)
-        os.makedirs (directory)
+        if self.store:
+            self.store.stop ()
+
+        for path in self._dirs.values():
+            shutil.rmtree(path)
+        os.rmdir(self._basedir)
 
 
 class OntologyChangeTestTemplate (ut.TestCase):
@@ -154,8 +163,7 @@ class OntologyChangeTestTemplate (ut.TestCase):
         self.system = TrackerSystemAbstraction ()
 
     def tearDown (self):
-        if self.system.store is not None:
-            self.system.tracker_store_testing_stop ()
+        self.system.finish()
 
     def template_test_ontology_change (self):
 
