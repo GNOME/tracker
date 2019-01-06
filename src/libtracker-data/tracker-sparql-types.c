@@ -71,17 +71,9 @@ tracker_predicate_variable_new (void)
 static void
 tracker_predicate_variable_free (TrackerPredicateVariable *pred_var)
 {
-	g_clear_object (&pred_var->domain);
 	g_free (pred_var->subject);
 	g_free (pred_var->object);
 	g_free (pred_var);
-}
-
-void
-tracker_predicate_variable_set_domain (TrackerPredicateVariable *pred_var,
-                                       TrackerClass             *domain)
-{
-	g_set_object (&pred_var->domain, domain);
 }
 
 void

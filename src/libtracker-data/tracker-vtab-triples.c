@@ -75,6 +75,7 @@ tracker_triples_module_free (gpointer data)
 {
 	TrackerTriplesModule *module = data;
 
+	g_clear_object (&module->ontologies);
 	g_free (module);
 }
 

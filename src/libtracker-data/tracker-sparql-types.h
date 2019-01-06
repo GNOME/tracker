@@ -143,8 +143,6 @@ struct _TrackerToken {
 struct _TrackerPredicateVariable {
 	gchar *subject;
 	gchar *object;
-	TrackerClass *domain;
-
 	guint return_graph : 1;
 };
 
@@ -319,8 +317,6 @@ TrackerPathElement * tracker_token_get_path   (TrackerToken *token);
 /* Predicate variable */
 TrackerPredicateVariable *tracker_predicate_variable_new (void);
 
-void tracker_predicate_variable_set_domain (TrackerPredicateVariable *pred_var,
-                                            TrackerClass             *domain);
 void tracker_predicate_variable_set_triple_details (TrackerPredicateVariable *pred_var,
                                                     const gchar              *subject,
                                                     const gchar              *object,
