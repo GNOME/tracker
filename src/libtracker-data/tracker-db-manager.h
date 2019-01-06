@@ -95,6 +95,9 @@ void                tracker_db_manager_tokenizer_update       (TrackerDBManager 
 
 void                tracker_db_manager_check_perform_vacuum   (TrackerDBManager      *db_manager);
 
+void                tracker_db_manager_set_vtab_user_data     (TrackerDBManager      *db_manager,
+                                                               gpointer               user_data);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_DB_MANAGER_H__ */

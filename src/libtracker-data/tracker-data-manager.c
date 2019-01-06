@@ -4209,6 +4209,9 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		return FALSE;
 	}
 
+	tracker_db_manager_set_vtab_user_data (manager->db_manager,
+					       manager->ontologies);
+
 	manager->first_time_index = is_first_time_index;
 
 	tracker_data_manager_update_status (manager, "Initializing data manager");
@@ -4801,6 +4804,9 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			}
 		}
 	}
+
+	tracker_db_manager_set_vtab_user_data (manager->db_manager,
+					       manager->ontologies);
 
 skip_ontology_check:
 

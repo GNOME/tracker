@@ -140,6 +140,8 @@ struct _TrackerDBManager {
 	guint s_cache_size;
 	guint u_cache_size;
 
+	gpointer vtab_data;
+
 	GWeakRef iface_data;
 
 	GAsyncQueue *interfaces;
@@ -1010,6 +1012,8 @@ tracker_db_manager_create_db_interface (TrackerDBManager  *db_manager,
 	                                    g_weak_ref_get (&db_manager->iface_data),
 	                                    g_object_unref);
 
+	tracker_db_interface_init_vtabs (connection, db_manager->vtab_data);
+
 	db_set_params (connection,
 	               db_manager->db.cache_size,
 	               db_manager->db.page_size,
@@ -1258,4 +1262,11 @@ tracker_db_manager_check_perform_vacuum (TrackerDBManager *db_manager)
 
 	iface = tracker_db_manager_get_writable_db_interface (db_manager);
 	tracker_db_interface_execute_query (iface, NULL, "VACUUM");
+}
+
+void
+tracker_db_manager_set_vtab_user_data (TrackerDBManager *db_manager,
+                                       gpointer          user_data)
+{
+	db_manager->vtab_data = user_data;
 }

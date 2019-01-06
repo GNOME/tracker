@@ -56,6 +56,7 @@
 #include "tracker-db-manager.h"
 #include "tracker-data-enum-types.h"
 #include "tracker-uuid.h"
+#include "tracker-vtab-triples.h"
 
 typedef struct {
 	TrackerDBStatement *head;
@@ -3081,4 +3082,12 @@ gboolean
 tracker_db_interface_get_is_used (TrackerDBInterface *db_interface)
 {
 	return g_atomic_int_get (&db_interface->n_active_cursors) > 0;
+}
+
+gboolean
+tracker_db_interface_init_vtabs (TrackerDBInterface *db_interface,
+                                 TrackerOntologies  *ontologies)
+{
+	tracker_vtab_triples_init (db_interface->db, ontologies);
+	return TRUE;
 }

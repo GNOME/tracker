@@ -58,7 +58,8 @@ void                tracker_db_interface_sqlite_wal_hook               (TrackerD
 gboolean            tracker_db_interface_sqlite_wal_checkpoint         (TrackerDBInterface       *interface,
                                                                         gboolean                  blocking,
                                                                         GError                  **error);
-
+gboolean            tracker_db_interface_init_vtabs                    (TrackerDBInterface       *interface,
+                                                                        TrackerOntologies        *ontologies);
 
 #if HAVE_TRACKER_FTS
 void                tracker_db_interface_sqlite_fts_delete_table       (TrackerDBInterface       *interface);
