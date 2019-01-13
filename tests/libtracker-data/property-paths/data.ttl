@@ -23,6 +23,7 @@ _:bob
 _:eve
     rdf:type      foaf:Person ;
     foaf:name     "Eve" ; 
+    foaf:aimChatID "Eve" ;
     foaf:knows    _:fred ;
     .
 
