@@ -161,6 +161,7 @@ typedef enum {
 	TRACKER_PATH_OPERATOR_ZEROORONE,   /* ? */
 	TRACKER_PATH_OPERATOR_ONEORMORE,   /* + */
 	TRACKER_PATH_OPERATOR_ZEROORMORE,  /* * */
+	TRACKER_PATH_OPERATOR_NEGATED,     /* ! */
 } TrackerPathOperator;
 
 struct _TrackerPathElement {

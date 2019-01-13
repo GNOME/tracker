@@ -614,6 +614,9 @@ tracker_path_element_set_unique_name (TrackerPathElement *elem,
 	case TRACKER_PATH_OPERATOR_ONEORMORE:
 		name = "oneormore";
 		break;
+	case TRACKER_PATH_OPERATOR_NEGATED:
+		name = "neg";
+		break;
 	default:
 		g_assert_not_reached ();
 	}
