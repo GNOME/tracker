@@ -5853,10 +5853,15 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		tracker_sparql_swap_builder (sparql, old);
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DATATYPE)) {
 		_unimplemented ("DATATYPE");
-	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_IRI)) {
-		_unimplemented ("IRI");
-	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_URI)) {
-		_unimplemented ("URI");
+	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_URI) ||
+	           _accept (sparql, RULE_TYPE_LITERAL, LITERAL_IRI)) {
+		sparql->current_state.convert_to_string = TRUE;
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		_append_string (sparql, "SparqlUri (");
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+		_append_string (sparql, ") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ABS)) {
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "ABS (");

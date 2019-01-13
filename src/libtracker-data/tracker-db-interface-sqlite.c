@@ -1406,6 +1406,26 @@ function_sparql_encode_for_uri (sqlite3_context *context,
 }
 
 static void
+function_sparql_uri (sqlite3_context *context,
+                     int              argc,
+                     sqlite3_value   *argv[])
+{
+	const gchar *str;
+	gchar *encoded;
+
+	if (argc != 1) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	str = (gchar *)sqlite3_value_text (argv[0]);
+	encoded = g_uri_escape_string (str,
+	                               G_URI_RESERVED_CHARS_ALLOWED_IN_PATH,
+	                               FALSE);
+	sqlite3_result_text (context, encoded, -1, g_free);
+}
+
+static void
 function_sparql_string_before (sqlite3_context *context,
                                int              argc,
                                sqlite3_value   *argv[])
@@ -1684,6 +1704,8 @@ initialize_functions (TrackerDBInterface *db_interface)
 		  function_sparql_uri_is_descendant },
 		{ "SparqlEncodeForUri", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_encode_for_uri },
+		{ "SparqlUri", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		  function_sparql_uri },
 		/* Strings */
 		{ "SparqlRegex", -1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_regex },
