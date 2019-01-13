@@ -32,3 +32,6 @@ foaf:member a rdf:Property ;
 	rdfs:domain foaf:Person ;
 	rdfs:range foaf:Group .
 
+foaf:aimChatID a rdf:Property ;
+	rdfs:domain foaf:Agent ;
+	rdfs:range xsd:string .
