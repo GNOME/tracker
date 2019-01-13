@@ -6340,7 +6340,13 @@ translate_Aggregate (TrackerSparql  *sparql,
 		_append_string (sparql, ") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SAMPLE)) {
-		_unimplemented ("SAMPLE");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+
+		if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DISTINCT))
+			_append_string (sparql, "DISTINCT ");
+
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 	} else {
 		g_assert_not_reached ();
 	}
