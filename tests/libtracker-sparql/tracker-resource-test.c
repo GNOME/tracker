@@ -73,7 +73,7 @@ test_resource_get_set_gvalue (void)
 	resource = tracker_resource_new ("http://example.com/resource");
 
 	g_value_init (&value, G_TYPE_STRING);
-	g_value_set_string (&value, "xyzzy");
+	g_value_set_static_string (&value, "xyzzy");
 	tracker_resource_set_gvalue (resource, "http://example.com/0", &value);
 
 	list = tracker_resource_get_values (resource, "http://example.com/0");
