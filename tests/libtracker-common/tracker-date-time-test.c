@@ -90,6 +90,10 @@ test_string_to_date (void)
 	g_assert_cmpint (g_date_get_day (expected), ==, g_date_get_day (result));
 	g_assert_cmpint (g_date_get_month (expected), ==, g_date_get_month (result));
 
+	g_date_free (expected);
+	g_date_free (result);
+
+
 	result_time_t = tracker_string_to_date ("", NULL, &error);
 	g_assert_cmpint (result_time_t, ==, -1);
 	g_assert_error (error, TRACKER_DATE_ERROR, TRACKER_DATE_ERROR_INVALID_ISO8601);
@@ -137,6 +141,9 @@ test_date_to_string (void)
 	result = tracker_date_to_string (input);
 
 	g_assert (result != NULL && strncmp (result, "2008-06-16T23:53:10Z", 19) == 0);
+
+	g_free (result);
+	g_free (original);
 }
 
 static void
