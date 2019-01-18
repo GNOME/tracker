@@ -321,13 +321,14 @@ test_common_context_teardown (TestCommonContext *fixture,
 		g_object_unref (fixture->test_file);
 	}
 
+	DELETE_FOLDER (fixture, NULL);
+
 	if (fixture->test_path) {
 		g_free (fixture->test_path);
 	}
 
 	g_clear_object (&fixture->connection);
-
-	DELETE_FOLDER (fixture, NULL);
+	g_main_loop_unref (fixture->main_loop);
 }
 
 static gboolean
