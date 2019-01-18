@@ -56,6 +56,7 @@ test_string_in_string_list (void)
 
 	g_assert_cmpint (tracker_string_in_string_list ("is", pieces), ==, 1);
 	g_assert_cmpint (tracker_string_in_string_list ("Audio:Title", pieces), ==, 12);
+	g_strfreev (pieces);
 
 	g_assert_cmpint (tracker_string_in_string_list ("terms", NULL), ==, -1);
 }
@@ -143,6 +144,7 @@ test_string_to_string_list (void)
         result = tracker_string_to_string_list (input);
         g_assert_cmpint (g_strv_length (result), ==, 1);
         g_assert_cmpstr (result [0], ==, "first line");
+        g_strfreev (result);
 }
 
 static void
