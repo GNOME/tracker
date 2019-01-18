@@ -614,13 +614,15 @@ flush_cached_event (TrackerMonitor *monitor,
                     GFile          *file,
                     gboolean        is_directory)
 {
-	GFileMonitorEvent prev_event_type;
+	gpointer value = NULL;
 	TrackerMonitorPrivate *priv;
 
 	priv = tracker_monitor_get_instance_private (monitor);
 
 	if (g_hash_table_lookup_extended (priv->cached_events,
-	                                  file, NULL, (gpointer*) &prev_event_type)) {
+	                                  file, NULL, &value)) {
+		GFileMonitorEvent prev_event_type = GPOINTER_TO_UINT (value);
+
 		g_hash_table_remove (priv->cached_events, file);
 		emit_signal_for_event (monitor, prev_event_type,
 		                       is_directory, file, NULL);
