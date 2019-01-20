@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: el\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues\n"
-"POT-Creation-Date: 2018-11-13 11:25+0000\n"
-"PO-Revision-Date: 2018-12-21 01:08+0200\n"
+"POT-Creation-Date: 2019-01-19 20:26+0000\n"
+"PO-Revision-Date: 2019-01-20 23:25+0200\n"
 "Last-Translator: Efstathios Iosifidis <iosifidis@opensuse.org>\n"
 "Language-Team: Ελληνικά <>\n"
 "Language: el\n"
@@ -18,8 +18,114 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.7\n"
+"X-Generator: Poedit 1.5.7\n"
 "X-Project-Style: gnome\n"
+
+#: data/org.freedesktop.Tracker.DB.gschema.xml:24
+msgid "Maximum size of journal"
+msgstr "Μέγιστο μέγεθος αρχείου καταγραφής"
+
+#: data/org.freedesktop.Tracker.DB.gschema.xml:25
+msgid "Size of the journal at rotation in MB. Use -1 to disable rotating."
+msgstr ""
+"Μέγεθος του αρχείου καταγραφής σε περιστροφή σε MB. Χρήση του -1 για "
+"απενεργοποίηση της περιστροφής."
+
+#: data/org.freedesktop.Tracker.DB.gschema.xml:29
+msgid "Location of journal pieces"
+msgstr "Θέση των τμημάτων της καταγραφής"
+
+#: data/org.freedesktop.Tracker.DB.gschema.xml:30
+msgid "Where to store a journal chunk when it hits the max size."
+msgstr ""
+"Θέση αποθήκευσης ενός τμήματος καταγραφής όταν φτάνει το μέγιστο μέγεθος."
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:26
+msgid "Maximum length of a word to be indexed"
+msgstr "Μέγιστο μήκος μιας λέξης για ευρετηριοποίηση"
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:27
+msgid ""
+"Words with more characters than this length will be ignored by the indexer."
+msgstr ""
+"Λέξεις με λιγότερους χαρακτήρες από αυτό το μήκος θα αγνοηθούν από το "
+"ευρετήριο."
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:32
+msgid "Maximum number of words to index in a document"
+msgstr "Μέγιστος αριθμός λέξεων για ευρετηριοποίηση σε ένα έγγραφο"
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:33
+msgid ""
+"Indexer will read only this maximum number of words from a single document."
+msgstr ""
+"Το ευρετήριο θα διαβάσει μόνο αυτόν τον μέγιστο αριθμό των λέξεων από ένα "
+"μοναδικό έγγραφο."
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:37
+msgid "Enable stemmer"
+msgstr "Ενεργοποίηση stemmer"
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:38
+msgid ""
+"Simplify the words to their root to provide more results. E.g. “shelves” and "
+"“shelf” to “shel”"
+msgstr ""
+"Απλοποίηση των λέξεων στην ρίζα τους για παροχή περισσότερων αποτελεσμάτων. "
+"Π.χ. «ράφια» και «ράφι» σε «ράφ»"
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:43
+msgid "Enable unaccent"
+msgstr "Ενεργοποίηση άτονων"
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:44
+msgid ""
+"Translate accented characters to the equivalent unaccented. E.g. “Idéa” to "
+"“Idea” for improved matching."
+msgstr ""
+"Μετάφραση τονισμένων χαρακτήρων σε ισοδύναμους άτονους. Π.χ. «Ιδέα» σε "
+"«Ιδεα» για βελτιωμένη αντιστοίχηση."
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:49
+msgid "Ignore numbers"
+msgstr "Παράβλεψη αριθμών"
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:50
+msgid "If enabled, numbers will not be indexed."
+msgstr "Εάν ενεργοποιηθεί, οι αριθμοί δεν θα ευρετηριοποιηθούν."
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:55
+msgid "Ignore stop words"
+msgstr "Παράβλεψη φιλτραρισμένων λέξεων"
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:56
+msgid ""
+"If enabled, the words listed in the stop-words list are ignored. E.g. common "
+"words like “the”, “yes”, “no”, etc."
+msgstr ""
+"Εάν ενεργοποιηθεί, οι καταχωρημένες λέξεις στη λίστα κενών λέξεων θα "
+"αγνοηθούν. Π.χ. κοινές λέξεις όπως «το», «ναι», «όχι», κλπ."
+
+#: data/org.freedesktop.Tracker.Store.gschema.xml:24
+msgid "Log verbosity"
+msgstr "Αρχείο καταγραφής με αναλυτική περιγραφή"
+
+#: data/org.freedesktop.Tracker.Store.gschema.xml:25
+msgid "Log verbosity."
+msgstr "Αρχείο καταγραφής με αναλυτική περιγραφή"
+
+#: data/org.freedesktop.Tracker.Store.gschema.xml:29
+msgid "GraphUpdated delay"
+msgstr "Καθυστέρηση ενημέρωσης γραφήματος"
+
+#: data/org.freedesktop.Tracker.Store.gschema.xml:30
+msgid ""
+"Period in milliseconds between GraphUpdated signals being emitted when "
+"indexed data has changed inside the database."
+msgstr ""
+"Η περίοδος σε χιλιοστά δευτερολέπτου μεταξύ σημάτων ενημέρωσης γραφήματος "
+"που εκπέμπονται όταν ευρετηριοποιημένα δεδομένα έχουν αλλάξει μέσα στη βάση "
+"δεδομένων."
 
 # #-#-#-#-#  nautilus.HEAD.el.po (el)  #-#-#-#-#
 #
@@ -84,25 +190,6 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " σε %2.2d δευτερόλεπτο"
 msgstr[1] " σε %2.2d δευτερόλεπτα"
 
-#: src/libtracker-data/org.freedesktop.Tracker.DB.gschema.xml:24
-msgid "Maximum size of journal"
-msgstr "Μέγιστο μέγεθος αρχείου καταγραφής"
-
-#: src/libtracker-data/org.freedesktop.Tracker.DB.gschema.xml:25
-msgid "Size of the journal at rotation in MB. Use -1 to disable rotating."
-msgstr ""
-"Μέγεθος του αρχείου καταγραφής σε περιστροφή σε MB. Χρήση του -1 για "
-"απενεργοποίηση της περιστροφής."
-
-#: src/libtracker-data/org.freedesktop.Tracker.DB.gschema.xml:29
-msgid "Location of journal pieces"
-msgstr "Θέση των τμημάτων της καταγραφής"
-
-#: src/libtracker-data/org.freedesktop.Tracker.DB.gschema.xml:30
-msgid "Where to store a journal chunk when it hits the max size."
-msgstr ""
-"Θέση αποθήκευσης ενός τμήματος καταγραφής όταν φτάνει το μέγιστο μέγεθος."
-
 #. Translators: this is a '|' (U+007C) separated list of common
 #. * title beginnings. Meant to be skipped for sorting purposes,
 #. * case doesn't matter. Given English media is quite common, it is
@@ -145,72 +232,6 @@ msgstr "Δεν προέκυψε σφάλμα"
 msgid "Unknown error, “tar” exited with status %d"
 msgstr "Άγνωστο σφάλμα, το «tar» εξήλθε με κατάσταση %d"
 
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:26
-msgid "Maximum length of a word to be indexed"
-msgstr "Μέγιστο μήκος μιας λέξης για ευρετηριοποίηση"
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:27
-msgid ""
-"Words with more characters than this length will be ignored by the indexer."
-msgstr ""
-"Λέξεις με λιγότερους χαρακτήρες από αυτό το μήκος θα αγνοηθούν από το "
-"ευρετήριο."
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:32
-msgid "Maximum number of words to index in a document"
-msgstr "Μέγιστος αριθμός λέξεων για ευρετηριοποίηση σε ένα έγγραφο"
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:33
-msgid ""
-"Indexer will read only this maximum number of words from a single document."
-msgstr ""
-"Το ευρετήριο θα διαβάσει μόνο αυτόν τον μέγιστο αριθμό των λέξεων από ένα "
-"μοναδικό έγγραφο."
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:37
-msgid "Enable stemmer"
-msgstr "Ενεργοποίηση stemmer"
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:38
-msgid ""
-"Simplify the words to their root to provide more results. E.g. “shelves” and "
-"“shelf” to “shel”"
-msgstr ""
-"Απλοποίηση των λέξεων στην ρίζα τους για παροχή περισσότερων αποτελεσμάτων. "
-"Π.χ. «ράφια» και «ράφι» σε «ράφ»"
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:43
-msgid "Enable unaccent"
-msgstr "Ενεργοποίηση άτονων"
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:44
-msgid ""
-"Translate accented characters to the equivalent unaccented. E.g. “Idéa” to "
-"“Idea” for improved matching."
-msgstr ""
-"Μετάφραση τονισμένων χαρακτήρων σε ισοδύναμους άτονους. Π.χ. «Ιδέα» σε "
-"«Ιδεα» για βελτιωμένη αντιστοίχηση."
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:49
-msgid "Ignore numbers"
-msgstr "Παράβλεψη αριθμών"
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:50
-msgid "If enabled, numbers will not be indexed."
-msgstr "Εάν ενεργοποιηθεί, οι αριθμοί δεν θα ευρετηριοποιηθούν."
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:55
-msgid "Ignore stop words"
-msgstr "Παράβλεψη φιλτραρισμένων λέξεων"
-
-#: src/libtracker-fts/org.freedesktop.Tracker.FTS.gschema.xml:56
-msgid ""
-"If enabled, the words listed in the stop-words list are ignored. E.g. common "
-"words like “the”, “yes”, “no”, etc."
-msgstr ""
-"Εάν ενεργοποιηθεί, οι καταχωρημένες λέξεις στη λίστα κενών λέξεων θα "
-"αγνοηθούν. Π.χ. κοινές λέξεις όπως «το», «ναι», «όχι», κλπ."
-
 #: src/libtracker-miner/tracker-data-provider.c:108
 #: src/libtracker-miner/tracker-data-provider.c:168
 msgid "Operation not supported"
@@ -225,27 +246,6 @@ msgstr ""
 msgid "Pause application and reason match an already existing pause request"
 msgstr ""
 "Η παύση της εφαρμογής και η αιτία ταιριάζουν με ένα ήδη υπάρχον αίτημα παύσης"
-
-#: src/tracker-store/org.freedesktop.Tracker.Store.gschema.xml:24
-msgid "Log verbosity"
-msgstr "Αρχείο καταγραφής με αναλυτική περιγραφή"
-
-#: src/tracker-store/org.freedesktop.Tracker.Store.gschema.xml:25
-msgid "Log verbosity."
-msgstr "Αρχείο καταγραφής με αναλυτική περιγραφή"
-
-#: src/tracker-store/org.freedesktop.Tracker.Store.gschema.xml:29
-msgid "GraphUpdated delay"
-msgstr "Καθυστέρηση ενημέρωσης γραφήματος"
-
-#: src/tracker-store/org.freedesktop.Tracker.Store.gschema.xml:30
-msgid ""
-"Period in milliseconds between GraphUpdated signals being emitted when "
-"indexed data has changed inside the database."
-msgstr ""
-"Η περίοδος σε χιλιοστά δευτερολέπτου μεταξύ σημάτων ενημέρωσης γραφήματος "
-"που εκπέμπονται όταν ευρετηριοποιημένα δεδομένα έχουν αλλάξει μέσα στη βάση "
-"δεδομένων."
 
 #. Daemon options
 #: src/tracker-store/tracker-main.vala:60
@@ -1785,9 +1785,11 @@ msgstr[1] "%d αρχεία"
 
 #: src/tracker/tracker-status.c:524
 #, c-format
-msgid "%d folders"
+#| msgid "%d folders"
+#| msgid_plural "%d folders"
+msgid "%d folder"
 msgid_plural "%d folders"
-msgstr[0] "%d φάκελοι"
+msgstr[0] "%d φάκελος"
 msgstr[1] "%d φάκελοι"
 
 #: src/tracker/tracker-status.c:550
