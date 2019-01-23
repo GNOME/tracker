@@ -569,6 +569,7 @@ update_array_async_thread_func (GTask        *task,
 	tracker_sparql_connection_update (source_object, concatenated,
 	                                  g_task_get_priority (task),
 	                                  cancellable, &error);
+	g_free (concatenated);
 
 	if (!error) {
 		g_task_return_pointer (task, errors,
