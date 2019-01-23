@@ -790,7 +790,7 @@ static const TrackerGrammarRule helper_BuiltInCall_or_2[] = { S(helper_BuiltInCa
 						       S(helper_BuiltInCall_seq_47), S(helper_BuiltInCall_seq_48), S(helper_BuiltInCall_seq_49),
 						       S(helper_BuiltInCall_seq_50), S(helper_BuiltInCall_seq_51), S(helper_BuiltInCall_seq_52),
                                                        S(helper_BuiltInCall_seq_53), S(helper_BuiltInCall_seq_54), S(helper_BuiltInCall_seq_55),
-                                                       S(helper_BuiltInCall_seq_56)};
+                                                       S(helper_BuiltInCall_seq_56), NIL };
 static const TrackerGrammarRule rule_BuiltInCall[] = { OR(helper_BuiltInCall_or_2), NIL };
 
 /* BrackettedExpression ::= '(' Expression ')'
