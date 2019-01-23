@@ -314,6 +314,7 @@ tracker_monitor_finalize (GObject *object)
 
 	g_hash_table_unref (priv->cached_events);
 	g_hash_table_unref (priv->monitors);
+	g_clear_object (&priv->tree);
 
 	G_OBJECT_CLASS (tracker_monitor_parent_class)->finalize (object);
 }
