@@ -5006,6 +5006,7 @@ tracker_data_manager_finalize (GObject *object)
 
 	g_clear_object (&manager->ontologies);
 	g_clear_object (&manager->data_update);
+	g_free (manager->status);
 
 	G_OBJECT_CLASS (tracker_data_manager_parent_class)->finalize (object);
 }
