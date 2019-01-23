@@ -17,6 +17,8 @@
  * Boston, MA  02110-1301, USA.
  */
 
+using GLib;
+
 public class Tracker.TurtleReader : Object {
 	SparqlScanner scanner;
 
@@ -56,8 +58,8 @@ public class Tracker.TurtleReader : Object {
 
 	HashTable<string,string> prefix_map;
 
-	string[] subject_stack;
-	string[] predicate_stack;
+	GLib.Queue<string> subject_stack;
+	GLib.Queue<string> predicate_stack;
 
 	int bnodeid = 0;
 	// base UUID used for blank nodes
@@ -88,6 +90,8 @@ public class Tracker.TurtleReader : Object {
 
 		tokens = new TokenInfo[BUFFER_SIZE];
 		prefix_map = new HashTable<string,string>.full (str_hash, str_equal, g_free, g_free);
+		subject_stack = new GLib.Queue<string> ();
+		predicate_stack = new GLib.Queue<string> ();
 	}
 
 	private string generate_bnodeid (string? user_bnodeid) {
@@ -266,8 +270,8 @@ public class Tracker.TurtleReader : Object {
 					return true;
 				} else if (accept (SparqlTokenType.OPEN_BRACKET)) {
 					// begin of anonymous blank node
-					subject_stack += subject;
-					predicate_stack += predicate;
+					subject_stack.push_tail (subject);
+					predicate_stack.push_tail (predicate);
 					subject = generate_bnodeid (null);
 					state = State.SUBJECT;
 					continue;
@@ -355,22 +359,19 @@ public class Tracker.TurtleReader : Object {
 					}
 					state = State.SUBJECT;
 					continue;
-				} else if (subject_stack.length > 0) {
+				} else if (!subject_stack.is_empty()) {
 					// end of anonymous blank node
 					expect (SparqlTokenType.CLOSE_BRACKET);
 
 					object = subject;
 					object_is_uri = true;
 
-					subject = subject_stack[subject_stack.length - 1];
-					subject_stack.length--;
-
-					predicate = predicate_stack[predicate_stack.length - 1];
-					predicate_stack.length--;
+					subject = subject_stack.pop_tail();
+					predicate = predicate_stack.pop_tail();
 
 					state = State.OBJECT;
 					return true;
-				} else if (accept (SparqlTokenType.DOT)) {
+				} else if (accept (SparqlTokenType.DOT)) 	{
 					state = State.BOS;
 					continue;
 				} else {
