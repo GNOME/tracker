@@ -284,6 +284,7 @@ test_ontology_change (void)
 	g_free (ontologies);
 	g_free (build_prefix);
 	g_free (prefix);
+	g_free (ontology_file);
 }
 
 int
