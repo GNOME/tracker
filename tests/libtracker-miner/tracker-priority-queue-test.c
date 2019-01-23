@@ -130,6 +130,11 @@ test_priority_queue_find (void)
         g_assert_cmpstr (result, !=, NULL);
         g_assert_cmpint (priority, ==, 10);
 
+        while (!tracker_priority_queue_is_empty (queue)) {
+            gchar *text = (gchar *) tracker_priority_queue_pop (queue, NULL);
+            g_free (text);
+        }
+
         tracker_priority_queue_unref (queue);
 }
 
@@ -156,6 +161,11 @@ test_priority_queue_foreach (void)
         tracker_priority_queue_foreach (queue, foreach_testing_cb, &counter);
 
         g_assert_cmpint (counter, ==, 3);
+
+        while (!tracker_priority_queue_is_empty (queue)) {
+            gchar *text = (gchar *) tracker_priority_queue_pop (queue, NULL);
+            g_free (text);
+        }
 
         tracker_priority_queue_unref (queue);
 }
