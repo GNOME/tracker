@@ -1780,10 +1780,11 @@ tracker_db_journal_reader_verify_last (GFile   *data_location,
 
 			jreader.current = jreader.end - entry_size_check;
 			success = db_journal_reader_next (&jreader, FALSE, NULL);
-			db_journal_reader_clear (&jreader);
 		} else {
 			success = TRUE;
 		}
+
+		db_journal_reader_clear (&jreader);
 	}
 
 	g_free (filename);
