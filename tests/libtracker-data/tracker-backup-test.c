@@ -216,6 +216,8 @@ test_backup_and_restore_helper (const gchar *db_location,
 
 	g_assert_cmpint (backup_calls, ==, 1);
 
+	g_free (data_prefix);
+	g_object_unref (data_location);
 	g_object_unref (manager);
 }
 
