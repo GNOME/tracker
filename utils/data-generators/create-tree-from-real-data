@@ -33,9 +33,9 @@ if sys.version_info[0] >= 3:
     import urllib.parse as urlparse
     from urllib.parse import unquote as url_unquote
 else:
-    import ConfigParser as configparser
-    import urlparse
-    from urllib import unquote as url_unquote
+    import configparser as configparser
+    import urllib.parse
+    from urllib.parse import unquote as url_unquote
 
 
 def argument_parser():
@@ -105,13 +105,13 @@ def resources_with_mime_types(db, mime_types, limit=10):
     ''' % (make_sparql_list(mime_types), limit)
 
     result = db.query(query)
-    while result.next():
+    while next(result):
         yield result.get_string(0)[0]
 
 
 def file_url_to_path(url):
     '''Convert file:// URL to a pathname.'''
-    scheme, netloc, path, params, query, fragment = urlparse.urlparse(url)
+    scheme, netloc, path, params, query, fragment = urllib.parse.urlparse(url)
     if scheme != 'file':
         raise RuntimeError("Only file:// URLs are supported.")
     if any([netloc, params, query, fragment]):
@@ -142,7 +142,7 @@ def main():
 
     extractors_with_no_files = []
 
-    for extractor, mime_types in rule_map.items():
+    for extractor, mime_types in list(rule_map.items()):
         resources = list(resources_with_mime_types(db, mime_types, limit=2))
 
         if (len(resources) == 0):

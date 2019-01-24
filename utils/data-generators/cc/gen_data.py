@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-import cPickle as pickle
+import pickle as pickle
 import random
 import string
 import calendar
@@ -75,7 +75,7 @@ def create_job_title():
 
 def create_phone(zip_code=None):
     if not zip_code:
-        zip_code = random.choice(all_zips.keys())
+        zip_code = random.choice(list(all_zips.keys()))
     area_code = random.choice(state_area_codes[all_zips[zip_code][1]])
     output = "(%s)%s-%s" % (area_code, random.randint(111,999), random.randint(1111,9999))
     return(output)
@@ -89,27 +89,27 @@ def create_street():
 
 def create_city_state_zip(zip_code=None):
     if not zip_code:
-        zip_code = random.choice(all_zips.keys())
+        zip_code = random.choice(list(all_zips.keys()))
     return(zip_code, all_zips[zip_code][0], all_zips[zip_code][1])
 
 def create_sentence(min=4, max=15):
     sentence = []
-    sentence.append(string.capitalize(random.choice(latin_words)))
-    for word in xrange(1, random.randint(min, max-1)):
+    sentence.append(random.choice(latin_words).capitalize())
+    for word in range(1, random.randint(min, max-1)):
         sentence.append(random.choice(latin_words))
     return ' '.join(sentence) + '.'
 
 def create_paragraphs(num=1, min_sentences=4, max_sentences=7):
     paragraphs = []
-    for para in xrange(0, num):
-        for sentence in xrange(1, random.randint(min_sentences, max_sentences)):
+    for para in range(0, num):
+        for sentence in range(1, random.randint(min_sentences, max_sentences)):
             paragraphs.append(create_sentence()+" ")
         paragraphs.append("\n\n")
     return "".join(paragraphs)
 
 def create_text(min_sentences=4, max_sentences=10):
     text = []
-    for sentence in xrange(1, random.randint(min_sentences, max_sentences)):
+    for sentence in range(1, random.randint(min_sentences, max_sentences)):
         text.append(create_sentence())
     return ' '.join(text)
 
@@ -139,7 +139,7 @@ def create_birthday(age=random.randint (16, 80)):
 def create_email(tld=None, name=create_name()):
     if not tld:
         tld = random.choice(email_domains)
-    user = random.choice(usernames) % tuple(map(lambda n: n.lower(), name))
+    user = random.choice(usernames) % tuple([n.lower() for n in name])
     domain = random.choice(latin_words) + random.choice(latin_words)
     return ("%s@%s.%s" % (user, domain, tld))
 
@@ -152,7 +152,7 @@ def create_company_name(biz_type=None):
                      random.choice(last_names))
         name.append('LLP')
     else:
-        for i in xrange(1,random.randint(2,4)):
+        for i in range(1,random.randint(2,4)):
             rand_name = random.choice(company_names)
             if rand_name not in name:
                 name.append(rand_name)
@@ -173,17 +173,17 @@ if __name__ == "__main__":
     add = create_street()
     zip, city, state = create_city_state_zip()
     phone = create_phone(zip)
-    print first, last
-    print add
-    print "%s %s, %s" % (city, state,zip)
-    print phone
-    print create_sentence(), "\n"
-    print create_paragraphs(num=3)
+    print(first, last)
+    print(add)
+    print("%s %s, %s" % (city, state,zip))
+    print(phone)
+    print(create_sentence(), "\n")
+    print(create_paragraphs(num=3))
     expiry = create_date(max_years_future=3)
-    print expiry.strftime("%m/%y")
-    print create_email()
-    print create_company_name()
-    print create_job_title()
+    print(expiry.strftime("%m/%y"))
+    print(create_email())
+    print(create_company_name())
+    print(create_job_title())
 
 
 

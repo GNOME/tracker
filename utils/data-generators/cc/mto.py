@@ -41,7 +41,7 @@ def generateUploadTransfer(index):
 
   # add some random transfers
   upload_transfers = ''
-  for index in xrange (1, 2 + (index % 10)):
+  for index in range (1, 2 + (index % 10)):
     upload_transfers += 'mto:transferList <%s> ;\n' % tools.getRandomUri( 'mto#TransferElement' )
 
   tools.addItem( me, upload_uri, mto_UploadTransfer % locals() )

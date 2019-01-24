@@ -17,25 +17,25 @@
 # 02110-1301, USA.
 #
 
-import ConfigParser, os
+import configparser, os
 import sys
 
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.readfp(sys.stdin)
 
-print "<service>"
+print("<service>")
 for section in config.sections():
    splitted = section.split (":")
-   print " <section prefix=\"" + splitted[0] + "\" name=\"" + splitted[1] + "\" fullname=\"" + section + "\">"
+   print(" <section prefix=\"" + splitted[0] + "\" name=\"" + splitted[1] + "\" fullname=\"" + section + "\">")
    for name, value in config.items (section):
      vsplit = value.split (":")
-     print "\t<item name=\""+ name + "\" fullvalue=\"" + value+ "\">"
+     print("\t<item name=\""+ name + "\" fullvalue=\"" + value+ "\">")
      if len (vsplit) > 1:
-       print "\t\t<prefix>" + vsplit[0] + "</prefix>"
-       print "\t\t<value>" + vsplit[1] + "</value>"
+       print("\t\t<prefix>" + vsplit[0] + "</prefix>")
+       print("\t\t<value>" + vsplit[1] + "</value>")
      else:
-       print "\t\t<prefix />"
-       print "\t\t<value>" + value + "</value>"
-     print "\t</item>"
-   print " </section>"
-print "</service>"
+       print("\t\t<prefix />")
+       print("\t\t<value>" + value + "</value>")
+     print("\t</item>")
+   print(" </section>")
+print("</service>")

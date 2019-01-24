@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import argparse
@@ -6,7 +6,7 @@ import os
 import string
 import time
 import sys
-import ConfigParser
+import configparser
 import platform 
 
 import ontology_prefixes
@@ -28,7 +28,7 @@ def recent_enough_python ():
   """
   True if it is 2.6 or more recent
   """
-  print "Running generate with python", platform.python_version ()
+  print("Running generate with python", platform.python_version ())
   version = platform.python_version_tuple ()
   return (int(version[0]) >= 2 and int(version[1]) >= 6)
 
@@ -43,7 +43,7 @@ def argument_parser():
 
 args = argument_parser().parse_args()
 
-config = ConfigParser.RawConfigParser()
+config = configparser.RawConfigParser()
 try:
   loaded_files = config.read(args.config_file)
   # config.read 
@@ -51,10 +51,10 @@ try:
   #   in 2.6+ returns a list of loaded files
   if recent_enough_python ():
     if (len (loaded_files) != 1):
-      print "Cannot open %s" % (args.config_file)
+      print("Cannot open %s" % (args.config_file))
       sys.exit (-1)
-except Exception, e:
-  print "Failed to read configuration file %s (%s)" % (args.config_file, e)
+except Exception as e:
+  print("Failed to read configuration file %s (%s)" % (args.config_file, e))
   sys.exit (-1)
 
 if args.output_dir:
@@ -111,9 +111,9 @@ tools.addType( 'mfo#FeedMessage', 81 )
 tools.addType( 'mto#TransferElement', 90 )
 tools.addType( 'mto#UploadTransfer', 91 )
 
-print "Generating Contacts",
+print("Generating Contacts")
 count_contacts = get_counter('counts','contacts')
-for contact in xrange(1, count_contacts+1):
+for contact in range(1, count_contacts+1):
   if (contact % 10 == 0):
     sys.stdout.write('.')
     sys.stdout.flush()
@@ -125,18 +125,18 @@ for contact in xrange(1, count_contacts+1):
   nco.generateIMAddress( contact )
   nco.generateContactIM( contact )
   nco.generatePersonContact( contact )
-print "Done"
+print("Done")
 
-print "Generating Locations and landmarks",
+print("Generating Locations and landmarks")
 count_locations = get_counter('counts','locations')
-for location in xrange(1, count_locations+1):
+for location in range(1, count_locations+1):
   if (location % 10 == 0):
     sys.stdout.write('.')
     sys.stdout.flush()
   slo.generateGeoLocation( location )
   slo.generateLandmark( location )
 count_locations = get_counter('counts','locations')
-for location in xrange(1, count_locations+1):
+for location in range(1, count_locations+1):
   if (location % 10 == 0):
     sys.stdout.write('.')
     sys.stdout.flush()
@@ -144,142 +144,142 @@ for location in xrange(1, count_locations+1):
   mlo.generateLocationBoundingBox( location )
   mlo.generateGeoLocation( location )
   mlo.generateLandmark( location )
-print "Done"
+print("Done")
 
-print "Generate Emails",
+print("Generate Emails")
 count_accounts = get_counter('counts','accounts')
 count_folders = get_counter('counts','folders')
 count_emails = get_counter('counts','emails')
-for account in xrange(1, count_accounts+1):
+for account in range(1, count_accounts+1):
   sys.stdout.write('.')
   sys.stdout.flush()
   nmo.generateMailAccount( account*count_folders*count_emails )
-  for folder in xrange(1, count_folders+1):
+  for folder in range(1, count_folders+1):
     nmo.generateMailFolder( account*count_folders*count_emails+folder*count_emails )
-    for email in xrange(1, count_emails+1):
+    for email in range(1, count_emails+1):
       nmo.generateEmail( account*count_folders*count_emails+folder*count_emails+email )
-print "Done"
+print("Done")
 
-print "Generate IM messages",
+print("Generate IM messages")
 count_comchans = get_counter('counts','comchans')
 count_ims = get_counter('counts','ims')
-for comchannel in xrange(1, count_comchans+1):
+for comchannel in range(1, count_comchans+1):
   sys.stdout.write('.')
   sys.stdout.flush()
   nmo.generateCommunicationChannel( comchannel )
-  for im in xrange(1, count_ims+1):
+  for im in range(1, count_ims+1):
     nmo.generateIMMessage( comchannel*count_ims+im )
-print "Done"
+print("Done")
 
-print "Generate SMS messages",
+print("Generate SMS messages")
 count_sms = get_counter('counts','sms')
-for sms in xrange(1, count_sms+1):
+for sms in range(1, count_sms+1):
   if (sms % 10 == 0):
     sys.stdout.write('.')
     sys.stdout.flush()
   nmo.generateSMSMessage( sms )
-print "Done"
+print("Done")
 
-print "Generate calls",
+print("Generate calls")
 count_calls = get_counter('counts','calls')
-for call in xrange(1, count_calls+1):
+for call in range(1, count_calls+1):
   if (call % 10 == 0):
     sys.stdout.write('.')
     sys.stdout.flush()
   nmo.generateCall( call )
-print "Done"
+print("Done")
 
-print "* Starting with file system based content"
+print("* Starting with file system based content")
 
-print "Generate volumes",
+print("Generate volumes")
 count_volumes = get_counter('counts','volumes')
-for volume in xrange(1, count_volumes+1):
+for volume in range(1, count_volumes+1):
   sys.stdout.write('.')
   sys.stdout.flush()
   tracker.generateVolume( volume )
-print "Done"
+print("Done")
 
-print "Generating Music",
+print("Generating Music")
 count_artists = get_counter('counts','artists')
 count_albums = get_counter('counts','albums')
 count_songs = get_counter('counts','songs')
 count_discs = get_counter('counts','discs')
 song_index = 0
-for artist in xrange(1, count_artists+1):
+for artist in range(1, count_artists+1):
   sys.stdout.write('.')
   sys.stdout.flush()
   nmm.generateArtist( artist*count_albums*count_songs )
-  for album in xrange(1, count_albums+1):
+  for album in range(1, count_albums+1):
     nmm.generateAlbum( artist*count_albums*count_songs+album )
-    for disc in xrange(1, count_discs+1):
+    for disc in range(1, count_discs+1):
        discUri = nmm.generateMusicAlbumDisc( artist*count_albums*count_songs+album+disc )
-       for song in xrange(1, count_songs+1):
+       for song in range(1, count_songs+1):
           nmm.generateMusicPiece( song_index, discUri )
           song_index = song_index + 1
-print "Done"
+print("Done")
 
-print "Generate Equipment",
+print("Generate Equipment")
 count_equipment = get_counter('counts','equipment')
 nmm.generateOwnEquipment ()
-for equipment in xrange(1, count_equipment):
+for equipment in range(1, count_equipment):
   if (equipment % 2 == 0):
     sys.stdout.write('.')
     sys.stdout.flush()
   nmm.generateEquipment( equipment )
-print "Done"
+print("Done")
 
-print "Generate Photos",
+print("Generate Photos")
 count_images = get_counter('counts','images')
-for photo in xrange(1, count_images+1):
+for photo in range(1, count_images+1):
   if (photo % 10 == 0):
     sys.stdout.write('.')
     sys.stdout.flush()
   nmm.generatePhoto( photo )
-print "Done"
+print("Done")
 
-print "Generate Videos",
+print("Generate Videos")
 count_videos = get_counter('counts','videos')
-for video in xrange(1, count_videos+1):
+for video in range(1, count_videos+1):
   if (video % 10 == 0):
     sys.stdout.write('.')
     sys.stdout.flush()
   nmm.generateVideo( video )
-print "Done"
+print("Done")
 
-print "Generate plain text documents",
+print("Generate plain text documents")
 count_docs = get_counter('counts','docs')
-for doc in xrange(1, count_docs+1):
+for doc in range(1, count_docs+1):
   if (doc % 10 == 0):
     sys.stdout.write('.')
     sys.stdout.flush()
   nfo.generatePlainTextDocument( doc )
-print "Done"
+print("Done")
 
-print "Generate feeds",
+print("Generate feeds")
 count_fchans = get_counter('counts','fchans')
 count_fms = get_counter('counts','fms')
-for fchan in xrange(1, count_fchans+1):
+for fchan in range(1, count_fchans+1):
   sys.stdout.write('.')
   sys.stdout.flush()
   mfo.generateFeedChannel( fchan*count_fms )
-  for fm in xrange(1, count_fms+1):
+  for fm in range(1, count_fms+1):
     mfo.generateFeedMessage( fchan*count_fms+fm )
-print "Done"
+print("Done")
 
-print "Generate software",
+print("Generate software")
 count_softcats = get_counter('counts','softcats')
 count_softapps = get_counter('counts','softapps')
-for softcat in xrange(1, count_softcats+1):
+for softcat in range(1, count_softcats+1):
   sys.stdout.write('.')
   sys.stdout.flush()
   nfo.generateSoftwareCategory( softcat*count_softapps )
-  for softapp in xrange(1, count_softapps+1):
+  for softapp in range(1, count_softapps+1):
     nfo.generateSoftwareApplication( softcat*count_softapps+softapp )
-print "Done"
+print("Done")
 
-print "Generate something for the rest",
+print("Generate something for the rest")
 count_others = get_counter('counts','others')
-for index in xrange(1,count_others+1):
+for index in range(1,count_others+1):
   if (index % 10 == 0):
     sys.stdout.write('.')
     sys.stdout.flush()
@@ -290,7 +290,7 @@ for index in xrange(1,count_others+1):
   ncal.generateTodo( index )
   mto.generateTransferElement( index )
   mto.generateUploadTransfer( index )
-print "Done"
+print("Done")
 
 # dump all files
 tools.saveResult(output_dir=args.output_dir)

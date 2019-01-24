@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 import csv
 import string
-import cPickle as pickle
+import pickle as pickle
 import random
 import os
 
@@ -37,7 +37,7 @@ simple_files_to_process = ['street-names.txt', 'street-types.txt', 'latin-words.
 def load_files():
     # Process Zip Codes
     all_zips = {}
-    reader = csv.reader(open(os.path.join(data_dir,"zip-codes.txt"), "rb"))
+    reader = csv.reader(open(os.path.join(data_dir,"zip-codes.txt")))
     for row in reader:
         data = [string.capwords(row[3]), row[4]]
         all_zips[row[0]] = data
@@ -45,7 +45,7 @@ def load_files():
     pickle.dump(all_zips, output)
 
     #Process area codes
-    area_code_file = open(os.path.join(data_dir,"area-codes.txt"), "rb")
+    area_code_file = open(os.path.join(data_dir,"area-codes.txt"))
     state_area_codes = {}
     for line in area_code_file:
         clean_line = line.replace(' ','').rstrip('\n')
@@ -55,7 +55,7 @@ def load_files():
 
     #Process Last Names
     last_names = []
-    last_name_file = open(os.path.join(data_dir,"last-name.txt"),"rb")
+    last_name_file = open(os.path.join(data_dir,"last-name.txt"))
     for line in last_name_file:
         clean_line = line.rstrip('\n')
         last_names.append(string.capwords(clean_line.split(' ')[0]))
@@ -64,7 +64,7 @@ def load_files():
 
     #Process Male First Names
     male_first_names = []
-    male_first_name_file = open(os.path.join(data_dir,"male-first-name.txt"),"rb")
+    male_first_name_file = open(os.path.join(data_dir,"male-first-name.txt"))
     for line in male_first_name_file:
         clean_line = line.rstrip('\n')
         male_first_names.append(string.capwords(clean_line.split(' ')[0]))
@@ -73,7 +73,7 @@ def load_files():
 
     #Process Female First Names
     female_first_names = []
-    female_first_name_file = open(os.path.join(data_dir,"female-first-name.txt"),"rb")
+    female_first_name_file = open(os.path.join(data_dir,"female-first-name.txt"))
     for line in female_first_name_file:
         clean_line = line.rstrip('\n')
         female_first_names.append(string.capwords(clean_line.split(' ')[0]))
@@ -83,7 +83,7 @@ def load_files():
     #Process the simple files
     for f in simple_files_to_process:
         temp = []
-        sample_file = open(os.path.join(data_dir, f), "rb")
+        sample_file = open(os.path.join(data_dir, f))
         for line in sample_file:
             clean_line = line.rstrip('\n')
             temp.append(clean_line)
@@ -93,7 +93,7 @@ def load_files():
     output.close()
 
 if __name__ == "__main__":
-    response = string.lower(raw_input("Type 'yes' to reload the data from source files and create a new source file: "))
+    response = string.lower(input("Type 'yes' to reload the data from source files and create a new source file: "))
     if response == 'yes':
         load_files()
 

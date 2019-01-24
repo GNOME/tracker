@@ -17,12 +17,12 @@
 # 02110-1301, USA.
 #
 
-import ConfigParser, os
+import configparser, os
 import sys
 import getopt
 
 def usage():
-  print "Usage: python service2rdf-xml.py --metadata=ONTOLOGY.metadata --service=ONTOLOGY.service [--uri=URI]"
+  print("Usage: python service2rdf-xml.py --metadata=ONTOLOGY.metadata --service=ONTOLOGY.service [--uri=URI]")
 
 def main():
   try:
@@ -50,74 +50,74 @@ def main():
        usage ()
        sys.exit ()
 
-     service = ConfigParser.ConfigParser()
+     service = configparser.ConfigParser()
      service.readfp(open(servicef))
 
-     metadata = ConfigParser.ConfigParser()
+     metadata = configparser.ConfigParser()
      metadata.readfp(open(metadataf))
 
-     print "<rdf:RDF"
-     print "  xmlns:nid3=\"http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#\""
-     print "  xmlns:nfo=\"http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#\""
-     print "  xmlns:nmo=\"http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#\""
-     print "  xmlns:nie=\"http://www.semanticdesktop.org/ontologies/2007/01/19/nie#\""
-     print "  xmlns:exif=\"http://www.kanzaki.com/ns/exif#\""
-     print "  xmlns:nao=\"http://www.semanticdesktop.org/ontologies/2007/08/15/nao#\""
-     print "  xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\""
-     print "  xmlns:protege=\"http://protege.stanford.edu/system#\""
-     print "  xmlns:dcterms=\"http://purl.org/dc/terms/\""
-     print "  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""
-     print "  xmlns:ncal=\"http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#\""
-     print "  xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\""
-     print "  xmlns:nrl=\"http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#\""
-     print "  xmlns:pimo=\"http://www.semanticdesktop.org/ontologies/2007/11/01/pimo#\""
-     print "  xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\""
-     print "  xmlns:tmo=\"http://www.semanticdesktop.org/ontologies/2008/05/20/tmo#\""
-     print "  xmlns:dc=\"http://purl.org/dc/elements/1.1/\""
-     print "  xmlns:nco=\"http://www.semanticdesktop.org/ontologies/2007/03/22/nco#\""
-     print "  xmlns:nexif=\"http://www.semanticdesktop.org/ontologies/2007/05/10/nexif#\">"
+     print("<rdf:RDF")
+     print("  xmlns:nid3=\"http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#\"")
+     print("  xmlns:nfo=\"http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#\"")
+     print("  xmlns:nmo=\"http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#\"")
+     print("  xmlns:nie=\"http://www.semanticdesktop.org/ontologies/2007/01/19/nie#\"")
+     print("  xmlns:exif=\"http://www.kanzaki.com/ns/exif#\"")
+     print("  xmlns:nao=\"http://www.semanticdesktop.org/ontologies/2007/08/15/nao#\"")
+     print("  xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"")
+     print("  xmlns:protege=\"http://protege.stanford.edu/system#\"")
+     print("  xmlns:dcterms=\"http://purl.org/dc/terms/\"")
+     print("  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"")
+     print("  xmlns:ncal=\"http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#\"")
+     print("  xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"")
+     print("  xmlns:nrl=\"http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#\"")
+     print("  xmlns:pimo=\"http://www.semanticdesktop.org/ontologies/2007/11/01/pimo#\"")
+     print("  xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\"")
+     print("  xmlns:tmo=\"http://www.semanticdesktop.org/ontologies/2008/05/20/tmo#\"")
+     print("  xmlns:dc=\"http://purl.org/dc/elements/1.1/\"")
+     print("  xmlns:nco=\"http://www.semanticdesktop.org/ontologies/2007/03/22/nco#\"")
+     print("  xmlns:nexif=\"http://www.semanticdesktop.org/ontologies/2007/05/10/nexif#\">")
 
-     print ""
+     print("")
 
      for klass in service.sections():
         splitted = klass.split (":")
-        print "\t<rdfs:Class rdf:about=\"" + uri + "/" + splitted[0] + "#" + splitted[1] + "\">"
-        print "\t\t<rdfs:label>" + splitted[1] + "</rdfs:label>"
+        print("\t<rdfs:Class rdf:about=\"" + uri + "/" + splitted[0] + "#" + splitted[1] + "\">")
+        print("\t\t<rdfs:label>" + splitted[1] + "</rdfs:label>")
 
         for name, value in service.items (klass):
            if name == "SuperClasses":
              vsplit = value.split (";")
              for val in vsplit:
                vvsplit = val.split (":");
-               print "\t\t<rdfs:subClassOf>"
-               print "\t\t\t<rdfs:Class rdf:about=\"" + uri + "/" +vvsplit[0] + "#" + vvsplit[1] + "\"/>"
-               print "\t\t</rdfs:subClassOf>"
-        print "\t</rdfs:Class>"
+               print("\t\t<rdfs:subClassOf>")
+               print("\t\t\t<rdfs:Class rdf:about=\"" + uri + "/" +vvsplit[0] + "#" + vvsplit[1] + "\"/>")
+               print("\t\t</rdfs:subClassOf>")
+        print("\t</rdfs:Class>")
 
      for mdata in metadata.sections():
         splitted = mdata.split (":")
-        print "\t<rdf:Property rdf:about=\"" + uri + "#" + splitted[1] + "\">"
-        print "\t\t<rdfs:label>" + splitted[1] + "</rdfs:label>"
+        print("\t<rdf:Property rdf:about=\"" + uri + "#" + splitted[1] + "\">")
+        print("\t\t<rdfs:label>" + splitted[1] + "</rdfs:label>")
 
         for name, value in metadata.items (mdata):
            if name == "datatype":
-             print "\t\t<rdfs:range rdf:resource=\"" + uri + "#" + value + "\"/>"
+             print("\t\t<rdfs:range rdf:resource=\"" + uri + "#" + value + "\"/>")
 
            if name == "domain":
             vvsplit = value.split (":")
-            print "\t\t<rdfs:domain rdf:resource=\"" + uri + "/" +vvsplit[0] + "#" + vvsplit[1] + "\"/>"
+            print("\t\t<rdfs:domain rdf:resource=\"" + uri + "/" +vvsplit[0] + "#" + vvsplit[1] + "\"/>")
 
            if name == "parent":
-            print "\t\t<rdfs:subPropertyOf rdf:resource=\"" + uri + "#" + value.split (":")[1] + "\"/>"
+            print("\t\t<rdfs:subPropertyOf rdf:resource=\"" + uri + "#" + value.split (":")[1] + "\"/>")
 
            if name == "weight":
-            print "\t\t<rdfs:comment>Weight is " + value + "</rdfs:comment>"
+            print("\t\t<rdfs:comment>Weight is " + value + "</rdfs:comment>")
 
-        print "\t</rdf:Property>"
+        print("\t</rdf:Property>")
 
-     print "</rdf:RDF>"
-  except getopt.GetoptError, err:
-     print str(err)
+     print("</rdf:RDF>")
+  except getopt.GetoptError as err:
+     print(str(err))
      usage ()
      sys.exit(2)
 

@@ -96,7 +96,7 @@ def merge_includes(all_includes):
         version = element.get('version')
         if name not in merged:
             merged[name] = element
-    return merged.values()
+    return list(merged.values())
 
 
 def merge_namespaces(all_namespaces):

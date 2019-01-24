@@ -60,7 +60,7 @@ from multiprocessing import Process
 if sys.version_info[0] <= 3:
     import configparser
 else:
-    import ConfigParser as configparser
+    import configparser as configparser
 
 from gi.repository import Tracker, GLib, GObject
 
