@@ -1,11 +1,13 @@
-option('docs', type: 'boolean', value: true,
-       description: 'Enable the documentation')
 option('fts', type: 'boolean', value: true,
        description: 'Enable the Tracker full-text search feature')
 option('functional_tests', type: 'boolean', value: true,
        description: 'Enable the Tracker functional test suite')
+option('gtk-doc', type: 'boolean', value: true,
+       description: 'Generate API documentation with gtk-doc')
 option('journal', type: 'boolean', value: true,
        description: 'Enable database journal backup mechanism')
+option('man', type: 'boolean', value: true,
+       description: 'Install man pages')
 
 option('network_manager', type: 'combo', choices: ['auto', 'no', 'yes'], value: 'auto',
        description: 'Enable connection detection through NetworkManager')
