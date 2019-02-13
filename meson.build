@@ -21,7 +21,7 @@ libversion = '@0@.@1@.@2@'.format(soversion, tracker_binary_age - tracker_interf
 libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
-glib_required = '2.40.0'
+glib_required = '2.44.0'
 
 # 3.6.11 for sqlite_backup API
 # 3.6.16 to fix test failures
