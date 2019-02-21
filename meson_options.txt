@@ -22,3 +22,6 @@ option('dbus_services', type: 'string', value: '',
        description: 'Directory to install D-Bus .service files (leave blank to use the value from dbus-1.pc)')
 option('systemd_user_services', type: 'string', value: 'yes',
        description: 'Directory to install systemd user .service files (or "yes" for default directory, "no" to disable installation)')
+
+option('sqlite3_fts5', type: 'combo', choices: ['auto', 'builtin', 'external'], value: 'auto',
+       description: 'Whether sqlite has fts support builtin, meant for cross compilation')
