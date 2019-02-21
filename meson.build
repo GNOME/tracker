@@ -88,40 +88,54 @@ have_libstemmer = libstemmer.found()
 ##################################################################
 
 if enable_fts
-  sqlite3_builtin_fts5_test = '''
-    #include <sqlite3.h>
-
-    int main (int argc, char *argv[]) {
-      sqlite3 *db;
-      int rc;
-      rc = sqlite3_open(":memory:", &db);
-      if (rc!=SQLITE_OK) return -1;
-      rc = sqlite3_exec(db, "create table a(text)", 0, 0, 0);
-      if (rc!=SQLITE_OK) return -1;
-      rc = sqlite3_exec(db, "create virtual table t using fts5(content='a',text)", 0, 0, 0);
-      if (rc!=SQLITE_OK) return -1;
-    }
-  '''
-
-  result = cc.run(sqlite3_builtin_fts5_test,
-    name: 'sqlite3 has builtin FTS5 module',
-    dependencies: sqlite)
-
-  if not result.compiled()
-    error('Failed to compile SQLite FTS test.')
-  endif
-
-  if result.returncode() == 0
-    message('Using sqlite3 builtin FTS module')
-    sqlite3_has_builtin_fts5 = true
-  else
-    message('FTS support was enabled but SQLite doesn\'t have the FTS module built in')
-    if sqlite.version().version_compare('>= 3.20.0')
-      error('sqlite3 >= 3.20.0 must be compiled with --enable-fts5 in order to get FTS support.')
+  if meson.is_cross_build() and not meson.has_exe_wrapper()
+    sqlite3_fts5 = meson.get_cross_property('sqlite3_has_fts5')
+	if sqlite3_fts5 == ''
+	  error('Please assign an appropriate value for sqlite3_fts5 in the [properties] section of your crossfile')
+    elif sqlite3_fts5 == 'true'
+	  sqlite3_has_builtin_fts5 = true
+    elif sqlite3_fts5 == 'false'
+	  sqlite3_has_builtin_fts5 = false
     else
-      message('sqlite3 is older than version 3.20.0, using FTS module that is bundled with Tracker')
+		error('Invalid value of sqlite3_has_fts5 property, use \'true\' or \'false\'')
+    endif
+  else
+    sqlite3_builtin_fts5_test = '''
+      #include <sqlite3.h>
+
+      int main (int argc, char *argv[]) {
+        sqlite3 *db;
+        int rc;
+        rc = sqlite3_open(":memory:", &db);
+        if (rc!=SQLITE_OK) return -1;
+        rc = sqlite3_exec(db, "create table a(text)", 0, 0, 0);
+        if (rc!=SQLITE_OK) return -1;
+        rc = sqlite3_exec(db, "create virtual table t using fts5(content='a',text)", 0, 0, 0);
+        if (rc!=SQLITE_OK) return -1;
+      }
+    '''
+
+    result = cc.run(sqlite3_builtin_fts5_test,
+      name: 'sqlite3 has builtin FTS5 module',
+      dependencies: sqlite)
+
+    if not result.compiled()
+      error('Failed to compile SQLite FTS test.')
+    endif
+
+    if result.returncode() == 0
+      sqlite3_has_builtin_fts5 = true
+    else
       sqlite3_has_builtin_fts5 = false
     endif
+  endif
+
+  if sqlite3_has_builtin_fts5
+    message('Using sqlite3 builtin FTS module')
+  elif sqlite.version().version_compare('>= 3.20.0')
+    error('FTS support was enabled but SQLite doesn\'t have the FTS module built in')
+  else
+    message('sqlite3 is older than version 3.20.0, using FTS module that is bundled with Tracker')
   endif
 
 else
