@@ -66,6 +66,7 @@ libtracker_data = library('tracker-data',
     tracker_data_enums[1],
     tracker_gresources[0],
     tracker_gresources[1],
+    tracker_sparql_generated_header,
     c_args: tracker_c_args,
     install: true,
     install_dir: tracker_internal_libs_dir,
@@ -76,7 +77,7 @@ libtracker_data = library('tracker-data',
     # symbols from libtracker-sparql, but does not mean it should
     # be linked to it.
     override_options: ['b_lundef=false'],
-    dependencies: tracker_data_dependencies + [unicode_library, tracker_sparql_intermediate_dep],
+    dependencies: tracker_data_dependencies + [unicode_library],
     include_directories: [commoninc, configinc, srcinc],
 )
 
