@@ -2551,11 +2551,13 @@ tracker_data_delete_statement (TrackerData  *data,
 		}
 	} else {
 		gint pred_id = 0, graph_id = 0, object_id = 0;
-		gboolean tried = FALSE;
 		TrackerProperty *field;
 
+		graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 		field = tracker_ontologies_get_property_by_uri (ontologies, predicate);
 		if (field != NULL) {
+			pred_id = tracker_property_get_id (field);
+
 			if (!tracker_property_get_transient (field)) {
 				data->has_persistent = TRUE;
 			}
@@ -2563,11 +2565,7 @@ tracker_data_delete_statement (TrackerData  *data,
 			change = delete_metadata_decomposed (data, field, object, 0, error);
 			if (!data->in_journal_replay && change && !tracker_property_get_transient (field)) {
 				if (tracker_property_get_data_type (field) == TRACKER_PROPERTY_TYPE_RESOURCE) {
-
-					graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
-					pred_id = tracker_property_get_id (field);
 					object_id = query_resource_id (data, object);
-					tried = TRUE;
 
 #ifndef DISABLE_JOURNAL
 					tracker_db_journal_append_delete_statement_id (data->journal_writer,
@@ -2577,10 +2575,7 @@ tracker_data_delete_statement (TrackerData  *data,
 					                                               object_id);
 #endif /* DISABLE_JOURNAL */
 				} else {
-					pred_id = tracker_property_get_id (field);
-					graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 					object_id = 0;
-					tried = TRUE;
 
 #ifndef DISABLE_JOURNAL
 					if (!tracker_property_get_force_journal (field) &&
@@ -2609,15 +2604,6 @@ tracker_data_delete_statement (TrackerData  *data,
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_PROPERTY,
 			             "Property '%s' not found in the ontology", predicate);
 			return;
-		}
-
-		if (!tried) {
-			graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
-			if (field == NULL) {
-				pred_id = tracker_data_query_resource_id (data->manager, iface, predicate);
-			} else {
-				pred_id = tracker_property_get_id (field);
-			}
 		}
 
 		if (data->delete_callbacks && change) {
