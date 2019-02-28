@@ -2606,9 +2606,9 @@ tracker_data_delete_statement (TrackerData  *data,
 				}
 			}
 		} else {
-			/* I wonder why in case of error the delete_callbacks are still executed */
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_PROPERTY,
 			             "Property '%s' not found in the ontology", predicate);
+			return;
 		}
 
 		if (!tried) {
