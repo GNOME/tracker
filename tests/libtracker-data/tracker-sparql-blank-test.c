@@ -52,8 +52,6 @@ test_blank (TestInfo      *info,
 
 	data_location = g_file_new_for_path (info->data_location);
 
-	tracker_db_journal_set_rotating (FALSE, G_MAXSIZE, NULL);
-
 	/* initialization */
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
 	                                    data_location, data_location, data_location, /* loc, domain and ontology_name */

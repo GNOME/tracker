@@ -88,9 +88,6 @@ TEST_ONTOLOGIES_DIR = os.path.normpath(
 
 TRACKER_STORE_PATH = os.path.normpath(expandvars(config['TRACKER_STORE_PATH']))
 
-disableJournal = (len(config['disableJournal']) == 0)
-
-
 def generated_ttl_dir():
     if TOP_BUILDDIR:
         return os.path.join(TOP_BUILDDIR, 'tests', 'functional-tests', 'ttl')

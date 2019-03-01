@@ -167,14 +167,9 @@ public class Tracker.Resources : Object {
 
 	public void sync (BusName sender) throws Error {
 		var request = DBusRequest.begin (sender, "Resources.Sync");
-		var data_manager = Tracker.Main.get_data_manager ();
-		var data = data_manager.get_data ();
 
 		var sparql_conn = Tracker.Main.get_sparql_connection ();
 		sparql_conn.sync ();
-
-		// sync journal if available
-		data.sync ();
 
 		request.end ();
 	}

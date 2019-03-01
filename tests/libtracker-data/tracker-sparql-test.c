@@ -298,8 +298,6 @@ test_sparql_query (TestInfo      *test_info,
 
 	data_location = g_file_new_for_path (test_info->data_location);
 
-	tracker_db_journal_set_rotating (FALSE, G_MAXSIZE, NULL);
-
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
 	                                    data_location, data_location, test_schemas, /* loc, domain and ontology_name */
 	                                    FALSE, FALSE, 100, 100);

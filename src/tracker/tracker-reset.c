@@ -222,13 +222,6 @@ reset_run (void)
 		GFile *cache_location, *data_location;
 		gchar *dir;
 		TrackerDBManager *db_manager;
-#ifndef DISABLE_JOURNAL
-		gchar *rotate_to;
-		TrackerDBConfig *db_config;
-		gsize chunk_size;
-		gint chunk_size_mb;
-		TrackerDBJournal *journal_writer;
-#endif /* DISABLE_JOURNAL */
 
 		dir = g_build_filename (g_get_user_cache_dir (), "tracker", NULL);
 		cache_location = g_file_new_for_path (dir);
@@ -245,22 +238,6 @@ reset_run (void)
 		                                    NULL);
 
 		g_log_set_default_handler (log_handler, NULL);
-
-#ifndef DISABLE_JOURNAL
-		db_config = tracker_db_config_new ();
-
-		chunk_size_mb = tracker_db_config_get_journal_chunk_size (db_config);
-		chunk_size = (gsize) ((gsize) chunk_size_mb * (gsize) 1024 * (gsize) 1024);
-		rotate_to = tracker_db_config_get_journal_rotate_destination (db_config);
-
-		/* This call is needed to set the journal's filename */
-		tracker_db_journal_set_rotating ((chunk_size_mb != -1),
-		                                 chunk_size, rotate_to);
-
-		g_free (rotate_to);
-		g_object_unref (db_config);
-
-#endif /* DISABLE_JOURNAL */
 
 		/* Clean up (select_cache_size and update_cache_size don't matter here) */
 		db_manager = tracker_db_manager_new (TRACKER_DB_MANAGER_REMOVE_ALL,
@@ -285,10 +262,6 @@ reset_run (void)
 		}
 
 		tracker_db_manager_remove_all (db_manager);
-#ifndef DISABLE_JOURNAL
-		journal_writer = tracker_db_journal_new (data_location, FALSE, NULL);
-		tracker_db_journal_remove (journal_writer);
-#endif /* DISABLE_JOURNAL */
 
 		tracker_db_manager_remove_version_file (db_manager);
 		tracker_db_manager_free (db_manager);
