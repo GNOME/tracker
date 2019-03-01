@@ -40,7 +40,6 @@ typedef struct _TrackerDataManagerClass TrackerDataManagerClass;
 #include <libtracker-data/tracker-data-update.h>
 #include <libtracker-data/tracker-db-interface.h>
 #include <libtracker-data/tracker-db-manager.h>
-#include <libtracker-data/tracker-db-journal.h>
 
 #define TRACKER_DATA_ONTOLOGY_ERROR                  (tracker_data_ontology_error_quark ())
 
@@ -73,8 +72,6 @@ void                 tracker_data_manager_shutdown            (TrackerDataManage
 
 GFile *              tracker_data_manager_get_cache_location  (TrackerDataManager *manager);
 GFile *              tracker_data_manager_get_data_location   (TrackerDataManager *manager);
-TrackerDBJournal *   tracker_data_manager_get_journal_writer  (TrackerDataManager *manager);
-TrackerDBJournal *   tracker_data_manager_get_ontology_writer (TrackerDataManager *manager);
 TrackerOntologies *  tracker_data_manager_get_ontologies      (TrackerDataManager *manager);
 
 TrackerDBManager *   tracker_data_manager_get_db_manager      (TrackerDataManager *manager);

@@ -35,10 +35,6 @@ def expectedFailureJournal():
     Decorator to handle tests that are expected to fail when journal is disabled.
     """
     def decorator(func):
-        # no wrapping if journal is enabled, test is expected to pass
-        if not cfg.disableJournal:
-            return func
-
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:

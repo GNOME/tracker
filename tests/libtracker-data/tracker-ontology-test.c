@@ -183,8 +183,6 @@ test_ontology_init (TestInfo      *test_info,
 
 	data_location = g_file_new_for_path (test_info->data_location);
 
-	tracker_db_journal_set_rotating (FALSE, G_MAXSIZE, NULL);
-
 	/* first-time initialization */
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
 	                                    data_location, data_location, data_location,
@@ -193,8 +191,6 @@ test_ontology_init (TestInfo      *test_info,
 	g_assert_no_error (error);
 
 	g_object_unref (manager);
-
-	tracker_db_journal_set_rotating (FALSE, G_MAXSIZE, NULL);
 
 	/* initialization from existing database */
 	manager = tracker_data_manager_new (0, data_location, data_location, data_location,
@@ -229,8 +225,6 @@ test_query (TestInfo      *test_info,
 	ontology_path = g_build_filename (TOP_SRCDIR, "src", "ontologies", "nepomuk", NULL);
 	ontology_location = g_file_new_for_path (ontology_path);
 	g_free (ontology_path);
-
-	tracker_db_journal_set_rotating (FALSE, G_MAXSIZE, NULL);
 
 	/* initialization */
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,

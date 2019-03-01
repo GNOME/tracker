@@ -2339,19 +2339,7 @@ execute_stmt (TrackerDBInterface  *interface,
 			g_critical ("SQLite error: %s (errno: %s)",
 			            sqlite3_errmsg (interface->db),
 			            g_strerror (errno));
-
-#ifndef DISABLE_JOURNAL
-			g_unlink (interface->filename);
-
-			g_error ("SQLite experienced an error with file:'%s'. "
-			         "It is either NOT a SQLite database or it is "
-			         "corrupt or there was an IO error accessing the data. "
-			         "This file has now been removed and will be recreated on the next start. "
-			         "Shutting down now.",
-			         interface->filename);
-
 			return;
-#endif /* DISABLE_JOURNAL */
 		}
 
 		if (!error) {

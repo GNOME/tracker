@@ -123,8 +123,6 @@ test_backup_and_restore_helper (const gchar *db_location,
 	                           NULL);
 	test_schemas = g_file_new_for_path (ontologies);
 
-	tracker_db_journal_set_rotating (FALSE, G_MAXSIZE, NULL);
-
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
 	                                    data_location, data_location, test_schemas,
 	                                    FALSE, FALSE, 100, 100);
@@ -173,25 +171,9 @@ test_backup_and_restore_helper (const gchar *db_location,
 	g_unlink (meta_db);
 	g_free (meta_db);
 
-#ifndef DISABLE_JOURNAL
-	if (!journal) {
-		meta_db = g_build_path (G_DIR_SEPARATOR_S, db_location, "data", "tracker-store.journal", NULL);
-		g_unlink (meta_db);
-		g_free (meta_db);
-
-		meta_db = g_build_path (G_DIR_SEPARATOR_S, db_location, "data", "tracker-store.ontology.journal", NULL);
-		g_unlink (meta_db);
-		g_free (meta_db);
-	}
-#endif /* DISABLE_JOURNAL */
-
 	meta_db = g_build_path (G_DIR_SEPARATOR_S, db_location, "data", ".meta.isrunning", NULL);
 	g_unlink (meta_db);
 	g_free (meta_db);
-
-#ifndef DISABLE_JOURNAL
-	tracker_db_journal_set_rotating (FALSE, G_MAXSIZE, NULL);
-#endif /* DISABLE_JOURNAL */
 
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
 	                                    data_location, data_location, test_schemas,

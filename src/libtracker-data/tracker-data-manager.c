@@ -41,7 +41,6 @@
 #include "tracker-data-update.h"
 #include "tracker-db-interface-sqlite.h"
 #include "tracker-db-manager.h"
-#include "tracker-db-journal.h"
 #include "tracker-namespace.h"
 #include "tracker-ontologies.h"
 #include "tracker-ontology.h"
@@ -80,12 +79,6 @@ struct _TrackerDataManager {
 
 	gint select_cache_size;
 	gint update_cache_size;
-
-#ifndef DISABLE_JOURNAL
-	gboolean  in_journal_replay;
-	TrackerDBJournal *journal_writer;
-	TrackerDBJournal *ontology_writer;
-#endif
 
 	TrackerDBManager *db_manager;
 	TrackerOntologies *ontologies;
@@ -167,11 +160,6 @@ handle_unsupported_ontology_change (TrackerDataManager  *manager,
                                     const gchar         *attempted_new,
                                     GError             **error)
 {
-#ifndef DISABLE_JOURNAL
-	/* force reindex on restart */
-	tracker_db_manager_remove_version_file (manager->db_manager);
-#endif /* DISABLE_JOURNAL */
-
 	g_set_error (error, TRACKER_DATA_ONTOLOGY_ERROR,
 	             TRACKER_DATA_UNSUPPORTED_ONTOLOGY_CHANGE,
 	             "%s: Unsupported ontology change for %s: can't change %s (old=%s, attempted new=%s)",
@@ -962,17 +950,6 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		}
 
 		tracker_property_set_writeback (property, (strcmp (object, "true") == 0));
-	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "forceJournal") == 0) {
-		TrackerProperty *property;
-
-		property = tracker_ontologies_get_property_by_uri (manager->ontologies, subject);
-
-		if (property == NULL) {
-			g_critical ("%s: Unknown property %s", ontology_path, subject);
-			return;
-		}
-
-		tracker_property_set_force_journal (property, (strcmp (object, "true") == 0));
 	} else if (g_strcmp0 (predicate, RDFS_SUB_PROPERTY_OF) == 0) {
 		TrackerProperty *property, *super_property;
 		gboolean is_new;
@@ -1921,37 +1898,6 @@ get_ontology_from_file (TrackerDataManager *manager,
 	return ret;
 }
 
-#ifndef DISABLE_JOURNAL
-static void
-load_ontology_ids_from_journal (TrackerDBJournalReader  *reader,
-                                GHashTable             **uri_id_map_out,
-                                gint                    *max_id)
-{
-	GHashTable *uri_id_map;
-
-	uri_id_map = g_hash_table_new_full (g_str_hash, g_str_equal,
-	                                    g_free, NULL);
-
-	while (tracker_db_journal_reader_next (reader, NULL)) {
-		TrackerDBJournalEntryType type;
-
-		type = tracker_db_journal_reader_get_entry_type (reader);
-		if (type == TRACKER_DB_JOURNAL_RESOURCE) {
-			gint id;
-			const gchar *uri;
-
-			tracker_db_journal_reader_get_resource (reader, &id, &uri);
-			g_hash_table_insert (uri_id_map, g_strdup (uri), GINT_TO_POINTER (id));
-			if (id > *max_id) {
-				*max_id = id;
-			}
-		}
-	}
-
-	*uri_id_map_out = uri_id_map;
-}
-#endif /* DISABLE_JOURNAL */
-
 static void
 tracker_data_ontology_process_statement (TrackerDataManager *manager,
                                          const gchar        *graph,
@@ -2382,7 +2328,6 @@ db_get_static_data (TrackerDBInterface  *iface,
 	                                              "\"tracker:writeback\", "
 	                                              "(SELECT 1 FROM \"rdfs:Resource_rdf:type\" WHERE ID = \"rdf:Property\".ID AND "
 	                                              "\"rdf:type\" = (SELECT ID FROM Resource WHERE Uri = '" NRL_INVERSE_FUNCTIONAL_PROPERTY "')), "
-	                                              "\"tracker:forceJournal\", "
 	                                              "\"tracker:defaultValue\" "
 	                                              "FROM \"rdf:Property\" ORDER BY ID");
 
@@ -2398,7 +2343,7 @@ db_get_static_data (TrackerDBInterface  *iface,
 			const gchar     *uri, *domain_uri, *range_uri, *secondary_index_uri, *default_value;
 			gboolean         multi_valued, indexed, fulltext_indexed;
 			gboolean         transient, is_inverse_functional_property;
-			gboolean         writeback, force_journal;
+			gboolean         writeback;
 			gint             id;
 
 			property = tracker_property_new (FALSE);
@@ -2473,18 +2418,7 @@ db_get_static_data (TrackerDBInterface  *iface,
 				is_inverse_functional_property = FALSE;
 			}
 
-			/* tracker:forceJournal column */
-			tracker_db_cursor_get_value (cursor, 11, &value);
-
-			if (G_VALUE_TYPE (&value) != 0) {
-				force_journal = (g_value_get_int64 (&value) == 1);
-				g_value_unset (&value);
-			} else {
-				/* NULL */
-				force_journal = TRUE;
-			}
-
-			default_value = tracker_db_cursor_get_string (cursor, 12, NULL);
+			default_value = tracker_db_cursor_get_string (cursor, 11, NULL);
 
 			tracker_property_set_ontologies (property, manager->ontologies);
 			tracker_property_set_is_new_domain_index (property, tracker_ontologies_get_class_by_uri (manager->ontologies, domain_uri), FALSE);
@@ -2499,7 +2433,6 @@ db_get_static_data (TrackerDBInterface  *iface,
 			tracker_property_set_orig_multiple_values (property, multi_valued);
 			tracker_property_set_indexed (property, indexed);
 			tracker_property_set_default_value (property, default_value);
-			tracker_property_set_force_journal (property, force_journal);
 
 			tracker_property_set_db_schema_changed (property, FALSE);
 			tracker_property_set_writeback (property, writeback);
@@ -2570,12 +2503,6 @@ insert_uri_in_resource_table (TrackerDataManager  *manager,
 		g_propagate_error (error, internal_error);
 		return;
 	}
-
-#ifndef DISABLE_JOURNAL
-	if (!manager->in_journal_replay) {
-		tracker_db_journal_append_resource (manager->ontology_writer, id, uri);
-	}
-#endif /* DISABLE_JOURNAL */
 
 	g_object_unref (stmt);
 
@@ -4165,9 +4092,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 	gboolean read_only;
 	GHashTable *uri_id_map = NULL;
 	GError *internal_error = NULL;
-#ifndef DISABLE_JOURNAL
-	gboolean read_journal;
-#endif
 
 	if (manager->initialized) {
 		return TRUE;
@@ -4183,9 +4107,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 	}
 
 	read_only = (manager->flags & TRACKER_DB_MANAGER_READONLY) ? TRUE : FALSE;
-#ifndef DISABLE_JOURNAL
-	read_journal = FALSE;
-#endif
 
 	/* Make sure we initialize all other modules we depend on */
 	manager->data_update = tracker_data_new (manager);
@@ -4214,33 +4135,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
 
-#ifndef DISABLE_JOURNAL
-	if (manager->journal_check && is_first_time_index) {
-		TrackerDBJournalReader *journal_reader;
-
-		/* Call may fail without notice (it's handled) */
-		journal_reader = tracker_db_journal_reader_new (manager->data_location, &internal_error);
-
-		if (journal_reader) {
-			if (tracker_db_journal_reader_next (journal_reader, NULL)) {
-				/* journal with at least one valid transaction
-				   is required to trigger journal replay */
-				read_journal = TRUE;
-			}
-
-			tracker_db_journal_reader_free (journal_reader);
-		} else if (internal_error) {
-			if (!g_error_matches (internal_error,
-			                      TRACKER_DB_JOURNAL_ERROR,
-			                      TRACKER_DB_JOURNAL_ERROR_BEGIN_OF_JOURNAL)) {
-				g_propagate_error (error, internal_error);
-				return FALSE;
-			} else {
-				g_clear_error (&internal_error);
-			}
-		}
-	}
-#endif /* DISABLE_JOURNAL */
 
 	if (g_file_query_file_type (manager->ontology_location, G_FILE_QUERY_INFO_NONE, NULL) != G_FILE_TYPE_DIRECTORY) {
 		gchar *uri;
@@ -4253,38 +4147,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		return FALSE;
 	}
 
-#ifndef DISABLE_JOURNAL
-	if (read_journal) {
-		TrackerDBJournalReader *journal_reader;
-
-		manager->in_journal_replay = TRUE;
-		journal_reader = tracker_db_journal_reader_ontology_new (manager->data_location, &internal_error);
-
-		if (journal_reader) {
-			/* Load ontology IDs from journal into memory */
-			load_ontology_ids_from_journal (journal_reader, &uri_id_map, &max_id);
-			tracker_db_journal_reader_free (journal_reader);
-		} else {
-			if (internal_error) {
-				if (!g_error_matches (internal_error,
-					                  TRACKER_DB_JOURNAL_ERROR,
-					                  TRACKER_DB_JOURNAL_ERROR_BEGIN_OF_JOURNAL)) {
-					g_propagate_error (error, internal_error);
-					return FALSE;
-				} else {
-					g_clear_error (&internal_error);
-				}
-			}
-
-			/* do not trigger journal replay if ontology journal
-			   does not exist or is not valid,
-			   same as with regular journal further above */
-			manager->in_journal_replay = FALSE;
-			read_journal = FALSE;
-		}
-	}
-#endif /* DISABLE_JOURNAL */
-
 	if (is_first_time_index && !read_only) {
 		sorted = get_ontologies (manager, manager->ontology_location, &internal_error);
 
@@ -4292,15 +4154,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			g_propagate_error (error, internal_error);
 			return FALSE;
 		}
-
-#ifndef DISABLE_JOURNAL
-		manager->ontology_writer = tracker_db_journal_ontology_new (manager->data_location, &internal_error);
-
-		if (internal_error) {
-			g_propagate_error (error, internal_error);
-			return FALSE;
-		}
-#endif /* DISABLE_JOURNAL */
 
 		/* load ontology from files into memory (max_id starts at zero: first-time) */
 
@@ -4340,26 +4193,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			return FALSE;
 		}
 
-#ifndef DISABLE_JOURNAL
-		if (uri_id_map) {
-			/* restore all IDs from ontology journal */
-			GHashTableIter iter;
-			gpointer key, value;
-
-			g_hash_table_iter_init (&iter, uri_id_map);
-			while (g_hash_table_iter_next (&iter, &key, &value)) {
-				insert_uri_in_resource_table (manager, iface,
-				                              key,
-				                              GPOINTER_TO_INT (value),
-				                              &internal_error);
-				if (internal_error) {
-					g_propagate_error (error, internal_error);
-					return FALSE;
-				}
-			}
-		}
-#endif /* DISABLE_JOURNAL */
-
 		/* store ontology in database */
 		for (l = sorted; l; l = l->next) {
 			import_ontology_file (manager, l->data, FALSE, !manager->journal_check);
@@ -4381,16 +4214,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		check_ontology = FALSE;
 	} else {
 		if (!read_only) {
-
-#ifndef DISABLE_JOURNAL
-			manager->ontology_writer = tracker_db_journal_ontology_new (manager->data_location, &internal_error);
-
-			if (internal_error) {
-				g_propagate_error (error, internal_error);
-				return FALSE;
-			}
-#endif /* DISABLE_JOURNAL */
-
 			/* Load ontology from database into memory */
 			db_get_static_data (iface, manager, &internal_error);
 			check_ontology = (manager->flags & TRACKER_DB_MANAGER_DO_NOT_CHECK_ONTOLOGY) == 0;
@@ -4772,11 +4595,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 				g_propagate_error (error, internal_error);
 				return FALSE;
 			}
-
-#ifndef DISABLE_JOURNAL
-			tracker_db_journal_free (manager->ontology_writer, NULL);
-			manager->ontology_writer = NULL;
-#endif /* DISABLE_JOURNAL */
 		}
 
 		g_hash_table_unref (ontos_table);
@@ -4800,48 +4618,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 	}
 
 skip_ontology_check:
-
-#ifndef DISABLE_JOURNAL
-	if (read_journal) {
-		/* Start replay */
-		tracker_data_replay_journal (manager->data_update,
-		                             busy_callback,
-		                             manager,
-		                             "Replaying journal",
-		                             &internal_error);
-
-		if (internal_error) {
-			if (g_error_matches (internal_error, TRACKER_DB_INTERFACE_ERROR, TRACKER_DB_NO_SPACE)) {
-				GError *n_error = NULL;
-				tracker_db_manager_remove_all (manager->db_manager);
-				g_clear_pointer (&manager->db_manager, tracker_db_manager_free);
-				/* Call may fail without notice, we're in error handling already.
-				 * When fails it means that close() of journal file failed. */
-				if (n_error) {
-					g_warning ("Error closing journal: %s",
-					           n_error->message ? n_error->message : "No error given");
-					g_error_free (n_error);
-				}
-			}
-
-			g_hash_table_unref (uri_id_map);
-			g_propagate_error (error, internal_error);
-			return FALSE;
-		}
-
-		manager->in_journal_replay = FALSE;
-		g_hash_table_unref (uri_id_map);
-	}
-
-	/* open journal for writing */
-	manager->journal_writer = tracker_db_journal_new (manager->data_location, FALSE, &internal_error);
-
-	if (internal_error) {
-		g_propagate_error (error, internal_error);
-		return FALSE;
-	}
-#endif /* DISABLE_JOURNAL */
-
 	/* If locale changed, re-create indexes */
 	if (!read_only && tracker_db_manager_locale_changed (manager->db_manager, NULL)) {
 		/* No need to reset the collator in the db interface,
@@ -4862,13 +4638,6 @@ skip_ontology_check:
 		rebuild_fts_tokens (manager, iface);
 #endif
 	}
-
-#ifndef DISABLE_JOURNAL
-	if (manager->ontology_writer) {
-		tracker_db_journal_free (manager->ontology_writer, NULL);
-		manager->ontology_writer = NULL;
-	}
-#endif /* DISABLE_JOURNAL */
 
 	if (!read_only) {
 		tracker_ontologies_sort (manager->ontologies);
@@ -4978,28 +4747,6 @@ void
 tracker_data_manager_finalize (GObject *object)
 {
 	TrackerDataManager *manager = TRACKER_DATA_MANAGER (object);
-#ifndef DISABLE_JOURNAL
-	GError *error = NULL;
-
-	/* Make sure we shutdown all other modules we depend on */
-	if (manager->journal_writer) {
-		tracker_db_journal_free (manager->journal_writer, &error);
-		manager->journal_writer = NULL;
-		if (error) {
-			g_warning ("While shutting down journal %s", error->message);
-			g_clear_error (&error);
-		}
-	}
-
-	if (manager->ontology_writer) {
-		tracker_db_journal_free (manager->ontology_writer, &error);
-		manager->ontology_writer = NULL;
-		if (error) {
-			g_warning ("While shutting down ontology journal %s", error->message);
-			g_clear_error (&error);
-		}
-	}
-#endif /* DISABLE_JOURNAL */
 
 	g_clear_object (&manager->ontologies);
 	g_clear_object (&manager->data_update);
@@ -5049,20 +4796,6 @@ tracker_data_manager_class_init (TrackerDataManagerClass *klass)
 	                                                      NULL,
 	                                                      G_PARAM_READABLE));
 }
-
-#ifndef DISABLE_JOURNAL
-TrackerDBJournal *
-tracker_data_manager_get_journal_writer (TrackerDataManager *manager)
-{
-	return manager->journal_writer;
-}
-
-TrackerDBJournal *
-tracker_data_manager_get_ontology_writer (TrackerDataManager *manager)
-{
-	return manager->ontology_writer;
-}
-#endif
 
 TrackerOntologies *
 tracker_data_manager_get_ontologies (TrackerDataManager *manager)

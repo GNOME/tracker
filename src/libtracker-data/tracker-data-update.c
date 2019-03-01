@@ -34,7 +34,6 @@
 #include "tracker-data-query.h"
 #include "tracker-db-interface-sqlite.h"
 #include "tracker-db-manager.h"
-#include "tracker-db-journal.h"
 #include "tracker-ontologies.h"
 #include "tracker-property.h"
 #include "tracker-sparql-query.h"
@@ -158,8 +157,6 @@ struct _TrackerData {
 	GPtrArray *rollback_callbacks;
 	gint max_service_id;
 	gint max_ontology_id;
-
-	TrackerDBJournal *journal_writer;
 };
 
 struct _TrackerDataClass {
@@ -732,12 +729,6 @@ ensure_resource_id (TrackerData *data,
 			g_critical ("Could not ensure resource existence: %s", error->message);
 			g_error_free (error);
 		}
-
-#ifndef DISABLE_JOURNAL
-		if (!data->in_journal_replay) {
-			tracker_db_journal_append_resource (data->journal_writer, id, uri);
-		}
-#endif /* DISABLE_JOURNAL */
 
 		g_hash_table_insert (data->update_buffer.resource_cache, g_strdup (uri), GINT_TO_POINTER (id));
 	}
@@ -1918,16 +1909,6 @@ delete_first_object (TrackerData      *data,
 			g_propagate_error (error, new_error);
 			return change;
 		}
-
-#ifndef DISABLE_JOURNAL
-		if (!data->in_journal_replay && change && !tracker_property_get_transient (field)) {
-			tracker_db_journal_append_delete_statement_id (data->journal_writer,
-			                                               graph_id,
-			                                               data->resource_buffer->id,
-			                                               pred_id,
-			                                               object_id);
-		}
-#endif /* DISABLE_JOURNAL */
 	} else {
 		GValue *v;
 		GError *new_error = NULL;
@@ -1944,33 +1925,6 @@ delete_first_object (TrackerData      *data,
 			g_propagate_error (error, new_error);
 			return change;
 		}
-
-#ifndef DISABLE_JOURNAL
-		if (!data->in_journal_replay && change && !tracker_property_get_transient (field)) {
-			if (!tracker_property_get_force_journal (field) &&
-				g_strcmp0 (graph, TRACKER_OWN_GRAPH_URN) == 0) {
-				/* do not journal this statement extracted from filesystem */
-				TrackerProperty *damaged;
-				TrackerOntologies *ontologies;
-
-				ontologies = tracker_data_manager_get_ontologies (data->manager);
-				damaged = tracker_ontologies_get_property_by_uri (ontologies, TRACKER_PREFIX_TRACKER "damaged");
-
-				tracker_db_journal_append_insert_statement (data->journal_writer,
-				                                            graph_id,
-				                                            data->resource_buffer->id,
-				                                            tracker_property_get_id (damaged),
-				                                            "true");
-			} else {
-				tracker_db_journal_append_delete_statement (data->journal_writer,
-				                                            graph_id,
-				                                            data->resource_buffer->id,
-				                                            pred_id,
-				                                            object_str);
-			}
-		}
-
-#endif /* DISABLE_JOURNAL */
 
 		if (data->delete_callbacks && change) {
 			guint n;
@@ -2510,7 +2464,6 @@ tracker_data_delete_statement (TrackerData  *data,
 	gint                subject_id = 0;
 	gboolean            change = FALSE;
 	TrackerOntologies  *ontologies;
-	TrackerDBInterface *iface;
 
 	g_return_if_fail (subject != NULL);
 	g_return_if_fail (predicate != NULL);
@@ -2526,24 +2479,11 @@ tracker_data_delete_statement (TrackerData  *data,
 
 	resource_buffer_switch (data, graph, subject, subject_id);
 	ontologies = tracker_data_manager_get_ontologies (data->manager);
-	iface = tracker_data_manager_get_writable_db_interface (data->manager);
 
 	if (object && g_strcmp0 (predicate, TRACKER_PREFIX_RDF "type") == 0) {
 		class = tracker_ontologies_get_class_by_uri (ontologies, object);
 		if (class != NULL) {
 			data->has_persistent = TRUE;
-
-#ifndef DISABLE_JOURNAL
-			if (!data->in_journal_replay) {
-				tracker_db_journal_append_delete_statement_id (
-				       data->journal_writer,
-				       (graph != NULL ? query_resource_id (data, graph) : 0),
-				       data->resource_buffer->id,
-				       tracker_data_query_resource_id (data->manager, iface, predicate),
-				       tracker_class_get_id (class));
-			}
-#endif /* DISABLE_JOURNAL */
-
 			cache_delete_resource_type (data, class, graph, 0);
 		} else {
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_CLASS,
@@ -2563,43 +2503,6 @@ tracker_data_delete_statement (TrackerData  *data,
 			}
 
 			change = delete_metadata_decomposed (data, field, object, 0, error);
-			if (!data->in_journal_replay && change && !tracker_property_get_transient (field)) {
-				if (tracker_property_get_data_type (field) == TRACKER_PROPERTY_TYPE_RESOURCE) {
-					object_id = query_resource_id (data, object);
-
-#ifndef DISABLE_JOURNAL
-					tracker_db_journal_append_delete_statement_id (data->journal_writer,
-					                                               graph_id,
-					                                               data->resource_buffer->id,
-					                                               pred_id,
-					                                               object_id);
-#endif /* DISABLE_JOURNAL */
-				} else {
-					object_id = 0;
-
-#ifndef DISABLE_JOURNAL
-					if (!tracker_property_get_force_journal (field) &&
-					    g_strcmp0 (graph, TRACKER_OWN_GRAPH_URN) == 0) {
-						/* do not journal this statement extracted from filesystem */
-						TrackerProperty *damaged;
-
-						damaged = tracker_ontologies_get_property_by_uri (ontologies, TRACKER_PREFIX_TRACKER "damaged");
-
-						tracker_db_journal_append_insert_statement (data->journal_writer,
-						                                            graph_id,
-						                                            data->resource_buffer->id,
-						                                            tracker_property_get_id (damaged),
-						                                            "true");
-					} else {
-						tracker_db_journal_append_delete_statement (data->journal_writer,
-						                                            graph_id,
-						                                            data->resource_buffer->id,
-						                                            pred_id,
-						                                            object);
-					}
-#endif /* DISABLE_JOURNAL */
-				}
-			}
 		} else {
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_PROPERTY,
 			             "Property '%s' not found in the ontology", predicate);
@@ -2923,18 +2826,6 @@ tracker_data_insert_statement_with_uri (TrackerData  *data,
 			}
 		}
 	}
-
-#ifndef DISABLE_JOURNAL
-	if (!data->in_journal_replay && change && !tracker_property_get_transient (property)) {
-		tracker_db_journal_append_insert_statement_id (
-			data->journal_writer,
-			(graph != NULL ? query_resource_id (data, graph) : 0),
-			data->resource_buffer->id,
-			final_prop_id,
-			object_id);
-	}
-#endif /* DISABLE_JOURNAL */
-
 }
 
 void
@@ -2951,9 +2842,6 @@ tracker_data_insert_statement_with_string (TrackerData  *data,
 	gint             graph_id = 0, pred_id = 0;
 	TrackerOntologies *ontologies;
 	TrackerDBInterface *iface;
-#ifndef DISABLE_JOURNAL
-	gboolean         tried = FALSE;
-#endif
 
 	g_return_if_fail (subject != NULL);
 	g_return_if_fail (predicate != NULL);
@@ -3002,9 +2890,6 @@ tracker_data_insert_statement_with_string (TrackerData  *data,
 
 		graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 		pred_id = (pred_id != 0) ? pred_id : tracker_data_query_resource_id (data->manager, iface, predicate);
-#ifndef DISABLE_JOURNAL
-		tried = TRUE;
-#endif
 
 		for (n = 0; n < data->insert_callbacks->len; n++) {
 			TrackerStatementDelegate *delegate;
@@ -3017,33 +2902,6 @@ tracker_data_insert_statement_with_string (TrackerData  *data,
 			                    delegate->user_data);
 		}
 	}
-
-#ifndef DISABLE_JOURNAL
-	if (!data->in_journal_replay && change && !tracker_property_get_transient (property)) {
-		if (!tried) {
-			graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
-			pred_id = (pred_id != 0) ? pred_id : tracker_data_query_resource_id (data->manager, iface, predicate);
-		}
-		if (!tracker_property_get_force_journal (property) &&
-		    g_strcmp0 (graph, TRACKER_OWN_GRAPH_URN) == 0) {
-			/* do not journal this statement extracted from filesystem */
-			TrackerProperty *damaged;
-
-			damaged = tracker_ontologies_get_property_by_uri (ontologies, TRACKER_PREFIX_TRACKER "damaged");
-			tracker_db_journal_append_insert_statement (data->journal_writer,
-			                                            graph_id,
-				                                    data->resource_buffer->id,
-				                                    tracker_property_get_id (damaged),
-				                                    "true");
-		} else {
-			tracker_db_journal_append_insert_statement (data->journal_writer,
-			                                            graph_id,
-				                                    data->resource_buffer->id,
-				                                    pred_id,
-				                                    object);
-		}
-	}
-#endif /* DISABLE_JOURNAL */
 }
 
 static void
@@ -3243,17 +3101,6 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 			}
 		}
 	}
-
-#ifndef DISABLE_JOURNAL
-	if (!data->in_journal_replay && change && !tracker_property_get_transient (property)) {
-		tracker_db_journal_append_update_statement_id (
-			data->journal_writer,
-			(graph != NULL ? query_resource_id (data, graph) : 0),
-			data->resource_buffer->id,
-			final_prop_id,
-			object_id);
-	}
-#endif /* DISABLE_JOURNAL */
 }
 
 static void
@@ -3271,9 +3118,6 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 	gboolean multiple_values;
 	TrackerOntologies *ontologies;
 	TrackerDBInterface *iface;
-#ifndef DISABLE_JOURNAL
-	gboolean tried = FALSE;
-#endif
 #if HAVE_TRACKER_FTS
 	GError *new_error = NULL;
 #endif /* HAVE_TRACKER_FTS */
@@ -3343,9 +3187,6 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 	if (((!multiple_values && data->delete_callbacks) || data->insert_callbacks) && change) {
 		graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 		pred_id = (pred_id != 0) ? pred_id : tracker_data_query_resource_id (data->manager, iface, predicate);
-#ifndef DISABLE_JOURNAL
-		tried = TRUE;
-#endif
 	}
 
 	if ((!multiple_values && data->delete_callbacks) && change) {
@@ -3377,33 +3218,6 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 			                    delegate->user_data);
 		}
 	}
-
-#ifndef DISABLE_JOURNAL
-	if (!data->in_journal_replay && change && !tracker_property_get_transient (property)) {
-		if (!tried) {
-			graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
-			pred_id = (pred_id != 0) ? pred_id : tracker_data_query_resource_id (data->manager, iface, predicate);
-		}
-		if (!tracker_property_get_force_journal (property) &&
-		    g_strcmp0 (graph, TRACKER_OWN_GRAPH_URN) == 0) {
-			/* do not journal this statement extracted from filesystem */
-			TrackerProperty *damaged;
-
-			damaged = tracker_ontologies_get_property_by_uri (ontologies, TRACKER_PREFIX_TRACKER "damaged");
-			tracker_db_journal_append_update_statement (data->journal_writer,
-			                                            graph_id,
-			                                            data->resource_buffer->id,
-			                                            tracker_property_get_id (damaged),
-			                                            "true");
-		} else {
-			tracker_db_journal_append_update_statement (data->journal_writer,
-			                                            graph_id,
-			                                            data->resource_buffer->id,
-			                                            pred_id,
-			                                            object);
-		}
-	}
-#endif /* DISABLE_JOURNAL */
 }
 
 void
@@ -3504,18 +3318,6 @@ tracker_data_begin_transaction (TrackerData  *data,
 
 	tracker_db_interface_start_transaction (iface);
 
-#ifndef DISABLE_JOURNAL
-	if (!data->in_journal_replay) {
-		g_assert (data->journal_writer == NULL);
-		/* Pick the right journal writer for this transaction */
-		data->journal_writer = data->in_ontology_transaction ?
-			tracker_data_manager_get_ontology_writer (data->manager) :
-			tracker_data_manager_get_journal_writer (data->manager);
-
-		tracker_db_journal_start_transaction (data->journal_writer, data->resource_time);
-	}
-#endif /* DISABLE_JOURNAL */
-
 	data->in_transaction = TRUE;
 }
 
@@ -3563,28 +3365,6 @@ tracker_data_commit_transaction (TrackerData  *data,
 		g_propagate_error (error, actual_error);
 		return;
 	}
-
-#ifndef DISABLE_JOURNAL
-	if (!data->in_journal_replay) {
-		g_assert (data->journal_writer != NULL);
-		if (data->has_persistent || data->in_ontology_transaction) {
-			tracker_db_journal_commit_db_transaction (data->journal_writer, &actual_error);
-		} else {
-			/* If we only had transient properties, then we must not write
-			 * anything to the journal. So we roll it back, but only the
-			 * journal's part. */
-			tracker_db_journal_rollback_transaction (data->journal_writer);
-		}
-
-		data->journal_writer = NULL;
-
-		if (actual_error) {
-			/* Can't write in journal anymore; quite a serious problem */
-			g_propagate_error (error, actual_error);
-			/* Don't return, remainder of the function cleans things up */
-		}
-	}
-#endif /* DISABLE_JOURNAL */
 
 	get_transaction_modseq (data);
 	if (data->has_persistent && !data->in_ontology_transaction) {
@@ -3649,22 +3429,12 @@ tracker_data_rollback_transaction (TrackerData *data)
 
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA cache_size = %d", TRACKER_DB_CACHE_SIZE_DEFAULT);
 
-	/* Runtime false in case of DISABLE_JOURNAL */
-	if (!data->in_journal_replay) {
-
-#ifndef DISABLE_JOURNAL
-		g_assert (data->journal_writer != NULL);
-		tracker_db_journal_rollback_transaction (data->journal_writer);
-		data->journal_writer = NULL;
-#endif /* DISABLE_JOURNAL */
-
-		if (data->rollback_callbacks) {
-			guint n;
-			for (n = 0; n < data->rollback_callbacks->len; n++) {
-				TrackerCommitDelegate *delegate;
-				delegate = g_ptr_array_index (data->rollback_callbacks, n);
-				delegate->callback (delegate->user_data);
-			}
+	if (data->rollback_callbacks) {
+		guint n;
+		for (n = 0; n < data->rollback_callbacks->len; n++) {
+			TrackerCommitDelegate *delegate;
+			delegate = g_ptr_array_index (data->rollback_callbacks, n);
+			delegate->callback (delegate->user_data);
 		}
 	}
 }
@@ -3731,352 +3501,3 @@ tracker_data_load_turtle_file (TrackerData  *data,
 
 	tracker_turtle_reader_load (file, data, error);
 }
-
-void
-tracker_data_sync (TrackerData *data)
-{
-#ifndef DISABLE_JOURNAL
-	TrackerDBJournal *writer;
-
-	writer = tracker_data_manager_get_journal_writer (data->manager);
-	if (writer)
-		tracker_db_journal_fsync (writer);
-
-	writer = tracker_data_manager_get_ontology_writer (data->manager);
-	if (writer)
-		tracker_db_journal_fsync (writer);
-#endif
-}
-
-#ifndef DISABLE_JOURNAL
-
-void
-tracker_data_replay_journal (TrackerData          *data,
-                             TrackerBusyCallback   busy_callback,
-                             gpointer              busy_user_data,
-                             const gchar          *busy_status,
-                             GError              **error)
-{
-	GError *journal_error = NULL;
-	TrackerProperty *rdf_type = NULL;
-	gint last_operation_type = 0;
-	const gchar *uri;
-	GError *n_error = NULL;
-	GFile *data_location;
-	TrackerDBJournalReader *reader;
-	TrackerOntologies *ontologies;
-
-	ontologies = tracker_data_manager_get_ontologies (data->manager);
-	rdf_type = tracker_ontologies_get_rdf_type (ontologies);
-
-	data_location = tracker_data_manager_get_data_location (data->manager);
-	reader = tracker_db_journal_reader_new (data_location, &n_error);
-	g_object_unref (data_location);
-
-	if (!reader) {
-		/* This is fatal (doesn't happen when file doesn't exist, does happen
-		 * when for some other reason the reader can't be created) */
-		g_propagate_error (error, n_error);
-		return;
-	}
-
-	while (tracker_db_journal_reader_next (reader, &journal_error)) {
-		TrackerDBJournalEntryType type;
-		const gchar *object;
-		gint graph_id, subject_id, predicate_id, object_id;
-
-		type = tracker_db_journal_reader_get_entry_type (reader);
-		if (type == TRACKER_DB_JOURNAL_RESOURCE) {
-			GError *new_error = NULL;
-			TrackerDBInterface *iface;
-			TrackerDBStatement *stmt;
-			gint id;
-
-			tracker_db_journal_reader_get_resource (reader, &id, &uri);
-
-			iface = tracker_data_manager_get_writable_db_interface (data->manager);
-
-			stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &new_error,
-			                                              "INSERT INTO Resource (ID, Uri) VALUES (?, ?)");
-
-			if (stmt) {
-				tracker_db_statement_bind_int (stmt, 0, id);
-				tracker_db_statement_bind_text (stmt, 1, uri);
-				tracker_db_statement_execute (stmt, &new_error);
-				g_object_unref (stmt);
-			}
-
-			if (new_error) {
-				g_warning ("Journal replay error: '%s'", new_error->message);
-				g_error_free (new_error);
-			}
-
-		} else if (type == TRACKER_DB_JOURNAL_START_TRANSACTION) {
-			tracker_data_begin_transaction_for_replay (data, tracker_db_journal_reader_get_time (reader), NULL);
-		} else if (type == TRACKER_DB_JOURNAL_END_TRANSACTION) {
-			GError *new_error = NULL;
-			tracker_data_update_buffer_might_flush (data, &new_error);
-
-			tracker_data_commit_transaction (data, &new_error);
-			if (new_error) {
-				/* Out of disk is an unrecoverable fatal error */
-				if (g_error_matches (new_error, TRACKER_DB_INTERFACE_ERROR, TRACKER_DB_NO_SPACE)) {
-					g_propagate_error (error, new_error);
-					return;
-				} else {
-					g_warning ("Journal replay error: '%s'", new_error->message);
-					g_clear_error (&new_error);
-				}
-			}
-		} else if (type == TRACKER_DB_JOURNAL_INSERT_STATEMENT ||
-		           type == TRACKER_DB_JOURNAL_UPDATE_STATEMENT) {
-			GError *new_error = NULL;
-			TrackerProperty *property = NULL;
-
-			tracker_db_journal_reader_get_statement (reader, &graph_id, &subject_id, &predicate_id, &object);
-
-			if (last_operation_type == -1) {
-				tracker_data_update_buffer_flush (data, &new_error);
-				if (new_error) {
-					g_warning ("Journal replay error: '%s'", new_error->message);
-					g_clear_error (&new_error);
-				}
-			}
-			last_operation_type = 1;
-
-			uri = tracker_ontologies_get_uri_by_id (ontologies, predicate_id);
-			if (uri) {
-				property = tracker_ontologies_get_property_by_uri (ontologies, uri);
-			}
-
-			if (property) {
-				resource_buffer_switch (data, NULL, NULL, subject_id);
-
-				if (type == TRACKER_DB_JOURNAL_UPDATE_STATEMENT) {
-					cache_update_metadata_decomposed (data, property, object, 0, NULL, graph_id, &new_error);
-				} else {
-					cache_insert_metadata_decomposed (data, property, object, 0, NULL, graph_id, &new_error);
-				}
-				if (new_error) {
-					g_warning ("Journal replay error: '%s'", new_error->message);
-					g_clear_error (&new_error);
-				}
-
-			} else {
-				g_warning ("Journal replay error: 'property with ID %d doesn't exist'", predicate_id);
-			}
-
-		} else if (type == TRACKER_DB_JOURNAL_INSERT_STATEMENT_ID ||
-		           type == TRACKER_DB_JOURNAL_UPDATE_STATEMENT_ID) {
-			GError *new_error = NULL;
-			TrackerClass *class = NULL;
-			TrackerProperty *property = NULL;
-
-			tracker_db_journal_reader_get_statement_id (reader, &graph_id, &subject_id, &predicate_id, &object_id);
-
-			if (last_operation_type == -1) {
-				tracker_data_update_buffer_flush (data, &new_error);
-				if (new_error) {
-					g_warning ("Journal replay error: '%s'", new_error->message);
-					g_clear_error (&new_error);
-				}
-			}
-			last_operation_type = 1;
-
-			uri = tracker_ontologies_get_uri_by_id (ontologies, predicate_id);
-			if (uri) {
-				property = tracker_ontologies_get_property_by_uri (ontologies, uri);
-			}
-
-			if (property) {
-				if (tracker_property_get_data_type (property) != TRACKER_PROPERTY_TYPE_RESOURCE) {
-					g_warning ("Journal replay error: 'property with ID %d does not account URIs'", predicate_id);
-				} else {
-					resource_buffer_switch (data, NULL, NULL, subject_id);
-
-					if (property == rdf_type) {
-						uri = tracker_ontologies_get_uri_by_id (ontologies, object_id);
-						if (uri) {
-							class = tracker_ontologies_get_class_by_uri (ontologies, uri);
-						}
-						if (class) {
-							cache_create_service_decomposed (data, class, NULL, graph_id);
-						} else {
-							g_warning ("Journal replay error: 'class with ID %d not found in the ontology'", object_id);
-						}
-					} else {
-						GError *new_error = NULL;
-
-						/* add value to metadata database */
-						if (type == TRACKER_DB_JOURNAL_UPDATE_STATEMENT_ID) {
-							cache_update_metadata_decomposed (data, property, NULL, object_id, NULL, graph_id, &new_error);
-						} else {
-							cache_insert_metadata_decomposed (data, property, NULL, object_id, NULL, graph_id, &new_error);
-						}
-
-						if (new_error) {
-							g_warning ("Journal replay error: '%s'", new_error->message);
-							g_error_free (new_error);
-						}
-					}
-				}
-			} else {
-				g_warning ("Journal replay error: 'property with ID %d doesn't exist'", predicate_id);
-			}
-
-		} else if (type == TRACKER_DB_JOURNAL_DELETE_STATEMENT) {
-			GError *new_error = NULL;
-			TrackerProperty *property = NULL;
-
-			tracker_db_journal_reader_get_statement (reader, &graph_id, &subject_id, &predicate_id, &object);
-
-			if (last_operation_type == 1) {
-				tracker_data_update_buffer_flush (data, &new_error);
-				if (new_error) {
-					g_warning ("Journal replay error: '%s'", new_error->message);
-					g_clear_error (&new_error);
-				}
-			}
-			last_operation_type = -1;
-
-			resource_buffer_switch (data, NULL, NULL, subject_id);
-
-			uri = tracker_ontologies_get_uri_by_id (ontologies, predicate_id);
-			if (uri) {
-				property = tracker_ontologies_get_property_by_uri (ontologies, uri);
-			}
-
-			if (property) {
-				GError *new_error = NULL;
-
-				if (object && rdf_type == property) {
-					TrackerClass *class;
-
-					class = tracker_ontologies_get_class_by_uri (ontologies, object);
-					if (class != NULL) {
-						cache_delete_resource_type (data, class, NULL, graph_id);
-					} else {
-						g_warning ("Journal replay error: 'class with '%s' not found in the ontology'", object);
-					}
-				} else {
-					delete_metadata_decomposed (data, property, object, 0, &new_error);
-				}
-
-				if (new_error) {
-					g_warning ("Journal replay error: '%s'", new_error->message);
-					g_error_free (new_error);
-				}
-
-			} else {
-				g_warning ("Journal replay error: 'property with ID %d doesn't exist'", predicate_id);
-			}
-
-		} else if (type == TRACKER_DB_JOURNAL_DELETE_STATEMENT_ID) {
-			GError *new_error = NULL;
-			TrackerClass *class = NULL;
-			TrackerProperty *property = NULL;
-
-			tracker_db_journal_reader_get_statement_id (reader, &graph_id, &subject_id, &predicate_id, &object_id);
-
-			if (last_operation_type == 1) {
-				tracker_data_update_buffer_flush (data, &new_error);
-				if (new_error) {
-					g_warning ("Journal replay error: '%s'", new_error->message);
-					g_clear_error (&new_error);
-				}
-			}
-			last_operation_type = -1;
-
-			uri = tracker_ontologies_get_uri_by_id (ontologies, predicate_id);
-			if (uri) {
-				property = tracker_ontologies_get_property_by_uri (ontologies, uri);
-			}
-
-			if (property) {
-
-				resource_buffer_switch (data, NULL, NULL, subject_id);
-
-				if (property == rdf_type) {
-					uri = tracker_ontologies_get_uri_by_id (ontologies, object_id);
-					if (uri) {
-						class = tracker_ontologies_get_class_by_uri (ontologies, uri);
-					}
-					if (class) {
-						cache_delete_resource_type (data, class, NULL, graph_id);
-					} else {
-						g_warning ("Journal replay error: 'class with ID %d not found in the ontology'", object_id);
-					}
-				} else {
-					GError *new_error = NULL;
-
-					delete_metadata_decomposed (data, property, NULL, object_id, &new_error);
-
-					if (new_error) {
-						g_warning ("Journal replay error: '%s'", new_error->message);
-						g_error_free (new_error);
-					}
-				}
-			} else {
-				g_warning ("Journal replay error: 'property with ID %d doesn't exist'", predicate_id);
-			}
-		}
-
-		if (busy_callback) {
-			busy_callback (busy_status,
-			               tracker_db_journal_reader_get_progress (reader),
-			               busy_user_data);
-		}
-	}
-
-
-	if (journal_error) {
-		GError *n_error = NULL;
-		gsize size;
-		GFile *cache_location, *data_location;
-		TrackerDBJournal *writer;
-
-		size = tracker_db_journal_reader_get_size_of_correct (reader);
-		tracker_db_journal_reader_free (reader);
-
-		cache_location = tracker_data_manager_get_cache_location(data->manager);
-		data_location = tracker_data_manager_get_data_location (data->manager);
-
-		writer = tracker_db_journal_new (data_location, FALSE, &n_error);
-		g_object_unref (cache_location);
-		g_object_unref (data_location);
-
-		if (n_error) {
-			g_clear_error (&journal_error);
-			/* This is fatal (journal file not writable, etc) */
-			g_propagate_error (error, n_error);
-			return;
-		}
-		tracker_db_journal_truncate (writer, size);
-		tracker_db_journal_free (writer, &n_error);
-
-		if (n_error) {
-			g_clear_error (&journal_error);
-			/* This is fatal (close of journal file failed after truncate) */
-			g_propagate_error (error, n_error);
-			return;
-		}
-
-		g_clear_error (&journal_error);
-	} else {
-		tracker_db_journal_reader_free (reader);
-	}
-}
-
-#else
-
-void
-tracker_data_replay_journal (TrackerData          *data,
-                             TrackerBusyCallback   busy_callback,
-                             gpointer              busy_user_data,
-                             const gchar          *busy_status,
-                             GError              **error)
-{
-	g_critical ("Not good. We disabled the journal and yet replaying it got called");
-}
-
-#endif /* DISABLE_JOURNAL */

@@ -1,7 +1,6 @@
 libtracker_data_tests = [
     'backup',
     'crc32',
-    'db-journal',
     'ontology-change',
     'sparql-blank',
 ]
