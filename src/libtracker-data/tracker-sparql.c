@@ -1369,6 +1369,7 @@ convert_expression_to_string (TrackerSparql       *sparql,
 	switch (type) {
 	case TRACKER_PROPERTY_TYPE_STRING:
 	case TRACKER_PROPERTY_TYPE_INTEGER:
+	case TRACKER_PROPERTY_TYPE_DOUBLE:
 		/* Nothing to convert. Do not use CAST to convert integers to
 		 * strings as this breaks use of index when sorting by variable
 		 * introduced in select expression
