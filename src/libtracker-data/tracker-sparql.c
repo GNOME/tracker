@@ -2613,8 +2613,29 @@ get_solution_for_pattern (TrackerSparql      *sparql,
 
 	while (tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
 		for (i = 0; i < n_cols; i++) {
-			const gchar *str = tracker_db_cursor_get_string (cursor, i, NULL);
-			tracker_solution_add_value (solution, str);
+			GValue value = G_VALUE_INIT;
+
+			tracker_db_cursor_get_value (cursor, i, &value);
+
+			if (G_VALUE_TYPE (&value) == G_TYPE_STRING) {
+				tracker_solution_add_value (solution,
+				                            g_value_get_string (&value));
+			} else if (G_VALUE_TYPE (&value) == G_TYPE_INT64) {
+				gchar *str;
+				str = g_strdup_printf ("%" G_GINT64_FORMAT,
+				                       g_value_get_int64 (&value));
+				tracker_solution_add_value (solution, str);
+				g_free (str);
+			} else if (G_VALUE_TYPE (&value) == G_TYPE_DOUBLE) {
+				gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
+				g_ascii_dtostr (buf, sizeof (buf),
+				                g_value_get_double (&value));
+				tracker_solution_add_value (solution, buf);
+			} else {
+				g_assert_not_reached ();
+			}
+
+			g_value_unset (&value);
 		}
 	}
 
