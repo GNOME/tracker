@@ -4416,8 +4416,8 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			check_ontology = FALSE;
 
 			if (gvdb_error) {
-				g_critical ("Error loading ontology cache: %s",
-				            gvdb_error->message);
+				g_message ("Error loading ontology cache: %s",
+				           gvdb_error->message);
 				g_clear_error (&gvdb_error);
 
 				/* fall back to loading ontology from database into memory */
