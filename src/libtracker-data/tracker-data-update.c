@@ -1659,7 +1659,7 @@ string_to_gvalue (const gchar         *value,
 		break;
 	case TRACKER_PROPERTY_TYPE_DOUBLE:
 		g_value_init (gvalue, G_TYPE_DOUBLE);
-		g_value_set_double (gvalue, atof (value));
+		g_value_set_double (gvalue, g_ascii_strtod (value, NULL));
 		break;
 	case TRACKER_PROPERTY_TYPE_DATE:
 		g_value_init (gvalue, G_TYPE_INT64);
@@ -1700,7 +1700,9 @@ gvalue_to_string (TrackerPropertyType  type,
 		retval = g_value_get_int64 (gvalue) == 0 ? g_strdup ("false") : g_strdup ("true");
 		break;
 	case TRACKER_PROPERTY_TYPE_DOUBLE:
-		retval = g_strdup_printf ("%f", g_value_get_double (gvalue));
+		retval = g_new0 (char, G_ASCII_DTOSTR_BUF_SIZE);
+		g_ascii_dtostr (retval, G_ASCII_DTOSTR_BUF_SIZE,
+		                g_value_get_double (gvalue));
 		break;
 	case TRACKER_PROPERTY_TYPE_DATE:
 		datet = g_value_get_int64 (gvalue);
