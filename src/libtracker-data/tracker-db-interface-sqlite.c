@@ -414,8 +414,75 @@ function_sparql_format_time (sqlite3_context *context,
                              int              argc,
                              sqlite3_value   *argv[])
 {
-	gdouble seconds;
-	gchar *str;
+	if (argc != 1) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	if (sqlite3_value_type (argv[0]) == SQLITE_NULL) {
+		sqlite3_result_null (context);
+		return;
+	} else if (sqlite3_value_numeric_type (argv[0]) == SQLITE_INTEGER) {
+		gdouble seconds;
+		gchar *str;
+
+		seconds = sqlite3_value_double (argv[0]);
+		str = tracker_date_to_string (seconds, 0);
+		sqlite3_result_text (context, str, -1, g_free);
+	} else if (sqlite3_value_type (argv[0]) == SQLITE_TEXT) {
+		const gchar *str;
+
+		str = sqlite3_value_text (argv[0]);
+		sqlite3_result_text (context, g_strdup (str), -1, g_free);
+	} else {
+		sqlite3_result_error (context, "Invalid argument type", -1);
+	}
+}
+
+static void
+function_sparql_timestamp (sqlite3_context *context,
+                           int              argc,
+                           sqlite3_value   *argv[])
+{
+	if (argc != 1) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	if (sqlite3_value_type (argv[0]) == SQLITE_NULL) {
+		sqlite3_result_null (context);
+		return;
+	} else if (sqlite3_value_numeric_type (argv[0]) == SQLITE_INTEGER) {
+		gdouble seconds;
+
+		seconds = sqlite3_value_double (argv[0]);
+		sqlite3_result_double (context, seconds);
+	} else if (sqlite3_value_type (argv[0]) == SQLITE_TEXT) {
+		GError *error = NULL;
+		const gchar *str;
+		gdouble time;
+
+		str = sqlite3_value_text (argv[0]);
+		time = tracker_string_to_date (str, NULL, &error);
+
+		if (error) {
+			sqlite3_result_error (context, "Failed time string conversion", -1);
+			g_error_free (error);
+			return;
+		}
+
+		sqlite3_result_double (context, time);
+	} else {
+		sqlite3_result_error (context, "Invalid argument type", -1);
+	}
+}
+
+static void
+function_sparql_time_sort (sqlite3_context *context,
+                           int              argc,
+                           sqlite3_value   *argv[])
+{
+	gint64 sort_key;
 
 	if (argc != 1) {
 		sqlite3_result_error (context, "Invalid argument count", -1);
@@ -425,12 +492,37 @@ function_sparql_format_time (sqlite3_context *context,
 	if (sqlite3_value_type (argv[0]) == SQLITE_NULL) {
 		sqlite3_result_null (context);
 		return;
+	} else if (sqlite3_value_numeric_type (argv[0]) == SQLITE_INTEGER) {
+		gint64 value;
+
+		value = sqlite3_value_int64 (argv[0]);
+		sort_key = value * G_USEC_PER_SEC;
+
+		if (sort_key < value) {
+			sqlite3_result_error (context, "Invalid integer argument value", -1);
+			return;
+		}
+	} else if (sqlite3_value_type (argv[0]) == SQLITE_TEXT) {
+		const gchar *value;
+		gdouble time;
+		GError *error = NULL;
+
+		value = sqlite3_value_text (argv[0]);
+		time = tracker_string_to_date (value, NULL, &error);
+
+		if (error) {
+			sqlite3_result_error (context, "Failed time string conversion", -1);
+			g_error_free (error);
+			return;
+		}
+
+		sort_key = (gint64) (time * G_USEC_PER_SEC);
+	} else {
+		sqlite3_result_error (context, "Invalid argument type", -1);
+		return;
 	}
 
-	seconds = sqlite3_value_double (argv[0]);
-	str = tracker_date_to_string (seconds, 0);
-
-	sqlite3_result_text (context, str, -1, g_free);
+	sqlite3_result_int64 (context, sort_key);
 }
 
 static void
@@ -1438,6 +1530,10 @@ initialize_functions (TrackerDBInterface *db_interface)
 		/* Date/time */
 		{ "SparqlFormatTime", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_format_time },
+		{ "SparqlTimestamp", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		  function_sparql_timestamp },
+		{ "SparqlTimeSort", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		  function_sparql_time_sort },
 		/* Paths and filenames */
 		{ "SparqlStringFromFilename", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_string_from_filename },
