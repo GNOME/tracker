@@ -428,7 +428,7 @@ function_sparql_format_time (sqlite3_context *context,
 	}
 
 	seconds = sqlite3_value_double (argv[0]);
-	str = tracker_date_to_string (seconds);
+	str = tracker_date_to_string (seconds, 0);
 
 	sqlite3_result_text (context, str, -1, g_free);
 }

@@ -1679,6 +1679,7 @@ gvalue_to_string (TrackerPropertyType  type,
 {
 	gchar *retval = NULL;
 	gint64 datet;
+	gint offset;
 
 	switch (type) {
 	case TRACKER_PROPERTY_TYPE_STRING:
@@ -1697,13 +1698,14 @@ gvalue_to_string (TrackerPropertyType  type,
 		break;
 	case TRACKER_PROPERTY_TYPE_DATE:
 		datet = g_value_get_int64 (gvalue);
-		retval = tracker_date_to_string (datet);
+		retval = tracker_date_to_string (datet, 0);
 		/* it's a date-only, cut off the time */
 		retval[10] = '\0';
 		break;
 	case TRACKER_PROPERTY_TYPE_DATETIME:
 		datet = tracker_date_time_get_time (gvalue);
-		retval = tracker_date_to_string (datet);
+		offset = tracker_date_time_get_offset (gvalue);
+		retval = tracker_date_to_string (datet, offset);
 		break;
 	case TRACKER_PROPERTY_TYPE_RESOURCE:
 	default:

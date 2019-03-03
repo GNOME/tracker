@@ -61,7 +61,7 @@ test_miner_process_file (TrackerMinerFS *miner,
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
 	g_file_info_get_modification_time (info, &timeval);
-	str = tracker_date_to_string (timeval.tv_sec);
+	str = tracker_date_to_string (timeval.tv_sec, 0);
 	tracker_resource_set_string (resource, "nfo:fileLastModified", str);
 	g_free (str);
 
