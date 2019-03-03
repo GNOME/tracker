@@ -789,9 +789,21 @@ statement_bind_gvalue (TrackerDBStatement *stmt,
 		break;
 	default:
 		if (type == TRACKER_TYPE_DATE_TIME) {
-			tracker_db_statement_bind_double (stmt, (*idx)++, tracker_date_time_get_time (value));
-			tracker_db_statement_bind_int (stmt, (*idx)++, tracker_date_time_get_local_date (value));
-			tracker_db_statement_bind_int (stmt, (*idx)++, tracker_date_time_get_local_time (value));
+			gdouble time = tracker_date_time_get_time (value);
+			int offset = tracker_date_time_get_offset (value);
+
+			/* If we have anything that prevents a unix timestamp to be
+			 * lossless, we use the ISO8601 string.
+			 */
+			if (offset != 0 || floor (time) != time) {
+				gchar *str;
+
+				str = tracker_date_to_string (time, offset);
+				tracker_db_statement_bind_text (stmt, (*idx)++, str);
+				g_free (str);
+			} else {
+				tracker_db_statement_bind_int (stmt, (*idx)++, round (time));
+			}
 		} else {
 			g_warning ("Unknown type for binding: %s\n", G_VALUE_TYPE_NAME (value));
 		}
@@ -844,14 +856,6 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 					stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &actual_error,
 					                                              "DELETE FROM \"%s\" WHERE ID = ? AND \"%s\" = ?",
 					                                              table_name,
-					                                              property->name);
-				} else if (property->date_time) {
-					stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &actual_error,
-					                                              "INSERT OR IGNORE INTO \"%s\" (ID, \"%s\", \"%s:localDate\", \"%s:localTime\", \"%s:graph\") VALUES (?, ?, ?, ?, ?)",
-					                                              table_name,
-					                                              property->name,
-					                                              property->name,
-					                                              property->name,
 					                                              property->name);
 				} else {
 					stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &actual_error,
@@ -955,12 +959,6 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 					g_string_append_printf (sql, ", \"%s\"", property->name);
 					g_string_append (values_sql, ", ?");
 
-					if (property->date_time) {
-						g_string_append_printf (sql, ", \"%s:localDate\"", property->name);
-						g_string_append_printf (sql, ", \"%s:localTime\"", property->name);
-						g_string_append (values_sql, ", ?, ?");
-					}
-
 					g_string_append_printf (sql, ", \"%s:graph\"", property->name);
 					g_string_append (values_sql, ", ?");
 				} else {
@@ -968,12 +966,6 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 						g_string_append (sql, ", ");
 					}
 					g_string_append_printf (sql, "\"%s\" = ?", property->name);
-
-					if (property->date_time) {
-						g_string_append_printf (sql, ", \"%s:localDate\" = ?", property->name);
-						g_string_append_printf (sql, ", \"%s:localTime\" = ?", property->name);
-					}
-
 					g_string_append_printf (sql, ", \"%s:graph\" = ?", property->name);
 				}
 			}
@@ -1019,11 +1011,6 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 				if (table->delete_value) {
 					/* just set value to NULL for single value properties */
 					tracker_db_statement_bind_null (stmt, param++);
-					if (property->date_time) {
-						/* also set localDate and localTime to NULL */
-						tracker_db_statement_bind_null (stmt, param++);
-						tracker_db_statement_bind_null (stmt, param++);
-					}
 				} else {
 					statement_bind_gvalue (stmt, &param, &property->value);
 				}
