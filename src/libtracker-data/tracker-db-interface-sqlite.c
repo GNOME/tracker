@@ -492,16 +492,12 @@ function_sparql_time_sort (sqlite3_context *context,
 	if (sqlite3_value_type (argv[0]) == SQLITE_NULL) {
 		sqlite3_result_null (context);
 		return;
-	} else if (sqlite3_value_numeric_type (argv[0]) == SQLITE_INTEGER) {
-		gint64 value;
+	} else if (sqlite3_value_numeric_type (argv[0]) == SQLITE_INTEGER ||
+	           sqlite3_value_numeric_type (argv[0]) == SQLITE_FLOAT) {
+		gdouble value;
 
-		value = sqlite3_value_int64 (argv[0]);
-		sort_key = value * G_USEC_PER_SEC;
-
-		if (sort_key < value) {
-			sqlite3_result_error (context, "Invalid integer argument value", -1);
-			return;
-		}
+		value = sqlite3_value_double (argv[0]);
+		sort_key = (gint64) (value * G_USEC_PER_SEC);
 	} else if (sqlite3_value_type (argv[0]) == SQLITE_TEXT) {
 		const gchar *value;
 		gdouble time;

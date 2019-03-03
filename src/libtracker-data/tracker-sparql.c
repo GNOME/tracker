@@ -514,25 +514,8 @@ static void
 _append_variable_sql (TrackerSparql   *sparql,
                       TrackerVariable *variable)
 {
-	TrackerBinding *binding;
-
-	binding = TRACKER_BINDING (tracker_variable_get_sample_binding (variable));
-
-	if (binding &&
-	    binding->data_type == TRACKER_PROPERTY_TYPE_DATETIME) {
-		TrackerVariable *local_time;
-		gchar *name;
-
-		name = g_strdup_printf ("%s:local", variable->name);
-		local_time = _ensure_variable (sparql, name);
-		g_free (name);
-
-		_append_string_printf (sparql, "%s ",
-				       tracker_variable_get_sql_expression (local_time));
-	} else {
-		_append_string_printf (sparql, "%s ",
-				       tracker_variable_get_sql_expression (variable));
-	}
+	_append_string_printf (sparql, "%s ",
+	                       tracker_variable_get_sql_expression (variable));
 }
 
 static void
@@ -1200,31 +1183,6 @@ _add_quad (TrackerSparql  *sparql,
 				 */
 				tracker_variable_binding_set_nullable (TRACKER_VARIABLE_BINDING (binding), TRUE);
 			}
-
-			if (tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME) {
-				gchar *date_var, *sql_expression, *local_date, *local_time;
-				TrackerBinding *local_time_binding;
-
-				/* Merge localDate/localTime into $var:local */
-				date_var = g_strdup_printf ("%s:local", variable->name);
-				variable = _ensure_variable (sparql, date_var);
-
-				local_date = tracker_binding_get_extra_sql_expression (binding, "localDate");
-				local_time = tracker_binding_get_extra_sql_expression (binding, "localTime");
-				sql_expression = g_strdup_printf ("((%s * 24 * 3600) + %s)",
-								  local_date, local_time);
-
-				local_time_binding = tracker_variable_binding_new (variable, NULL, NULL);
-				tracker_binding_set_sql_expression (local_time_binding,
-				                                    sql_expression);
-				_add_binding (sparql, local_time_binding);
-				g_object_unref (local_time_binding);
-
-				g_free (sql_expression);
-				g_free (local_date);
-				g_free (local_time);
-				g_free (date_var);
-			}
 		}
 
 		_add_binding (sparql, binding);
@@ -1386,8 +1344,8 @@ convert_expression_to_string (TrackerSparql       *sparql,
 		break;
 	case TRACKER_PROPERTY_TYPE_DATE:
 		/* ISO 8601 format */
-		_prepend_string (sparql, "strftime (\"%Y-%m-%d\", ");
-		_append_string (sparql, ", \"unixepoch\") ");
+		_prepend_string (sparql, "strftime (\"%Y-%m-%d\", SparqlTimestamp (");
+		_append_string (sparql, "), \"unixepoch\") ");
 		break;
 	case TRACKER_PROPERTY_TYPE_DATETIME:
 		/* ISO 8601 format */
@@ -1562,8 +1520,14 @@ _end_triples_block (TrackerSparql  *sparql,
 
 		first = FALSE;
 		binding = g_ptr_array_index (triple_context->literal_bindings, i);
-		_append_string_printf (sparql, "%s = ", tracker_binding_get_sql_expression (binding));
-		_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+		if (binding->data_type == TRACKER_PROPERTY_TYPE_DATETIME) {
+			_append_string_printf (sparql, "SparqlTimeSort (%s) = SparqlTimeSort (", tracker_binding_get_sql_expression (binding));
+			_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+			_append_string (sparql, ") ");
+		} else {
+			_append_string_printf (sparql, "%s = ", tracker_binding_get_sql_expression (binding));
+			_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+		}
 	}
 
 	/* If we had any where clauses, prepend the 'WHERE' literal */
@@ -5380,12 +5344,12 @@ helper_translate_date (TrackerSparql  *sparql,
                        GError        **error)
 {
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
-	_append_string_printf (sparql, "strftime (\"%s\", ", format);
+	_append_string_printf (sparql, "strftime (\"%s\", SparqlTimestamp (", format);
 
 	_call_rule (sparql, NAMED_RULE_Expression, error);
 
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
-	_append_string (sparql, ", \"unixepoch\") ");
+	_append_string (sparql, "), \"unixepoch\") ");
 
 	return TRUE;
 }
@@ -5395,20 +5359,20 @@ helper_translate_time (TrackerSparql  *sparql,
                        guint           format,
                        GError        **error)
 {
+	_append_string (sparql, "CAST (SparqlTimestamp (");
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 	_call_rule (sparql, NAMED_RULE_Expression, error);
-
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 
 	switch (format) {
 	case TIME_FORMAT_SECONDS:
-		_append_string (sparql, " % 60 ");
+		_append_string (sparql, ") AS INTEGER) % 60 ");
 		break;
 	case TIME_FORMAT_MINUTES:
-		_append_string (sparql, " / 60 % 60 ");
+		_append_string (sparql, ") AS INTEGER) / 60 % 60 ");
 		break;
 	case TIME_FORMAT_HOURS:
-		_append_string (sparql, " / 3600 % 24 ");
+		_append_string (sparql, ") AS INTEGER) / 3600 % 24 ");
 		break;
 	default:
 		g_assert_not_reached ();
