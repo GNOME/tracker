@@ -138,11 +138,22 @@ test_date_to_string (void)
 	input = timegm (original);
 #endif
 
-	result = tracker_date_to_string (input);
-
+	result = tracker_date_to_string (input, 0);
 	g_assert (result != NULL && strncmp (result, "2008-06-16T23:53:10Z", 19) == 0);
-
 	g_free (result);
+
+	result = tracker_date_to_string (input, 7200);
+	g_assert_cmpstr (result, ==, "2008-06-17T01:53:10+02:00");
+	g_free (result);
+
+	result = tracker_date_to_string (input, -7200);
+	g_assert_cmpstr (result, ==, "2008-06-16T21:53:10-02:00");
+	g_free (result);
+
+	result = tracker_date_to_string (input, -9000);
+	g_assert_cmpstr (result, ==, "2008-06-16T21:23:10-02:30");
+	g_free (result);
+
 	g_free (original);
 }
 
@@ -245,6 +256,28 @@ test_date_time_get_local_time ()
         g_assert_cmpint (tracker_date_time_get_local_time (&value), ==, 63780);
 }
 
+static void
+test_date_time_conversions (void)
+{
+        GError *error = NULL;
+        time_t time;
+        int offset;
+        const gchar *date_str;
+        gchar *result;
+
+        date_str = "2011-10-28T17:43:00+03:00";
+
+	time = tracker_string_to_date (date_str, &offset, &error);
+        g_assert (!error);
+
+        g_assert_cmpint (time, ==, 1319812980);
+        g_assert_cmpint (offset, ==, 10800);
+
+        result = tracker_date_to_string (time, offset);
+        g_assert_cmpstr (result, ==, date_str);
+	g_free (result);
+}
+
 gint
 main (gint argc, gchar **argv) 
 {
@@ -266,6 +299,8 @@ main (gint argc, gchar **argv)
                          test_date_time_get_local_date);
         g_test_add_func ("/libtracker-common/date-time/get_local_time",
                          test_date_time_get_local_time);
+        g_test_add_func ("/libtracker-common/date-time/conversions",
+                         test_date_time_conversions);
 
         return g_test_run ();
 }
