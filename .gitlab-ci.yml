@@ -16,3 +16,8 @@ test-fedora-latest:
       unset $(env|grep -o '^CI_[^=]*')
 
       su tracker -c 'cd build; dbus-run-session -- env LANG=en_US.UTF8 meson test --print-errorlogs'
+
+  artifacts:
+    when: on_failure
+    paths:
+    - build/meson-logs/testlog.txt
