@@ -72,7 +72,6 @@ struct _TrackerDataManager {
 	GFile *cache_location;
 	GFile *data_location;
 	guint initialized      : 1;
-	guint journal_check    : 1;
 	guint restoring_backup : 1;
 	guint first_time_index : 1;
 	guint flags;
@@ -801,7 +800,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		is_new = tracker_class_get_is_new (class);
 		if (is_new != in_update) {
 			gboolean ignore = FALSE;
-			/* Detect unsupported ontology change (this needs a journal replay) */
+			/* Detect unsupported ontology change */
 			if (in_update == TRUE && is_new == FALSE && g_strcmp0 (object, TRACKER_PREFIX_RDFS "Resource") != 0) {
 				TrackerClass **super_classes = tracker_class_get_super_classes (class);
 				gboolean had = FALSE;
@@ -986,7 +985,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		is_new = tracker_property_get_is_new (property);
 		if (is_new != in_update) {
 			gboolean ignore = FALSE;
-			/* Detect unsupported ontology change (this needs a journal replay) */
+			/* Detect unsupported ontology change */
 			if (in_update == TRUE && is_new == FALSE) {
 				TrackerProperty **super_properties = tracker_property_get_super_properties (property);
 				gboolean had = FALSE;
@@ -1067,7 +1066,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 
 		is_new = tracker_property_get_is_new (property);
 		if (is_new != in_update) {
-			/* Detect unsupported ontology change (this needs a journal replay) */
+			/* Detect unsupported ontology change */
 			if (in_update == TRUE && is_new == FALSE) {
 				TrackerClass *old_domain = tracker_property_get_domain (property);
 				if (old_domain != domain) {
@@ -1170,7 +1169,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 
 		is_new = tracker_property_get_is_new (property);
 		if (is_new != in_update) {
-			/* Detect unsupported ontology change (this needs a journal replay).
+			/* Detect unsupported ontology change.
 			 * Wouldn't be very hard to support this, just dropping the tabtle
 			 * or creating the table in the-non memdisk db file, but afaik this
 			 * isn't supported right now */
@@ -1928,8 +1927,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
                                          const gchar        *predicate,
                                          const gchar        *object,
                                          gboolean            is_uri,
-                                         gboolean            in_update,
-                                         gboolean            ignore_nao_last_modified)
+                                         gboolean            in_update)
 {
 	GError *error = NULL;
 
@@ -2005,10 +2003,6 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 		if (ontology && tracker_ontology_get_is_new (ontology) != in_update) {
 			return;
 		}
-
-		if (ignore_nao_last_modified) {
-			return;
-		}
 	}
 
 	if (is_uri) {
@@ -2038,8 +2032,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 static void
 import_ontology_file (TrackerDataManager *manager,
                       GFile              *file,
-                      gboolean            in_update,
-                      gboolean            ignore_nao_last_modified)
+                      gboolean            in_update)
 {
 	GError *error = NULL;
 	TrackerTurtleReader* reader;
@@ -2062,7 +2055,7 @@ import_ontology_file (TrackerDataManager *manager,
 		tracker_data_ontology_process_statement (manager,
 		                                         graph, subject, predicate, object,
 		                                         tracker_turtle_reader_get_object_is_uri (reader),
-		                                         in_update, ignore_nao_last_modified);
+		                                         in_update);
 
 	}
 
@@ -3963,7 +3956,6 @@ tracker_data_manager_new (TrackerDBManagerFlags   flags,
                           GFile                  *cache_location,
                           GFile                  *data_location,
                           GFile                  *ontology_location,
-                          gboolean                journal_check,
                           gboolean                restoring_backup,
                           guint                   select_cache_size,
                           guint                   update_cache_size)
@@ -3982,7 +3974,6 @@ tracker_data_manager_new (TrackerDBManagerFlags   flags,
 	g_set_object (&manager->ontology_location, ontology_location);
 	g_set_object (&manager->data_location, data_location);
 	manager->flags = flags;
-	manager->journal_check = journal_check;
 	manager->restoring_backup = restoring_backup;
 	manager->select_cache_size = select_cache_size;
 	manager->update_cache_size = update_cache_size;
@@ -4135,7 +4126,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 		/* store ontology in database */
 		for (l = sorted; l; l = l->next) {
-			import_ontology_file (manager, l->data, FALSE, !manager->journal_check);
+			import_ontology_file (manager, l->data, FALSE);
 		}
 
 		tracker_data_commit_transaction (manager->data_update, &internal_error);
@@ -4514,7 +4505,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			for (l = to_reload; l; l = l->next) {
 				GFile *ontology_file = l->data;
 				/* store ontology in database */
-				import_ontology_file (manager, ontology_file, TRUE, !manager->journal_check);
+				import_ontology_file (manager, ontology_file, TRUE);
 			}
 			g_list_free (to_reload);
 
