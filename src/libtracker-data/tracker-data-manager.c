@@ -3029,7 +3029,6 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 	GString          *sel_col_sql = NULL;
 	TrackerProperty **properties, *property, **domain_indexes;
 	GSList           *class_properties = NULL, *field_it;
-	gboolean          main_class;
 	guint             i, n_props;
 	gboolean          in_alter = in_update;
 	GError           *internal_error = NULL;
@@ -3040,8 +3039,6 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 	service_name = tracker_class_get_name (service);
 
 	g_return_if_fail (service_name != NULL);
-
-	main_class = (strcmp (service_name, "rdfs:Resource") == 0);
 
 	if (g_str_has_prefix (service_name, "xsd:")) {
 		/* xsd classes do not derive from rdfs:Resource and do not need separate tables */
@@ -3067,10 +3064,6 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 		in_alter = FALSE;
 		create_sql = g_string_new ("");
 		g_string_append_printf (create_sql, "CREATE TABLE \"%s\" (ID INTEGER NOT NULL PRIMARY KEY", service_name);
-		if (main_class) {
-			/* FIXME: This column is unneeded */
-			g_string_append (create_sql, ", Available INTEGER DEFAULT 1");
-		}
 	}
 
 	properties = tracker_ontologies_get_properties (manager->ontologies, &n_props);
