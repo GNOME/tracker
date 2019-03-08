@@ -2502,7 +2502,7 @@ insert_uri_in_resource_table (TrackerDataManager  *manager,
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE,
 	                                              &internal_error,
 	                                              "INSERT OR IGNORE "
-	                                              "INTO Resource "
+	                                              "INTO main.Resource "
 	                                              "(ID, Uri) "
 	                                              "VALUES (?, ?)");
 	if (internal_error) {
