@@ -3500,34 +3500,21 @@ query_table_exists (TrackerDBInterface  *iface,
 static gboolean
 create_base_tables (TrackerDataManager  *manager,
                     TrackerDBInterface  *iface,
-                    gboolean            *altered,
                     GError             **error)
 {
 	GError *internal_error = NULL;
 
-	if (!query_table_exists (iface, "Resource", &internal_error) && !internal_error) {
-		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "CREATE TABLE Resource (ID INTEGER NOT NULL PRIMARY KEY,"
-		                                    " Uri TEXT NOT NULL, Refcount INTEGER DEFAULT 0, UNIQUE (Uri))");
-	} else if (!internal_error) {
-		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "ALTER TABLE Resource ADD COLUMN Refcount INTEGER DEFAULT 0");
-
-		if (!internal_error)
-			*altered = TRUE;
-		else
-			g_clear_error (&internal_error);
-	}
+	tracker_db_interface_execute_query (iface, &internal_error,
+	                                    "CREATE TABLE Resource (ID INTEGER NOT NULL PRIMARY KEY,"
+	                                    " Uri TEXT NOT NULL, Refcount INTEGER DEFAULT 0, UNIQUE (Uri))");
 
 	if (internal_error) {
 		g_propagate_error (error, internal_error);
 		return FALSE;
 	}
 
-	if (!query_table_exists (iface, "Graph", &internal_error) && !internal_error) {
-		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "CREATE TABLE Graph (ID INTEGER NOT NULL PRIMARY KEY)");
-	}
+	tracker_db_interface_execute_query (iface, &internal_error,
+	                                    "CREATE TABLE Graph (ID INTEGER NOT NULL PRIMARY KEY)");
 
 	if (internal_error) {
 		g_propagate_error (error, internal_error);
@@ -3547,28 +3534,11 @@ tracker_data_ontology_import_into_db (TrackerDataManager  *manager,
 	TrackerClass **classes;
 	TrackerProperty **properties;
 	guint i, n_props, n_classes;
-	gboolean base_tables_altered = FALSE;
-#if HAVE_TRACKER_FTS
-	gboolean update_fts = FALSE;
-#endif
 
 	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
 
 	classes = tracker_ontologies_get_classes (manager->ontologies, &n_classes);
 	properties = tracker_ontologies_get_properties (manager->ontologies, &n_props);
-
-	if (!create_base_tables (manager, iface, &base_tables_altered, error)) {
-		return;
-	}
-
-#if HAVE_TRACKER_FTS
-	if (base_tables_altered || in_update) {
-		update_fts = base_tables_altered | tracker_data_manager_fts_changed (manager);
-
-		if (update_fts)
-			tracker_db_interface_sqlite_fts_delete_table (iface);
-	}
-#endif
 
 	/* create tables */
 	for (i = 0; i < n_classes; i++) {
@@ -3576,7 +3546,6 @@ tracker_data_ontology_import_into_db (TrackerDataManager  *manager,
 
 		/* Also !is_new classes are processed, they might have new properties */
 		create_decomposed_metadata_tables (manager, iface, classes[i], in_update,
-		                                   base_tables_altered ||
 		                                   tracker_class_get_db_schema_changed (classes[i]),
 		                                   &internal_error);
 
@@ -3619,14 +3588,6 @@ tracker_data_ontology_import_into_db (TrackerDataManager  *manager,
 			}
 		}
 	}
-
-#if HAVE_TRACKER_FTS
-	if (update_fts) {
-		tracker_data_manager_update_fts (manager, iface);
-	} else {
-		tracker_data_manager_init_fts (iface, !in_update);
-	}
-#endif
 }
 
 static gint
@@ -4116,6 +4077,10 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			return FALSE;
 		}
 
+		if (!create_base_tables (manager, iface, error)) {
+			return FALSE;
+		}
+
 		tracker_data_ontology_import_into_db (manager, FALSE,
 		                                      &internal_error);
 
@@ -4123,6 +4088,10 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			g_propagate_error (error, internal_error);
 			return FALSE;
 		}
+
+#if HAVE_TRACKER_FTS
+		tracker_data_manager_init_fts (iface, TRUE);
+#endif
 
 		/* store ontology in database */
 		for (l = sorted; l; l = l->next) {
@@ -4459,10 +4428,26 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 			if (!ontology_error) {
 				/* Perform ALTER-TABLE and CREATE-TABLE calls for all that are is_new */
+#if HAVE_TRACKER_FTS
+				gboolean update_fts;
+
+				update_fts = tracker_data_manager_fts_changed (manager);
+
+				if (update_fts)
+					tracker_db_interface_sqlite_fts_delete_table (iface);
+#endif
+
 				tracker_data_ontology_import_into_db (manager, TRUE,
 				                                      &ontology_error);
 
 				if (!ontology_error) {
+#if HAVE_TRACKER_FTS
+					if (update_fts) {
+						tracker_data_manager_update_fts (manager, iface);
+					} else {
+						tracker_data_manager_init_fts (iface, FALSE);
+					}
+#endif
 					tracker_data_ontology_process_changes_post_db (manager,
 					                                               seen_classes,
 					                                               seen_properties,
