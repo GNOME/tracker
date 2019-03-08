@@ -63,7 +63,6 @@ TrackerDataManager * tracker_data_manager_new        (TrackerDBManagerFlags   fl
                                                       GFile                  *cache_location,
                                                       GFile                  *data_location,
                                                       GFile                  *ontology_location,
-                                                      gboolean                journal_check,
                                                       gboolean                restoring_backup,
                                                       guint                   select_cache_size,
                                                       guint                   update_cache_size);
