@@ -265,7 +265,7 @@ tracker_data_backup_restore (TrackerDataManager   *manager,
 		tracker_db_manager_create_version_file (db_manager);
 
 		manager = tracker_data_manager_new (flags, cache_location, data_location, ontology_location,
-		                                    TRUE, TRUE, select_cache_size, update_cache_size);
+		                                    TRUE, select_cache_size, update_cache_size);
 		g_initable_init (G_INITABLE (manager), NULL, &internal_error);
 
 		if (internal_error) {

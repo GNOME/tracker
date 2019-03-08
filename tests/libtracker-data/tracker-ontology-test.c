@@ -186,7 +186,7 @@ test_ontology_init (TestInfo      *test_info,
 	/* first-time initialization */
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
 	                                    data_location, data_location, data_location,
-	                                    FALSE, FALSE, 100, 100);
+	                                    FALSE, 100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
 
@@ -194,7 +194,7 @@ test_ontology_init (TestInfo      *test_info,
 
 	/* initialization from existing database */
 	manager = tracker_data_manager_new (0, data_location, data_location, data_location,
-	                                    FALSE, FALSE, 100, 100);
+	                                    FALSE, 100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
 
@@ -229,7 +229,7 @@ test_query (TestInfo      *test_info,
 	/* initialization */
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
 	                                    data_location, data_location, ontology_location,
-	                                    FALSE, FALSE, 100, 100);
+	                                    FALSE, 100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
 

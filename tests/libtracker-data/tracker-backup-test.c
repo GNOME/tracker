@@ -125,7 +125,7 @@ test_backup_and_restore_helper (const gchar *db_location,
 
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
 	                                    data_location, data_location, test_schemas,
-	                                    FALSE, FALSE, 100, 100);
+	                                    FALSE, 100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
 
@@ -177,7 +177,7 @@ test_backup_and_restore_helper (const gchar *db_location,
 
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
 	                                    data_location, data_location, test_schemas,
-	                                    FALSE, FALSE, 100, 100);
+	                                    FALSE, 100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
 
@@ -188,7 +188,7 @@ test_backup_and_restore_helper (const gchar *db_location,
 	g_object_unref (manager);
 
 	manager = tracker_data_manager_new (0, data_location, data_location, test_schemas,
-	                                    FALSE, FALSE, 100, 100);
+	                                    FALSE, 100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
 	check_content_in_db (manager, 3, 1);

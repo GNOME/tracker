@@ -113,7 +113,7 @@ sql_by_query (void)
 
 	data_manager = tracker_data_manager_new (0, cache_location,
 	                                         data_location, ontology_location,
-	                                         FALSE, FALSE, 100, 100);
+	                                         FALSE, 100, 100);
 
 	if (!g_initable_init (G_INITABLE (data_manager), NULL, &error)) {
 		g_printerr ("%s: %s\n",
