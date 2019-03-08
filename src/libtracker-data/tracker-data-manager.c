@@ -3525,20 +3525,16 @@ create_base_tables (TrackerDataManager  *manager,
 }
 
 static void
-tracker_data_ontology_import_into_db (TrackerDataManager  *manager,
-                                      gboolean             in_update,
-                                      GError             **error)
+tracker_data_ontology_setup_db (TrackerDataManager  *manager,
+                                TrackerDBInterface  *iface,
+                                gboolean             in_update,
+                                GError             **error)
 {
-	TrackerDBInterface *iface;
 
 	TrackerClass **classes;
-	TrackerProperty **properties;
-	guint i, n_props, n_classes;
-
-	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
+	guint i, n_classes;
 
 	classes = tracker_ontologies_get_classes (manager->ontologies, &n_classes);
-	properties = tracker_ontologies_get_properties (manager->ontologies, &n_props);
 
 	/* create tables */
 	for (i = 0; i < n_classes; i++) {
@@ -3554,6 +3550,20 @@ tracker_data_ontology_import_into_db (TrackerDataManager  *manager,
 			return;
 		}
 	}
+}
+
+static void
+tracker_data_ontology_import_into_db (TrackerDataManager  *manager,
+                                      TrackerDBInterface  *iface,
+                                      gboolean             in_update,
+                                      GError             **error)
+{
+	TrackerClass **classes;
+	TrackerProperty **properties;
+	guint i, n_props, n_classes;
+
+	classes = tracker_ontologies_get_classes (manager->ontologies, &n_classes);
+	properties = tracker_ontologies_get_properties (manager->ontologies, &n_props);
 
 	/* insert classes into rdfs:Resource table */
 	for (i = 0; i < n_classes; i++) {
@@ -3588,6 +3598,7 @@ tracker_data_ontology_import_into_db (TrackerDataManager  *manager,
 			}
 		}
 	}
+
 }
 
 static gint
@@ -4081,8 +4092,14 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			return FALSE;
 		}
 
-		tracker_data_ontology_import_into_db (manager, FALSE,
-		                                      &internal_error);
+		tracker_data_ontology_setup_db (manager, iface, FALSE,
+		                                &internal_error);
+
+		if (!internal_error) {
+			tracker_data_ontology_import_into_db (manager, iface,
+							      FALSE,
+			                                      &internal_error);
+		}
 
 		if (internal_error) {
 			g_propagate_error (error, internal_error);
@@ -4437,8 +4454,13 @@ tracker_data_manager_initable_init (GInitable     *initable,
 					tracker_db_interface_sqlite_fts_delete_table (iface);
 #endif
 
-				tracker_data_ontology_import_into_db (manager, TRUE,
-				                                      &ontology_error);
+				tracker_data_ontology_setup_db (manager, iface, TRUE,
+				                                &ontology_error);
+
+				if (!ontology_error) {
+					tracker_data_ontology_import_into_db (manager, iface, TRUE,
+					                                      &ontology_error);
+				}
 
 				if (!ontology_error) {
 #if HAVE_TRACKER_FTS
