@@ -1922,7 +1922,6 @@ get_ontology_from_file (TrackerDataManager *manager,
 
 static void
 tracker_data_ontology_process_statement (TrackerDataManager *manager,
-                                         const gchar        *graph,
                                          const gchar        *subject,
                                          const gchar        *predicate,
                                          const gchar        *object,
@@ -2006,7 +2005,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 	}
 
 	if (is_uri) {
-		tracker_data_insert_statement_with_uri (manager->data_update, graph, subject,
+		tracker_data_insert_statement_with_uri (manager->data_update, NULL, subject,
 		                                        predicate, object,
 		                                        &error);
 
@@ -2017,7 +2016,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 		}
 
 	} else {
-		tracker_data_insert_statement_with_string (manager->data_update, graph, subject,
+		tracker_data_insert_statement_with_string (manager->data_update, NULL, subject,
 		                                           predicate, object,
 		                                           &error);
 
@@ -2046,17 +2045,14 @@ import_ontology_file (TrackerDataManager *manager,
 	}
 
 	while (tracker_turtle_reader_next (reader, &error)) {
-
-		const gchar *graph = tracker_turtle_reader_get_graph (reader);
 		const gchar *subject = tracker_turtle_reader_get_subject (reader);
 		const gchar *predicate = tracker_turtle_reader_get_predicate (reader);
 		const gchar *object  = tracker_turtle_reader_get_object (reader);
 
 		tracker_data_ontology_process_statement (manager,
-		                                         graph, subject, predicate, object,
+		                                         subject, predicate, object,
 		                                         tracker_turtle_reader_get_object_is_uri (reader),
 		                                         in_update);
-
 	}
 
 	g_object_unref (reader);
