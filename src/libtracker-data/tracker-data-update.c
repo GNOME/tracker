@@ -53,8 +53,6 @@ struct _TrackerDataUpdateBuffer {
 	GHashTable *resource_cache;
 	/* string -> TrackerDataUpdateBufferResource */
 	GHashTable *resources;
-	/* integer -> TrackerDataUpdateBufferResource */
-	GHashTable *resources_by_id;
 
 	/* the following two fields are valid per sqlite transaction, not just for same subject */
 	/* TrackerClass -> integer */
@@ -141,7 +139,6 @@ struct _TrackerData {
 
 	gboolean in_transaction;
 	gboolean in_ontology_transaction;
-	gboolean in_journal_replay;
 	TrackerDataUpdateBuffer update_buffer;
 
 	/* current resource */
@@ -1099,29 +1096,16 @@ tracker_data_update_buffer_flush (TrackerData  *data,
 	GHashTableIter iter;
 	GError *actual_error = NULL;
 
-	if (data->in_journal_replay) {
-		g_hash_table_iter_init (&iter, data->update_buffer.resources_by_id);
-		while (g_hash_table_iter_next (&iter, NULL, (gpointer*) &data->resource_buffer)) {
-			tracker_data_resource_buffer_flush (data, &actual_error);
-			if (actual_error) {
-				g_propagate_error (error, actual_error);
-				break;
-			}
+	g_hash_table_iter_init (&iter, data->update_buffer.resources);
+	while (g_hash_table_iter_next (&iter, NULL, (gpointer*) &data->resource_buffer)) {
+		tracker_data_resource_buffer_flush (data, &actual_error);
+		if (actual_error) {
+			g_propagate_error (error, actual_error);
+			break;
 		}
-
-		g_hash_table_remove_all (data->update_buffer.resources_by_id);
-	} else {
-		g_hash_table_iter_init (&iter, data->update_buffer.resources);
-		while (g_hash_table_iter_next (&iter, NULL, (gpointer*) &data->resource_buffer)) {
-			tracker_data_resource_buffer_flush (data, &actual_error);
-			if (actual_error) {
-				g_propagate_error (error, actual_error);
-				break;
-			}
-		}
-
-		g_hash_table_remove_all (data->update_buffer.resources);
 	}
+
+	g_hash_table_remove_all (data->update_buffer.resources);
 	data->resource_buffer = NULL;
 }
 
@@ -1130,8 +1114,7 @@ tracker_data_update_buffer_might_flush (TrackerData  *data,
                                         GError      **error)
 {
 	/* avoid high memory usage by update buffer */
-	if (g_hash_table_size (data->update_buffer.resources) +
-	    g_hash_table_size (data->update_buffer.resources_by_id) >= 1000) {
+	if (g_hash_table_size (data->update_buffer.resources)) >= 1000) {
 		tracker_data_update_buffer_flush (data, error);
 	}
 }
@@ -1140,7 +1123,6 @@ static void
 tracker_data_update_buffer_clear (TrackerData *data)
 {
 	g_hash_table_remove_all (data->update_buffer.resources);
-	g_hash_table_remove_all (data->update_buffer.resources_by_id);
 	g_hash_table_remove_all (data->update_buffer.resource_cache);
 	data->resource_buffer = NULL;
 
@@ -1290,7 +1272,7 @@ cache_create_service_decomposed (TrackerData  *data,
 
 	add_class_count (data, cl, 1);
 
-	if (!data->in_journal_replay && data->insert_callbacks) {
+	if (data->insert_callbacks) {
 		guint n;
 
 		for (n = 0; n < data->insert_callbacks->len; n++) {
@@ -2343,7 +2325,7 @@ cache_delete_resource_type_full (TrackerData  *data,
 		cache_delete_row (data, class);
 	}
 
-	if (!data->in_journal_replay && data->delete_callbacks) {
+	if (data->delete_callbacks) {
 		guint n;
 		gint final_graph_id;
 
@@ -2380,19 +2362,9 @@ resource_buffer_switch (TrackerData *data,
                         const gchar *subject,
                         gint         subject_id)
 {
-	if (data->in_journal_replay) {
-		/* journal replay only provides subject id
-		   resource_buffer->subject is only used in error messages and callbacks
-		   both should never occur when in journal replay */
-		if (data->resource_buffer == NULL || data->resource_buffer->id != subject_id) {
-			/* switch subject */
-			data->resource_buffer = g_hash_table_lookup (data->update_buffer.resources_by_id, GINT_TO_POINTER (subject_id));
-		}
-	} else {
-		if (data->resource_buffer == NULL || strcmp (data->resource_buffer->subject, subject) != 0) {
-			/* switch subject */
-			data->resource_buffer = g_hash_table_lookup (data->update_buffer.resources, subject);
-		}
+	if (data->resource_buffer == NULL || strcmp (data->resource_buffer->subject, subject) != 0) {
+		/* switch subject */
+		data->resource_buffer = g_hash_table_lookup (data->update_buffer.resources, subject);
 	}
 
 	if (data->resource_buffer == NULL) {
@@ -2426,15 +2398,11 @@ resource_buffer_switch (TrackerData *data,
 		resource_buffer->predicates = g_hash_table_new_full (g_direct_hash, g_direct_equal, g_object_unref, (GDestroyNotify) g_array_unref);
 		resource_buffer->tables = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) cache_table_free);
 
-		if (data->in_journal_replay) {
-			g_hash_table_insert (data->update_buffer.resources_by_id, GINT_TO_POINTER (subject_id), resource_buffer);
-		} else {
-			g_hash_table_insert (data->update_buffer.resources, subject_dup, resource_buffer);
+		g_hash_table_insert (data->update_buffer.resources, subject_dup, resource_buffer);
 
-			/* Ensure the graph gets an ID */
-			if (graph != NULL) {
-				ensure_graph_id (data, graph, NULL);
-			}
+		/* Ensure the graph gets an ID */
+		if (graph != NULL) {
+			ensure_graph_id (data, graph, NULL);
 		}
 
 		data->resource_buffer = resource_buffer;
@@ -2780,7 +2748,7 @@ tracker_data_insert_statement_with_uri (TrackerData  *data,
 			return;
 		}
 
-		if (!data->in_journal_replay && !tracker_property_get_transient (property)) {
+		if (!tracker_property_get_transient (property)) {
 			graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 			final_prop_id = (prop_id != 0) ? prop_id : tracker_data_query_resource_id (data->manager, iface, predicate);
 			object_id = query_resource_id (data, object);
@@ -2970,7 +2938,7 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 			return;
 		}
 
-		if (!data->in_journal_replay && !tracker_property_get_transient (property)) {
+		if (!tracker_property_get_transient (property)) {
 			graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 			final_prop_id = (prop_id != 0) ? prop_id : tracker_data_query_resource_id (data->manager, iface, predicate);
 			object_id = query_resource_id (data, object);
@@ -3292,8 +3260,6 @@ tracker_data_begin_transaction (TrackerData  *data,
 		data->update_buffer.resource_cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 		/* used for normal transactions */
 		data->update_buffer.resources = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) resource_buffer_free);
-		/* used for journal replay */
-		data->update_buffer.resources_by_id = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, (GDestroyNotify) resource_buffer_free);
 	}
 
 	data->resource_buffer = NULL;
@@ -3316,16 +3282,6 @@ tracker_data_begin_ontology_transaction (TrackerData  *data,
 {
 	data->in_ontology_transaction = TRUE;
 	tracker_data_begin_transaction (data, error);
-}
-
-void
-tracker_data_begin_transaction_for_replay (TrackerData  *data,
-                                           time_t        time,
-                                           GError      **error)
-{
-	data->in_journal_replay = TRUE;
-	tracker_data_begin_transaction (data, error);
-	data->resource_time = time;
 }
 
 void
@@ -3379,10 +3335,9 @@ tracker_data_commit_transaction (TrackerData  *data,
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA cache_size = %d", TRACKER_DB_CACHE_SIZE_DEFAULT);
 
 	g_hash_table_remove_all (data->update_buffer.resources);
-	g_hash_table_remove_all (data->update_buffer.resources_by_id);
 	g_hash_table_remove_all (data->update_buffer.resource_cache);
 
-	if (!data->in_journal_replay && data->commit_callbacks) {
+	if (data->commit_callbacks) {
 		guint n;
 		for (n = 0; n < data->commit_callbacks->len; n++) {
 			TrackerCommitDelegate *delegate;
@@ -3390,8 +3345,6 @@ tracker_data_commit_transaction (TrackerData  *data,
 			delegate->callback (delegate->user_data);
 		}
 	}
-
-	data->in_journal_replay = FALSE;
 }
 
 void

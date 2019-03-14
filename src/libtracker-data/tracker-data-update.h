@@ -98,9 +98,6 @@ void     tracker_data_begin_transaction             (TrackerData               *
                                                      GError                   **error);
 void     tracker_data_begin_ontology_transaction    (TrackerData               *data,
                                                      GError                   **error);
-void     tracker_data_begin_transaction_for_replay  (TrackerData               *data,
-                                                     time_t                     time,
-                                                     GError                   **error);
 void     tracker_data_commit_transaction            (TrackerData               *data,
                                                      GError                   **error);
 void     tracker_data_rollback_transaction          (TrackerData               *data);
