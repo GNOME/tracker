@@ -398,53 +398,6 @@ is_allowed_conversion (const gchar *oldv,
 }
 
 static gboolean
-check_unsupported_property_value_change (TrackerDataManager *manager,
-                                         const gchar        *ontology_path,
-                                         const gchar        *kind,
-                                         const gchar        *subject,
-                                         const gchar        *predicate,
-                                         const gchar        *object)
-{
-	GError *error = NULL;
-	gboolean needed = TRUE;
-	gchar *query = NULL;
-	TrackerDBCursor *cursor;
-
-	query = g_strdup_printf ("SELECT ?old_value WHERE { "
-	                           "<%s> %s ?old_value "
-	                         "}", subject, kind);
-
-	cursor = tracker_data_query_sparql_cursor (manager, query, &error);
-
-	if (cursor && tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
-		if (g_strcmp0 (object, tracker_db_cursor_get_string (cursor, 0, NULL)) == 0) {
-			needed = FALSE;
-		} else {
-			needed = TRUE;
-		}
-
-	} else {
-		if (object && (g_strcmp0 (object, "false") == 0)) {
-			needed = FALSE;
-		} else {
-			needed = (object != NULL);
-		}
-	}
-
-	g_free (query);
-	if (cursor) {
-		g_object_unref (cursor);
-	}
-
-	if (error) {
-		g_critical ("Ontology change, %s", error->message);
-		g_clear_error (&error);
-	}
-
-	return needed;
-}
-
-static gboolean
 update_property_value (TrackerDataManager  *manager,
                        const gchar         *ontology_path,
                        const gchar         *kind,
@@ -1157,44 +1110,6 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		}
 
 		tracker_property_set_secondary_index (property, secondary_index);
-	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "transient") == 0) {
-		TrackerProperty *property;
-		gboolean is_new;
-
-		property = tracker_ontologies_get_property_by_uri (manager->ontologies, subject);
-		if (property == NULL) {
-			g_critical ("%s: Unknown property %s", ontology_path, subject);
-			return;
-		}
-
-		is_new = tracker_property_get_is_new (property);
-		if (is_new != in_update) {
-			/* Detect unsupported ontology change.
-			 * Wouldn't be very hard to support this, just dropping the tabtle
-			 * or creating the table in the-non memdisk db file, but afaik this
-			 * isn't supported right now */
-			if (in_update == TRUE && is_new == FALSE) {
-				if (check_unsupported_property_value_change (manager,
-				                                             ontology_path,
-				                                             "tracker:transient",
-				                                             subject,
-				                                             predicate,
-				                                             object)) {
-					handle_unsupported_ontology_change (manager,
-					                                    ontology_path,
-					                                    tracker_property_get_name (property),
-					                                    "tracker:transient",
-					                                    tracker_property_get_transient (property) ? "true" : "false",
-					                                    g_strcmp0 (object, "true") ==0 ? "true" : "false",
-					                                    error);
-				}
-			}
-			return;
-		}
-
-		if (g_strcmp0 (object, "true") == 0) {
-			tracker_property_set_transient (property, TRUE);
-		}
 	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "fulltextIndexed") == 0) {
 		TrackerProperty *property;
 
@@ -1977,7 +1892,6 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 	           g_strcmp0 (predicate, RDFS_RANGE) == 0                    ||
 	           /* g_strcmp0 (predicate, NRL_MAX_CARDINALITY) == 0        || */
 	           g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "indexed") == 0      ||
-	           g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "transient") == 0    ||
 	           g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "fulltextIndexed") == 0) {
 		TrackerProperty *prop;
 
@@ -2336,7 +2250,6 @@ db_get_static_data (TrackerDBInterface  *iface,
 	                                              "\"tracker:indexed\", "
 	                                              "(SELECT Uri FROM Resource WHERE ID = \"tracker:secondaryIndex\"), "
 	                                              "\"tracker:fulltextIndexed\", "
-	                                              "\"tracker:transient\", "
 	                                              "\"tracker:writeback\", "
 	                                              "(SELECT 1 FROM \"rdfs:Resource_rdf:type\" WHERE ID = \"rdf:Property\".ID AND "
 	                                              "\"rdf:type\" = (SELECT ID FROM Resource WHERE Uri = '" NRL_INVERSE_FUNCTIONAL_PROPERTY "')), "
@@ -2354,7 +2267,7 @@ db_get_static_data (TrackerDBInterface  *iface,
 			TrackerProperty *property;
 			const gchar     *uri, *domain_uri, *range_uri, *secondary_index_uri, *default_value;
 			gboolean         multi_valued, indexed, fulltext_indexed;
-			gboolean         transient, is_inverse_functional_property;
+			gboolean         is_inverse_functional_property;
 			gboolean         writeback;
 			gint             id;
 
@@ -2398,18 +2311,8 @@ db_get_static_data (TrackerDBInterface  *iface,
 				fulltext_indexed = FALSE;
 			}
 
-			tracker_db_cursor_get_value (cursor, 8, &value);
-
-			if (G_VALUE_TYPE (&value) != 0) {
-				transient = (g_value_get_int64 (&value) == 1);
-				g_value_unset (&value);
-			} else {
-				/* NULL */
-				transient = FALSE;
-			}
-
 			/* tracker:writeback column */
-			tracker_db_cursor_get_value (cursor, 9, &value);
+			tracker_db_cursor_get_value (cursor, 8, &value);
 
 			if (G_VALUE_TYPE (&value) != 0) {
 				writeback = (g_value_get_int64 (&value) == 1);
@@ -2420,7 +2323,7 @@ db_get_static_data (TrackerDBInterface  *iface,
 			}
 
 			/* NRL_INVERSE_FUNCTIONAL_PROPERTY column */
-			tracker_db_cursor_get_value (cursor, 10, &value);
+			tracker_db_cursor_get_value (cursor, 9, &value);
 
 			if (G_VALUE_TYPE (&value) != 0) {
 				is_inverse_functional_property = TRUE;
@@ -2430,13 +2333,12 @@ db_get_static_data (TrackerDBInterface  *iface,
 				is_inverse_functional_property = FALSE;
 			}
 
-			default_value = tracker_db_cursor_get_string (cursor, 11, NULL);
+			default_value = tracker_db_cursor_get_string (cursor, 10, NULL);
 
 			tracker_property_set_ontologies (property, manager->ontologies);
 			tracker_property_set_is_new_domain_index (property, tracker_ontologies_get_class_by_uri (manager->ontologies, domain_uri), FALSE);
 			tracker_property_set_is_new (property, FALSE);
 			tracker_property_set_cardinality_changed (property, FALSE);
-			tracker_property_set_transient (property, transient);
 			tracker_property_set_uri (property, uri);
 			tracker_property_set_id (property, id);
 			tracker_property_set_domain (property, tracker_ontologies_get_class_by_uri (manager->ontologies, domain_uri));
@@ -3398,52 +3300,6 @@ error_out:
 }
 
 static void
-clean_decomposed_transient_metadata (TrackerDataManager *manager,
-                                     TrackerDBInterface *iface)
-{
-	TrackerProperty **properties;
-	TrackerProperty *property;
-	guint i, n_props;
-
-	properties = tracker_ontologies_get_properties (manager->ontologies, &n_props);
-
-	for (i = 0; i < n_props; i++) {
-		property = properties[i];
-
-		if (tracker_property_get_transient (property)) {
-			TrackerClass *domain;
-			const gchar *service_name;
-			const gchar *prop_name;
-			GError *error = NULL;
-
-			domain = tracker_property_get_domain (property);
-			service_name = tracker_class_get_name (domain);
-			prop_name = tracker_property_get_name (property);
-
-			if (tracker_property_get_multiple_values (property)) {
-				/* create the disposable table */
-				tracker_db_interface_execute_query (iface, &error, "DELETE FROM \"%s_%s\"",
-				                                    service_name,
-				                                    prop_name);
-			} else {
-				/* create the disposable table */
-				tracker_db_interface_execute_query (iface, &error, "UPDATE \"%s\" SET \"%s\" = NULL",
-				                                    service_name,
-				                                    prop_name);
-			}
-
-			if (error) {
-				g_critical ("Cleaning transient propery '%s:%s' failed: %s",
-				            service_name,
-				            prop_name,
-				            error->message);
-				g_error_free (error);
-			}
-		}
-	}
-}
-
-static void
 tracker_data_ontology_import_finished (TrackerDataManager *manager)
 {
 	TrackerClass **classes;
@@ -4137,10 +3993,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			}
 
 			write_ontologies_gvdb (manager, FALSE /* overwrite */, NULL);
-
-			/* Skipped in the read-only case as it can't work with direct access and
-			   it reduces initialization time */
-			clean_decomposed_transient_metadata (manager, iface);
 		} else {
 			GError *gvdb_error = NULL;
 
