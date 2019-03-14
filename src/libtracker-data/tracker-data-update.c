@@ -734,8 +734,6 @@ ensure_graph_id (TrackerData *data,
                  const gchar *uri,
 		 gboolean    *create)
 {
-	TrackerDBInterface *iface;
-	TrackerDBStatement *stmt;
 	GError *error = NULL;
 	gint id;
 
@@ -743,17 +741,7 @@ ensure_graph_id (TrackerData *data,
 	if (id != 0)
 		return id;
 
-	id = ensure_resource_id (data, uri, create);
-	iface = tracker_data_manager_get_writable_db_interface (data->manager);
-	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &error,
-	                                              "INSERT OR IGNORE INTO Graph (ID) VALUES (?)");
-
-	if (stmt) {
-		tracker_db_statement_bind_int (stmt, 0, id);
-		tracker_db_statement_execute (stmt, &error);
-		g_object_unref (stmt);
-	}
-
+	id = tracker_data_ensure_graph (data, uri, &error);
 	if (error) {
 		g_critical ("Could not ensure graph existence: %s", error->message);
 		g_error_free (error);
@@ -3411,4 +3399,50 @@ tracker_data_load_turtle_file (TrackerData  *data,
 	g_return_if_fail (G_IS_FILE (file));
 
 	tracker_turtle_reader_load (file, data, error);
+}
+
+gint
+tracker_data_ensure_graph (TrackerData  *data,
+                           const gchar  *uri,
+                           GError      **error)
+{
+	TrackerDBInterface *iface;
+	TrackerDBStatement *stmt;
+	gint id;
+
+	id = ensure_resource_id (data, uri, NULL);
+	iface = tracker_data_manager_get_writable_db_interface (data->manager);
+	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, error,
+	                                              "INSERT OR IGNORE INTO Graph (ID) VALUES (?)");
+	if (!stmt)
+		return 0;
+
+	tracker_db_statement_bind_int (stmt, 0, id);
+	tracker_db_statement_execute (stmt, error);
+	g_object_unref (stmt);
+
+	return id;
+}
+
+gboolean
+tracker_data_delete_graph (TrackerData  *data,
+                           const gchar  *uri,
+                           GError      **error)
+{
+	TrackerDBInterface *iface;
+	TrackerDBStatement *stmt;
+	gint id;
+
+	id = query_resource_id (data, uri);
+	iface = tracker_data_manager_get_writable_db_interface (data->manager);
+	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, error,
+	                                              "DELETE FROM Graph WHERE ID = ?");
+	if (!stmt)
+		return FALSE;
+
+	tracker_db_statement_bind_int (stmt, 0, id);
+	tracker_db_statement_execute (stmt, error);
+	g_object_unref (stmt);
+
+	return TRUE;
 }

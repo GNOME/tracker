@@ -83,6 +83,8 @@ struct _TrackerDataManager {
 	TrackerOntologies *ontologies;
 	TrackerData *data_update;
 
+	GHashTable *graphs;
+
 	gchar *status;
 };
 
@@ -148,6 +150,49 @@ GQuark
 tracker_data_ontology_error_quark (void)
 {
 	return g_quark_from_static_string ("tracker-data-ontology-error-quark");
+}
+
+static GHashTable *
+tracker_data_manager_get_graphs (TrackerDataManager  *manager,
+                                 TrackerDBInterface  *iface,
+                                 GError             **error)
+{
+	if (!manager->graphs) {
+		TrackerDBCursor *cursor = NULL;
+		TrackerDBStatement *stmt;
+
+		manager->graphs = g_hash_table_new_full (g_str_hash,
+		                                         g_str_equal,
+		                                         g_free,
+		                                         NULL);
+
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, error,
+		                                              "SELECT ID, Url FROM Resource WHERE ID IN (SELECT ID FROM Graph)");
+		if (stmt) {
+			cursor = tracker_db_statement_start_cursor (stmt, error);
+			g_object_unref (stmt);
+		}
+
+		if (cursor) {
+			while (tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
+				const gchar *name;
+				gint id;
+
+				id = tracker_db_cursor_get_int (cursor, 0);
+				name = tracker_db_cursor_get_string (cursor, 1, NULL);
+
+				g_hash_table_insert (manager->graphs,
+				                     g_strdup (name),
+				                     GINT_TO_POINTER (id));
+			}
+
+			g_object_unref (cursor);
+		} else {
+			return NULL;
+		}
+	}
+
+	return manager->graphs;
 }
 
 static void
@@ -3909,6 +3954,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 	TrackerDBCursor *cursor;
 	TrackerDBStatement *stmt;
 	GHashTable *ontos_table;
+	GHashTable *graphs;
 	GList *sorted = NULL, *l;
 	gint max_id = 0;
 	gboolean read_only;
@@ -4372,6 +4418,22 @@ tracker_data_manager_initable_init (GInitable     *initable,
 				tracker_data_ontology_setup_db (manager, iface, "main", TRUE,
 				                                &ontology_error);
 
+				graphs = tracker_data_manager_get_graphs (manager, iface, &ontology_error);
+
+				if (graphs) {
+					GHashTableIter iter;
+					gpointer value;
+
+					g_hash_table_iter_init (&iter, graphs);
+
+					while (g_hash_table_iter_next (&iter, &value, NULL)) {
+						tracker_data_ontology_setup_db (manager, iface, value, TRUE,
+						                                &ontology_error);
+						if (ontology_error)
+							break;
+					}
+				}
+
 				if (!ontology_error) {
 					tracker_data_ontology_import_into_db (manager, iface, TRUE,
 					                                      &ontology_error);
@@ -4468,6 +4530,27 @@ tracker_data_manager_initable_init (GInitable     *initable,
 				g_clear_error (&n_error);
 			}
 		}
+	}
+
+	graphs = tracker_data_manager_get_graphs (manager, iface, &internal_error);
+
+	if (graphs) {
+		GHashTableIter iter;
+		gpointer value;
+
+		g_hash_table_iter_init (&iter, graphs);
+
+		while (g_hash_table_iter_next (&iter, &value, NULL)) {
+			if (!tracker_db_manager_attach_database (manager->db_manager,
+			                                         iface, value, FALSE,
+			                                         &internal_error))
+				break;
+		}
+	}
+
+	if (internal_error) {
+		g_propagate_error (error, internal_error);
+		return FALSE;
 	}
 
 skip_ontology_check:
@@ -4603,6 +4686,7 @@ tracker_data_manager_finalize (GObject *object)
 
 	g_clear_object (&manager->ontologies);
 	g_clear_object (&manager->data_update);
+	g_clear_pointer (&manager->graphs, g_hash_table_unref);
 	g_free (manager->status);
 
 	G_OBJECT_CLASS (tracker_data_manager_parent_class)->finalize (object);
@@ -4703,4 +4787,53 @@ tracker_data_manager_get_namespaces (TrackerDataManager *manager)
 	}
 
 	return ht;
+}
+
+gboolean
+tracker_data_manager_create_graph (TrackerDataManager  *manager,
+                                   const gchar         *name,
+                                   GError             **error)
+{
+	TrackerDBInterface *iface;
+	gint id;
+
+	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
+	if (!tracker_db_manager_attach_database (manager->db_manager, iface,
+	                                         name, TRUE, error))
+		return FALSE;
+
+	if (!tracker_data_ontology_setup_db (manager, iface, name,
+	                                     FALSE, error))
+		goto error;
+
+	id = tracker_data_ensure_graph (manager->data_update, name, error);
+	if (id == 0)
+		goto error;
+
+	g_hash_table_insert (manager->graphs, g_strdup (name), GINT_TO_POINTER (id));
+	return TRUE;
+
+error:
+	tracker_db_manager_detach_database (manager->db_manager, iface, name, NULL);
+	return FALSE;
+}
+
+gboolean
+tracker_data_manager_drop_graph (TrackerDataManager  *manager,
+                                 const gchar         *name,
+                                 GError             **error)
+{
+	TrackerDBInterface *iface;
+
+	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
+
+	if (!tracker_db_manager_detach_database (manager->db_manager, iface,
+	                                         name, error))
+		return FALSE;
+
+	if (!tracker_data_delete_graph (manager->data_update, name, error))
+		return FALSE;
+
+	g_hash_table_remove (manager->graphs, name);
+	return TRUE;
 }

@@ -96,6 +96,16 @@ void                tracker_db_manager_tokenizer_update       (TrackerDBManager 
 
 void                tracker_db_manager_check_perform_vacuum   (TrackerDBManager      *db_manager);
 
+gboolean            tracker_db_manager_attach_database        (TrackerDBManager      *db_manager,
+                                                               TrackerDBInterface    *iface,
+                                                               const gchar           *name,
+                                                               gboolean               create,
+                                                               GError               **error);
+gboolean            tracker_db_manager_detach_database        (TrackerDBManager      *db_manager,
+                                                               TrackerDBInterface    *iface,
+                                                               const gchar           *name,
+                                                               GError               **error);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_DB_MANAGER_H__ */

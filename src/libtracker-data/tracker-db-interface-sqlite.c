@@ -2382,7 +2382,7 @@ tracker_db_interface_create_statement (TrackerDBInterface           *db_interfac
 	return g_object_ref_sink (stmt);
 }
 
-static void
+static gboolean
 execute_stmt (TrackerDBInterface  *interface,
               sqlite3_stmt        *stmt,
               GCancellable        *cancellable,
@@ -2431,7 +2431,7 @@ execute_stmt (TrackerDBInterface  *interface,
 			g_critical ("SQLite error: %s (errno: %s)",
 			            sqlite3_errmsg (interface->db),
 			            g_strerror (errno));
-			return;
+			return FALSE;
 		}
 
 		if (!error) {
@@ -2456,6 +2456,8 @@ execute_stmt (TrackerDBInterface  *interface,
 			}
 		}
 	}
+
+	return result == SQLITE_DONE;
 }
 
 void
@@ -3170,4 +3172,47 @@ tracker_db_interface_init_vtabs (TrackerDBInterface *db_interface,
 {
 	tracker_vtab_triples_init (db_interface->db, ontologies);
 	return TRUE;
+}
+
+gboolean
+tracker_db_interface_attach_database (TrackerDBInterface  *db_interface,
+                                      GFile               *file,
+                                      const gchar         *name,
+                                      GError             **error)
+{
+	gchar *sql, *path;
+	sqlite3_stmt *stmt;
+	gboolean retval;
+
+	path = g_file_get_path (file);
+	sql = g_strdup_printf ("ATTACH DATABASE \"%s\" AS \"%s\"", path, name);
+	g_free (path);
+
+	stmt = tracker_db_interface_prepare_stmt (db_interface, sql, error);
+	if (!stmt)
+		return FALSE;
+
+	retval = execute_stmt (db_interface, stmt, NULL, error);
+	sqlite3_finalize (stmt);
+	return retval;
+}
+
+gboolean
+tracker_db_interface_detach_database (TrackerDBInterface  *db_interface,
+                                      const gchar         *name,
+                                      GError             **error)
+{
+	sqlite3_stmt *stmt;
+	gboolean retval;
+	gchar *sql;
+
+	sql = g_strdup_printf ("DETACH DATABASE \"%s\"", name);
+
+	stmt = tracker_db_interface_prepare_stmt (db_interface, sql, error);
+	if (!stmt)
+		return FALSE;
+
+	retval = execute_stmt (db_interface, stmt, NULL, error);
+	sqlite3_finalize (stmt);
+	return retval;
 }
