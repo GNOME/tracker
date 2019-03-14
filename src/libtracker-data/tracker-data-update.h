@@ -118,6 +118,13 @@ void     tracker_data_load_turtle_file              (TrackerData               *
 
 void     tracker_data_sync                          (TrackerData               *data);
 
+gint     tracker_data_ensure_graph                  (TrackerData               *data,
+                                                     const gchar               *name,
+                                                     GError                   **error);
+gboolean tracker_data_delete_graph                  (TrackerData               *data,
+                                                     const gchar               *uri,
+                                                     GError                   **error);
+
 /* Calling back */
 void     tracker_data_add_insert_statement_callback      (TrackerData               *data,
                                                           TrackerStatementCallback   callback,
