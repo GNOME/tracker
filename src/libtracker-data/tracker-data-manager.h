@@ -80,6 +80,19 @@ TrackerData *        tracker_data_manager_get_data            (TrackerDataManage
 
 GHashTable *         tracker_data_manager_get_namespaces      (TrackerDataManager *manager);
 
+gboolean             tracker_data_manager_create_graph (TrackerDataManager  *manager,
+                                                        const gchar         *name,
+                                                        GError             **error);
+
+gboolean             tracker_data_manager_drop_graph (TrackerDataManager  *manager,
+                                                      const gchar         *name,
+                                                      GError             **error);
+
+gint                 tracker_data_manager_find_graph       (TrackerDataManager *manager,
+                                                            const gchar        *name);
+const gchar *        tracker_data_manager_find_graph_by_id (TrackerDataManager *manager,
+                                                            gint                id);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_DATA_MANAGER_H__ */

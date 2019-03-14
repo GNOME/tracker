@@ -83,6 +83,14 @@ void                tracker_db_interface_sqlite_fts_update_rollback    (TrackerD
 
 void                tracker_db_interface_sqlite_fts_rebuild_tokens     (TrackerDBInterface       *interface);
 
+gboolean            tracker_db_interface_attach_database               (TrackerDBInterface       *db_interface,
+                                                                        GFile                    *file,
+                                                                        const gchar              *name,
+                                                                        GError                  **error);
+gboolean            tracker_db_interface_detach_database               (TrackerDBInterface       *db_interface,
+                                                                        const gchar              *name,
+                                                                        GError                  **error);
+
 #endif
 
 G_END_DECLS

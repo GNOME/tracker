@@ -1277,3 +1277,43 @@ tracker_db_manager_check_perform_vacuum (TrackerDBManager *db_manager)
 	iface = tracker_db_manager_get_writable_db_interface (db_manager);
 	tracker_db_interface_execute_query (iface, NULL, "VACUUM");
 }
+
+gboolean
+tracker_db_manager_attach_database (TrackerDBManager    *db_manager,
+                                    TrackerDBInterface  *iface,
+                                    const gchar         *name,
+                                    gboolean             create,
+                                    GError             **error)
+{
+	gchar *filename, *escaped;
+	GFile *file;
+
+	filename = g_strdup_printf ("%s.db", name);
+	escaped = g_uri_escape_string (filename, NULL, FALSE);
+	file = g_file_get_child (db_manager->cache_location, escaped);
+	g_free (filename);
+	g_free (escaped);
+
+	if (create) {
+		GError *inner_error = NULL;
+
+		/* Create the database from scratch */
+		if (!g_file_delete (file, NULL, &inner_error)) {
+			if (!g_error_matches (inner_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
+				g_propagate_error (error, inner_error);
+				return FALSE;
+			}
+		}
+	}
+
+	return tracker_db_interface_attach_database (iface, file, name, error);
+}
+
+gboolean
+tracker_db_manager_detach_database (TrackerDBManager    *db_manager,
+                                    TrackerDBInterface  *iface,
+                                    const gchar         *name,
+                                    GError             **error)
+{
+	return tracker_db_interface_detach_database (iface, name, error);
+}
