@@ -35,20 +35,19 @@
 
   Bugs and feature requests should be filed at:
 
-        http://bugzilla.gnome.org
+        https://gitlab.gnome.org/GNOME/tracker/issues
 
   More infomation on Tracker can be found at:
 
-        http://wiki.gnome.org/Projects/Tracker
+        https://wiki.gnome.org/Projects/Tracker
 
-  Repository (first is read-only, second is write access):
+  Repository can be found at:
 
-	git://git.gnome.org/tracker
-	ssh://<user>@git.gnome.org/git/tracker
+        https://gitlab.gnome.org/GNOME/tracker
 
   The official RoadMap (aka TODO) can be found at:
 
-        http://wiki.gnome.org/Projects/Tracker/Roadmap
+        https://wiki.gnome.org/Projects/Tracker/Roadmap
 
 
 2 Use Cases
@@ -97,7 +96,7 @@
   * Provides option to index removable devices.
 
   * Implements the freedesktop specification for metadata
-  (http://freedesktop.org/wiki/Standards/shared-filemetadata-spec).
+  (https://freedesktop.org/wiki/Standards/shared-filemetadata-spec/).
 
   * Extracts embedded File, Image, Document and Audio type
   metadata from files.
@@ -122,63 +121,21 @@
 
 4 Compilation
 
-  The git repository contains input to the GNU Autotools however a
-  number of commands need to be run to initialize GNU Autotools in the
-  project directory. To setup the project for compilation after
-  checking it out from the git repository, use: 
+  To setup the project for compilation after checking it out from
+  the git repository, use:
 
-        ./autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var
-
-  Or if you don't have autogen.sh (i.e. you are using the released
-  tarball), you can use:
-
-        ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var
+        meson build --prefix=/usr --sysconfdir=/etc
 
   To start compiling the project use:
 
-        make
-        sudo make install
+        ninja -C build
+        ninja install
 
   If you install using any other prefix, you might have problems
   with files not being installed correctly. (You may need to copy
   and amend the dbus service file to the correct directory and/or
   might need to update ld_conf if you install into non-standard
   directories.)
-
-4.1 Notes on Solaris
-
-  To compile Tracker with GCC on Solaris uses the following
-  commands :
-
-        CFLAGS="-D_POSIX_PTHREAD_SEMANTICS" ./configure \
-	--prefix=/usr \
-	--sysconfdir=/etc \
-        --localstatedir=/var \
-	--with-pic
-
-        make
-        sudo make install
-
-  To compile Tracker with SUN Studio on Solaris uses the
-  following commands, because there are some problems to compile
-  exiv2 using SUN C++ compiler :
-
-        CFLAGS="-D_POSIX_PTHREAD_SEMANTICS" ./configure \
-	--prefix=/usr \
-	--sysconfdir=/etc \
-        --localstatedir=/var \
-	--with-pic \
-        --disable-exiv2
-
-        make
-        sudo make install
-
-4.2 Compile Options
-
-  Tracker has several compiler options to enable/disable certain
-  features. You can get a full listing by running
-
-  	./configure --help
 
 5 Running Tracker
 
@@ -229,3 +186,4 @@
 6.2 Utilities
 
   There are a range of tracker utilities that help you query for data.
+
