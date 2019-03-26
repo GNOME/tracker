@@ -17,7 +17,11 @@
 
     <para>
       The Tracker SPARQL library provides several underlying methods to perform
-      queries and updates to the Tracker Store.
+      queries and updates to the Tracker Store. Every operation is done in a
+      <type><link linkend="TrackerSparqlConnection-struct">TrackerSparqlConnection</link></type>
+      which creates the right access method depending on the query. You can obtain a
+      <type><link linkend="TrackerSparqlConnection-struct">TrackerSparqlConnection</link></type>
+      object using <function><link linkend="tracker-sparql-connection-get">tracker_sparql_connection_get</link></function> or <function><link linkend="tracker-sparql-connection-get-async">tracker_sparql_connection_get_async</link></function> for asynchronous operation.
 
       <itemizedlist>
 	<listitem>
@@ -30,13 +34,6 @@
 	    the Tracker Store in this case, as the access is direct to the underlying
 	    SQLite database. Again, note that this method applies only to
 	    <emphasis>Read-Only</emphasis> operations.
-	  </para>
-	  <para>
-	    If you plan to only do Read-Only queries to the store, you can get the
-	    <type><link linkend="TrackerSparqlConnection-struct">TrackerSparqlConnection</link></type>
-	    object using <function><link linkend="tracker-sparql-connection-get-direct">tracker_sparql_connection_get_direct</link></function>. Otherwise, if you also plan to use the same connection object
-	    for <emphasis>Write</emphasis> operations, you must get the connection object with
-	    <function><link linkend="tracker-sparql-connection-get">tracker_sparql_connection_get</link></function>.
 	  </para>
 	</listitem>
 	<listitem>
@@ -73,11 +70,11 @@
       <application>pkg-config</application> is used (the actual output on
       your system may be different):
 <programlisting>
-$ pkg-config --cflags tracker-sparql-0.12
--pthread -I/usr/include/tracker-0.12 -I/usr/include/tracker-0.12/libtracker-sparql -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+$ pkg-config --cflags tracker-sparql-2.0
+-pthread -I/usr/include/tracker-2.0 -I/usr/include/tracker-2.0/libtracker-sparql -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
 
-$ pkg-config --libs tracker-sparql-0.12
--Wl,--export-dynamic -pthread -ltracker-sparql-0.12 -lgio-2.0 -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lrt -lglib-2.0
+$ pkg-config --libs tracker-sparql-2.0
+-ltracker-sparql-2.0 -lgio-2.0 -lgobject-2.0 -Wl,--export-dynamic -lgmodule-2.0 -pthread -lglib-2.0
 </programlisting>
     </para>
     <para>
@@ -86,7 +83,7 @@ $ pkg-config --libs tracker-sparql-0.12
       (<emphasis>not single quotes</emphasis>), then its output will be
       substituted into the command line before execution:
 <programlisting>
- $ cc `pkg-config --cflags --libs tracker-sparql-0.12` hello.c -o hello
+ $ cc `pkg-config --cflags --libs tracker-sparql-2.0` hello.c -o hello
 </programlisting>
     </para>
 
