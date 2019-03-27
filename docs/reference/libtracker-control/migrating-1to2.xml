@@ -17,8 +17,9 @@
   <section>
     <title>Cancellation support for tracker_miner_manager_index_file</title>
     <para>
-      The tracker_miner_manager_index_file method now requires a GCancellable
-      argument. You can pass NULL if you don't want to specify one.
+      The <link linkend="tracker-miner-manager-index-file">tracker_miner_manager_index_file</link>
+ method now requires a <link linkend="GCancellable-struct"><classname>GCancellable</classname></link>
+      argument. You can pass <structname>NULL</structname> if you don't want to specify one.
     </para>
   </section>
 </chapter>
