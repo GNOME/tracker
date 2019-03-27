@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+                      'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd' [
+
+<!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'">
+<!ENTITY version SYSTEM "version.xml">
+]>
+<book id="index" xmlns:xi="http://www.w3.org/2003/XInclude">
+  <bookinfo>
+    <title>Tracker Control Library Reference Manual</title>
+    <releaseinfo>
+      for libtracker-control &version;.
+      The latest version of this documentation can be found on-line at
+      <ulink role="online-location" url="https://developer.gnome.org/libtracker-miner/stable/">
+        https://developer.gnome.org/libtracker-miner/stable
+      </ulink>.
+    </releaseinfo>
+  </bookinfo>
+
+  <part id="libtracker-miner-reference">
+    <title>API Reference</title>
+    <partintro>
+      <para>
+        This section provides the detailed API of the Tracker Miner library.
+      </para>
+    </partintro>
+
+    <chapter>
+      <title>Tracker control objects</title>
+      <xi:include href="xml/tracker-miner-manager.xml"/>
+    </chapter>
+  </part>
+
+  <xi:include href="migrating-1to2.xml"/>
+
+  <index id="api-index-full">
+    <title>Index</title>
+    <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-deprecated" role="deprecated">
+    <title>Index of deprecated symbols</title>
+    <xi:include href="xml/api-index-deprecated.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-0-8" role="0.8">
+    <title>Index of new symbols in 0.8</title>
+    <xi:include href="xml/api-index-0.8.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-0-10" role="0.10">
+    <title>Index of new symbols in 0.10</title>
+    <xi:include href="xml/api-index-0.10.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-0-10-5" role="0.10.5">
+    <title>Index of new symbols in 0.10.5</title>
+    <xi:include href="xml/api-index-0.10.5.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-0-10-15" role="0.10.15">
+    <title>Index of new symbols in 0.10.15</title>
+    <xi:include href="xml/api-index-0.10.15.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-0-12" role="0.12">
+    <title>Index of new symbols in 0.12</title>
+    <xi:include href="xml/api-index-0.12.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-0-16" role="0.16">
+    <title>Index of new symbols in 0.16</title>
+    <xi:include href="xml/api-index-0.16.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-1-10" role="1.10">
+    <title>Index of new symbols in 1.10</title>
+    <xi:include href="xml/api-index-1.10.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-2-0" role="2.0">
+    <title>Index of new symbols in 2.0</title>
+    <xi:include href="xml/api-index-2.0.xml"><xi:fallback /></xi:include>
+  </index>
+
+  <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>
+</book>
