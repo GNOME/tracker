@@ -166,7 +166,7 @@ static GOptionEntry entries[] = {
 	  N_("Disable color when printing snippets and results"),
 	  NULL,
 	},
-  { "dir", 0, 0, G_OPTION_ARG_STRING, &search_directory,
+	{ "dir", 0, 0, G_OPTION_ARG_STRING, &search_directory,
 	  N_("Limit search to certain directory"),
 	  NULL,
 	},
@@ -690,22 +690,22 @@ get_image_files (TrackerSparqlConnection *connection,
 		                         search_offset,
 		                         search_limit);
 	} else {
-    search_directory_str = search_directory?
-      g_strdup_printf("  ?image nie:url ?furl."
-                      "  FILTER(fn:starts-with(?furl, \"file://%s\"))."
-                      , search_directory) : "";
+		search_directory_str = search_directory?
+		g_strdup_printf("  ?image nie:url ?furl ."
+			"  FILTER(fn:starts-with(?furl, \"file://%s\")) ."
+			, search_directory) : "";
 
 		query = g_strdup_printf ("SELECT ?image nie:url(?image) "
 		                         "WHERE { "
-		                         "  ?image a nfo:Image."
+		                         "  ?image a nfo:Image ."
 		                         "  %s"
-                             "  %s"
+		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:url(?image)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
 		                         show_all_str,
-                             search_directory_str,
+		                         search_directory_str,
 		                         search_offset,
 		                         search_limit);
 	}
