@@ -58,7 +58,7 @@ static gboolean feeds;
 static gboolean software;
 static gboolean software_categories;
 static gboolean bookmarks;
-
+static gchar *search_directory;
 #define SEARCH_OPTIONS_ENABLED() \
 	(music_albums || music_artists || music_files || \
 	 bookmarks || \
@@ -164,6 +164,10 @@ static GOptionEntry entries[] = {
 	},
 	{ "disable-color", 0, 0, G_OPTION_ARG_NONE, &disable_color,
 	  N_("Disable color when printing snippets and results"),
+	  NULL,
+	},
+  { "dir", 0, 0, G_OPTION_ARG_STRING, &search_directory,
+	  N_("Limit search to certain directory"),
 	  NULL,
 	},
 
@@ -663,7 +667,7 @@ get_image_files (TrackerSparqlConnection *connection,
 {
 	gchar *fts;
 	gchar *query;
-	const gchar *show_all_str;
+	const gchar *show_all_str, *search_directory_str;
 	gboolean success;
 
 	show_all_str = show_all ? "" : "?image tracker:available true . ";
@@ -686,15 +690,22 @@ get_image_files (TrackerSparqlConnection *connection,
 		                         search_offset,
 		                         search_limit);
 	} else {
+    search_directory_str = search_directory?
+      g_strdup_printf("  ?image nie:url ?furl."
+                      "  FILTER(fn:starts-with(?furl, \"file://%s\"))."
+                      , search_directory) : "";
+
 		query = g_strdup_printf ("SELECT ?image nie:url(?image) "
 		                         "WHERE { "
-		                         "  ?image a nfo:Image ."
+		                         "  ?image a nfo:Image."
 		                         "  %s"
+                             "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:url(?image)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
 		                         show_all_str,
+                             search_directory_str,
 		                         search_offset,
 		                         search_limit);
 	}
