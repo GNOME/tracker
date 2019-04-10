@@ -903,7 +903,7 @@ enumerate_next_cb (GObject      *object,
 {
 	DataProviderData *dpd;
 	GList *info;
-	GError *error = NULL;
+	g_autoptr(GError) error = NULL;
 
 	info = g_file_enumerator_next_files_finish (G_FILE_ENUMERATOR (object), result, &error);
 	dpd = user_data;
@@ -922,9 +922,9 @@ enumerate_next_cb (GObject      *object,
 				g_warning ("Could not enumerate next item in container / directory '%s', %s",
 				           uri, error ? error->message : "no error given");
 				g_free (uri);
+			} else {
+				return;
 			}
-
-			g_clear_error (&error);
 		} else {
 			/* Done enumerating, start processing what we got ... */
 			data_provider_data_add (dpd);

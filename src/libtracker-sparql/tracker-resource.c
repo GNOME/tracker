@@ -1025,11 +1025,9 @@ generate_nested_turtle_resource (TrackerResource    *resource,
 		return;
 
 	if (g_list_find_custom (data->done_list, resource, (GCompareFunc) tracker_resource_compare) == NULL) {
-		generate_turtle (resource, data);
-
-		g_string_append (data->string, "\n");
-
 		data->done_list = g_list_prepend (data->done_list, resource);
+		generate_turtle (resource, data);
+		g_string_append (data->string, "\n");
 	}
 }
 
@@ -1260,7 +1258,7 @@ tracker_resource_print_turtle (TrackerResource         *self,
 	context.all_namespaces = namespaces;
 	context.our_namespaces = tracker_namespace_manager_new ();
 	context.string = g_string_new ("");
-	context.done_list = NULL;
+	context.done_list = g_list_prepend (NULL, self);
 
 	maybe_intern_prefix_of_compact_uri (context.all_namespaces, context.our_namespaces, tracker_resource_get_identifier(self));
 
@@ -1300,8 +1298,8 @@ generate_sparql_relation_deletes_foreach (gpointer key,
 		TrackerResource *relation = g_value_get_object (value);
 
 		if (g_list_find_custom (data->done_list, relation, (GCompareFunc) tracker_resource_compare) == NULL) {
-			generate_sparql_deletes (relation, data);
 			data->done_list = g_list_prepend (data->done_list, relation);
+			generate_sparql_deletes (relation, data);
 		}
 	}
 }
@@ -1323,8 +1321,8 @@ generate_sparql_relation_inserts_foreach (gpointer key,
 			return;
 
 		if (g_list_find_custom (data->done_list, relation, (GCompareFunc) tracker_resource_compare) == NULL) {
-			generate_sparql_insert_pattern (relation, data);
 			data->done_list = g_list_prepend (data->done_list, relation);
+			generate_sparql_insert_pattern (relation, data);
 		}
 	} else if (G_VALUE_HOLDS (value, G_TYPE_PTR_ARRAY)) {
 		GPtrArray *array = g_value_get_boxed (value);
@@ -1349,8 +1347,8 @@ generate_sparql_relation_inserts_foreach (gpointer key,
 						(GCompareFunc) tracker_resource_compare) != NULL)
 				continue;
 
-			generate_sparql_insert_pattern (relation, data);
 			data->done_list = g_list_prepend (data->done_list, relation);
+			generate_sparql_insert_pattern (relation, data);
 		}
 	}
 }
@@ -1507,7 +1505,7 @@ tracker_resource_print_sparql_update (TrackerResource         *resource,
 	/* Resources can be recursive, and may have repeated or even cyclic
 	 * relationships. This list keeps track of what we already processed.
 	 */
-	context.done_list = NULL;
+	context.done_list = g_list_prepend (NULL, resource);
 
 	/* Delete the existing data. If we don't do this, we may get constraint
 	 * violations due to trying to add a second value to a single-valued
@@ -1516,7 +1514,7 @@ tracker_resource_print_sparql_update (TrackerResource         *resource,
 	generate_sparql_deletes (resource, &context);
 
 	g_list_free (context.done_list);
-	context.done_list = NULL;
+	context.done_list = g_list_prepend (NULL, resource);
 
 	/* Finally insert the data */
 	g_string_append (context.string, "INSERT DATA {\n");
@@ -1577,13 +1575,12 @@ generate_jsonld_value (const GValue       *value,
 		resource = TRACKER_RESOURCE (g_value_get_object (value));
 
 		if (g_list_find_custom (data->done_list, resource, (GCompareFunc) tracker_resource_compare) == NULL) {
+			data->done_list = g_list_prepend (data->done_list, resource);
 			json_builder_begin_object (data->builder);
 
 			tracker_resource_generate_jsonld (resource, data);
 
 			json_builder_end_object (data->builder);
-
-			data->done_list = g_list_prepend (data->done_list, resource);
 		} else {
 			json_builder_add_string_value (data->builder, tracker_resource_get_identifier(resource));
 		}
@@ -1680,7 +1677,7 @@ tracker_resource_print_jsonld (TrackerResource         *self,
 	context.all_namespaces = namespaces;
 	context.our_namespaces = tracker_namespace_manager_new ();
 	context.builder = json_builder_new ();
-	context.done_list = NULL;
+	context.done_list = g_list_prepend (NULL, self);
 
 	maybe_intern_prefix_of_compact_uri (context.all_namespaces, context.our_namespaces, tracker_resource_get_identifier (self));
 
