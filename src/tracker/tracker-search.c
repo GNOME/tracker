@@ -58,7 +58,7 @@ static gboolean feeds;
 static gboolean software;
 static gboolean software_categories;
 static gboolean bookmarks;
-static gchar *search_directory, *search_directory_str;
+static gchar *search_directory;
 
 #define SEARCH_OPTIONS_ENABLED() \
 	(music_albums || music_artists || music_files || \
@@ -167,7 +167,7 @@ static GOptionEntry entries[] = {
 	  N_("Disable color when printing snippets and results"),
 	  NULL,
 	},
-	{ "dir", 0, 0, G_OPTION_ARG_STRING, &search_directory,
+	{ "path", 'p', 0, G_OPTION_ARG_STRING, &search_directory,
 	  N_("Limit search to certain directory"),
 	  NULL,
 	},
@@ -486,6 +486,21 @@ get_emails (TrackerSparqlConnection *connection,
 	return success;
 }
 
+static gchar *
+get_directory_limit_search()
+{
+	gchar * search_directory_str, * full_path;
+
+	full_path = g_canonicalize_filename (search_directory, NULL); // get full path from relative if used
+	//check if directory limiting is requested
+	search_directory_str = full_path?
+		g_strdup_printf ("nie:url ?furl ."
+			"  FILTER(fn:starts-with(?furl, \"file://%s\")) ."
+			, full_path) : ".";
+
+	return search_directory_str;
+}
+
 static gboolean
 get_files_results (TrackerSparqlConnection *connection,
                    const gchar             *query,
@@ -494,7 +509,6 @@ get_files_results (TrackerSparqlConnection *connection,
 {
 	GError *error = NULL;
 	TrackerSparqlCursor *cursor;
-	
 	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
 
 	if (error) {
@@ -562,7 +576,9 @@ get_document_files (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
+	gchar *search_directory_str;
 
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?document tracker:available true .";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -618,7 +634,9 @@ get_video_files (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?video tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -674,7 +692,9 @@ get_image_files (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?image tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -732,7 +752,9 @@ get_music_files (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?song tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -787,7 +809,9 @@ get_music_artists (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -880,7 +904,9 @@ get_music_albums (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_words, use_or_operator);
 
 	if (fts) {
@@ -970,7 +996,9 @@ get_bookmarks (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -1056,7 +1084,9 @@ get_feeds (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -1140,7 +1170,9 @@ get_software (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -1226,7 +1258,9 @@ get_software_categories (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -1312,7 +1346,9 @@ get_files (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?u tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -1368,7 +1404,9 @@ get_folders (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?u tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -1423,7 +1461,9 @@ get_all_by_search (TrackerSparqlConnection *connection,
 	gchar *fts;
 	gchar *query;
 	const gchar *show_all_str;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_words, use_or_operator);
 	if (!fts) {
 		return FALSE;
@@ -1630,11 +1670,7 @@ search_run (void)
 			limit = 10;
 		}
 	}
-	//check if directory limiting is requested
-	search_directory_str = search_directory?
-		g_strdup_printf("nie:url ?furl ."
-			"  FILTER(fn:starts-with(?furl, \"file://%s\")) ."
-			, search_directory) : ".";
+	
 	if (files) {
 		gboolean success;
 
