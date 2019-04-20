@@ -57,6 +57,7 @@
 #include "tracker-data-enum-types.h"
 #include "tracker-uuid.h"
 #include "tracker-vtab-triples.h"
+#include "tracker-vtab-union.h"
 
 typedef struct {
 	TrackerDBStatement *head;
@@ -3171,6 +3172,7 @@ tracker_db_interface_init_vtabs (TrackerDBInterface *db_interface,
                                  TrackerOntologies  *ontologies)
 {
 	tracker_vtab_triples_init (db_interface->db, ontologies);
+	tracker_vtab_union_init (db_interface->db, ontologies);
 	return TRUE;
 }
 

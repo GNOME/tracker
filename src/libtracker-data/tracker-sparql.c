@@ -2394,7 +2394,7 @@ translate_Drop (TrackerSparql  *sparql,
 
 	_call_rule (sparql, NAMED_RULE_GraphRefAll, error);
 
-	if (!tracker_token_is_empty (sparql->current_state.graph)) {
+	if (!tracker_token_is_empty (&sparql->current_state.graph)) {
 		const gchar *graph_name;
 
 		graph_name = tracker_token_get_idstring (&sparql->current_state.graph);
