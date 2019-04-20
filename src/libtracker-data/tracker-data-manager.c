@@ -4854,6 +4854,14 @@ tracker_data_manager_drop_graph (TrackerDataManager  *manager,
 
 	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
 
+	/* Silently refuse to drop the main graph, clear it instead */
+	if (!name)
+		return tracker_data_manager_clear_graph (manager, name, error);
+
+	/* Ensure the current transaction doesn't keep tables in this database locked */
+	tracker_data_commit_transaction (manager->data_update, NULL);
+	tracker_data_begin_transaction (manager->data_update, NULL);
+
 	if (!tracker_db_manager_detach_database (manager->db_manager, iface,
 	                                         name, error))
 		return FALSE;
