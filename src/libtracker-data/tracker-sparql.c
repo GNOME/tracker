@@ -2384,14 +2384,69 @@ static gboolean
 translate_Drop (TrackerSparql  *sparql,
                 GError        **error)
 {
-	_unimplemented ("DROP");
+	gboolean silent = FALSE;
+	GError *inner_error = NULL;
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_DROP);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_GraphRefAll, error);
+
+	if (!tracker_token_is_empty (sparql->current_state.graph)) {
+		const gchar *graph_name;
+
+		graph_name = tracker_token_get_idstring (&sparql->current_state.graph);
+		if (!tracker_data_manager_drop_graph (sparql->data_manager,
+		                                      graph_name,
+		                                      &inner_error)) {
+			if (silent) {
+				g_error_free (inner_error);
+				return TRUE;
+			} else {
+				g_propagate_error (error, inner_error);
+				return FALSE;
+			}
+		}
+	}
+
+	return TRUE;
 }
 
 static gboolean
 translate_Create (TrackerSparql  *sparql,
                   GError        **error)
 {
-	_unimplemented ("CREATE");
+	gboolean silent = FALSE;
+	GError *inner_error = NULL;
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CREATE);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_GraphRef, error);
+
+	if (!tracker_token_is_empty (&sparql->current_state.graph)) {
+		const gchar *graph_name;
+
+		graph_name = tracker_token_get_idstring (&sparql->current_state.graph);
+
+		if (!tracker_data_manager_create_graph (sparql->data_manager,
+		                                        graph_name,
+		                                        &inner_error)) {
+			if (silent) {
+				g_error_free (inner_error);
+				return TRUE;
+			} else {
+				g_propagate_error (error, inner_error);
+				return FALSE;
+			}
+		}
+	}
+
+	return TRUE;
 }
 
 static gboolean
@@ -2843,11 +2898,16 @@ translate_GraphRefAll (TrackerSparql  *sparql,
 {
 	/* GraphRefAll ::= GraphRef | 'DEFAULT' | 'NAMED' | 'ALL'
 	 */
-	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DEFAULT) ||
-	    _accept (sparql, RULE_TYPE_LITERAL, LITERAL_NAMED) ||
-	    _accept (sparql, RULE_TYPE_LITERAL, LITERAL_ALL)) {
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DEFAULT)) {
+		_unimplemented ("DROP/CLEAR DEFAULT");
+	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_NAMED)) {
+		_unimplemented ("DROP/CLEAR NAMED");
+	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ALL)) {
+		_unimplemented ("DROP/CLEAR ALL");
 	} else {
 		_call_rule (sparql, NAMED_RULE_GraphRef, error);
+		_init_token (&sparql->current_state.graph,
+		             sparql->current_state.prev_node, sparql);
 	}
 
 	return TRUE;

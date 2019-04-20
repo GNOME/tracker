@@ -83,6 +83,14 @@ gboolean tracker_data_manager_init_fts               (TrackerDBInterface     *in
 
 GHashTable *         tracker_data_manager_get_namespaces      (TrackerDataManager *manager);
 
+gboolean             tracker_data_manager_create_graph (TrackerDataManager  *manager,
+                                                        const gchar         *name,
+                                                        GError             **error);
+
+gboolean             tracker_data_manager_drop_graph (TrackerDataManager  *manager,
+                                                      const gchar         *name,
+                                                      GError             **error);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_DATA_MANAGER_H__ */
