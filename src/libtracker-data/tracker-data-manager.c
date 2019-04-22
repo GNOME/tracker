@@ -3846,7 +3846,7 @@ rebuild_fts_tokens (TrackerDataManager *manager,
 	tracker_db_manager_tokenizer_update (manager->db_manager);
 }
 
-gboolean
+static gboolean
 tracker_data_manager_init_fts (TrackerDBInterface *iface,
                                gboolean            create)
 {
@@ -3943,6 +3943,16 @@ update_ontology_last_modified (TrackerDataManager  *manager,
 	}
 }
 
+static void
+setup_interface_cb (TrackerDBManager   *db_manager,
+                    TrackerDBInterface *iface,
+                    TrackerDataManager *data_manager)
+{
+#if HAVE_TRACKER_FTS
+	tracker_data_manager_init_fts (iface, FALSE);
+#endif
+}
+
 static gboolean
 tracker_data_manager_initable_init (GInitable     *initable,
                                     GCancellable  *cancellable,
@@ -3996,6 +4006,9 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		g_propagate_error (error, internal_error);
 		return FALSE;
 	}
+
+	g_signal_connect (manager->db_manager, "setup-interface",
+	                  G_CALLBACK (setup_interface_cb), manager);
 
 	manager->first_time_index = is_first_time_index;
 

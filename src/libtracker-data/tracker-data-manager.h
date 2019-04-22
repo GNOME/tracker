@@ -78,9 +78,6 @@ TrackerDBInterface * tracker_data_manager_get_db_interface    (TrackerDataManage
 TrackerDBInterface * tracker_data_manager_get_writable_db_interface (TrackerDataManager *manager);
 TrackerData *        tracker_data_manager_get_data            (TrackerDataManager *manager);
 
-gboolean tracker_data_manager_init_fts               (TrackerDBInterface     *interface,
-						      gboolean                create);
-
 GHashTable *         tracker_data_manager_get_namespaces      (TrackerDataManager *manager);
 
 gboolean             tracker_data_manager_create_graph (TrackerDataManager  *manager,
