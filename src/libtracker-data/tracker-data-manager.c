@@ -4585,7 +4585,7 @@ tracker_data_manager_dispose (GObject *object)
 			tracker_db_manager_check_perform_vacuum (manager->db_manager);
 		}
 
-		g_clear_pointer (&manager->db_manager, tracker_db_manager_free);
+		g_clear_object (&manager->db_manager);
 	}
 
 	G_OBJECT_CLASS (tracker_data_manager_parent_class)->dispose (object);
