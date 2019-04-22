@@ -30,6 +30,10 @@ G_BEGIN_DECLS
 #error "only <libtracker-data/tracker-data.h> must be included directly."
 #endif
 
+#define TRACKER_TYPE_DB_MANAGER (tracker_db_manager_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerDBManager, tracker_db_manager,
+                      TRACKER, DB_MANAGER, GObject)
+
 #define TRACKER_DB_CACHE_SIZE_DEFAULT 250
 #define TRACKER_DB_CACHE_SIZE_UPDATE 2000
 
@@ -57,7 +61,6 @@ TrackerDBManager   *tracker_db_manager_new                    (TrackerDBManagerF
                                                                GObject                *iface_data,
                                                                gpointer                vtab_data,
                                                                GError                **error);
-void                tracker_db_manager_free                   (TrackerDBManager      *db_manager);
 void                tracker_db_manager_remove_all             (TrackerDBManager      *db_manager);
 void                tracker_db_manager_optimize               (TrackerDBManager      *db_manager);
 const gchar *       tracker_db_manager_get_file               (TrackerDBManager      *db_manager);

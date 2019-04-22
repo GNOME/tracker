@@ -128,6 +128,7 @@ static TrackerDBDefinition db_base = {
 };
 
 struct _TrackerDBManager {
+	GObject parent_instance;
 	TrackerDBDefinition db;
 	gboolean locations_initialized;
 	gchar *data_dir;
@@ -146,6 +147,8 @@ struct _TrackerDBManager {
 	GAsyncQueue *interfaces;
 	GThread *wal_thread;
 };
+
+G_DEFINE_TYPE (TrackerDBManager, tracker_db_manager, G_TYPE_OBJECT)
 
 static gboolean            db_exec_no_reply                        (TrackerDBInterface   *iface,
                                                                     const gchar          *query,
@@ -598,7 +601,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		return NULL;
 	}
 
-	db_manager = g_new0 (TrackerDBManager, 1);
+	db_manager = g_object_new (TRACKER_TYPE_DB_MANAGER, NULL);
 	db_manager->vtab_data = vtab_data;
 
 	/* First set defaults for return values */
@@ -667,7 +670,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 			             TRACKER_DB_OPEN_ERROR,
 			             "Could not find database file:'%s'.", db_manager->db.abs_filename);
 
-			tracker_db_manager_free (db_manager);
+			g_object_unref (db_manager);
 			return NULL;
 		}
 	}
@@ -705,7 +708,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 			             TRACKER_DB_OPEN_ERROR,
 			             "No reindexing supported in read-only mode (direct access)");
 
-			tracker_db_manager_free (db_manager);
+			g_object_unref (db_manager);
 			return NULL;
 		}
 
@@ -713,7 +716,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 
 		if (internal_error) {
 			g_propagate_error (error, internal_error);
-			tracker_db_manager_free (db_manager);
+			g_object_unref (db_manager);
 			return NULL;
 		}
 
@@ -749,7 +752,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 					             TRACKER_DB_INTERFACE_ERROR,
 					             TRACKER_DB_OPEN_ERROR,
 					             "Corrupt db file");
-					tracker_db_manager_free (db_manager);
+					g_object_unref (db_manager);
 					return NULL;
 				}
 			}
@@ -765,7 +768,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 						must_recreate = TRUE;
 					} else {
 						g_propagate_error (error, internal_error);
-						tracker_db_manager_free (db_manager);
+						g_object_unref (db_manager);
 						return NULL;
 					}
 				}
@@ -885,12 +888,12 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 				/* Most serious error is the recreate one here */
 				g_clear_error (&internal_error);
 				g_propagate_error (error, new_error);
-				tracker_db_manager_free (db_manager);
+				g_object_unref (db_manager);
 				return NULL;
 			}
 		} else {
 			g_propagate_error (error, internal_error);
-			tracker_db_manager_free (db_manager);
+			g_object_unref (db_manager);
 			return NULL;
 		}
 	}
@@ -901,8 +904,9 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 }
 
 void
-tracker_db_manager_free (TrackerDBManager *db_manager)
+tracker_db_manager_finalize (GObject *object)
 {
+	TrackerDBManager *db_manager = TRACKER_DB_MANAGER (object);
 	gboolean readonly = (db_manager->flags & TRACKER_DB_MANAGER_READONLY) != 0;
 
 	g_async_queue_unref (db_manager->interfaces);
@@ -930,7 +934,8 @@ tracker_db_manager_free (TrackerDBManager *db_manager)
 	}
 
 	g_free (db_manager->in_use_filename);
-	g_free (db_manager);
+
+	G_OBJECT_CLASS (tracker_db_manager_parent_class)->finalize (object);
 }
 
 void
@@ -1081,6 +1086,19 @@ tracker_db_manager_get_db_interface (TrackerDBManager *db_manager)
 	g_async_queue_unlock (db_manager->interfaces);
 
 	return interface;
+}
+
+static void
+tracker_db_manager_init (TrackerDBManager *manager)
+{
+}
+
+static void
+tracker_db_manager_class_init (TrackerDBManagerClass *klass)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+	object_class->finalize = tracker_db_manager_finalize;
 }
 
 static void
