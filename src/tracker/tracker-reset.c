@@ -264,7 +264,7 @@ reset_run (void)
 		tracker_db_manager_remove_all (db_manager);
 
 		tracker_db_manager_remove_version_file (db_manager);
-		tracker_db_manager_free (db_manager);
+		g_object_unref (db_manager);
 
 		/* Unset log handler */
 		g_log_remove_handler (NULL, log_handler_id);
