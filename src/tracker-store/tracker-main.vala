@@ -319,6 +319,9 @@ License which can be viewed at:
 		Tracker.DBJournal.set_rotating (do_rotating, chunk_size, rotate_to);
 
 		try {
+			print ("####################### %s\n", cache_location.get_path ());
+			print ("####################### %s\n", data_location.get_path ());
+			print ("####################### %s\n", ontology_location.get_path ());
 			connection = new Tracker.Direct.Connection (Sparql.ConnectionFlags.NONE,
 			                                            cache_location,
 			                                            data_location,
