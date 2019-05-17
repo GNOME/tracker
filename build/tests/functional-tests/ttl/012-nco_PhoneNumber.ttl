@@ -1,0 +1,3017 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<tel:+1-555-00000001> a nco:CellPhoneNumber;
+    nco:phoneNumber "+1-555-00000001".
+
+<tel:+2-555-00000002> a nco:CellPhoneNumber;
+    nco:phoneNumber "+2-555-00000002".
+
+<tel:+3-555-00000003> a nco:CellPhoneNumber;
+    nco:phoneNumber "+3-555-00000003".
+
+<tel:+4-555-00000004> a nco:CellPhoneNumber;
+    nco:phoneNumber "+4-555-00000004".
+
+<tel:+5-555-00000005> a nco:CellPhoneNumber;
+    nco:phoneNumber "+5-555-00000005".
+
+<tel:+6-555-00000006> a nco:CellPhoneNumber;
+    nco:phoneNumber "+6-555-00000006".
+
+<tel:+7-555-00000007> a nco:CellPhoneNumber;
+    nco:phoneNumber "+7-555-00000007".
+
+<tel:+8-555-00000008> a nco:CellPhoneNumber;
+    nco:phoneNumber "+8-555-00000008".
+
+<tel:+9-555-00000009> a nco:CellPhoneNumber;
+    nco:phoneNumber "+9-555-00000009".
+
+<tel:+10-555-00000010> a nco:CellPhoneNumber;
+    nco:phoneNumber "+10-555-00000010".
+
+<tel:+11-555-00000011> a nco:CellPhoneNumber;
+    nco:phoneNumber "+11-555-00000011".
+
+<tel:+12-555-00000012> a nco:CellPhoneNumber;
+    nco:phoneNumber "+12-555-00000012".
+
+<tel:+13-555-00000013> a nco:CellPhoneNumber;
+    nco:phoneNumber "+13-555-00000013".
+
+<tel:+14-555-00000014> a nco:CellPhoneNumber;
+    nco:phoneNumber "+14-555-00000014".
+
+<tel:+15-555-00000015> a nco:CellPhoneNumber;
+    nco:phoneNumber "+15-555-00000015".
+
+<tel:+16-555-00000016> a nco:CellPhoneNumber;
+    nco:phoneNumber "+16-555-00000016".
+
+<tel:+17-555-00000017> a nco:CellPhoneNumber;
+    nco:phoneNumber "+17-555-00000017".
+
+<tel:+18-555-00000018> a nco:CellPhoneNumber;
+    nco:phoneNumber "+18-555-00000018".
+
+<tel:+19-555-00000019> a nco:CellPhoneNumber;
+    nco:phoneNumber "+19-555-00000019".
+
+<tel:+20-555-00000020> a nco:CellPhoneNumber;
+    nco:phoneNumber "+20-555-00000020".
+
+<tel:+21-555-00000021> a nco:CellPhoneNumber;
+    nco:phoneNumber "+21-555-00000021".
+
+<tel:+22-555-00000022> a nco:CellPhoneNumber;
+    nco:phoneNumber "+22-555-00000022".
+
+<tel:+23-555-00000023> a nco:CellPhoneNumber;
+    nco:phoneNumber "+23-555-00000023".
+
+<tel:+24-555-00000024> a nco:CellPhoneNumber;
+    nco:phoneNumber "+24-555-00000024".
+
+<tel:+25-555-00000025> a nco:CellPhoneNumber;
+    nco:phoneNumber "+25-555-00000025".
+
+<tel:+26-555-00000026> a nco:CellPhoneNumber;
+    nco:phoneNumber "+26-555-00000026".
+
+<tel:+27-555-00000027> a nco:CellPhoneNumber;
+    nco:phoneNumber "+27-555-00000027".
+
+<tel:+28-555-00000028> a nco:CellPhoneNumber;
+    nco:phoneNumber "+28-555-00000028".
+
+<tel:+29-555-00000029> a nco:CellPhoneNumber;
+    nco:phoneNumber "+29-555-00000029".
+
+<tel:+30-555-00000030> a nco:CellPhoneNumber;
+    nco:phoneNumber "+30-555-00000030".
+
+<tel:+31-555-00000031> a nco:CellPhoneNumber;
+    nco:phoneNumber "+31-555-00000031".
+
+<tel:+32-555-00000032> a nco:CellPhoneNumber;
+    nco:phoneNumber "+32-555-00000032".
+
+<tel:+33-555-00000033> a nco:CellPhoneNumber;
+    nco:phoneNumber "+33-555-00000033".
+
+<tel:+34-555-00000034> a nco:CellPhoneNumber;
+    nco:phoneNumber "+34-555-00000034".
+
+<tel:+35-555-00000035> a nco:CellPhoneNumber;
+    nco:phoneNumber "+35-555-00000035".
+
+<tel:+36-555-00000036> a nco:CellPhoneNumber;
+    nco:phoneNumber "+36-555-00000036".
+
+<tel:+37-555-00000037> a nco:CellPhoneNumber;
+    nco:phoneNumber "+37-555-00000037".
+
+<tel:+38-555-00000038> a nco:CellPhoneNumber;
+    nco:phoneNumber "+38-555-00000038".
+
+<tel:+39-555-00000039> a nco:CellPhoneNumber;
+    nco:phoneNumber "+39-555-00000039".
+
+<tel:+40-555-00000040> a nco:CellPhoneNumber;
+    nco:phoneNumber "+40-555-00000040".
+
+<tel:+41-555-00000041> a nco:CellPhoneNumber;
+    nco:phoneNumber "+41-555-00000041".
+
+<tel:+42-555-00000042> a nco:CellPhoneNumber;
+    nco:phoneNumber "+42-555-00000042".
+
+<tel:+43-555-00000043> a nco:CellPhoneNumber;
+    nco:phoneNumber "+43-555-00000043".
+
+<tel:+44-555-00000044> a nco:CellPhoneNumber;
+    nco:phoneNumber "+44-555-00000044".
+
+<tel:+45-555-00000045> a nco:CellPhoneNumber;
+    nco:phoneNumber "+45-555-00000045".
+
+<tel:+46-555-00000046> a nco:CellPhoneNumber;
+    nco:phoneNumber "+46-555-00000046".
+
+<tel:+47-555-00000047> a nco:CellPhoneNumber;
+    nco:phoneNumber "+47-555-00000047".
+
+<tel:+48-555-00000048> a nco:CellPhoneNumber;
+    nco:phoneNumber "+48-555-00000048".
+
+<tel:+49-555-00000049> a nco:CellPhoneNumber;
+    nco:phoneNumber "+49-555-00000049".
+
+<tel:+50-555-00000050> a nco:CellPhoneNumber;
+    nco:phoneNumber "+50-555-00000050".
+
+<tel:+51-555-00000051> a nco:CellPhoneNumber;
+    nco:phoneNumber "+51-555-00000051".
+
+<tel:+52-555-00000052> a nco:CellPhoneNumber;
+    nco:phoneNumber "+52-555-00000052".
+
+<tel:+53-555-00000053> a nco:CellPhoneNumber;
+    nco:phoneNumber "+53-555-00000053".
+
+<tel:+54-555-00000054> a nco:CellPhoneNumber;
+    nco:phoneNumber "+54-555-00000054".
+
+<tel:+55-555-00000055> a nco:CellPhoneNumber;
+    nco:phoneNumber "+55-555-00000055".
+
+<tel:+56-555-00000056> a nco:CellPhoneNumber;
+    nco:phoneNumber "+56-555-00000056".
+
+<tel:+57-555-00000057> a nco:CellPhoneNumber;
+    nco:phoneNumber "+57-555-00000057".
+
+<tel:+58-555-00000058> a nco:CellPhoneNumber;
+    nco:phoneNumber "+58-555-00000058".
+
+<tel:+59-555-00000059> a nco:CellPhoneNumber;
+    nco:phoneNumber "+59-555-00000059".
+
+<tel:+60-555-00000060> a nco:CellPhoneNumber;
+    nco:phoneNumber "+60-555-00000060".
+
+<tel:+61-555-00000061> a nco:CellPhoneNumber;
+    nco:phoneNumber "+61-555-00000061".
+
+<tel:+62-555-00000062> a nco:CellPhoneNumber;
+    nco:phoneNumber "+62-555-00000062".
+
+<tel:+63-555-00000063> a nco:CellPhoneNumber;
+    nco:phoneNumber "+63-555-00000063".
+
+<tel:+64-555-00000064> a nco:CellPhoneNumber;
+    nco:phoneNumber "+64-555-00000064".
+
+<tel:+65-555-00000065> a nco:CellPhoneNumber;
+    nco:phoneNumber "+65-555-00000065".
+
+<tel:+66-555-00000066> a nco:CellPhoneNumber;
+    nco:phoneNumber "+66-555-00000066".
+
+<tel:+67-555-00000067> a nco:CellPhoneNumber;
+    nco:phoneNumber "+67-555-00000067".
+
+<tel:+68-555-00000068> a nco:CellPhoneNumber;
+    nco:phoneNumber "+68-555-00000068".
+
+<tel:+69-555-00000069> a nco:CellPhoneNumber;
+    nco:phoneNumber "+69-555-00000069".
+
+<tel:+70-555-00000070> a nco:CellPhoneNumber;
+    nco:phoneNumber "+70-555-00000070".
+
+<tel:+71-555-00000071> a nco:CellPhoneNumber;
+    nco:phoneNumber "+71-555-00000071".
+
+<tel:+72-555-00000072> a nco:CellPhoneNumber;
+    nco:phoneNumber "+72-555-00000072".
+
+<tel:+73-555-00000073> a nco:CellPhoneNumber;
+    nco:phoneNumber "+73-555-00000073".
+
+<tel:+74-555-00000074> a nco:CellPhoneNumber;
+    nco:phoneNumber "+74-555-00000074".
+
+<tel:+75-555-00000075> a nco:CellPhoneNumber;
+    nco:phoneNumber "+75-555-00000075".
+
+<tel:+76-555-00000076> a nco:CellPhoneNumber;
+    nco:phoneNumber "+76-555-00000076".
+
+<tel:+77-555-00000077> a nco:CellPhoneNumber;
+    nco:phoneNumber "+77-555-00000077".
+
+<tel:+78-555-00000078> a nco:CellPhoneNumber;
+    nco:phoneNumber "+78-555-00000078".
+
+<tel:+79-555-00000079> a nco:CellPhoneNumber;
+    nco:phoneNumber "+79-555-00000079".
+
+<tel:+80-555-00000080> a nco:CellPhoneNumber;
+    nco:phoneNumber "+80-555-00000080".
+
+<tel:+81-555-00000081> a nco:CellPhoneNumber;
+    nco:phoneNumber "+81-555-00000081".
+
+<tel:+82-555-00000082> a nco:CellPhoneNumber;
+    nco:phoneNumber "+82-555-00000082".
+
+<tel:+83-555-00000083> a nco:CellPhoneNumber;
+    nco:phoneNumber "+83-555-00000083".
+
+<tel:+84-555-00000084> a nco:CellPhoneNumber;
+    nco:phoneNumber "+84-555-00000084".
+
+<tel:+85-555-00000085> a nco:CellPhoneNumber;
+    nco:phoneNumber "+85-555-00000085".
+
+<tel:+86-555-00000086> a nco:CellPhoneNumber;
+    nco:phoneNumber "+86-555-00000086".
+
+<tel:+87-555-00000087> a nco:CellPhoneNumber;
+    nco:phoneNumber "+87-555-00000087".
+
+<tel:+88-555-00000088> a nco:CellPhoneNumber;
+    nco:phoneNumber "+88-555-00000088".
+
+<tel:+89-555-00000089> a nco:CellPhoneNumber;
+    nco:phoneNumber "+89-555-00000089".
+
+<tel:+90-555-00000090> a nco:CellPhoneNumber;
+    nco:phoneNumber "+90-555-00000090".
+
+<tel:+91-555-00000091> a nco:CellPhoneNumber;
+    nco:phoneNumber "+91-555-00000091".
+
+<tel:+92-555-00000092> a nco:CellPhoneNumber;
+    nco:phoneNumber "+92-555-00000092".
+
+<tel:+93-555-00000093> a nco:CellPhoneNumber;
+    nco:phoneNumber "+93-555-00000093".
+
+<tel:+94-555-00000094> a nco:CellPhoneNumber;
+    nco:phoneNumber "+94-555-00000094".
+
+<tel:+95-555-00000095> a nco:CellPhoneNumber;
+    nco:phoneNumber "+95-555-00000095".
+
+<tel:+96-555-00000096> a nco:CellPhoneNumber;
+    nco:phoneNumber "+96-555-00000096".
+
+<tel:+97-555-00000097> a nco:CellPhoneNumber;
+    nco:phoneNumber "+97-555-00000097".
+
+<tel:+98-555-00000098> a nco:CellPhoneNumber;
+    nco:phoneNumber "+98-555-00000098".
+
+<tel:+99-555-00000099> a nco:CellPhoneNumber;
+    nco:phoneNumber "+99-555-00000099".
+
+<tel:+100-555-00000100> a nco:CellPhoneNumber;
+    nco:phoneNumber "+100-555-00000100".
+
+<tel:+101-555-00000101> a nco:CellPhoneNumber;
+    nco:phoneNumber "+101-555-00000101".
+
+<tel:+102-555-00000102> a nco:CellPhoneNumber;
+    nco:phoneNumber "+102-555-00000102".
+
+<tel:+103-555-00000103> a nco:CellPhoneNumber;
+    nco:phoneNumber "+103-555-00000103".
+
+<tel:+104-555-00000104> a nco:CellPhoneNumber;
+    nco:phoneNumber "+104-555-00000104".
+
+<tel:+105-555-00000105> a nco:CellPhoneNumber;
+    nco:phoneNumber "+105-555-00000105".
+
+<tel:+106-555-00000106> a nco:CellPhoneNumber;
+    nco:phoneNumber "+106-555-00000106".
+
+<tel:+107-555-00000107> a nco:CellPhoneNumber;
+    nco:phoneNumber "+107-555-00000107".
+
+<tel:+108-555-00000108> a nco:CellPhoneNumber;
+    nco:phoneNumber "+108-555-00000108".
+
+<tel:+109-555-00000109> a nco:CellPhoneNumber;
+    nco:phoneNumber "+109-555-00000109".
+
+<tel:+110-555-00000110> a nco:CellPhoneNumber;
+    nco:phoneNumber "+110-555-00000110".
+
+<tel:+111-555-00000111> a nco:CellPhoneNumber;
+    nco:phoneNumber "+111-555-00000111".
+
+<tel:+112-555-00000112> a nco:CellPhoneNumber;
+    nco:phoneNumber "+112-555-00000112".
+
+<tel:+113-555-00000113> a nco:CellPhoneNumber;
+    nco:phoneNumber "+113-555-00000113".
+
+<tel:+114-555-00000114> a nco:CellPhoneNumber;
+    nco:phoneNumber "+114-555-00000114".
+
+<tel:+115-555-00000115> a nco:CellPhoneNumber;
+    nco:phoneNumber "+115-555-00000115".
+
+<tel:+116-555-00000116> a nco:CellPhoneNumber;
+    nco:phoneNumber "+116-555-00000116".
+
+<tel:+117-555-00000117> a nco:CellPhoneNumber;
+    nco:phoneNumber "+117-555-00000117".
+
+<tel:+118-555-00000118> a nco:CellPhoneNumber;
+    nco:phoneNumber "+118-555-00000118".
+
+<tel:+119-555-00000119> a nco:CellPhoneNumber;
+    nco:phoneNumber "+119-555-00000119".
+
+<tel:+120-555-00000120> a nco:CellPhoneNumber;
+    nco:phoneNumber "+120-555-00000120".
+
+<tel:+121-555-00000121> a nco:CellPhoneNumber;
+    nco:phoneNumber "+121-555-00000121".
+
+<tel:+122-555-00000122> a nco:CellPhoneNumber;
+    nco:phoneNumber "+122-555-00000122".
+
+<tel:+123-555-00000123> a nco:CellPhoneNumber;
+    nco:phoneNumber "+123-555-00000123".
+
+<tel:+124-555-00000124> a nco:CellPhoneNumber;
+    nco:phoneNumber "+124-555-00000124".
+
+<tel:+125-555-00000125> a nco:CellPhoneNumber;
+    nco:phoneNumber "+125-555-00000125".
+
+<tel:+126-555-00000126> a nco:CellPhoneNumber;
+    nco:phoneNumber "+126-555-00000126".
+
+<tel:+127-555-00000127> a nco:CellPhoneNumber;
+    nco:phoneNumber "+127-555-00000127".
+
+<tel:+128-555-00000128> a nco:CellPhoneNumber;
+    nco:phoneNumber "+128-555-00000128".
+
+<tel:+129-555-00000129> a nco:CellPhoneNumber;
+    nco:phoneNumber "+129-555-00000129".
+
+<tel:+130-555-00000130> a nco:CellPhoneNumber;
+    nco:phoneNumber "+130-555-00000130".
+
+<tel:+131-555-00000131> a nco:CellPhoneNumber;
+    nco:phoneNumber "+131-555-00000131".
+
+<tel:+132-555-00000132> a nco:CellPhoneNumber;
+    nco:phoneNumber "+132-555-00000132".
+
+<tel:+133-555-00000133> a nco:CellPhoneNumber;
+    nco:phoneNumber "+133-555-00000133".
+
+<tel:+134-555-00000134> a nco:CellPhoneNumber;
+    nco:phoneNumber "+134-555-00000134".
+
+<tel:+135-555-00000135> a nco:CellPhoneNumber;
+    nco:phoneNumber "+135-555-00000135".
+
+<tel:+136-555-00000136> a nco:CellPhoneNumber;
+    nco:phoneNumber "+136-555-00000136".
+
+<tel:+137-555-00000137> a nco:CellPhoneNumber;
+    nco:phoneNumber "+137-555-00000137".
+
+<tel:+138-555-00000138> a nco:CellPhoneNumber;
+    nco:phoneNumber "+138-555-00000138".
+
+<tel:+139-555-00000139> a nco:CellPhoneNumber;
+    nco:phoneNumber "+139-555-00000139".
+
+<tel:+140-555-00000140> a nco:CellPhoneNumber;
+    nco:phoneNumber "+140-555-00000140".
+
+<tel:+141-555-00000141> a nco:CellPhoneNumber;
+    nco:phoneNumber "+141-555-00000141".
+
+<tel:+142-555-00000142> a nco:CellPhoneNumber;
+    nco:phoneNumber "+142-555-00000142".
+
+<tel:+143-555-00000143> a nco:CellPhoneNumber;
+    nco:phoneNumber "+143-555-00000143".
+
+<tel:+144-555-00000144> a nco:CellPhoneNumber;
+    nco:phoneNumber "+144-555-00000144".
+
+<tel:+145-555-00000145> a nco:CellPhoneNumber;
+    nco:phoneNumber "+145-555-00000145".
+
+<tel:+146-555-00000146> a nco:CellPhoneNumber;
+    nco:phoneNumber "+146-555-00000146".
+
+<tel:+147-555-00000147> a nco:CellPhoneNumber;
+    nco:phoneNumber "+147-555-00000147".
+
+<tel:+148-555-00000148> a nco:CellPhoneNumber;
+    nco:phoneNumber "+148-555-00000148".
+
+<tel:+149-555-00000149> a nco:CellPhoneNumber;
+    nco:phoneNumber "+149-555-00000149".
+
+<tel:+150-555-00000150> a nco:CellPhoneNumber;
+    nco:phoneNumber "+150-555-00000150".
+
+<tel:+151-555-00000151> a nco:CellPhoneNumber;
+    nco:phoneNumber "+151-555-00000151".
+
+<tel:+152-555-00000152> a nco:CellPhoneNumber;
+    nco:phoneNumber "+152-555-00000152".
+
+<tel:+153-555-00000153> a nco:CellPhoneNumber;
+    nco:phoneNumber "+153-555-00000153".
+
+<tel:+154-555-00000154> a nco:CellPhoneNumber;
+    nco:phoneNumber "+154-555-00000154".
+
+<tel:+155-555-00000155> a nco:CellPhoneNumber;
+    nco:phoneNumber "+155-555-00000155".
+
+<tel:+156-555-00000156> a nco:CellPhoneNumber;
+    nco:phoneNumber "+156-555-00000156".
+
+<tel:+157-555-00000157> a nco:CellPhoneNumber;
+    nco:phoneNumber "+157-555-00000157".
+
+<tel:+158-555-00000158> a nco:CellPhoneNumber;
+    nco:phoneNumber "+158-555-00000158".
+
+<tel:+159-555-00000159> a nco:CellPhoneNumber;
+    nco:phoneNumber "+159-555-00000159".
+
+<tel:+160-555-00000160> a nco:CellPhoneNumber;
+    nco:phoneNumber "+160-555-00000160".
+
+<tel:+161-555-00000161> a nco:CellPhoneNumber;
+    nco:phoneNumber "+161-555-00000161".
+
+<tel:+162-555-00000162> a nco:CellPhoneNumber;
+    nco:phoneNumber "+162-555-00000162".
+
+<tel:+163-555-00000163> a nco:CellPhoneNumber;
+    nco:phoneNumber "+163-555-00000163".
+
+<tel:+164-555-00000164> a nco:CellPhoneNumber;
+    nco:phoneNumber "+164-555-00000164".
+
+<tel:+165-555-00000165> a nco:CellPhoneNumber;
+    nco:phoneNumber "+165-555-00000165".
+
+<tel:+166-555-00000166> a nco:CellPhoneNumber;
+    nco:phoneNumber "+166-555-00000166".
+
+<tel:+167-555-00000167> a nco:CellPhoneNumber;
+    nco:phoneNumber "+167-555-00000167".
+
+<tel:+168-555-00000168> a nco:CellPhoneNumber;
+    nco:phoneNumber "+168-555-00000168".
+
+<tel:+169-555-00000169> a nco:CellPhoneNumber;
+    nco:phoneNumber "+169-555-00000169".
+
+<tel:+170-555-00000170> a nco:CellPhoneNumber;
+    nco:phoneNumber "+170-555-00000170".
+
+<tel:+171-555-00000171> a nco:CellPhoneNumber;
+    nco:phoneNumber "+171-555-00000171".
+
+<tel:+172-555-00000172> a nco:CellPhoneNumber;
+    nco:phoneNumber "+172-555-00000172".
+
+<tel:+173-555-00000173> a nco:CellPhoneNumber;
+    nco:phoneNumber "+173-555-00000173".
+
+<tel:+174-555-00000174> a nco:CellPhoneNumber;
+    nco:phoneNumber "+174-555-00000174".
+
+<tel:+175-555-00000175> a nco:CellPhoneNumber;
+    nco:phoneNumber "+175-555-00000175".
+
+<tel:+176-555-00000176> a nco:CellPhoneNumber;
+    nco:phoneNumber "+176-555-00000176".
+
+<tel:+177-555-00000177> a nco:CellPhoneNumber;
+    nco:phoneNumber "+177-555-00000177".
+
+<tel:+178-555-00000178> a nco:CellPhoneNumber;
+    nco:phoneNumber "+178-555-00000178".
+
+<tel:+179-555-00000179> a nco:CellPhoneNumber;
+    nco:phoneNumber "+179-555-00000179".
+
+<tel:+180-555-00000180> a nco:CellPhoneNumber;
+    nco:phoneNumber "+180-555-00000180".
+
+<tel:+181-555-00000181> a nco:CellPhoneNumber;
+    nco:phoneNumber "+181-555-00000181".
+
+<tel:+182-555-00000182> a nco:CellPhoneNumber;
+    nco:phoneNumber "+182-555-00000182".
+
+<tel:+183-555-00000183> a nco:CellPhoneNumber;
+    nco:phoneNumber "+183-555-00000183".
+
+<tel:+184-555-00000184> a nco:CellPhoneNumber;
+    nco:phoneNumber "+184-555-00000184".
+
+<tel:+185-555-00000185> a nco:CellPhoneNumber;
+    nco:phoneNumber "+185-555-00000185".
+
+<tel:+186-555-00000186> a nco:CellPhoneNumber;
+    nco:phoneNumber "+186-555-00000186".
+
+<tel:+187-555-00000187> a nco:CellPhoneNumber;
+    nco:phoneNumber "+187-555-00000187".
+
+<tel:+188-555-00000188> a nco:CellPhoneNumber;
+    nco:phoneNumber "+188-555-00000188".
+
+<tel:+189-555-00000189> a nco:CellPhoneNumber;
+    nco:phoneNumber "+189-555-00000189".
+
+<tel:+190-555-00000190> a nco:CellPhoneNumber;
+    nco:phoneNumber "+190-555-00000190".
+
+<tel:+191-555-00000191> a nco:CellPhoneNumber;
+    nco:phoneNumber "+191-555-00000191".
+
+<tel:+192-555-00000192> a nco:CellPhoneNumber;
+    nco:phoneNumber "+192-555-00000192".
+
+<tel:+193-555-00000193> a nco:CellPhoneNumber;
+    nco:phoneNumber "+193-555-00000193".
+
+<tel:+194-555-00000194> a nco:CellPhoneNumber;
+    nco:phoneNumber "+194-555-00000194".
+
+<tel:+195-555-00000195> a nco:CellPhoneNumber;
+    nco:phoneNumber "+195-555-00000195".
+
+<tel:+196-555-00000196> a nco:CellPhoneNumber;
+    nco:phoneNumber "+196-555-00000196".
+
+<tel:+197-555-00000197> a nco:CellPhoneNumber;
+    nco:phoneNumber "+197-555-00000197".
+
+<tel:+198-555-00000198> a nco:CellPhoneNumber;
+    nco:phoneNumber "+198-555-00000198".
+
+<tel:+199-555-00000199> a nco:CellPhoneNumber;
+    nco:phoneNumber "+199-555-00000199".
+
+<tel:+200-555-00000200> a nco:CellPhoneNumber;
+    nco:phoneNumber "+200-555-00000200".
+
+<tel:+201-555-00000201> a nco:CellPhoneNumber;
+    nco:phoneNumber "+201-555-00000201".
+
+<tel:+202-555-00000202> a nco:CellPhoneNumber;
+    nco:phoneNumber "+202-555-00000202".
+
+<tel:+203-555-00000203> a nco:CellPhoneNumber;
+    nco:phoneNumber "+203-555-00000203".
+
+<tel:+204-555-00000204> a nco:CellPhoneNumber;
+    nco:phoneNumber "+204-555-00000204".
+
+<tel:+205-555-00000205> a nco:CellPhoneNumber;
+    nco:phoneNumber "+205-555-00000205".
+
+<tel:+206-555-00000206> a nco:CellPhoneNumber;
+    nco:phoneNumber "+206-555-00000206".
+
+<tel:+207-555-00000207> a nco:CellPhoneNumber;
+    nco:phoneNumber "+207-555-00000207".
+
+<tel:+208-555-00000208> a nco:CellPhoneNumber;
+    nco:phoneNumber "+208-555-00000208".
+
+<tel:+209-555-00000209> a nco:CellPhoneNumber;
+    nco:phoneNumber "+209-555-00000209".
+
+<tel:+210-555-00000210> a nco:CellPhoneNumber;
+    nco:phoneNumber "+210-555-00000210".
+
+<tel:+211-555-00000211> a nco:CellPhoneNumber;
+    nco:phoneNumber "+211-555-00000211".
+
+<tel:+212-555-00000212> a nco:CellPhoneNumber;
+    nco:phoneNumber "+212-555-00000212".
+
+<tel:+213-555-00000213> a nco:CellPhoneNumber;
+    nco:phoneNumber "+213-555-00000213".
+
+<tel:+214-555-00000214> a nco:CellPhoneNumber;
+    nco:phoneNumber "+214-555-00000214".
+
+<tel:+215-555-00000215> a nco:CellPhoneNumber;
+    nco:phoneNumber "+215-555-00000215".
+
+<tel:+216-555-00000216> a nco:CellPhoneNumber;
+    nco:phoneNumber "+216-555-00000216".
+
+<tel:+217-555-00000217> a nco:CellPhoneNumber;
+    nco:phoneNumber "+217-555-00000217".
+
+<tel:+218-555-00000218> a nco:CellPhoneNumber;
+    nco:phoneNumber "+218-555-00000218".
+
+<tel:+219-555-00000219> a nco:CellPhoneNumber;
+    nco:phoneNumber "+219-555-00000219".
+
+<tel:+220-555-00000220> a nco:CellPhoneNumber;
+    nco:phoneNumber "+220-555-00000220".
+
+<tel:+221-555-00000221> a nco:CellPhoneNumber;
+    nco:phoneNumber "+221-555-00000221".
+
+<tel:+222-555-00000222> a nco:CellPhoneNumber;
+    nco:phoneNumber "+222-555-00000222".
+
+<tel:+223-555-00000223> a nco:CellPhoneNumber;
+    nco:phoneNumber "+223-555-00000223".
+
+<tel:+224-555-00000224> a nco:CellPhoneNumber;
+    nco:phoneNumber "+224-555-00000224".
+
+<tel:+225-555-00000225> a nco:CellPhoneNumber;
+    nco:phoneNumber "+225-555-00000225".
+
+<tel:+226-555-00000226> a nco:CellPhoneNumber;
+    nco:phoneNumber "+226-555-00000226".
+
+<tel:+227-555-00000227> a nco:CellPhoneNumber;
+    nco:phoneNumber "+227-555-00000227".
+
+<tel:+228-555-00000228> a nco:CellPhoneNumber;
+    nco:phoneNumber "+228-555-00000228".
+
+<tel:+229-555-00000229> a nco:CellPhoneNumber;
+    nco:phoneNumber "+229-555-00000229".
+
+<tel:+230-555-00000230> a nco:CellPhoneNumber;
+    nco:phoneNumber "+230-555-00000230".
+
+<tel:+231-555-00000231> a nco:CellPhoneNumber;
+    nco:phoneNumber "+231-555-00000231".
+
+<tel:+232-555-00000232> a nco:CellPhoneNumber;
+    nco:phoneNumber "+232-555-00000232".
+
+<tel:+233-555-00000233> a nco:CellPhoneNumber;
+    nco:phoneNumber "+233-555-00000233".
+
+<tel:+234-555-00000234> a nco:CellPhoneNumber;
+    nco:phoneNumber "+234-555-00000234".
+
+<tel:+235-555-00000235> a nco:CellPhoneNumber;
+    nco:phoneNumber "+235-555-00000235".
+
+<tel:+236-555-00000236> a nco:CellPhoneNumber;
+    nco:phoneNumber "+236-555-00000236".
+
+<tel:+237-555-00000237> a nco:CellPhoneNumber;
+    nco:phoneNumber "+237-555-00000237".
+
+<tel:+238-555-00000238> a nco:CellPhoneNumber;
+    nco:phoneNumber "+238-555-00000238".
+
+<tel:+239-555-00000239> a nco:CellPhoneNumber;
+    nco:phoneNumber "+239-555-00000239".
+
+<tel:+240-555-00000240> a nco:CellPhoneNumber;
+    nco:phoneNumber "+240-555-00000240".
+
+<tel:+241-555-00000241> a nco:CellPhoneNumber;
+    nco:phoneNumber "+241-555-00000241".
+
+<tel:+242-555-00000242> a nco:CellPhoneNumber;
+    nco:phoneNumber "+242-555-00000242".
+
+<tel:+243-555-00000243> a nco:CellPhoneNumber;
+    nco:phoneNumber "+243-555-00000243".
+
+<tel:+244-555-00000244> a nco:CellPhoneNumber;
+    nco:phoneNumber "+244-555-00000244".
+
+<tel:+245-555-00000245> a nco:CellPhoneNumber;
+    nco:phoneNumber "+245-555-00000245".
+
+<tel:+246-555-00000246> a nco:CellPhoneNumber;
+    nco:phoneNumber "+246-555-00000246".
+
+<tel:+247-555-00000247> a nco:CellPhoneNumber;
+    nco:phoneNumber "+247-555-00000247".
+
+<tel:+248-555-00000248> a nco:CellPhoneNumber;
+    nco:phoneNumber "+248-555-00000248".
+
+<tel:+249-555-00000249> a nco:CellPhoneNumber;
+    nco:phoneNumber "+249-555-00000249".
+
+<tel:+250-555-00000250> a nco:CellPhoneNumber;
+    nco:phoneNumber "+250-555-00000250".
+
+<tel:+251-555-00000251> a nco:CellPhoneNumber;
+    nco:phoneNumber "+251-555-00000251".
+
+<tel:+252-555-00000252> a nco:CellPhoneNumber;
+    nco:phoneNumber "+252-555-00000252".
+
+<tel:+253-555-00000253> a nco:CellPhoneNumber;
+    nco:phoneNumber "+253-555-00000253".
+
+<tel:+254-555-00000254> a nco:CellPhoneNumber;
+    nco:phoneNumber "+254-555-00000254".
+
+<tel:+255-555-00000255> a nco:CellPhoneNumber;
+    nco:phoneNumber "+255-555-00000255".
+
+<tel:+256-555-00000256> a nco:CellPhoneNumber;
+    nco:phoneNumber "+256-555-00000256".
+
+<tel:+257-555-00000257> a nco:CellPhoneNumber;
+    nco:phoneNumber "+257-555-00000257".
+
+<tel:+258-555-00000258> a nco:CellPhoneNumber;
+    nco:phoneNumber "+258-555-00000258".
+
+<tel:+259-555-00000259> a nco:CellPhoneNumber;
+    nco:phoneNumber "+259-555-00000259".
+
+<tel:+260-555-00000260> a nco:CellPhoneNumber;
+    nco:phoneNumber "+260-555-00000260".
+
+<tel:+261-555-00000261> a nco:CellPhoneNumber;
+    nco:phoneNumber "+261-555-00000261".
+
+<tel:+262-555-00000262> a nco:CellPhoneNumber;
+    nco:phoneNumber "+262-555-00000262".
+
+<tel:+263-555-00000263> a nco:CellPhoneNumber;
+    nco:phoneNumber "+263-555-00000263".
+
+<tel:+264-555-00000264> a nco:CellPhoneNumber;
+    nco:phoneNumber "+264-555-00000264".
+
+<tel:+265-555-00000265> a nco:CellPhoneNumber;
+    nco:phoneNumber "+265-555-00000265".
+
+<tel:+266-555-00000266> a nco:CellPhoneNumber;
+    nco:phoneNumber "+266-555-00000266".
+
+<tel:+267-555-00000267> a nco:CellPhoneNumber;
+    nco:phoneNumber "+267-555-00000267".
+
+<tel:+268-555-00000268> a nco:CellPhoneNumber;
+    nco:phoneNumber "+268-555-00000268".
+
+<tel:+269-555-00000269> a nco:CellPhoneNumber;
+    nco:phoneNumber "+269-555-00000269".
+
+<tel:+270-555-00000270> a nco:CellPhoneNumber;
+    nco:phoneNumber "+270-555-00000270".
+
+<tel:+271-555-00000271> a nco:CellPhoneNumber;
+    nco:phoneNumber "+271-555-00000271".
+
+<tel:+272-555-00000272> a nco:CellPhoneNumber;
+    nco:phoneNumber "+272-555-00000272".
+
+<tel:+273-555-00000273> a nco:CellPhoneNumber;
+    nco:phoneNumber "+273-555-00000273".
+
+<tel:+274-555-00000274> a nco:CellPhoneNumber;
+    nco:phoneNumber "+274-555-00000274".
+
+<tel:+275-555-00000275> a nco:CellPhoneNumber;
+    nco:phoneNumber "+275-555-00000275".
+
+<tel:+276-555-00000276> a nco:CellPhoneNumber;
+    nco:phoneNumber "+276-555-00000276".
+
+<tel:+277-555-00000277> a nco:CellPhoneNumber;
+    nco:phoneNumber "+277-555-00000277".
+
+<tel:+278-555-00000278> a nco:CellPhoneNumber;
+    nco:phoneNumber "+278-555-00000278".
+
+<tel:+279-555-00000279> a nco:CellPhoneNumber;
+    nco:phoneNumber "+279-555-00000279".
+
+<tel:+280-555-00000280> a nco:CellPhoneNumber;
+    nco:phoneNumber "+280-555-00000280".
+
+<tel:+281-555-00000281> a nco:CellPhoneNumber;
+    nco:phoneNumber "+281-555-00000281".
+
+<tel:+282-555-00000282> a nco:CellPhoneNumber;
+    nco:phoneNumber "+282-555-00000282".
+
+<tel:+283-555-00000283> a nco:CellPhoneNumber;
+    nco:phoneNumber "+283-555-00000283".
+
+<tel:+284-555-00000284> a nco:CellPhoneNumber;
+    nco:phoneNumber "+284-555-00000284".
+
+<tel:+285-555-00000285> a nco:CellPhoneNumber;
+    nco:phoneNumber "+285-555-00000285".
+
+<tel:+286-555-00000286> a nco:CellPhoneNumber;
+    nco:phoneNumber "+286-555-00000286".
+
+<tel:+287-555-00000287> a nco:CellPhoneNumber;
+    nco:phoneNumber "+287-555-00000287".
+
+<tel:+288-555-00000288> a nco:CellPhoneNumber;
+    nco:phoneNumber "+288-555-00000288".
+
+<tel:+289-555-00000289> a nco:CellPhoneNumber;
+    nco:phoneNumber "+289-555-00000289".
+
+<tel:+290-555-00000290> a nco:CellPhoneNumber;
+    nco:phoneNumber "+290-555-00000290".
+
+<tel:+291-555-00000291> a nco:CellPhoneNumber;
+    nco:phoneNumber "+291-555-00000291".
+
+<tel:+292-555-00000292> a nco:CellPhoneNumber;
+    nco:phoneNumber "+292-555-00000292".
+
+<tel:+293-555-00000293> a nco:CellPhoneNumber;
+    nco:phoneNumber "+293-555-00000293".
+
+<tel:+294-555-00000294> a nco:CellPhoneNumber;
+    nco:phoneNumber "+294-555-00000294".
+
+<tel:+295-555-00000295> a nco:CellPhoneNumber;
+    nco:phoneNumber "+295-555-00000295".
+
+<tel:+296-555-00000296> a nco:CellPhoneNumber;
+    nco:phoneNumber "+296-555-00000296".
+
+<tel:+297-555-00000297> a nco:CellPhoneNumber;
+    nco:phoneNumber "+297-555-00000297".
+
+<tel:+298-555-00000298> a nco:CellPhoneNumber;
+    nco:phoneNumber "+298-555-00000298".
+
+<tel:+299-555-00000299> a nco:CellPhoneNumber;
+    nco:phoneNumber "+299-555-00000299".
+
+<tel:+300-555-00000300> a nco:CellPhoneNumber;
+    nco:phoneNumber "+300-555-00000300".
+
+<tel:+301-555-00000301> a nco:CellPhoneNumber;
+    nco:phoneNumber "+301-555-00000301".
+
+<tel:+302-555-00000302> a nco:CellPhoneNumber;
+    nco:phoneNumber "+302-555-00000302".
+
+<tel:+303-555-00000303> a nco:CellPhoneNumber;
+    nco:phoneNumber "+303-555-00000303".
+
+<tel:+304-555-00000304> a nco:CellPhoneNumber;
+    nco:phoneNumber "+304-555-00000304".
+
+<tel:+305-555-00000305> a nco:CellPhoneNumber;
+    nco:phoneNumber "+305-555-00000305".
+
+<tel:+306-555-00000306> a nco:CellPhoneNumber;
+    nco:phoneNumber "+306-555-00000306".
+
+<tel:+307-555-00000307> a nco:CellPhoneNumber;
+    nco:phoneNumber "+307-555-00000307".
+
+<tel:+308-555-00000308> a nco:CellPhoneNumber;
+    nco:phoneNumber "+308-555-00000308".
+
+<tel:+309-555-00000309> a nco:CellPhoneNumber;
+    nco:phoneNumber "+309-555-00000309".
+
+<tel:+310-555-00000310> a nco:CellPhoneNumber;
+    nco:phoneNumber "+310-555-00000310".
+
+<tel:+311-555-00000311> a nco:CellPhoneNumber;
+    nco:phoneNumber "+311-555-00000311".
+
+<tel:+312-555-00000312> a nco:CellPhoneNumber;
+    nco:phoneNumber "+312-555-00000312".
+
+<tel:+313-555-00000313> a nco:CellPhoneNumber;
+    nco:phoneNumber "+313-555-00000313".
+
+<tel:+314-555-00000314> a nco:CellPhoneNumber;
+    nco:phoneNumber "+314-555-00000314".
+
+<tel:+315-555-00000315> a nco:CellPhoneNumber;
+    nco:phoneNumber "+315-555-00000315".
+
+<tel:+316-555-00000316> a nco:CellPhoneNumber;
+    nco:phoneNumber "+316-555-00000316".
+
+<tel:+317-555-00000317> a nco:CellPhoneNumber;
+    nco:phoneNumber "+317-555-00000317".
+
+<tel:+318-555-00000318> a nco:CellPhoneNumber;
+    nco:phoneNumber "+318-555-00000318".
+
+<tel:+319-555-00000319> a nco:CellPhoneNumber;
+    nco:phoneNumber "+319-555-00000319".
+
+<tel:+320-555-00000320> a nco:CellPhoneNumber;
+    nco:phoneNumber "+320-555-00000320".
+
+<tel:+321-555-00000321> a nco:CellPhoneNumber;
+    nco:phoneNumber "+321-555-00000321".
+
+<tel:+322-555-00000322> a nco:CellPhoneNumber;
+    nco:phoneNumber "+322-555-00000322".
+
+<tel:+323-555-00000323> a nco:CellPhoneNumber;
+    nco:phoneNumber "+323-555-00000323".
+
+<tel:+324-555-00000324> a nco:CellPhoneNumber;
+    nco:phoneNumber "+324-555-00000324".
+
+<tel:+325-555-00000325> a nco:CellPhoneNumber;
+    nco:phoneNumber "+325-555-00000325".
+
+<tel:+326-555-00000326> a nco:CellPhoneNumber;
+    nco:phoneNumber "+326-555-00000326".
+
+<tel:+327-555-00000327> a nco:CellPhoneNumber;
+    nco:phoneNumber "+327-555-00000327".
+
+<tel:+328-555-00000328> a nco:CellPhoneNumber;
+    nco:phoneNumber "+328-555-00000328".
+
+<tel:+329-555-00000329> a nco:CellPhoneNumber;
+    nco:phoneNumber "+329-555-00000329".
+
+<tel:+330-555-00000330> a nco:CellPhoneNumber;
+    nco:phoneNumber "+330-555-00000330".
+
+<tel:+331-555-00000331> a nco:CellPhoneNumber;
+    nco:phoneNumber "+331-555-00000331".
+
+<tel:+332-555-00000332> a nco:CellPhoneNumber;
+    nco:phoneNumber "+332-555-00000332".
+
+<tel:+333-555-00000333> a nco:CellPhoneNumber;
+    nco:phoneNumber "+333-555-00000333".
+
+<tel:+334-555-00000334> a nco:CellPhoneNumber;
+    nco:phoneNumber "+334-555-00000334".
+
+<tel:+335-555-00000335> a nco:CellPhoneNumber;
+    nco:phoneNumber "+335-555-00000335".
+
+<tel:+336-555-00000336> a nco:CellPhoneNumber;
+    nco:phoneNumber "+336-555-00000336".
+
+<tel:+337-555-00000337> a nco:CellPhoneNumber;
+    nco:phoneNumber "+337-555-00000337".
+
+<tel:+338-555-00000338> a nco:CellPhoneNumber;
+    nco:phoneNumber "+338-555-00000338".
+
+<tel:+339-555-00000339> a nco:CellPhoneNumber;
+    nco:phoneNumber "+339-555-00000339".
+
+<tel:+340-555-00000340> a nco:CellPhoneNumber;
+    nco:phoneNumber "+340-555-00000340".
+
+<tel:+341-555-00000341> a nco:CellPhoneNumber;
+    nco:phoneNumber "+341-555-00000341".
+
+<tel:+342-555-00000342> a nco:CellPhoneNumber;
+    nco:phoneNumber "+342-555-00000342".
+
+<tel:+343-555-00000343> a nco:CellPhoneNumber;
+    nco:phoneNumber "+343-555-00000343".
+
+<tel:+344-555-00000344> a nco:CellPhoneNumber;
+    nco:phoneNumber "+344-555-00000344".
+
+<tel:+345-555-00000345> a nco:CellPhoneNumber;
+    nco:phoneNumber "+345-555-00000345".
+
+<tel:+346-555-00000346> a nco:CellPhoneNumber;
+    nco:phoneNumber "+346-555-00000346".
+
+<tel:+347-555-00000347> a nco:CellPhoneNumber;
+    nco:phoneNumber "+347-555-00000347".
+
+<tel:+348-555-00000348> a nco:CellPhoneNumber;
+    nco:phoneNumber "+348-555-00000348".
+
+<tel:+349-555-00000349> a nco:CellPhoneNumber;
+    nco:phoneNumber "+349-555-00000349".
+
+<tel:+350-555-00000350> a nco:CellPhoneNumber;
+    nco:phoneNumber "+350-555-00000350".
+
+<tel:+351-555-00000351> a nco:CellPhoneNumber;
+    nco:phoneNumber "+351-555-00000351".
+
+<tel:+352-555-00000352> a nco:CellPhoneNumber;
+    nco:phoneNumber "+352-555-00000352".
+
+<tel:+353-555-00000353> a nco:CellPhoneNumber;
+    nco:phoneNumber "+353-555-00000353".
+
+<tel:+354-555-00000354> a nco:CellPhoneNumber;
+    nco:phoneNumber "+354-555-00000354".
+
+<tel:+355-555-00000355> a nco:CellPhoneNumber;
+    nco:phoneNumber "+355-555-00000355".
+
+<tel:+356-555-00000356> a nco:CellPhoneNumber;
+    nco:phoneNumber "+356-555-00000356".
+
+<tel:+357-555-00000357> a nco:CellPhoneNumber;
+    nco:phoneNumber "+357-555-00000357".
+
+<tel:+358-555-00000358> a nco:CellPhoneNumber;
+    nco:phoneNumber "+358-555-00000358".
+
+<tel:+359-555-00000359> a nco:CellPhoneNumber;
+    nco:phoneNumber "+359-555-00000359".
+
+<tel:+360-555-00000360> a nco:CellPhoneNumber;
+    nco:phoneNumber "+360-555-00000360".
+
+<tel:+361-555-00000361> a nco:CellPhoneNumber;
+    nco:phoneNumber "+361-555-00000361".
+
+<tel:+362-555-00000362> a nco:CellPhoneNumber;
+    nco:phoneNumber "+362-555-00000362".
+
+<tel:+363-555-00000363> a nco:CellPhoneNumber;
+    nco:phoneNumber "+363-555-00000363".
+
+<tel:+364-555-00000364> a nco:CellPhoneNumber;
+    nco:phoneNumber "+364-555-00000364".
+
+<tel:+365-555-00000365> a nco:CellPhoneNumber;
+    nco:phoneNumber "+365-555-00000365".
+
+<tel:+366-555-00000366> a nco:CellPhoneNumber;
+    nco:phoneNumber "+366-555-00000366".
+
+<tel:+367-555-00000367> a nco:CellPhoneNumber;
+    nco:phoneNumber "+367-555-00000367".
+
+<tel:+368-555-00000368> a nco:CellPhoneNumber;
+    nco:phoneNumber "+368-555-00000368".
+
+<tel:+369-555-00000369> a nco:CellPhoneNumber;
+    nco:phoneNumber "+369-555-00000369".
+
+<tel:+370-555-00000370> a nco:CellPhoneNumber;
+    nco:phoneNumber "+370-555-00000370".
+
+<tel:+371-555-00000371> a nco:CellPhoneNumber;
+    nco:phoneNumber "+371-555-00000371".
+
+<tel:+372-555-00000372> a nco:CellPhoneNumber;
+    nco:phoneNumber "+372-555-00000372".
+
+<tel:+373-555-00000373> a nco:CellPhoneNumber;
+    nco:phoneNumber "+373-555-00000373".
+
+<tel:+374-555-00000374> a nco:CellPhoneNumber;
+    nco:phoneNumber "+374-555-00000374".
+
+<tel:+375-555-00000375> a nco:CellPhoneNumber;
+    nco:phoneNumber "+375-555-00000375".
+
+<tel:+376-555-00000376> a nco:CellPhoneNumber;
+    nco:phoneNumber "+376-555-00000376".
+
+<tel:+377-555-00000377> a nco:CellPhoneNumber;
+    nco:phoneNumber "+377-555-00000377".
+
+<tel:+378-555-00000378> a nco:CellPhoneNumber;
+    nco:phoneNumber "+378-555-00000378".
+
+<tel:+379-555-00000379> a nco:CellPhoneNumber;
+    nco:phoneNumber "+379-555-00000379".
+
+<tel:+380-555-00000380> a nco:CellPhoneNumber;
+    nco:phoneNumber "+380-555-00000380".
+
+<tel:+381-555-00000381> a nco:CellPhoneNumber;
+    nco:phoneNumber "+381-555-00000381".
+
+<tel:+382-555-00000382> a nco:CellPhoneNumber;
+    nco:phoneNumber "+382-555-00000382".
+
+<tel:+383-555-00000383> a nco:CellPhoneNumber;
+    nco:phoneNumber "+383-555-00000383".
+
+<tel:+384-555-00000384> a nco:CellPhoneNumber;
+    nco:phoneNumber "+384-555-00000384".
+
+<tel:+385-555-00000385> a nco:CellPhoneNumber;
+    nco:phoneNumber "+385-555-00000385".
+
+<tel:+386-555-00000386> a nco:CellPhoneNumber;
+    nco:phoneNumber "+386-555-00000386".
+
+<tel:+387-555-00000387> a nco:CellPhoneNumber;
+    nco:phoneNumber "+387-555-00000387".
+
+<tel:+388-555-00000388> a nco:CellPhoneNumber;
+    nco:phoneNumber "+388-555-00000388".
+
+<tel:+389-555-00000389> a nco:CellPhoneNumber;
+    nco:phoneNumber "+389-555-00000389".
+
+<tel:+390-555-00000390> a nco:CellPhoneNumber;
+    nco:phoneNumber "+390-555-00000390".
+
+<tel:+391-555-00000391> a nco:CellPhoneNumber;
+    nco:phoneNumber "+391-555-00000391".
+
+<tel:+392-555-00000392> a nco:CellPhoneNumber;
+    nco:phoneNumber "+392-555-00000392".
+
+<tel:+393-555-00000393> a nco:CellPhoneNumber;
+    nco:phoneNumber "+393-555-00000393".
+
+<tel:+394-555-00000394> a nco:CellPhoneNumber;
+    nco:phoneNumber "+394-555-00000394".
+
+<tel:+395-555-00000395> a nco:CellPhoneNumber;
+    nco:phoneNumber "+395-555-00000395".
+
+<tel:+396-555-00000396> a nco:CellPhoneNumber;
+    nco:phoneNumber "+396-555-00000396".
+
+<tel:+397-555-00000397> a nco:CellPhoneNumber;
+    nco:phoneNumber "+397-555-00000397".
+
+<tel:+398-555-00000398> a nco:CellPhoneNumber;
+    nco:phoneNumber "+398-555-00000398".
+
+<tel:+399-555-00000399> a nco:CellPhoneNumber;
+    nco:phoneNumber "+399-555-00000399".
+
+<tel:+400-555-00000400> a nco:CellPhoneNumber;
+    nco:phoneNumber "+400-555-00000400".
+
+<tel:+401-555-00000401> a nco:CellPhoneNumber;
+    nco:phoneNumber "+401-555-00000401".
+
+<tel:+402-555-00000402> a nco:CellPhoneNumber;
+    nco:phoneNumber "+402-555-00000402".
+
+<tel:+403-555-00000403> a nco:CellPhoneNumber;
+    nco:phoneNumber "+403-555-00000403".
+
+<tel:+404-555-00000404> a nco:CellPhoneNumber;
+    nco:phoneNumber "+404-555-00000404".
+
+<tel:+405-555-00000405> a nco:CellPhoneNumber;
+    nco:phoneNumber "+405-555-00000405".
+
+<tel:+406-555-00000406> a nco:CellPhoneNumber;
+    nco:phoneNumber "+406-555-00000406".
+
+<tel:+407-555-00000407> a nco:CellPhoneNumber;
+    nco:phoneNumber "+407-555-00000407".
+
+<tel:+408-555-00000408> a nco:CellPhoneNumber;
+    nco:phoneNumber "+408-555-00000408".
+
+<tel:+409-555-00000409> a nco:CellPhoneNumber;
+    nco:phoneNumber "+409-555-00000409".
+
+<tel:+410-555-00000410> a nco:CellPhoneNumber;
+    nco:phoneNumber "+410-555-00000410".
+
+<tel:+411-555-00000411> a nco:CellPhoneNumber;
+    nco:phoneNumber "+411-555-00000411".
+
+<tel:+412-555-00000412> a nco:CellPhoneNumber;
+    nco:phoneNumber "+412-555-00000412".
+
+<tel:+413-555-00000413> a nco:CellPhoneNumber;
+    nco:phoneNumber "+413-555-00000413".
+
+<tel:+414-555-00000414> a nco:CellPhoneNumber;
+    nco:phoneNumber "+414-555-00000414".
+
+<tel:+415-555-00000415> a nco:CellPhoneNumber;
+    nco:phoneNumber "+415-555-00000415".
+
+<tel:+416-555-00000416> a nco:CellPhoneNumber;
+    nco:phoneNumber "+416-555-00000416".
+
+<tel:+417-555-00000417> a nco:CellPhoneNumber;
+    nco:phoneNumber "+417-555-00000417".
+
+<tel:+418-555-00000418> a nco:CellPhoneNumber;
+    nco:phoneNumber "+418-555-00000418".
+
+<tel:+419-555-00000419> a nco:CellPhoneNumber;
+    nco:phoneNumber "+419-555-00000419".
+
+<tel:+420-555-00000420> a nco:CellPhoneNumber;
+    nco:phoneNumber "+420-555-00000420".
+
+<tel:+421-555-00000421> a nco:CellPhoneNumber;
+    nco:phoneNumber "+421-555-00000421".
+
+<tel:+422-555-00000422> a nco:CellPhoneNumber;
+    nco:phoneNumber "+422-555-00000422".
+
+<tel:+423-555-00000423> a nco:CellPhoneNumber;
+    nco:phoneNumber "+423-555-00000423".
+
+<tel:+424-555-00000424> a nco:CellPhoneNumber;
+    nco:phoneNumber "+424-555-00000424".
+
+<tel:+425-555-00000425> a nco:CellPhoneNumber;
+    nco:phoneNumber "+425-555-00000425".
+
+<tel:+426-555-00000426> a nco:CellPhoneNumber;
+    nco:phoneNumber "+426-555-00000426".
+
+<tel:+427-555-00000427> a nco:CellPhoneNumber;
+    nco:phoneNumber "+427-555-00000427".
+
+<tel:+428-555-00000428> a nco:CellPhoneNumber;
+    nco:phoneNumber "+428-555-00000428".
+
+<tel:+429-555-00000429> a nco:CellPhoneNumber;
+    nco:phoneNumber "+429-555-00000429".
+
+<tel:+430-555-00000430> a nco:CellPhoneNumber;
+    nco:phoneNumber "+430-555-00000430".
+
+<tel:+431-555-00000431> a nco:CellPhoneNumber;
+    nco:phoneNumber "+431-555-00000431".
+
+<tel:+432-555-00000432> a nco:CellPhoneNumber;
+    nco:phoneNumber "+432-555-00000432".
+
+<tel:+433-555-00000433> a nco:CellPhoneNumber;
+    nco:phoneNumber "+433-555-00000433".
+
+<tel:+434-555-00000434> a nco:CellPhoneNumber;
+    nco:phoneNumber "+434-555-00000434".
+
+<tel:+435-555-00000435> a nco:CellPhoneNumber;
+    nco:phoneNumber "+435-555-00000435".
+
+<tel:+436-555-00000436> a nco:CellPhoneNumber;
+    nco:phoneNumber "+436-555-00000436".
+
+<tel:+437-555-00000437> a nco:CellPhoneNumber;
+    nco:phoneNumber "+437-555-00000437".
+
+<tel:+438-555-00000438> a nco:CellPhoneNumber;
+    nco:phoneNumber "+438-555-00000438".
+
+<tel:+439-555-00000439> a nco:CellPhoneNumber;
+    nco:phoneNumber "+439-555-00000439".
+
+<tel:+440-555-00000440> a nco:CellPhoneNumber;
+    nco:phoneNumber "+440-555-00000440".
+
+<tel:+441-555-00000441> a nco:CellPhoneNumber;
+    nco:phoneNumber "+441-555-00000441".
+
+<tel:+442-555-00000442> a nco:CellPhoneNumber;
+    nco:phoneNumber "+442-555-00000442".
+
+<tel:+443-555-00000443> a nco:CellPhoneNumber;
+    nco:phoneNumber "+443-555-00000443".
+
+<tel:+444-555-00000444> a nco:CellPhoneNumber;
+    nco:phoneNumber "+444-555-00000444".
+
+<tel:+445-555-00000445> a nco:CellPhoneNumber;
+    nco:phoneNumber "+445-555-00000445".
+
+<tel:+446-555-00000446> a nco:CellPhoneNumber;
+    nco:phoneNumber "+446-555-00000446".
+
+<tel:+447-555-00000447> a nco:CellPhoneNumber;
+    nco:phoneNumber "+447-555-00000447".
+
+<tel:+448-555-00000448> a nco:CellPhoneNumber;
+    nco:phoneNumber "+448-555-00000448".
+
+<tel:+449-555-00000449> a nco:CellPhoneNumber;
+    nco:phoneNumber "+449-555-00000449".
+
+<tel:+450-555-00000450> a nco:CellPhoneNumber;
+    nco:phoneNumber "+450-555-00000450".
+
+<tel:+451-555-00000451> a nco:CellPhoneNumber;
+    nco:phoneNumber "+451-555-00000451".
+
+<tel:+452-555-00000452> a nco:CellPhoneNumber;
+    nco:phoneNumber "+452-555-00000452".
+
+<tel:+453-555-00000453> a nco:CellPhoneNumber;
+    nco:phoneNumber "+453-555-00000453".
+
+<tel:+454-555-00000454> a nco:CellPhoneNumber;
+    nco:phoneNumber "+454-555-00000454".
+
+<tel:+455-555-00000455> a nco:CellPhoneNumber;
+    nco:phoneNumber "+455-555-00000455".
+
+<tel:+456-555-00000456> a nco:CellPhoneNumber;
+    nco:phoneNumber "+456-555-00000456".
+
+<tel:+457-555-00000457> a nco:CellPhoneNumber;
+    nco:phoneNumber "+457-555-00000457".
+
+<tel:+458-555-00000458> a nco:CellPhoneNumber;
+    nco:phoneNumber "+458-555-00000458".
+
+<tel:+459-555-00000459> a nco:CellPhoneNumber;
+    nco:phoneNumber "+459-555-00000459".
+
+<tel:+460-555-00000460> a nco:CellPhoneNumber;
+    nco:phoneNumber "+460-555-00000460".
+
+<tel:+461-555-00000461> a nco:CellPhoneNumber;
+    nco:phoneNumber "+461-555-00000461".
+
+<tel:+462-555-00000462> a nco:CellPhoneNumber;
+    nco:phoneNumber "+462-555-00000462".
+
+<tel:+463-555-00000463> a nco:CellPhoneNumber;
+    nco:phoneNumber "+463-555-00000463".
+
+<tel:+464-555-00000464> a nco:CellPhoneNumber;
+    nco:phoneNumber "+464-555-00000464".
+
+<tel:+465-555-00000465> a nco:CellPhoneNumber;
+    nco:phoneNumber "+465-555-00000465".
+
+<tel:+466-555-00000466> a nco:CellPhoneNumber;
+    nco:phoneNumber "+466-555-00000466".
+
+<tel:+467-555-00000467> a nco:CellPhoneNumber;
+    nco:phoneNumber "+467-555-00000467".
+
+<tel:+468-555-00000468> a nco:CellPhoneNumber;
+    nco:phoneNumber "+468-555-00000468".
+
+<tel:+469-555-00000469> a nco:CellPhoneNumber;
+    nco:phoneNumber "+469-555-00000469".
+
+<tel:+470-555-00000470> a nco:CellPhoneNumber;
+    nco:phoneNumber "+470-555-00000470".
+
+<tel:+471-555-00000471> a nco:CellPhoneNumber;
+    nco:phoneNumber "+471-555-00000471".
+
+<tel:+472-555-00000472> a nco:CellPhoneNumber;
+    nco:phoneNumber "+472-555-00000472".
+
+<tel:+473-555-00000473> a nco:CellPhoneNumber;
+    nco:phoneNumber "+473-555-00000473".
+
+<tel:+474-555-00000474> a nco:CellPhoneNumber;
+    nco:phoneNumber "+474-555-00000474".
+
+<tel:+475-555-00000475> a nco:CellPhoneNumber;
+    nco:phoneNumber "+475-555-00000475".
+
+<tel:+476-555-00000476> a nco:CellPhoneNumber;
+    nco:phoneNumber "+476-555-00000476".
+
+<tel:+477-555-00000477> a nco:CellPhoneNumber;
+    nco:phoneNumber "+477-555-00000477".
+
+<tel:+478-555-00000478> a nco:CellPhoneNumber;
+    nco:phoneNumber "+478-555-00000478".
+
+<tel:+479-555-00000479> a nco:CellPhoneNumber;
+    nco:phoneNumber "+479-555-00000479".
+
+<tel:+480-555-00000480> a nco:CellPhoneNumber;
+    nco:phoneNumber "+480-555-00000480".
+
+<tel:+481-555-00000481> a nco:CellPhoneNumber;
+    nco:phoneNumber "+481-555-00000481".
+
+<tel:+482-555-00000482> a nco:CellPhoneNumber;
+    nco:phoneNumber "+482-555-00000482".
+
+<tel:+483-555-00000483> a nco:CellPhoneNumber;
+    nco:phoneNumber "+483-555-00000483".
+
+<tel:+484-555-00000484> a nco:CellPhoneNumber;
+    nco:phoneNumber "+484-555-00000484".
+
+<tel:+485-555-00000485> a nco:CellPhoneNumber;
+    nco:phoneNumber "+485-555-00000485".
+
+<tel:+486-555-00000486> a nco:CellPhoneNumber;
+    nco:phoneNumber "+486-555-00000486".
+
+<tel:+487-555-00000487> a nco:CellPhoneNumber;
+    nco:phoneNumber "+487-555-00000487".
+
+<tel:+488-555-00000488> a nco:CellPhoneNumber;
+    nco:phoneNumber "+488-555-00000488".
+
+<tel:+489-555-00000489> a nco:CellPhoneNumber;
+    nco:phoneNumber "+489-555-00000489".
+
+<tel:+490-555-00000490> a nco:CellPhoneNumber;
+    nco:phoneNumber "+490-555-00000490".
+
+<tel:+491-555-00000491> a nco:CellPhoneNumber;
+    nco:phoneNumber "+491-555-00000491".
+
+<tel:+492-555-00000492> a nco:CellPhoneNumber;
+    nco:phoneNumber "+492-555-00000492".
+
+<tel:+493-555-00000493> a nco:CellPhoneNumber;
+    nco:phoneNumber "+493-555-00000493".
+
+<tel:+494-555-00000494> a nco:CellPhoneNumber;
+    nco:phoneNumber "+494-555-00000494".
+
+<tel:+495-555-00000495> a nco:CellPhoneNumber;
+    nco:phoneNumber "+495-555-00000495".
+
+<tel:+496-555-00000496> a nco:CellPhoneNumber;
+    nco:phoneNumber "+496-555-00000496".
+
+<tel:+497-555-00000497> a nco:CellPhoneNumber;
+    nco:phoneNumber "+497-555-00000497".
+
+<tel:+498-555-00000498> a nco:CellPhoneNumber;
+    nco:phoneNumber "+498-555-00000498".
+
+<tel:+499-555-00000499> a nco:CellPhoneNumber;
+    nco:phoneNumber "+499-555-00000499".
+
+<tel:+500-555-00000500> a nco:CellPhoneNumber;
+    nco:phoneNumber "+500-555-00000500".
+
+<tel:+501-555-00000501> a nco:CellPhoneNumber;
+    nco:phoneNumber "+501-555-00000501".
+
+<tel:+502-555-00000502> a nco:CellPhoneNumber;
+    nco:phoneNumber "+502-555-00000502".
+
+<tel:+503-555-00000503> a nco:CellPhoneNumber;
+    nco:phoneNumber "+503-555-00000503".
+
+<tel:+504-555-00000504> a nco:CellPhoneNumber;
+    nco:phoneNumber "+504-555-00000504".
+
+<tel:+505-555-00000505> a nco:CellPhoneNumber;
+    nco:phoneNumber "+505-555-00000505".
+
+<tel:+506-555-00000506> a nco:CellPhoneNumber;
+    nco:phoneNumber "+506-555-00000506".
+
+<tel:+507-555-00000507> a nco:CellPhoneNumber;
+    nco:phoneNumber "+507-555-00000507".
+
+<tel:+508-555-00000508> a nco:CellPhoneNumber;
+    nco:phoneNumber "+508-555-00000508".
+
+<tel:+509-555-00000509> a nco:CellPhoneNumber;
+    nco:phoneNumber "+509-555-00000509".
+
+<tel:+510-555-00000510> a nco:CellPhoneNumber;
+    nco:phoneNumber "+510-555-00000510".
+
+<tel:+511-555-00000511> a nco:CellPhoneNumber;
+    nco:phoneNumber "+511-555-00000511".
+
+<tel:+512-555-00000512> a nco:CellPhoneNumber;
+    nco:phoneNumber "+512-555-00000512".
+
+<tel:+513-555-00000513> a nco:CellPhoneNumber;
+    nco:phoneNumber "+513-555-00000513".
+
+<tel:+514-555-00000514> a nco:CellPhoneNumber;
+    nco:phoneNumber "+514-555-00000514".
+
+<tel:+515-555-00000515> a nco:CellPhoneNumber;
+    nco:phoneNumber "+515-555-00000515".
+
+<tel:+516-555-00000516> a nco:CellPhoneNumber;
+    nco:phoneNumber "+516-555-00000516".
+
+<tel:+517-555-00000517> a nco:CellPhoneNumber;
+    nco:phoneNumber "+517-555-00000517".
+
+<tel:+518-555-00000518> a nco:CellPhoneNumber;
+    nco:phoneNumber "+518-555-00000518".
+
+<tel:+519-555-00000519> a nco:CellPhoneNumber;
+    nco:phoneNumber "+519-555-00000519".
+
+<tel:+520-555-00000520> a nco:CellPhoneNumber;
+    nco:phoneNumber "+520-555-00000520".
+
+<tel:+521-555-00000521> a nco:CellPhoneNumber;
+    nco:phoneNumber "+521-555-00000521".
+
+<tel:+522-555-00000522> a nco:CellPhoneNumber;
+    nco:phoneNumber "+522-555-00000522".
+
+<tel:+523-555-00000523> a nco:CellPhoneNumber;
+    nco:phoneNumber "+523-555-00000523".
+
+<tel:+524-555-00000524> a nco:CellPhoneNumber;
+    nco:phoneNumber "+524-555-00000524".
+
+<tel:+525-555-00000525> a nco:CellPhoneNumber;
+    nco:phoneNumber "+525-555-00000525".
+
+<tel:+526-555-00000526> a nco:CellPhoneNumber;
+    nco:phoneNumber "+526-555-00000526".
+
+<tel:+527-555-00000527> a nco:CellPhoneNumber;
+    nco:phoneNumber "+527-555-00000527".
+
+<tel:+528-555-00000528> a nco:CellPhoneNumber;
+    nco:phoneNumber "+528-555-00000528".
+
+<tel:+529-555-00000529> a nco:CellPhoneNumber;
+    nco:phoneNumber "+529-555-00000529".
+
+<tel:+530-555-00000530> a nco:CellPhoneNumber;
+    nco:phoneNumber "+530-555-00000530".
+
+<tel:+531-555-00000531> a nco:CellPhoneNumber;
+    nco:phoneNumber "+531-555-00000531".
+
+<tel:+532-555-00000532> a nco:CellPhoneNumber;
+    nco:phoneNumber "+532-555-00000532".
+
+<tel:+533-555-00000533> a nco:CellPhoneNumber;
+    nco:phoneNumber "+533-555-00000533".
+
+<tel:+534-555-00000534> a nco:CellPhoneNumber;
+    nco:phoneNumber "+534-555-00000534".
+
+<tel:+535-555-00000535> a nco:CellPhoneNumber;
+    nco:phoneNumber "+535-555-00000535".
+
+<tel:+536-555-00000536> a nco:CellPhoneNumber;
+    nco:phoneNumber "+536-555-00000536".
+
+<tel:+537-555-00000537> a nco:CellPhoneNumber;
+    nco:phoneNumber "+537-555-00000537".
+
+<tel:+538-555-00000538> a nco:CellPhoneNumber;
+    nco:phoneNumber "+538-555-00000538".
+
+<tel:+539-555-00000539> a nco:CellPhoneNumber;
+    nco:phoneNumber "+539-555-00000539".
+
+<tel:+540-555-00000540> a nco:CellPhoneNumber;
+    nco:phoneNumber "+540-555-00000540".
+
+<tel:+541-555-00000541> a nco:CellPhoneNumber;
+    nco:phoneNumber "+541-555-00000541".
+
+<tel:+542-555-00000542> a nco:CellPhoneNumber;
+    nco:phoneNumber "+542-555-00000542".
+
+<tel:+543-555-00000543> a nco:CellPhoneNumber;
+    nco:phoneNumber "+543-555-00000543".
+
+<tel:+544-555-00000544> a nco:CellPhoneNumber;
+    nco:phoneNumber "+544-555-00000544".
+
+<tel:+545-555-00000545> a nco:CellPhoneNumber;
+    nco:phoneNumber "+545-555-00000545".
+
+<tel:+546-555-00000546> a nco:CellPhoneNumber;
+    nco:phoneNumber "+546-555-00000546".
+
+<tel:+547-555-00000547> a nco:CellPhoneNumber;
+    nco:phoneNumber "+547-555-00000547".
+
+<tel:+548-555-00000548> a nco:CellPhoneNumber;
+    nco:phoneNumber "+548-555-00000548".
+
+<tel:+549-555-00000549> a nco:CellPhoneNumber;
+    nco:phoneNumber "+549-555-00000549".
+
+<tel:+550-555-00000550> a nco:CellPhoneNumber;
+    nco:phoneNumber "+550-555-00000550".
+
+<tel:+551-555-00000551> a nco:CellPhoneNumber;
+    nco:phoneNumber "+551-555-00000551".
+
+<tel:+552-555-00000552> a nco:CellPhoneNumber;
+    nco:phoneNumber "+552-555-00000552".
+
+<tel:+553-555-00000553> a nco:CellPhoneNumber;
+    nco:phoneNumber "+553-555-00000553".
+
+<tel:+554-555-00000554> a nco:CellPhoneNumber;
+    nco:phoneNumber "+554-555-00000554".
+
+<tel:+555-555-00000555> a nco:CellPhoneNumber;
+    nco:phoneNumber "+555-555-00000555".
+
+<tel:+556-555-00000556> a nco:CellPhoneNumber;
+    nco:phoneNumber "+556-555-00000556".
+
+<tel:+557-555-00000557> a nco:CellPhoneNumber;
+    nco:phoneNumber "+557-555-00000557".
+
+<tel:+558-555-00000558> a nco:CellPhoneNumber;
+    nco:phoneNumber "+558-555-00000558".
+
+<tel:+559-555-00000559> a nco:CellPhoneNumber;
+    nco:phoneNumber "+559-555-00000559".
+
+<tel:+560-555-00000560> a nco:CellPhoneNumber;
+    nco:phoneNumber "+560-555-00000560".
+
+<tel:+561-555-00000561> a nco:CellPhoneNumber;
+    nco:phoneNumber "+561-555-00000561".
+
+<tel:+562-555-00000562> a nco:CellPhoneNumber;
+    nco:phoneNumber "+562-555-00000562".
+
+<tel:+563-555-00000563> a nco:CellPhoneNumber;
+    nco:phoneNumber "+563-555-00000563".
+
+<tel:+564-555-00000564> a nco:CellPhoneNumber;
+    nco:phoneNumber "+564-555-00000564".
+
+<tel:+565-555-00000565> a nco:CellPhoneNumber;
+    nco:phoneNumber "+565-555-00000565".
+
+<tel:+566-555-00000566> a nco:CellPhoneNumber;
+    nco:phoneNumber "+566-555-00000566".
+
+<tel:+567-555-00000567> a nco:CellPhoneNumber;
+    nco:phoneNumber "+567-555-00000567".
+
+<tel:+568-555-00000568> a nco:CellPhoneNumber;
+    nco:phoneNumber "+568-555-00000568".
+
+<tel:+569-555-00000569> a nco:CellPhoneNumber;
+    nco:phoneNumber "+569-555-00000569".
+
+<tel:+570-555-00000570> a nco:CellPhoneNumber;
+    nco:phoneNumber "+570-555-00000570".
+
+<tel:+571-555-00000571> a nco:CellPhoneNumber;
+    nco:phoneNumber "+571-555-00000571".
+
+<tel:+572-555-00000572> a nco:CellPhoneNumber;
+    nco:phoneNumber "+572-555-00000572".
+
+<tel:+573-555-00000573> a nco:CellPhoneNumber;
+    nco:phoneNumber "+573-555-00000573".
+
+<tel:+574-555-00000574> a nco:CellPhoneNumber;
+    nco:phoneNumber "+574-555-00000574".
+
+<tel:+575-555-00000575> a nco:CellPhoneNumber;
+    nco:phoneNumber "+575-555-00000575".
+
+<tel:+576-555-00000576> a nco:CellPhoneNumber;
+    nco:phoneNumber "+576-555-00000576".
+
+<tel:+577-555-00000577> a nco:CellPhoneNumber;
+    nco:phoneNumber "+577-555-00000577".
+
+<tel:+578-555-00000578> a nco:CellPhoneNumber;
+    nco:phoneNumber "+578-555-00000578".
+
+<tel:+579-555-00000579> a nco:CellPhoneNumber;
+    nco:phoneNumber "+579-555-00000579".
+
+<tel:+580-555-00000580> a nco:CellPhoneNumber;
+    nco:phoneNumber "+580-555-00000580".
+
+<tel:+581-555-00000581> a nco:CellPhoneNumber;
+    nco:phoneNumber "+581-555-00000581".
+
+<tel:+582-555-00000582> a nco:CellPhoneNumber;
+    nco:phoneNumber "+582-555-00000582".
+
+<tel:+583-555-00000583> a nco:CellPhoneNumber;
+    nco:phoneNumber "+583-555-00000583".
+
+<tel:+584-555-00000584> a nco:CellPhoneNumber;
+    nco:phoneNumber "+584-555-00000584".
+
+<tel:+585-555-00000585> a nco:CellPhoneNumber;
+    nco:phoneNumber "+585-555-00000585".
+
+<tel:+586-555-00000586> a nco:CellPhoneNumber;
+    nco:phoneNumber "+586-555-00000586".
+
+<tel:+587-555-00000587> a nco:CellPhoneNumber;
+    nco:phoneNumber "+587-555-00000587".
+
+<tel:+588-555-00000588> a nco:CellPhoneNumber;
+    nco:phoneNumber "+588-555-00000588".
+
+<tel:+589-555-00000589> a nco:CellPhoneNumber;
+    nco:phoneNumber "+589-555-00000589".
+
+<tel:+590-555-00000590> a nco:CellPhoneNumber;
+    nco:phoneNumber "+590-555-00000590".
+
+<tel:+591-555-00000591> a nco:CellPhoneNumber;
+    nco:phoneNumber "+591-555-00000591".
+
+<tel:+592-555-00000592> a nco:CellPhoneNumber;
+    nco:phoneNumber "+592-555-00000592".
+
+<tel:+593-555-00000593> a nco:CellPhoneNumber;
+    nco:phoneNumber "+593-555-00000593".
+
+<tel:+594-555-00000594> a nco:CellPhoneNumber;
+    nco:phoneNumber "+594-555-00000594".
+
+<tel:+595-555-00000595> a nco:CellPhoneNumber;
+    nco:phoneNumber "+595-555-00000595".
+
+<tel:+596-555-00000596> a nco:CellPhoneNumber;
+    nco:phoneNumber "+596-555-00000596".
+
+<tel:+597-555-00000597> a nco:CellPhoneNumber;
+    nco:phoneNumber "+597-555-00000597".
+
+<tel:+598-555-00000598> a nco:CellPhoneNumber;
+    nco:phoneNumber "+598-555-00000598".
+
+<tel:+599-555-00000599> a nco:CellPhoneNumber;
+    nco:phoneNumber "+599-555-00000599".
+
+<tel:+600-555-00000600> a nco:CellPhoneNumber;
+    nco:phoneNumber "+600-555-00000600".
+
+<tel:+601-555-00000601> a nco:CellPhoneNumber;
+    nco:phoneNumber "+601-555-00000601".
+
+<tel:+602-555-00000602> a nco:CellPhoneNumber;
+    nco:phoneNumber "+602-555-00000602".
+
+<tel:+603-555-00000603> a nco:CellPhoneNumber;
+    nco:phoneNumber "+603-555-00000603".
+
+<tel:+604-555-00000604> a nco:CellPhoneNumber;
+    nco:phoneNumber "+604-555-00000604".
+
+<tel:+605-555-00000605> a nco:CellPhoneNumber;
+    nco:phoneNumber "+605-555-00000605".
+
+<tel:+606-555-00000606> a nco:CellPhoneNumber;
+    nco:phoneNumber "+606-555-00000606".
+
+<tel:+607-555-00000607> a nco:CellPhoneNumber;
+    nco:phoneNumber "+607-555-00000607".
+
+<tel:+608-555-00000608> a nco:CellPhoneNumber;
+    nco:phoneNumber "+608-555-00000608".
+
+<tel:+609-555-00000609> a nco:CellPhoneNumber;
+    nco:phoneNumber "+609-555-00000609".
+
+<tel:+610-555-00000610> a nco:CellPhoneNumber;
+    nco:phoneNumber "+610-555-00000610".
+
+<tel:+611-555-00000611> a nco:CellPhoneNumber;
+    nco:phoneNumber "+611-555-00000611".
+
+<tel:+612-555-00000612> a nco:CellPhoneNumber;
+    nco:phoneNumber "+612-555-00000612".
+
+<tel:+613-555-00000613> a nco:CellPhoneNumber;
+    nco:phoneNumber "+613-555-00000613".
+
+<tel:+614-555-00000614> a nco:CellPhoneNumber;
+    nco:phoneNumber "+614-555-00000614".
+
+<tel:+615-555-00000615> a nco:CellPhoneNumber;
+    nco:phoneNumber "+615-555-00000615".
+
+<tel:+616-555-00000616> a nco:CellPhoneNumber;
+    nco:phoneNumber "+616-555-00000616".
+
+<tel:+617-555-00000617> a nco:CellPhoneNumber;
+    nco:phoneNumber "+617-555-00000617".
+
+<tel:+618-555-00000618> a nco:CellPhoneNumber;
+    nco:phoneNumber "+618-555-00000618".
+
+<tel:+619-555-00000619> a nco:CellPhoneNumber;
+    nco:phoneNumber "+619-555-00000619".
+
+<tel:+620-555-00000620> a nco:CellPhoneNumber;
+    nco:phoneNumber "+620-555-00000620".
+
+<tel:+621-555-00000621> a nco:CellPhoneNumber;
+    nco:phoneNumber "+621-555-00000621".
+
+<tel:+622-555-00000622> a nco:CellPhoneNumber;
+    nco:phoneNumber "+622-555-00000622".
+
+<tel:+623-555-00000623> a nco:CellPhoneNumber;
+    nco:phoneNumber "+623-555-00000623".
+
+<tel:+624-555-00000624> a nco:CellPhoneNumber;
+    nco:phoneNumber "+624-555-00000624".
+
+<tel:+625-555-00000625> a nco:CellPhoneNumber;
+    nco:phoneNumber "+625-555-00000625".
+
+<tel:+626-555-00000626> a nco:CellPhoneNumber;
+    nco:phoneNumber "+626-555-00000626".
+
+<tel:+627-555-00000627> a nco:CellPhoneNumber;
+    nco:phoneNumber "+627-555-00000627".
+
+<tel:+628-555-00000628> a nco:CellPhoneNumber;
+    nco:phoneNumber "+628-555-00000628".
+
+<tel:+629-555-00000629> a nco:CellPhoneNumber;
+    nco:phoneNumber "+629-555-00000629".
+
+<tel:+630-555-00000630> a nco:CellPhoneNumber;
+    nco:phoneNumber "+630-555-00000630".
+
+<tel:+631-555-00000631> a nco:CellPhoneNumber;
+    nco:phoneNumber "+631-555-00000631".
+
+<tel:+632-555-00000632> a nco:CellPhoneNumber;
+    nco:phoneNumber "+632-555-00000632".
+
+<tel:+633-555-00000633> a nco:CellPhoneNumber;
+    nco:phoneNumber "+633-555-00000633".
+
+<tel:+634-555-00000634> a nco:CellPhoneNumber;
+    nco:phoneNumber "+634-555-00000634".
+
+<tel:+635-555-00000635> a nco:CellPhoneNumber;
+    nco:phoneNumber "+635-555-00000635".
+
+<tel:+636-555-00000636> a nco:CellPhoneNumber;
+    nco:phoneNumber "+636-555-00000636".
+
+<tel:+637-555-00000637> a nco:CellPhoneNumber;
+    nco:phoneNumber "+637-555-00000637".
+
+<tel:+638-555-00000638> a nco:CellPhoneNumber;
+    nco:phoneNumber "+638-555-00000638".
+
+<tel:+639-555-00000639> a nco:CellPhoneNumber;
+    nco:phoneNumber "+639-555-00000639".
+
+<tel:+640-555-00000640> a nco:CellPhoneNumber;
+    nco:phoneNumber "+640-555-00000640".
+
+<tel:+641-555-00000641> a nco:CellPhoneNumber;
+    nco:phoneNumber "+641-555-00000641".
+
+<tel:+642-555-00000642> a nco:CellPhoneNumber;
+    nco:phoneNumber "+642-555-00000642".
+
+<tel:+643-555-00000643> a nco:CellPhoneNumber;
+    nco:phoneNumber "+643-555-00000643".
+
+<tel:+644-555-00000644> a nco:CellPhoneNumber;
+    nco:phoneNumber "+644-555-00000644".
+
+<tel:+645-555-00000645> a nco:CellPhoneNumber;
+    nco:phoneNumber "+645-555-00000645".
+
+<tel:+646-555-00000646> a nco:CellPhoneNumber;
+    nco:phoneNumber "+646-555-00000646".
+
+<tel:+647-555-00000647> a nco:CellPhoneNumber;
+    nco:phoneNumber "+647-555-00000647".
+
+<tel:+648-555-00000648> a nco:CellPhoneNumber;
+    nco:phoneNumber "+648-555-00000648".
+
+<tel:+649-555-00000649> a nco:CellPhoneNumber;
+    nco:phoneNumber "+649-555-00000649".
+
+<tel:+650-555-00000650> a nco:CellPhoneNumber;
+    nco:phoneNumber "+650-555-00000650".
+
+<tel:+651-555-00000651> a nco:CellPhoneNumber;
+    nco:phoneNumber "+651-555-00000651".
+
+<tel:+652-555-00000652> a nco:CellPhoneNumber;
+    nco:phoneNumber "+652-555-00000652".
+
+<tel:+653-555-00000653> a nco:CellPhoneNumber;
+    nco:phoneNumber "+653-555-00000653".
+
+<tel:+654-555-00000654> a nco:CellPhoneNumber;
+    nco:phoneNumber "+654-555-00000654".
+
+<tel:+655-555-00000655> a nco:CellPhoneNumber;
+    nco:phoneNumber "+655-555-00000655".
+
+<tel:+656-555-00000656> a nco:CellPhoneNumber;
+    nco:phoneNumber "+656-555-00000656".
+
+<tel:+657-555-00000657> a nco:CellPhoneNumber;
+    nco:phoneNumber "+657-555-00000657".
+
+<tel:+658-555-00000658> a nco:CellPhoneNumber;
+    nco:phoneNumber "+658-555-00000658".
+
+<tel:+659-555-00000659> a nco:CellPhoneNumber;
+    nco:phoneNumber "+659-555-00000659".
+
+<tel:+660-555-00000660> a nco:CellPhoneNumber;
+    nco:phoneNumber "+660-555-00000660".
+
+<tel:+661-555-00000661> a nco:CellPhoneNumber;
+    nco:phoneNumber "+661-555-00000661".
+
+<tel:+662-555-00000662> a nco:CellPhoneNumber;
+    nco:phoneNumber "+662-555-00000662".
+
+<tel:+663-555-00000663> a nco:CellPhoneNumber;
+    nco:phoneNumber "+663-555-00000663".
+
+<tel:+664-555-00000664> a nco:CellPhoneNumber;
+    nco:phoneNumber "+664-555-00000664".
+
+<tel:+665-555-00000665> a nco:CellPhoneNumber;
+    nco:phoneNumber "+665-555-00000665".
+
+<tel:+666-555-00000666> a nco:CellPhoneNumber;
+    nco:phoneNumber "+666-555-00000666".
+
+<tel:+667-555-00000667> a nco:CellPhoneNumber;
+    nco:phoneNumber "+667-555-00000667".
+
+<tel:+668-555-00000668> a nco:CellPhoneNumber;
+    nco:phoneNumber "+668-555-00000668".
+
+<tel:+669-555-00000669> a nco:CellPhoneNumber;
+    nco:phoneNumber "+669-555-00000669".
+
+<tel:+670-555-00000670> a nco:CellPhoneNumber;
+    nco:phoneNumber "+670-555-00000670".
+
+<tel:+671-555-00000671> a nco:CellPhoneNumber;
+    nco:phoneNumber "+671-555-00000671".
+
+<tel:+672-555-00000672> a nco:CellPhoneNumber;
+    nco:phoneNumber "+672-555-00000672".
+
+<tel:+673-555-00000673> a nco:CellPhoneNumber;
+    nco:phoneNumber "+673-555-00000673".
+
+<tel:+674-555-00000674> a nco:CellPhoneNumber;
+    nco:phoneNumber "+674-555-00000674".
+
+<tel:+675-555-00000675> a nco:CellPhoneNumber;
+    nco:phoneNumber "+675-555-00000675".
+
+<tel:+676-555-00000676> a nco:CellPhoneNumber;
+    nco:phoneNumber "+676-555-00000676".
+
+<tel:+677-555-00000677> a nco:CellPhoneNumber;
+    nco:phoneNumber "+677-555-00000677".
+
+<tel:+678-555-00000678> a nco:CellPhoneNumber;
+    nco:phoneNumber "+678-555-00000678".
+
+<tel:+679-555-00000679> a nco:CellPhoneNumber;
+    nco:phoneNumber "+679-555-00000679".
+
+<tel:+680-555-00000680> a nco:CellPhoneNumber;
+    nco:phoneNumber "+680-555-00000680".
+
+<tel:+681-555-00000681> a nco:CellPhoneNumber;
+    nco:phoneNumber "+681-555-00000681".
+
+<tel:+682-555-00000682> a nco:CellPhoneNumber;
+    nco:phoneNumber "+682-555-00000682".
+
+<tel:+683-555-00000683> a nco:CellPhoneNumber;
+    nco:phoneNumber "+683-555-00000683".
+
+<tel:+684-555-00000684> a nco:CellPhoneNumber;
+    nco:phoneNumber "+684-555-00000684".
+
+<tel:+685-555-00000685> a nco:CellPhoneNumber;
+    nco:phoneNumber "+685-555-00000685".
+
+<tel:+686-555-00000686> a nco:CellPhoneNumber;
+    nco:phoneNumber "+686-555-00000686".
+
+<tel:+687-555-00000687> a nco:CellPhoneNumber;
+    nco:phoneNumber "+687-555-00000687".
+
+<tel:+688-555-00000688> a nco:CellPhoneNumber;
+    nco:phoneNumber "+688-555-00000688".
+
+<tel:+689-555-00000689> a nco:CellPhoneNumber;
+    nco:phoneNumber "+689-555-00000689".
+
+<tel:+690-555-00000690> a nco:CellPhoneNumber;
+    nco:phoneNumber "+690-555-00000690".
+
+<tel:+691-555-00000691> a nco:CellPhoneNumber;
+    nco:phoneNumber "+691-555-00000691".
+
+<tel:+692-555-00000692> a nco:CellPhoneNumber;
+    nco:phoneNumber "+692-555-00000692".
+
+<tel:+693-555-00000693> a nco:CellPhoneNumber;
+    nco:phoneNumber "+693-555-00000693".
+
+<tel:+694-555-00000694> a nco:CellPhoneNumber;
+    nco:phoneNumber "+694-555-00000694".
+
+<tel:+695-555-00000695> a nco:CellPhoneNumber;
+    nco:phoneNumber "+695-555-00000695".
+
+<tel:+696-555-00000696> a nco:CellPhoneNumber;
+    nco:phoneNumber "+696-555-00000696".
+
+<tel:+697-555-00000697> a nco:CellPhoneNumber;
+    nco:phoneNumber "+697-555-00000697".
+
+<tel:+698-555-00000698> a nco:CellPhoneNumber;
+    nco:phoneNumber "+698-555-00000698".
+
+<tel:+699-555-00000699> a nco:CellPhoneNumber;
+    nco:phoneNumber "+699-555-00000699".
+
+<tel:+700-555-00000700> a nco:CellPhoneNumber;
+    nco:phoneNumber "+700-555-00000700".
+
+<tel:+701-555-00000701> a nco:CellPhoneNumber;
+    nco:phoneNumber "+701-555-00000701".
+
+<tel:+702-555-00000702> a nco:CellPhoneNumber;
+    nco:phoneNumber "+702-555-00000702".
+
+<tel:+703-555-00000703> a nco:CellPhoneNumber;
+    nco:phoneNumber "+703-555-00000703".
+
+<tel:+704-555-00000704> a nco:CellPhoneNumber;
+    nco:phoneNumber "+704-555-00000704".
+
+<tel:+705-555-00000705> a nco:CellPhoneNumber;
+    nco:phoneNumber "+705-555-00000705".
+
+<tel:+706-555-00000706> a nco:CellPhoneNumber;
+    nco:phoneNumber "+706-555-00000706".
+
+<tel:+707-555-00000707> a nco:CellPhoneNumber;
+    nco:phoneNumber "+707-555-00000707".
+
+<tel:+708-555-00000708> a nco:CellPhoneNumber;
+    nco:phoneNumber "+708-555-00000708".
+
+<tel:+709-555-00000709> a nco:CellPhoneNumber;
+    nco:phoneNumber "+709-555-00000709".
+
+<tel:+710-555-00000710> a nco:CellPhoneNumber;
+    nco:phoneNumber "+710-555-00000710".
+
+<tel:+711-555-00000711> a nco:CellPhoneNumber;
+    nco:phoneNumber "+711-555-00000711".
+
+<tel:+712-555-00000712> a nco:CellPhoneNumber;
+    nco:phoneNumber "+712-555-00000712".
+
+<tel:+713-555-00000713> a nco:CellPhoneNumber;
+    nco:phoneNumber "+713-555-00000713".
+
+<tel:+714-555-00000714> a nco:CellPhoneNumber;
+    nco:phoneNumber "+714-555-00000714".
+
+<tel:+715-555-00000715> a nco:CellPhoneNumber;
+    nco:phoneNumber "+715-555-00000715".
+
+<tel:+716-555-00000716> a nco:CellPhoneNumber;
+    nco:phoneNumber "+716-555-00000716".
+
+<tel:+717-555-00000717> a nco:CellPhoneNumber;
+    nco:phoneNumber "+717-555-00000717".
+
+<tel:+718-555-00000718> a nco:CellPhoneNumber;
+    nco:phoneNumber "+718-555-00000718".
+
+<tel:+719-555-00000719> a nco:CellPhoneNumber;
+    nco:phoneNumber "+719-555-00000719".
+
+<tel:+720-555-00000720> a nco:CellPhoneNumber;
+    nco:phoneNumber "+720-555-00000720".
+
+<tel:+721-555-00000721> a nco:CellPhoneNumber;
+    nco:phoneNumber "+721-555-00000721".
+
+<tel:+722-555-00000722> a nco:CellPhoneNumber;
+    nco:phoneNumber "+722-555-00000722".
+
+<tel:+723-555-00000723> a nco:CellPhoneNumber;
+    nco:phoneNumber "+723-555-00000723".
+
+<tel:+724-555-00000724> a nco:CellPhoneNumber;
+    nco:phoneNumber "+724-555-00000724".
+
+<tel:+725-555-00000725> a nco:CellPhoneNumber;
+    nco:phoneNumber "+725-555-00000725".
+
+<tel:+726-555-00000726> a nco:CellPhoneNumber;
+    nco:phoneNumber "+726-555-00000726".
+
+<tel:+727-555-00000727> a nco:CellPhoneNumber;
+    nco:phoneNumber "+727-555-00000727".
+
+<tel:+728-555-00000728> a nco:CellPhoneNumber;
+    nco:phoneNumber "+728-555-00000728".
+
+<tel:+729-555-00000729> a nco:CellPhoneNumber;
+    nco:phoneNumber "+729-555-00000729".
+
+<tel:+730-555-00000730> a nco:CellPhoneNumber;
+    nco:phoneNumber "+730-555-00000730".
+
+<tel:+731-555-00000731> a nco:CellPhoneNumber;
+    nco:phoneNumber "+731-555-00000731".
+
+<tel:+732-555-00000732> a nco:CellPhoneNumber;
+    nco:phoneNumber "+732-555-00000732".
+
+<tel:+733-555-00000733> a nco:CellPhoneNumber;
+    nco:phoneNumber "+733-555-00000733".
+
+<tel:+734-555-00000734> a nco:CellPhoneNumber;
+    nco:phoneNumber "+734-555-00000734".
+
+<tel:+735-555-00000735> a nco:CellPhoneNumber;
+    nco:phoneNumber "+735-555-00000735".
+
+<tel:+736-555-00000736> a nco:CellPhoneNumber;
+    nco:phoneNumber "+736-555-00000736".
+
+<tel:+737-555-00000737> a nco:CellPhoneNumber;
+    nco:phoneNumber "+737-555-00000737".
+
+<tel:+738-555-00000738> a nco:CellPhoneNumber;
+    nco:phoneNumber "+738-555-00000738".
+
+<tel:+739-555-00000739> a nco:CellPhoneNumber;
+    nco:phoneNumber "+739-555-00000739".
+
+<tel:+740-555-00000740> a nco:CellPhoneNumber;
+    nco:phoneNumber "+740-555-00000740".
+
+<tel:+741-555-00000741> a nco:CellPhoneNumber;
+    nco:phoneNumber "+741-555-00000741".
+
+<tel:+742-555-00000742> a nco:CellPhoneNumber;
+    nco:phoneNumber "+742-555-00000742".
+
+<tel:+743-555-00000743> a nco:CellPhoneNumber;
+    nco:phoneNumber "+743-555-00000743".
+
+<tel:+744-555-00000744> a nco:CellPhoneNumber;
+    nco:phoneNumber "+744-555-00000744".
+
+<tel:+745-555-00000745> a nco:CellPhoneNumber;
+    nco:phoneNumber "+745-555-00000745".
+
+<tel:+746-555-00000746> a nco:CellPhoneNumber;
+    nco:phoneNumber "+746-555-00000746".
+
+<tel:+747-555-00000747> a nco:CellPhoneNumber;
+    nco:phoneNumber "+747-555-00000747".
+
+<tel:+748-555-00000748> a nco:CellPhoneNumber;
+    nco:phoneNumber "+748-555-00000748".
+
+<tel:+749-555-00000749> a nco:CellPhoneNumber;
+    nco:phoneNumber "+749-555-00000749".
+
+<tel:+750-555-00000750> a nco:CellPhoneNumber;
+    nco:phoneNumber "+750-555-00000750".
+
+<tel:+751-555-00000751> a nco:CellPhoneNumber;
+    nco:phoneNumber "+751-555-00000751".
+
+<tel:+752-555-00000752> a nco:CellPhoneNumber;
+    nco:phoneNumber "+752-555-00000752".
+
+<tel:+753-555-00000753> a nco:CellPhoneNumber;
+    nco:phoneNumber "+753-555-00000753".
+
+<tel:+754-555-00000754> a nco:CellPhoneNumber;
+    nco:phoneNumber "+754-555-00000754".
+
+<tel:+755-555-00000755> a nco:CellPhoneNumber;
+    nco:phoneNumber "+755-555-00000755".
+
+<tel:+756-555-00000756> a nco:CellPhoneNumber;
+    nco:phoneNumber "+756-555-00000756".
+
+<tel:+757-555-00000757> a nco:CellPhoneNumber;
+    nco:phoneNumber "+757-555-00000757".
+
+<tel:+758-555-00000758> a nco:CellPhoneNumber;
+    nco:phoneNumber "+758-555-00000758".
+
+<tel:+759-555-00000759> a nco:CellPhoneNumber;
+    nco:phoneNumber "+759-555-00000759".
+
+<tel:+760-555-00000760> a nco:CellPhoneNumber;
+    nco:phoneNumber "+760-555-00000760".
+
+<tel:+761-555-00000761> a nco:CellPhoneNumber;
+    nco:phoneNumber "+761-555-00000761".
+
+<tel:+762-555-00000762> a nco:CellPhoneNumber;
+    nco:phoneNumber "+762-555-00000762".
+
+<tel:+763-555-00000763> a nco:CellPhoneNumber;
+    nco:phoneNumber "+763-555-00000763".
+
+<tel:+764-555-00000764> a nco:CellPhoneNumber;
+    nco:phoneNumber "+764-555-00000764".
+
+<tel:+765-555-00000765> a nco:CellPhoneNumber;
+    nco:phoneNumber "+765-555-00000765".
+
+<tel:+766-555-00000766> a nco:CellPhoneNumber;
+    nco:phoneNumber "+766-555-00000766".
+
+<tel:+767-555-00000767> a nco:CellPhoneNumber;
+    nco:phoneNumber "+767-555-00000767".
+
+<tel:+768-555-00000768> a nco:CellPhoneNumber;
+    nco:phoneNumber "+768-555-00000768".
+
+<tel:+769-555-00000769> a nco:CellPhoneNumber;
+    nco:phoneNumber "+769-555-00000769".
+
+<tel:+770-555-00000770> a nco:CellPhoneNumber;
+    nco:phoneNumber "+770-555-00000770".
+
+<tel:+771-555-00000771> a nco:CellPhoneNumber;
+    nco:phoneNumber "+771-555-00000771".
+
+<tel:+772-555-00000772> a nco:CellPhoneNumber;
+    nco:phoneNumber "+772-555-00000772".
+
+<tel:+773-555-00000773> a nco:CellPhoneNumber;
+    nco:phoneNumber "+773-555-00000773".
+
+<tel:+774-555-00000774> a nco:CellPhoneNumber;
+    nco:phoneNumber "+774-555-00000774".
+
+<tel:+775-555-00000775> a nco:CellPhoneNumber;
+    nco:phoneNumber "+775-555-00000775".
+
+<tel:+776-555-00000776> a nco:CellPhoneNumber;
+    nco:phoneNumber "+776-555-00000776".
+
+<tel:+777-555-00000777> a nco:CellPhoneNumber;
+    nco:phoneNumber "+777-555-00000777".
+
+<tel:+778-555-00000778> a nco:CellPhoneNumber;
+    nco:phoneNumber "+778-555-00000778".
+
+<tel:+779-555-00000779> a nco:CellPhoneNumber;
+    nco:phoneNumber "+779-555-00000779".
+
+<tel:+780-555-00000780> a nco:CellPhoneNumber;
+    nco:phoneNumber "+780-555-00000780".
+
+<tel:+781-555-00000781> a nco:CellPhoneNumber;
+    nco:phoneNumber "+781-555-00000781".
+
+<tel:+782-555-00000782> a nco:CellPhoneNumber;
+    nco:phoneNumber "+782-555-00000782".
+
+<tel:+783-555-00000783> a nco:CellPhoneNumber;
+    nco:phoneNumber "+783-555-00000783".
+
+<tel:+784-555-00000784> a nco:CellPhoneNumber;
+    nco:phoneNumber "+784-555-00000784".
+
+<tel:+785-555-00000785> a nco:CellPhoneNumber;
+    nco:phoneNumber "+785-555-00000785".
+
+<tel:+786-555-00000786> a nco:CellPhoneNumber;
+    nco:phoneNumber "+786-555-00000786".
+
+<tel:+787-555-00000787> a nco:CellPhoneNumber;
+    nco:phoneNumber "+787-555-00000787".
+
+<tel:+788-555-00000788> a nco:CellPhoneNumber;
+    nco:phoneNumber "+788-555-00000788".
+
+<tel:+789-555-00000789> a nco:CellPhoneNumber;
+    nco:phoneNumber "+789-555-00000789".
+
+<tel:+790-555-00000790> a nco:CellPhoneNumber;
+    nco:phoneNumber "+790-555-00000790".
+
+<tel:+791-555-00000791> a nco:CellPhoneNumber;
+    nco:phoneNumber "+791-555-00000791".
+
+<tel:+792-555-00000792> a nco:CellPhoneNumber;
+    nco:phoneNumber "+792-555-00000792".
+
+<tel:+793-555-00000793> a nco:CellPhoneNumber;
+    nco:phoneNumber "+793-555-00000793".
+
+<tel:+794-555-00000794> a nco:CellPhoneNumber;
+    nco:phoneNumber "+794-555-00000794".
+
+<tel:+795-555-00000795> a nco:CellPhoneNumber;
+    nco:phoneNumber "+795-555-00000795".
+
+<tel:+796-555-00000796> a nco:CellPhoneNumber;
+    nco:phoneNumber "+796-555-00000796".
+
+<tel:+797-555-00000797> a nco:CellPhoneNumber;
+    nco:phoneNumber "+797-555-00000797".
+
+<tel:+798-555-00000798> a nco:CellPhoneNumber;
+    nco:phoneNumber "+798-555-00000798".
+
+<tel:+799-555-00000799> a nco:CellPhoneNumber;
+    nco:phoneNumber "+799-555-00000799".
+
+<tel:+800-555-00000800> a nco:CellPhoneNumber;
+    nco:phoneNumber "+800-555-00000800".
+
+<tel:+801-555-00000801> a nco:CellPhoneNumber;
+    nco:phoneNumber "+801-555-00000801".
+
+<tel:+802-555-00000802> a nco:CellPhoneNumber;
+    nco:phoneNumber "+802-555-00000802".
+
+<tel:+803-555-00000803> a nco:CellPhoneNumber;
+    nco:phoneNumber "+803-555-00000803".
+
+<tel:+804-555-00000804> a nco:CellPhoneNumber;
+    nco:phoneNumber "+804-555-00000804".
+
+<tel:+805-555-00000805> a nco:CellPhoneNumber;
+    nco:phoneNumber "+805-555-00000805".
+
+<tel:+806-555-00000806> a nco:CellPhoneNumber;
+    nco:phoneNumber "+806-555-00000806".
+
+<tel:+807-555-00000807> a nco:CellPhoneNumber;
+    nco:phoneNumber "+807-555-00000807".
+
+<tel:+808-555-00000808> a nco:CellPhoneNumber;
+    nco:phoneNumber "+808-555-00000808".
+
+<tel:+809-555-00000809> a nco:CellPhoneNumber;
+    nco:phoneNumber "+809-555-00000809".
+
+<tel:+810-555-00000810> a nco:CellPhoneNumber;
+    nco:phoneNumber "+810-555-00000810".
+
+<tel:+811-555-00000811> a nco:CellPhoneNumber;
+    nco:phoneNumber "+811-555-00000811".
+
+<tel:+812-555-00000812> a nco:CellPhoneNumber;
+    nco:phoneNumber "+812-555-00000812".
+
+<tel:+813-555-00000813> a nco:CellPhoneNumber;
+    nco:phoneNumber "+813-555-00000813".
+
+<tel:+814-555-00000814> a nco:CellPhoneNumber;
+    nco:phoneNumber "+814-555-00000814".
+
+<tel:+815-555-00000815> a nco:CellPhoneNumber;
+    nco:phoneNumber "+815-555-00000815".
+
+<tel:+816-555-00000816> a nco:CellPhoneNumber;
+    nco:phoneNumber "+816-555-00000816".
+
+<tel:+817-555-00000817> a nco:CellPhoneNumber;
+    nco:phoneNumber "+817-555-00000817".
+
+<tel:+818-555-00000818> a nco:CellPhoneNumber;
+    nco:phoneNumber "+818-555-00000818".
+
+<tel:+819-555-00000819> a nco:CellPhoneNumber;
+    nco:phoneNumber "+819-555-00000819".
+
+<tel:+820-555-00000820> a nco:CellPhoneNumber;
+    nco:phoneNumber "+820-555-00000820".
+
+<tel:+821-555-00000821> a nco:CellPhoneNumber;
+    nco:phoneNumber "+821-555-00000821".
+
+<tel:+822-555-00000822> a nco:CellPhoneNumber;
+    nco:phoneNumber "+822-555-00000822".
+
+<tel:+823-555-00000823> a nco:CellPhoneNumber;
+    nco:phoneNumber "+823-555-00000823".
+
+<tel:+824-555-00000824> a nco:CellPhoneNumber;
+    nco:phoneNumber "+824-555-00000824".
+
+<tel:+825-555-00000825> a nco:CellPhoneNumber;
+    nco:phoneNumber "+825-555-00000825".
+
+<tel:+826-555-00000826> a nco:CellPhoneNumber;
+    nco:phoneNumber "+826-555-00000826".
+
+<tel:+827-555-00000827> a nco:CellPhoneNumber;
+    nco:phoneNumber "+827-555-00000827".
+
+<tel:+828-555-00000828> a nco:CellPhoneNumber;
+    nco:phoneNumber "+828-555-00000828".
+
+<tel:+829-555-00000829> a nco:CellPhoneNumber;
+    nco:phoneNumber "+829-555-00000829".
+
+<tel:+830-555-00000830> a nco:CellPhoneNumber;
+    nco:phoneNumber "+830-555-00000830".
+
+<tel:+831-555-00000831> a nco:CellPhoneNumber;
+    nco:phoneNumber "+831-555-00000831".
+
+<tel:+832-555-00000832> a nco:CellPhoneNumber;
+    nco:phoneNumber "+832-555-00000832".
+
+<tel:+833-555-00000833> a nco:CellPhoneNumber;
+    nco:phoneNumber "+833-555-00000833".
+
+<tel:+834-555-00000834> a nco:CellPhoneNumber;
+    nco:phoneNumber "+834-555-00000834".
+
+<tel:+835-555-00000835> a nco:CellPhoneNumber;
+    nco:phoneNumber "+835-555-00000835".
+
+<tel:+836-555-00000836> a nco:CellPhoneNumber;
+    nco:phoneNumber "+836-555-00000836".
+
+<tel:+837-555-00000837> a nco:CellPhoneNumber;
+    nco:phoneNumber "+837-555-00000837".
+
+<tel:+838-555-00000838> a nco:CellPhoneNumber;
+    nco:phoneNumber "+838-555-00000838".
+
+<tel:+839-555-00000839> a nco:CellPhoneNumber;
+    nco:phoneNumber "+839-555-00000839".
+
+<tel:+840-555-00000840> a nco:CellPhoneNumber;
+    nco:phoneNumber "+840-555-00000840".
+
+<tel:+841-555-00000841> a nco:CellPhoneNumber;
+    nco:phoneNumber "+841-555-00000841".
+
+<tel:+842-555-00000842> a nco:CellPhoneNumber;
+    nco:phoneNumber "+842-555-00000842".
+
+<tel:+843-555-00000843> a nco:CellPhoneNumber;
+    nco:phoneNumber "+843-555-00000843".
+
+<tel:+844-555-00000844> a nco:CellPhoneNumber;
+    nco:phoneNumber "+844-555-00000844".
+
+<tel:+845-555-00000845> a nco:CellPhoneNumber;
+    nco:phoneNumber "+845-555-00000845".
+
+<tel:+846-555-00000846> a nco:CellPhoneNumber;
+    nco:phoneNumber "+846-555-00000846".
+
+<tel:+847-555-00000847> a nco:CellPhoneNumber;
+    nco:phoneNumber "+847-555-00000847".
+
+<tel:+848-555-00000848> a nco:CellPhoneNumber;
+    nco:phoneNumber "+848-555-00000848".
+
+<tel:+849-555-00000849> a nco:CellPhoneNumber;
+    nco:phoneNumber "+849-555-00000849".
+
+<tel:+850-555-00000850> a nco:CellPhoneNumber;
+    nco:phoneNumber "+850-555-00000850".
+
+<tel:+851-555-00000851> a nco:CellPhoneNumber;
+    nco:phoneNumber "+851-555-00000851".
+
+<tel:+852-555-00000852> a nco:CellPhoneNumber;
+    nco:phoneNumber "+852-555-00000852".
+
+<tel:+853-555-00000853> a nco:CellPhoneNumber;
+    nco:phoneNumber "+853-555-00000853".
+
+<tel:+854-555-00000854> a nco:CellPhoneNumber;
+    nco:phoneNumber "+854-555-00000854".
+
+<tel:+855-555-00000855> a nco:CellPhoneNumber;
+    nco:phoneNumber "+855-555-00000855".
+
+<tel:+856-555-00000856> a nco:CellPhoneNumber;
+    nco:phoneNumber "+856-555-00000856".
+
+<tel:+857-555-00000857> a nco:CellPhoneNumber;
+    nco:phoneNumber "+857-555-00000857".
+
+<tel:+858-555-00000858> a nco:CellPhoneNumber;
+    nco:phoneNumber "+858-555-00000858".
+
+<tel:+859-555-00000859> a nco:CellPhoneNumber;
+    nco:phoneNumber "+859-555-00000859".
+
+<tel:+860-555-00000860> a nco:CellPhoneNumber;
+    nco:phoneNumber "+860-555-00000860".
+
+<tel:+861-555-00000861> a nco:CellPhoneNumber;
+    nco:phoneNumber "+861-555-00000861".
+
+<tel:+862-555-00000862> a nco:CellPhoneNumber;
+    nco:phoneNumber "+862-555-00000862".
+
+<tel:+863-555-00000863> a nco:CellPhoneNumber;
+    nco:phoneNumber "+863-555-00000863".
+
+<tel:+864-555-00000864> a nco:CellPhoneNumber;
+    nco:phoneNumber "+864-555-00000864".
+
+<tel:+865-555-00000865> a nco:CellPhoneNumber;
+    nco:phoneNumber "+865-555-00000865".
+
+<tel:+866-555-00000866> a nco:CellPhoneNumber;
+    nco:phoneNumber "+866-555-00000866".
+
+<tel:+867-555-00000867> a nco:CellPhoneNumber;
+    nco:phoneNumber "+867-555-00000867".
+
+<tel:+868-555-00000868> a nco:CellPhoneNumber;
+    nco:phoneNumber "+868-555-00000868".
+
+<tel:+869-555-00000869> a nco:CellPhoneNumber;
+    nco:phoneNumber "+869-555-00000869".
+
+<tel:+870-555-00000870> a nco:CellPhoneNumber;
+    nco:phoneNumber "+870-555-00000870".
+
+<tel:+871-555-00000871> a nco:CellPhoneNumber;
+    nco:phoneNumber "+871-555-00000871".
+
+<tel:+872-555-00000872> a nco:CellPhoneNumber;
+    nco:phoneNumber "+872-555-00000872".
+
+<tel:+873-555-00000873> a nco:CellPhoneNumber;
+    nco:phoneNumber "+873-555-00000873".
+
+<tel:+874-555-00000874> a nco:CellPhoneNumber;
+    nco:phoneNumber "+874-555-00000874".
+
+<tel:+875-555-00000875> a nco:CellPhoneNumber;
+    nco:phoneNumber "+875-555-00000875".
+
+<tel:+876-555-00000876> a nco:CellPhoneNumber;
+    nco:phoneNumber "+876-555-00000876".
+
+<tel:+877-555-00000877> a nco:CellPhoneNumber;
+    nco:phoneNumber "+877-555-00000877".
+
+<tel:+878-555-00000878> a nco:CellPhoneNumber;
+    nco:phoneNumber "+878-555-00000878".
+
+<tel:+879-555-00000879> a nco:CellPhoneNumber;
+    nco:phoneNumber "+879-555-00000879".
+
+<tel:+880-555-00000880> a nco:CellPhoneNumber;
+    nco:phoneNumber "+880-555-00000880".
+
+<tel:+881-555-00000881> a nco:CellPhoneNumber;
+    nco:phoneNumber "+881-555-00000881".
+
+<tel:+882-555-00000882> a nco:CellPhoneNumber;
+    nco:phoneNumber "+882-555-00000882".
+
+<tel:+883-555-00000883> a nco:CellPhoneNumber;
+    nco:phoneNumber "+883-555-00000883".
+
+<tel:+884-555-00000884> a nco:CellPhoneNumber;
+    nco:phoneNumber "+884-555-00000884".
+
+<tel:+885-555-00000885> a nco:CellPhoneNumber;
+    nco:phoneNumber "+885-555-00000885".
+
+<tel:+886-555-00000886> a nco:CellPhoneNumber;
+    nco:phoneNumber "+886-555-00000886".
+
+<tel:+887-555-00000887> a nco:CellPhoneNumber;
+    nco:phoneNumber "+887-555-00000887".
+
+<tel:+888-555-00000888> a nco:CellPhoneNumber;
+    nco:phoneNumber "+888-555-00000888".
+
+<tel:+889-555-00000889> a nco:CellPhoneNumber;
+    nco:phoneNumber "+889-555-00000889".
+
+<tel:+890-555-00000890> a nco:CellPhoneNumber;
+    nco:phoneNumber "+890-555-00000890".
+
+<tel:+891-555-00000891> a nco:CellPhoneNumber;
+    nco:phoneNumber "+891-555-00000891".
+
+<tel:+892-555-00000892> a nco:CellPhoneNumber;
+    nco:phoneNumber "+892-555-00000892".
+
+<tel:+893-555-00000893> a nco:CellPhoneNumber;
+    nco:phoneNumber "+893-555-00000893".
+
+<tel:+894-555-00000894> a nco:CellPhoneNumber;
+    nco:phoneNumber "+894-555-00000894".
+
+<tel:+895-555-00000895> a nco:CellPhoneNumber;
+    nco:phoneNumber "+895-555-00000895".
+
+<tel:+896-555-00000896> a nco:CellPhoneNumber;
+    nco:phoneNumber "+896-555-00000896".
+
+<tel:+897-555-00000897> a nco:CellPhoneNumber;
+    nco:phoneNumber "+897-555-00000897".
+
+<tel:+898-555-00000898> a nco:CellPhoneNumber;
+    nco:phoneNumber "+898-555-00000898".
+
+<tel:+899-555-00000899> a nco:CellPhoneNumber;
+    nco:phoneNumber "+899-555-00000899".
+
+<tel:+900-555-00000900> a nco:CellPhoneNumber;
+    nco:phoneNumber "+900-555-00000900".
+
+<tel:+901-555-00000901> a nco:CellPhoneNumber;
+    nco:phoneNumber "+901-555-00000901".
+
+<tel:+902-555-00000902> a nco:CellPhoneNumber;
+    nco:phoneNumber "+902-555-00000902".
+
+<tel:+903-555-00000903> a nco:CellPhoneNumber;
+    nco:phoneNumber "+903-555-00000903".
+
+<tel:+904-555-00000904> a nco:CellPhoneNumber;
+    nco:phoneNumber "+904-555-00000904".
+
+<tel:+905-555-00000905> a nco:CellPhoneNumber;
+    nco:phoneNumber "+905-555-00000905".
+
+<tel:+906-555-00000906> a nco:CellPhoneNumber;
+    nco:phoneNumber "+906-555-00000906".
+
+<tel:+907-555-00000907> a nco:CellPhoneNumber;
+    nco:phoneNumber "+907-555-00000907".
+
+<tel:+908-555-00000908> a nco:CellPhoneNumber;
+    nco:phoneNumber "+908-555-00000908".
+
+<tel:+909-555-00000909> a nco:CellPhoneNumber;
+    nco:phoneNumber "+909-555-00000909".
+
+<tel:+910-555-00000910> a nco:CellPhoneNumber;
+    nco:phoneNumber "+910-555-00000910".
+
+<tel:+911-555-00000911> a nco:CellPhoneNumber;
+    nco:phoneNumber "+911-555-00000911".
+
+<tel:+912-555-00000912> a nco:CellPhoneNumber;
+    nco:phoneNumber "+912-555-00000912".
+
+<tel:+913-555-00000913> a nco:CellPhoneNumber;
+    nco:phoneNumber "+913-555-00000913".
+
+<tel:+914-555-00000914> a nco:CellPhoneNumber;
+    nco:phoneNumber "+914-555-00000914".
+
+<tel:+915-555-00000915> a nco:CellPhoneNumber;
+    nco:phoneNumber "+915-555-00000915".
+
+<tel:+916-555-00000916> a nco:CellPhoneNumber;
+    nco:phoneNumber "+916-555-00000916".
+
+<tel:+917-555-00000917> a nco:CellPhoneNumber;
+    nco:phoneNumber "+917-555-00000917".
+
+<tel:+918-555-00000918> a nco:CellPhoneNumber;
+    nco:phoneNumber "+918-555-00000918".
+
+<tel:+919-555-00000919> a nco:CellPhoneNumber;
+    nco:phoneNumber "+919-555-00000919".
+
+<tel:+920-555-00000920> a nco:CellPhoneNumber;
+    nco:phoneNumber "+920-555-00000920".
+
+<tel:+921-555-00000921> a nco:CellPhoneNumber;
+    nco:phoneNumber "+921-555-00000921".
+
+<tel:+922-555-00000922> a nco:CellPhoneNumber;
+    nco:phoneNumber "+922-555-00000922".
+
+<tel:+923-555-00000923> a nco:CellPhoneNumber;
+    nco:phoneNumber "+923-555-00000923".
+
+<tel:+924-555-00000924> a nco:CellPhoneNumber;
+    nco:phoneNumber "+924-555-00000924".
+
+<tel:+925-555-00000925> a nco:CellPhoneNumber;
+    nco:phoneNumber "+925-555-00000925".
+
+<tel:+926-555-00000926> a nco:CellPhoneNumber;
+    nco:phoneNumber "+926-555-00000926".
+
+<tel:+927-555-00000927> a nco:CellPhoneNumber;
+    nco:phoneNumber "+927-555-00000927".
+
+<tel:+928-555-00000928> a nco:CellPhoneNumber;
+    nco:phoneNumber "+928-555-00000928".
+
+<tel:+929-555-00000929> a nco:CellPhoneNumber;
+    nco:phoneNumber "+929-555-00000929".
+
+<tel:+930-555-00000930> a nco:CellPhoneNumber;
+    nco:phoneNumber "+930-555-00000930".
+
+<tel:+931-555-00000931> a nco:CellPhoneNumber;
+    nco:phoneNumber "+931-555-00000931".
+
+<tel:+932-555-00000932> a nco:CellPhoneNumber;
+    nco:phoneNumber "+932-555-00000932".
+
+<tel:+933-555-00000933> a nco:CellPhoneNumber;
+    nco:phoneNumber "+933-555-00000933".
+
+<tel:+934-555-00000934> a nco:CellPhoneNumber;
+    nco:phoneNumber "+934-555-00000934".
+
+<tel:+935-555-00000935> a nco:CellPhoneNumber;
+    nco:phoneNumber "+935-555-00000935".
+
+<tel:+936-555-00000936> a nco:CellPhoneNumber;
+    nco:phoneNumber "+936-555-00000936".
+
+<tel:+937-555-00000937> a nco:CellPhoneNumber;
+    nco:phoneNumber "+937-555-00000937".
+
+<tel:+938-555-00000938> a nco:CellPhoneNumber;
+    nco:phoneNumber "+938-555-00000938".
+
+<tel:+939-555-00000939> a nco:CellPhoneNumber;
+    nco:phoneNumber "+939-555-00000939".
+
+<tel:+940-555-00000940> a nco:CellPhoneNumber;
+    nco:phoneNumber "+940-555-00000940".
+
+<tel:+941-555-00000941> a nco:CellPhoneNumber;
+    nco:phoneNumber "+941-555-00000941".
+
+<tel:+942-555-00000942> a nco:CellPhoneNumber;
+    nco:phoneNumber "+942-555-00000942".
+
+<tel:+943-555-00000943> a nco:CellPhoneNumber;
+    nco:phoneNumber "+943-555-00000943".
+
+<tel:+944-555-00000944> a nco:CellPhoneNumber;
+    nco:phoneNumber "+944-555-00000944".
+
+<tel:+945-555-00000945> a nco:CellPhoneNumber;
+    nco:phoneNumber "+945-555-00000945".
+
+<tel:+946-555-00000946> a nco:CellPhoneNumber;
+    nco:phoneNumber "+946-555-00000946".
+
+<tel:+947-555-00000947> a nco:CellPhoneNumber;
+    nco:phoneNumber "+947-555-00000947".
+
+<tel:+948-555-00000948> a nco:CellPhoneNumber;
+    nco:phoneNumber "+948-555-00000948".
+
+<tel:+949-555-00000949> a nco:CellPhoneNumber;
+    nco:phoneNumber "+949-555-00000949".
+
+<tel:+950-555-00000950> a nco:CellPhoneNumber;
+    nco:phoneNumber "+950-555-00000950".
+
+<tel:+951-555-00000951> a nco:CellPhoneNumber;
+    nco:phoneNumber "+951-555-00000951".
+
+<tel:+952-555-00000952> a nco:CellPhoneNumber;
+    nco:phoneNumber "+952-555-00000952".
+
+<tel:+953-555-00000953> a nco:CellPhoneNumber;
+    nco:phoneNumber "+953-555-00000953".
+
+<tel:+954-555-00000954> a nco:CellPhoneNumber;
+    nco:phoneNumber "+954-555-00000954".
+
+<tel:+955-555-00000955> a nco:CellPhoneNumber;
+    nco:phoneNumber "+955-555-00000955".
+
+<tel:+956-555-00000956> a nco:CellPhoneNumber;
+    nco:phoneNumber "+956-555-00000956".
+
+<tel:+957-555-00000957> a nco:CellPhoneNumber;
+    nco:phoneNumber "+957-555-00000957".
+
+<tel:+958-555-00000958> a nco:CellPhoneNumber;
+    nco:phoneNumber "+958-555-00000958".
+
+<tel:+959-555-00000959> a nco:CellPhoneNumber;
+    nco:phoneNumber "+959-555-00000959".
+
+<tel:+960-555-00000960> a nco:CellPhoneNumber;
+    nco:phoneNumber "+960-555-00000960".
+
+<tel:+961-555-00000961> a nco:CellPhoneNumber;
+    nco:phoneNumber "+961-555-00000961".
+
+<tel:+962-555-00000962> a nco:CellPhoneNumber;
+    nco:phoneNumber "+962-555-00000962".
+
+<tel:+963-555-00000963> a nco:CellPhoneNumber;
+    nco:phoneNumber "+963-555-00000963".
+
+<tel:+964-555-00000964> a nco:CellPhoneNumber;
+    nco:phoneNumber "+964-555-00000964".
+
+<tel:+965-555-00000965> a nco:CellPhoneNumber;
+    nco:phoneNumber "+965-555-00000965".
+
+<tel:+966-555-00000966> a nco:CellPhoneNumber;
+    nco:phoneNumber "+966-555-00000966".
+
+<tel:+967-555-00000967> a nco:CellPhoneNumber;
+    nco:phoneNumber "+967-555-00000967".
+
+<tel:+968-555-00000968> a nco:CellPhoneNumber;
+    nco:phoneNumber "+968-555-00000968".
+
+<tel:+969-555-00000969> a nco:CellPhoneNumber;
+    nco:phoneNumber "+969-555-00000969".
+
+<tel:+970-555-00000970> a nco:CellPhoneNumber;
+    nco:phoneNumber "+970-555-00000970".
+
+<tel:+971-555-00000971> a nco:CellPhoneNumber;
+    nco:phoneNumber "+971-555-00000971".
+
+<tel:+972-555-00000972> a nco:CellPhoneNumber;
+    nco:phoneNumber "+972-555-00000972".
+
+<tel:+973-555-00000973> a nco:CellPhoneNumber;
+    nco:phoneNumber "+973-555-00000973".
+
+<tel:+974-555-00000974> a nco:CellPhoneNumber;
+    nco:phoneNumber "+974-555-00000974".
+
+<tel:+975-555-00000975> a nco:CellPhoneNumber;
+    nco:phoneNumber "+975-555-00000975".
+
+<tel:+976-555-00000976> a nco:CellPhoneNumber;
+    nco:phoneNumber "+976-555-00000976".
+
+<tel:+977-555-00000977> a nco:CellPhoneNumber;
+    nco:phoneNumber "+977-555-00000977".
+
+<tel:+978-555-00000978> a nco:CellPhoneNumber;
+    nco:phoneNumber "+978-555-00000978".
+
+<tel:+979-555-00000979> a nco:CellPhoneNumber;
+    nco:phoneNumber "+979-555-00000979".
+
+<tel:+980-555-00000980> a nco:CellPhoneNumber;
+    nco:phoneNumber "+980-555-00000980".
+
+<tel:+981-555-00000981> a nco:CellPhoneNumber;
+    nco:phoneNumber "+981-555-00000981".
+
+<tel:+982-555-00000982> a nco:CellPhoneNumber;
+    nco:phoneNumber "+982-555-00000982".
+
+<tel:+983-555-00000983> a nco:CellPhoneNumber;
+    nco:phoneNumber "+983-555-00000983".
+
+<tel:+984-555-00000984> a nco:CellPhoneNumber;
+    nco:phoneNumber "+984-555-00000984".
+
+<tel:+985-555-00000985> a nco:CellPhoneNumber;
+    nco:phoneNumber "+985-555-00000985".
+
+<tel:+986-555-00000986> a nco:CellPhoneNumber;
+    nco:phoneNumber "+986-555-00000986".
+
+<tel:+987-555-00000987> a nco:CellPhoneNumber;
+    nco:phoneNumber "+987-555-00000987".
+
+<tel:+988-555-00000988> a nco:CellPhoneNumber;
+    nco:phoneNumber "+988-555-00000988".
+
+<tel:+989-555-00000989> a nco:CellPhoneNumber;
+    nco:phoneNumber "+989-555-00000989".
+
+<tel:+990-555-00000990> a nco:CellPhoneNumber;
+    nco:phoneNumber "+990-555-00000990".
+
+<tel:+991-555-00000991> a nco:CellPhoneNumber;
+    nco:phoneNumber "+991-555-00000991".
+
+<tel:+992-555-00000992> a nco:CellPhoneNumber;
+    nco:phoneNumber "+992-555-00000992".
+
+<tel:+993-555-00000993> a nco:CellPhoneNumber;
+    nco:phoneNumber "+993-555-00000993".
+
+<tel:+994-555-00000994> a nco:CellPhoneNumber;
+    nco:phoneNumber "+994-555-00000994".
+
+<tel:+995-555-00000995> a nco:CellPhoneNumber;
+    nco:phoneNumber "+995-555-00000995".
+
+<tel:+996-555-00000996> a nco:CellPhoneNumber;
+    nco:phoneNumber "+996-555-00000996".
+
+<tel:+997-555-00000997> a nco:CellPhoneNumber;
+    nco:phoneNumber "+997-555-00000997".
+
+<tel:+998-555-00000998> a nco:CellPhoneNumber;
+    nco:phoneNumber "+998-555-00000998".
+
+<tel:+999-555-00000999> a nco:CellPhoneNumber;
+    nco:phoneNumber "+999-555-00000999".
+
+<tel:+1000-555-00001000> a nco:CellPhoneNumber;
+    nco:phoneNumber "+1000-555-00001000".

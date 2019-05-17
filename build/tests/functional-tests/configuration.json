@@ -1,0 +1,8 @@
+{
+    "PREFIX": "/usr",
+    "RAW_EXEC_PREFIX": "/usr",
+    "RAW_DATAROOT_DIR": "/usr/share",
+    "TEST_ONTOLOGIES_DIR": "/home/sumaid/gsoc/tracker/tests/functional-tests/test-ontologies",
+    "TRACKER_STORE_PATH": "/home/sumaid/gsoc/tracker/build/src/tracker-store/tracker-store",
+    "disableJournal": "true"
+}

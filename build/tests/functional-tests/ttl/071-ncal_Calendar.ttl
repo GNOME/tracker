@@ -1,0 +1,217 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<urn:x-ical:calendar1> a ncal:Calendar .
+
+<urn:x-ical:calendar2> a ncal:Calendar .
+
+<urn:x-ical:calendar3> a ncal:Calendar .
+
+<urn:x-ical:calendar4> a ncal:Calendar .
+
+<urn:x-ical:calendar5> a ncal:Calendar .
+
+<urn:x-ical:calendar6> a ncal:Calendar .
+
+<urn:x-ical:calendar7> a ncal:Calendar .
+
+<urn:x-ical:calendar8> a ncal:Calendar .
+
+<urn:x-ical:calendar9> a ncal:Calendar .
+
+<urn:x-ical:calendar10> a ncal:Calendar .
+
+<urn:x-ical:calendar11> a ncal:Calendar .
+
+<urn:x-ical:calendar12> a ncal:Calendar .
+
+<urn:x-ical:calendar13> a ncal:Calendar .
+
+<urn:x-ical:calendar14> a ncal:Calendar .
+
+<urn:x-ical:calendar15> a ncal:Calendar .
+
+<urn:x-ical:calendar16> a ncal:Calendar .
+
+<urn:x-ical:calendar17> a ncal:Calendar .
+
+<urn:x-ical:calendar18> a ncal:Calendar .
+
+<urn:x-ical:calendar19> a ncal:Calendar .
+
+<urn:x-ical:calendar20> a ncal:Calendar .
+
+<urn:x-ical:calendar21> a ncal:Calendar .
+
+<urn:x-ical:calendar22> a ncal:Calendar .
+
+<urn:x-ical:calendar23> a ncal:Calendar .
+
+<urn:x-ical:calendar24> a ncal:Calendar .
+
+<urn:x-ical:calendar25> a ncal:Calendar .
+
+<urn:x-ical:calendar26> a ncal:Calendar .
+
+<urn:x-ical:calendar27> a ncal:Calendar .
+
+<urn:x-ical:calendar28> a ncal:Calendar .
+
+<urn:x-ical:calendar29> a ncal:Calendar .
+
+<urn:x-ical:calendar30> a ncal:Calendar .
+
+<urn:x-ical:calendar31> a ncal:Calendar .
+
+<urn:x-ical:calendar32> a ncal:Calendar .
+
+<urn:x-ical:calendar33> a ncal:Calendar .
+
+<urn:x-ical:calendar34> a ncal:Calendar .
+
+<urn:x-ical:calendar35> a ncal:Calendar .
+
+<urn:x-ical:calendar36> a ncal:Calendar .
+
+<urn:x-ical:calendar37> a ncal:Calendar .
+
+<urn:x-ical:calendar38> a ncal:Calendar .
+
+<urn:x-ical:calendar39> a ncal:Calendar .
+
+<urn:x-ical:calendar40> a ncal:Calendar .
+
+<urn:x-ical:calendar41> a ncal:Calendar .
+
+<urn:x-ical:calendar42> a ncal:Calendar .
+
+<urn:x-ical:calendar43> a ncal:Calendar .
+
+<urn:x-ical:calendar44> a ncal:Calendar .
+
+<urn:x-ical:calendar45> a ncal:Calendar .
+
+<urn:x-ical:calendar46> a ncal:Calendar .
+
+<urn:x-ical:calendar47> a ncal:Calendar .
+
+<urn:x-ical:calendar48> a ncal:Calendar .
+
+<urn:x-ical:calendar49> a ncal:Calendar .
+
+<urn:x-ical:calendar50> a ncal:Calendar .
+
+<urn:x-ical:calendar51> a ncal:Calendar .
+
+<urn:x-ical:calendar52> a ncal:Calendar .
+
+<urn:x-ical:calendar53> a ncal:Calendar .
+
+<urn:x-ical:calendar54> a ncal:Calendar .
+
+<urn:x-ical:calendar55> a ncal:Calendar .
+
+<urn:x-ical:calendar56> a ncal:Calendar .
+
+<urn:x-ical:calendar57> a ncal:Calendar .
+
+<urn:x-ical:calendar58> a ncal:Calendar .
+
+<urn:x-ical:calendar59> a ncal:Calendar .
+
+<urn:x-ical:calendar60> a ncal:Calendar .
+
+<urn:x-ical:calendar61> a ncal:Calendar .
+
+<urn:x-ical:calendar62> a ncal:Calendar .
+
+<urn:x-ical:calendar63> a ncal:Calendar .
+
+<urn:x-ical:calendar64> a ncal:Calendar .
+
+<urn:x-ical:calendar65> a ncal:Calendar .
+
+<urn:x-ical:calendar66> a ncal:Calendar .
+
+<urn:x-ical:calendar67> a ncal:Calendar .
+
+<urn:x-ical:calendar68> a ncal:Calendar .
+
+<urn:x-ical:calendar69> a ncal:Calendar .
+
+<urn:x-ical:calendar70> a ncal:Calendar .
+
+<urn:x-ical:calendar71> a ncal:Calendar .
+
+<urn:x-ical:calendar72> a ncal:Calendar .
+
+<urn:x-ical:calendar73> a ncal:Calendar .
+
+<urn:x-ical:calendar74> a ncal:Calendar .
+
+<urn:x-ical:calendar75> a ncal:Calendar .
+
+<urn:x-ical:calendar76> a ncal:Calendar .
+
+<urn:x-ical:calendar77> a ncal:Calendar .
+
+<urn:x-ical:calendar78> a ncal:Calendar .
+
+<urn:x-ical:calendar79> a ncal:Calendar .
+
+<urn:x-ical:calendar80> a ncal:Calendar .
+
+<urn:x-ical:calendar81> a ncal:Calendar .
+
+<urn:x-ical:calendar82> a ncal:Calendar .
+
+<urn:x-ical:calendar83> a ncal:Calendar .
+
+<urn:x-ical:calendar84> a ncal:Calendar .
+
+<urn:x-ical:calendar85> a ncal:Calendar .
+
+<urn:x-ical:calendar86> a ncal:Calendar .
+
+<urn:x-ical:calendar87> a ncal:Calendar .
+
+<urn:x-ical:calendar88> a ncal:Calendar .
+
+<urn:x-ical:calendar89> a ncal:Calendar .
+
+<urn:x-ical:calendar90> a ncal:Calendar .
+
+<urn:x-ical:calendar91> a ncal:Calendar .
+
+<urn:x-ical:calendar92> a ncal:Calendar .
+
+<urn:x-ical:calendar93> a ncal:Calendar .
+
+<urn:x-ical:calendar94> a ncal:Calendar .
+
+<urn:x-ical:calendar95> a ncal:Calendar .
+
+<urn:x-ical:calendar96> a ncal:Calendar .
+
+<urn:x-ical:calendar97> a ncal:Calendar .
+
+<urn:x-ical:calendar98> a ncal:Calendar .
+
+<urn:x-ical:calendar99> a ncal:Calendar .
+
+<urn:x-ical:calendar100> a ncal:Calendar .

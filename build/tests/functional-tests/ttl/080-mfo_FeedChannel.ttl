@@ -1,0 +1,97 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<http://feed0.feed.com/feed1000.rss> a mfo:FeedChannel ;
+  nie:title       "Feed 1000" ;
+  nie:relatedTo   <http://feed0.feed.com/feed1000.rss> ;
+  nie:description "Description 0" ;
+  nie:links       <http://feed0.feed.com/feed1000.rss> ;
+  mfo:image       "" ;
+  mfo:type        <http://www.tracker-project.org/temp/mfo#rssatom> .
+
+<http://feed0.feed.com/feed2000.rss> a mfo:FeedChannel ;
+  nie:title       "Feed 2000" ;
+  nie:relatedTo   <http://feed0.feed.com/feed2000.rss> ;
+  nie:description "Description 0" ;
+  nie:links       <http://feed0.feed.com/feed2000.rss> ;
+  mfo:image       "" ;
+  mfo:type        <http://www.tracker-project.org/temp/mfo#rssatom> .
+
+<http://feed0.feed.com/feed3000.rss> a mfo:FeedChannel ;
+  nie:title       "Feed 3000" ;
+  nie:relatedTo   <http://feed0.feed.com/feed3000.rss> ;
+  nie:description "Description 0" ;
+  nie:links       <http://feed0.feed.com/feed3000.rss> ;
+  mfo:image       "" ;
+  mfo:type        <http://www.tracker-project.org/temp/mfo#rssatom> .
+
+<http://feed0.feed.com/feed4000.rss> a mfo:FeedChannel ;
+  nie:title       "Feed 4000" ;
+  nie:relatedTo   <http://feed0.feed.com/feed4000.rss> ;
+  nie:description "Description 0" ;
+  nie:links       <http://feed0.feed.com/feed4000.rss> ;
+  mfo:image       "" ;
+  mfo:type        <http://www.tracker-project.org/temp/mfo#rssatom> .
+
+<http://feed0.feed.com/feed5000.rss> a mfo:FeedChannel ;
+  nie:title       "Feed 5000" ;
+  nie:relatedTo   <http://feed0.feed.com/feed5000.rss> ;
+  nie:description "Description 0" ;
+  nie:links       <http://feed0.feed.com/feed5000.rss> ;
+  mfo:image       "" ;
+  mfo:type        <http://www.tracker-project.org/temp/mfo#rssatom> .
+
+<http://feed0.feed.com/feed6000.rss> a mfo:FeedChannel ;
+  nie:title       "Feed 6000" ;
+  nie:relatedTo   <http://feed0.feed.com/feed6000.rss> ;
+  nie:description "Description 0" ;
+  nie:links       <http://feed0.feed.com/feed6000.rss> ;
+  mfo:image       "" ;
+  mfo:type        <http://www.tracker-project.org/temp/mfo#rssatom> .
+
+<http://feed0.feed.com/feed7000.rss> a mfo:FeedChannel ;
+  nie:title       "Feed 7000" ;
+  nie:relatedTo   <http://feed0.feed.com/feed7000.rss> ;
+  nie:description "Description 0" ;
+  nie:links       <http://feed0.feed.com/feed7000.rss> ;
+  mfo:image       "" ;
+  mfo:type        <http://www.tracker-project.org/temp/mfo#rssatom> .
+
+<http://feed0.feed.com/feed8000.rss> a mfo:FeedChannel ;
+  nie:title       "Feed 8000" ;
+  nie:relatedTo   <http://feed0.feed.com/feed8000.rss> ;
+  nie:description "Description 0" ;
+  nie:links       <http://feed0.feed.com/feed8000.rss> ;
+  mfo:image       "" ;
+  mfo:type        <http://www.tracker-project.org/temp/mfo#rssatom> .
+
+<http://feed0.feed.com/feed9000.rss> a mfo:FeedChannel ;
+  nie:title       "Feed 9000" ;
+  nie:relatedTo   <http://feed0.feed.com/feed9000.rss> ;
+  nie:description "Description 0" ;
+  nie:links       <http://feed0.feed.com/feed9000.rss> ;
+  mfo:image       "" ;
+  mfo:type        <http://www.tracker-project.org/temp/mfo#rssatom> .
+
+<http://feed0.feed.com/feed10000.rss> a mfo:FeedChannel ;
+  nie:title       "Feed 10000" ;
+  nie:relatedTo   <http://feed0.feed.com/feed10000.rss> ;
+  nie:description "Description 0" ;
+  nie:links       <http://feed0.feed.com/feed10000.rss> ;
+  mfo:image       "" ;
+  mfo:type        <http://www.tracker-project.org/temp/mfo#rssatom> .

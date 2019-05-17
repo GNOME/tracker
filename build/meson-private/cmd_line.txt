@@ -1,0 +1,6 @@
+[options]
+prefix = /usr
+sysconfdir = /etc
+
+[properties]
+

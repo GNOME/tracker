@@ -1,0 +1,47 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<urn:software-category:100> a nfo:SoftwareCategory;
+  nie:title "Category 100" .
+
+<urn:software-category:200> a nfo:SoftwareCategory;
+  nie:title "Category 200" .
+
+<urn:software-category:300> a nfo:SoftwareCategory;
+  nie:title "Category 300" .
+
+<urn:software-category:400> a nfo:SoftwareCategory;
+  nie:title "Category 400" .
+
+<urn:software-category:500> a nfo:SoftwareCategory;
+  nie:title "Category 500" .
+
+<urn:software-category:600> a nfo:SoftwareCategory;
+  nie:title "Category 600" .
+
+<urn:software-category:700> a nfo:SoftwareCategory;
+  nie:title "Category 700" .
+
+<urn:software-category:800> a nfo:SoftwareCategory;
+  nie:title "Category 800" .
+
+<urn:software-category:900> a nfo:SoftwareCategory;
+  nie:title "Category 900" .
+
+<urn:software-category:1000> a nfo:SoftwareCategory;
+  nie:title "Category 0" .

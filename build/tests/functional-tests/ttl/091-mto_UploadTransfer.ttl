@@ -1,0 +1,1267 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<mtransfer://1> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://2> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://3> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://4> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://5> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://6> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://7> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://8> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://9> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://10> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://11> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://12> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://13> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://14> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://15> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://16> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/15> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://17> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://18> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/15> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/15> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://19> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://20> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/14> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://21> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://22> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://23> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/20> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://24> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/24> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://25> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/22> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://26> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/24> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/21> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://27> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/24> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/15> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://28> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://29> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/22> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/20> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://30> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://31> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/15> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://32> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/15> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://33> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/29> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://34> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/27> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/20> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/22> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://35> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://36> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/21> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/33> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/27> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://37> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/33> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/18> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://38> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/32> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/22> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/29> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/24> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://39> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/21> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/38> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/32> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/31> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/28> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://40> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/20> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://41> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/38> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/37> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://42> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/22> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/35> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://43> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/35> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/14> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://44> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/15> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/14> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/39> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://45> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/40> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://46> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/32> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/21> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://47> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/43> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/21> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/38> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/36> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://48> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/27> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/24> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/46> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/33> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/18> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://49> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/34> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/35> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/21> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/33> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/24> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://50> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/38> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://51> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/40> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/29> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://52> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/18> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://53> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/52> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/39> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://54> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/21> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/27> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/51> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/45> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/29> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://55> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/44> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/28> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/48> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/48> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://56> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/15> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/46> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/28> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/50> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://57> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/55> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/40> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://58> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/18> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/54> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/38> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/35> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/34> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://59> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/32> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/52> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/38> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/49> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/32> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/24> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/46> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://60> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://61> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/45> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://62> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/31> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/50> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/18> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://63> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/28> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/63> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/47> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/45> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://64> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/34> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://65> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/47> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/53> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/48> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/43> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/55> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/39> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://66> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/20> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/29> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/38> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/39> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/38> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://67> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/37> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/63> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/53> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/53> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://68> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/43> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/35> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/46> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/29> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/54> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/37> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://69> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/57> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/28> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/29> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/18> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/34> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/33> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://70> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://71> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://72> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/39> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/59> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/22> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://73> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/32> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/27> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://74> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/55> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/44> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/70> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://75> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/71> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/38> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/34> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/40> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/64> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/48> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://76> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/14> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/75> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/20> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/57> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://77> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/44> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/41> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/41> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/36> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/27> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/62> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/68> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://78> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/74> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/22> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/18> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/72> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/49> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/59> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/74> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://79> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/65> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/71> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/60> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/67> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/74> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/64> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/32> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://80> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/59> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://81> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/81> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://82> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/51> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/58> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/65> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://83> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/50> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/50> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/51> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://84> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/36> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/83> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://85> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/43> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/70> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/44> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://86> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/76> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/52> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/45> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/29> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/69> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/65> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://87> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/44> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/41> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/63> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/86> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/82> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/67> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://88> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/48> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/53> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/32> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/81> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/68> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://89> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/80> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/21> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/70> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/41> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/59> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/41> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://90> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://91> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/53> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/46> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://92> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/66> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/48> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://93> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/92> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/15> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://94> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/90> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/94> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/50> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://95> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/47> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/60> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/43> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/59> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/47> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/62> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://96> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/22> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/84> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/95> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/62> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/71> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> ;
+
+  mto:account        "picasa" .
+
+<mtransfer://97> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/73> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/31> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/96> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/51> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/95> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/34> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/61> ;
+
+  mto:account        "flickr" .
+
+<mtransfer://98> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/47> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/85> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/67> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/87> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/41> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/49> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/36> ;
+
+  mto:account        "facebook" .
+
+<mtransfer://99> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/18> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/56> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/95> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/31> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/34> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/70> ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> ;
+
+  mto:account        "youtube" .
+
+<mtransfer://100> a mto:UploadTransfer ;
+  mto:transferState  <http://www.tracker-project.org/temp/mto#state-done> ;
+  mto:method         <http://www.tracker-project.org/temp/mto#transfer-method-web> ;
+  mto:created        "2019-05-16T11:16:55Z" ;
+mto:transferList <http://www.sopranolive.org/contexts/tracker/generated_unique_id/92> ;
+
+  mto:account        "picasa" .

@@ -1,0 +1,1417 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<urn:channel:1> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:570> .
+
+<urn:channel:2> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:90> .
+
+<urn:channel:3> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:721> .
+
+<urn:channel:4> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:766> .
+
+<urn:channel:5> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:582> .
+
+<urn:channel:6> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:712> .
+
+<urn:channel:7> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:897> .
+
+<urn:channel:8> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:121> .
+
+<urn:channel:9> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:420> .
+
+<urn:channel:10> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:237> .
+
+<urn:channel:11> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:261> .
+
+<urn:channel:12> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:36> .
+
+<urn:channel:13> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:809> .
+
+<urn:channel:14> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:976> .
+
+<urn:channel:15> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:197> .
+
+<urn:channel:16> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:95> .
+
+<urn:channel:17> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:872> .
+
+<urn:channel:18> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:30> .
+
+<urn:channel:19> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:800> .
+
+<urn:channel:20> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:673> .
+
+<urn:channel:21> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:901> .
+
+<urn:channel:22> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:727> .
+
+<urn:channel:23> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:433> .
+
+<urn:channel:24> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:232> .
+
+<urn:channel:25> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:394> .
+
+<urn:channel:26> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:579> .
+
+<urn:channel:27> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:335> .
+
+<urn:channel:28> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:144> .
+
+<urn:channel:29> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:493> .
+
+<urn:channel:30> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:417> .
+
+<urn:channel:31> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:691> .
+
+<urn:channel:32> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:726> .
+
+<urn:channel:33> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:798> .
+
+<urn:channel:34> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:317> .
+
+<urn:channel:35> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:70> .
+
+<urn:channel:36> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:51> .
+
+<urn:channel:37> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:180> .
+
+<urn:channel:38> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:206> .
+
+<urn:channel:39> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:668> .
+
+<urn:channel:40> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:792> .
+
+<urn:channel:41> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:566> .
+
+<urn:channel:42> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:567> .
+
+<urn:channel:43> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:245> .
+
+<urn:channel:44> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:489> .
+
+<urn:channel:45> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:983> .
+
+<urn:channel:46> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:304> .
+
+<urn:channel:47> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:317> .
+
+<urn:channel:48> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:5> .
+
+<urn:channel:49> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:45> .
+
+<urn:channel:50> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:825> .
+
+<urn:channel:51> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:936> .
+
+<urn:channel:52> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:3> .
+
+<urn:channel:53> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:917> .
+
+<urn:channel:54> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:942> .
+
+<urn:channel:55> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:496> .
+
+<urn:channel:56> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:815> .
+
+<urn:channel:57> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:438> .
+
+<urn:channel:58> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:248> .
+
+<urn:channel:59> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:505> .
+
+<urn:channel:60> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:429> .
+
+<urn:channel:61> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:354> .
+
+<urn:channel:62> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:489> .
+
+<urn:channel:63> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:906> .
+
+<urn:channel:64> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:218> .
+
+<urn:channel:65> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:871> .
+
+<urn:channel:66> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:757> .
+
+<urn:channel:67> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:699> .
+
+<urn:channel:68> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:500> .
+
+<urn:channel:69> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:421> .
+
+<urn:channel:70> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:893> .
+
+<urn:channel:71> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:154> .
+
+<urn:channel:72> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:124> .
+
+<urn:channel:73> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:529> .
+
+<urn:channel:74> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:53> .
+
+<urn:channel:75> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:89> .
+
+<urn:channel:76> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:314> .
+
+<urn:channel:77> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:294> .
+
+<urn:channel:78> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:95> .
+
+<urn:channel:79> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:987> .
+
+<urn:channel:80> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:21> .
+
+<urn:channel:81> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:185> .
+
+<urn:channel:82> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:370> .
+
+<urn:channel:83> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:323> .
+
+<urn:channel:84> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:481> .
+
+<urn:channel:85> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:898> .
+
+<urn:channel:86> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:840> .
+
+<urn:channel:87> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:442> .
+
+<urn:channel:88> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:716> .
+
+<urn:channel:89> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:778> .
+
+<urn:channel:90> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:339> .
+
+<urn:channel:91> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:999> .
+
+<urn:channel:92> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:381> .
+
+<urn:channel:93> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:734> .
+
+<urn:channel:94> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:443> .
+
+<urn:channel:95> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:239> .
+
+<urn:channel:96> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:494> .
+
+<urn:channel:97> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:297> .
+
+<urn:channel:98> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:352> .
+
+<urn:channel:99> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:428> .
+
+<urn:channel:100> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:651> .
+
+<urn:channel:101> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:416> .
+
+<urn:channel:102> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:799> .
+
+<urn:channel:103> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:829> .
+
+<urn:channel:104> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:619> .
+
+<urn:channel:105> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:743> .
+
+<urn:channel:106> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:577> .
+
+<urn:channel:107> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:657> .
+
+<urn:channel:108> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:986> .
+
+<urn:channel:109> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:686> .
+
+<urn:channel:110> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:382> .
+
+<urn:channel:111> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:831> .
+
+<urn:channel:112> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:319> .
+
+<urn:channel:113> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:144> .
+
+<urn:channel:114> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:956> .
+
+<urn:channel:115> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:561> .
+
+<urn:channel:116> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:289> .
+
+<urn:channel:117> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:104> .
+
+<urn:channel:118> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:762> .
+
+<urn:channel:119> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:308> .
+
+<urn:channel:120> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:788> .
+
+<urn:channel:121> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:799> .
+
+<urn:channel:122> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:484> .
+
+<urn:channel:123> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:986> .
+
+<urn:channel:124> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:439> .
+
+<urn:channel:125> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:630> .
+
+<urn:channel:126> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:107> .
+
+<urn:channel:127> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:699> .
+
+<urn:channel:128> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:647> .
+
+<urn:channel:129> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:152> .
+
+<urn:channel:130> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:16> .
+
+<urn:channel:131> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:411> .
+
+<urn:channel:132> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:585> .
+
+<urn:channel:133> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:477> .
+
+<urn:channel:134> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:277> .
+
+<urn:channel:135> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:381> .
+
+<urn:channel:136> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:274> .
+
+<urn:channel:137> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:46> .
+
+<urn:channel:138> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:731> .
+
+<urn:channel:139> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:619> .
+
+<urn:channel:140> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:528> .
+
+<urn:channel:141> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:473> .
+
+<urn:channel:142> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:207> .
+
+<urn:channel:143> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:262> .
+
+<urn:channel:144> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:707> .
+
+<urn:channel:145> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:974> .
+
+<urn:channel:146> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:304> .
+
+<urn:channel:147> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:120> .
+
+<urn:channel:148> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:591> .
+
+<urn:channel:149> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:238> .
+
+<urn:channel:150> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:504> .
+
+<urn:channel:151> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:297> .
+
+<urn:channel:152> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:365> .
+
+<urn:channel:153> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:598> .
+
+<urn:channel:154> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:47> .
+
+<urn:channel:155> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:812> .
+
+<urn:channel:156> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:341> .
+
+<urn:channel:157> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:937> .
+
+<urn:channel:158> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:893> .
+
+<urn:channel:159> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:730> .
+
+<urn:channel:160> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:609> .
+
+<urn:channel:161> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:637> .
+
+<urn:channel:162> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:56> .
+
+<urn:channel:163> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:285> .
+
+<urn:channel:164> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:991> .
+
+<urn:channel:165> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:831> .
+
+<urn:channel:166> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:921> .
+
+<urn:channel:167> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:767> .
+
+<urn:channel:168> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:207> .
+
+<urn:channel:169> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:835> .
+
+<urn:channel:170> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:23> .
+
+<urn:channel:171> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:820> .
+
+<urn:channel:172> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:919> .
+
+<urn:channel:173> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:556> .
+
+<urn:channel:174> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:250> .
+
+<urn:channel:175> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:921> .
+
+<urn:channel:176> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:667> .
+
+<urn:channel:177> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:598> .
+
+<urn:channel:178> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:317> .
+
+<urn:channel:179> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:116> .
+
+<urn:channel:180> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:777> .
+
+<urn:channel:181> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:822> .
+
+<urn:channel:182> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:406> .
+
+<urn:channel:183> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:666> .
+
+<urn:channel:184> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:353> .
+
+<urn:channel:185> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:848> .
+
+<urn:channel:186> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:557> .
+
+<urn:channel:187> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:101> .
+
+<urn:channel:188> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:845> .
+
+<urn:channel:189> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:223> .
+
+<urn:channel:190> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:987> .
+
+<urn:channel:191> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:297> .
+
+<urn:channel:192> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:987> .
+
+<urn:channel:193> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:755> .
+
+<urn:channel:194> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:229> .
+
+<urn:channel:195> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:894> .
+
+<urn:channel:196> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:557> .
+
+<urn:channel:197> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:482> .
+
+<urn:channel:198> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:572> .
+
+<urn:channel:199> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:992> .
+
+<urn:channel:200> a nmo:CommunicationChannel;
+  nie:subject                "/org/freedesktop/Telepathy/Account/gabble/jabber/dut_40localhost0";
+  nie:informationElementDate "2019-05-16T11:16:55Z";
+  nie:contentLastModified    "2019-05-16T11:16:55Z";
+  nmo:lastMessageDate        "2019-05-16T11:16:55Z";
+  nmo:hasParticipant         <urn:uid:638> .

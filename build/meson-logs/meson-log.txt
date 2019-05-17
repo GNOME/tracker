@@ -1,0 +1,575 @@
+Build started at 2019-05-16T11:16:09.627944
+Main binary: /usr/bin/python3
+Python system: Linux
+The Meson build system
+Version: 0.50.1
+Source dir: /home/sumaid/gsoc/tracker
+Build dir: /home/sumaid/gsoc/tracker/build
+Build type: native build
+Project name: tracker
+Project version: 2.2.2
+Sanity testing C compiler: cc
+Is cross compiler: False.
+Sanity check compiler command line: cc /home/sumaid/gsoc/tracker/build/meson-private/sanitycheckc.c -o /home/sumaid/gsoc/tracker/build/meson-private/sanitycheckc.exe
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /home/sumaid/gsoc/tracker/build/meson-private/sanitycheckc.exe
+Native C compiler: cc (gcc 7.4.0 "cc (Ubuntu 7.4.0-1ubuntu1~18.04) 7.4.0")
+Running compile:
+Working directory:  /tmp/tmpbd5r2wd2
+Command line:  valac /tmp/tmpbd5r2wd2/testfile.vala -C 
+
+Code:
+ class MesonSanityCheck : Object { }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Native Vala compiler: valac (valac 0.40.8)
+Build machine cpu family: x86_64
+Build machine cpu: x86_64
+Pkg-config binary for MachineChoice.HOST is not cached.
+Pkg-config binary missing from cross or native file, or env var undefined.
+Trying a default pkg-config fallback at pkg-config
+Trying pkg-config binary pkg-config for machine MachineChoice.HOST at ['/usr/bin/pkg-config']
+Found pkg-config: /usr/bin/pkg-config (0.29.1)
+Determining dependency 'dbus-1' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion dbus-1` -> 0
+1.12.2
+Called `/usr/bin/pkg-config --cflags dbus-1` -> 0
+-I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include
+Called `/usr/bin/pkg-config dbus-1 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -ldbus-1
+Called `/usr/bin/pkg-config dbus-1 --libs` -> 0
+-ldbus-1
+Running compile:
+Working directory:  /tmp/tmp81w1ra09
+Command line:  cc /tmp/tmp81w1ra09/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmp81w1ra09/output.exe -O0 
+
+Code:
+ #include<stdio.h>
+        
+        int main(int argc, char **argv) {
+            printf("%ld\n", (long)(sizeof(void *)));
+            return 0;
+        };
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Program stdout:
+
+8
+
+Program stderr:
+
+
+Running compile:
+Working directory:  /tmp/tmp69vdets0
+Command line:  cc /tmp/tmp69vdets0/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -c -o /tmp/tmp69vdets0/output.obj -O0 --print-search-dirs 
+
+Code:
+ 
+Compiler stdout:
+ install: /usr/lib/gcc/x86_64-linux-gnu/7/
+programs: =/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../x86_64-linux-gnu/bin/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../x86_64-linux-gnu/bin/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../x86_64-linux-gnu/bin/
+libraries: =/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../x86_64-linux-gnu/lib/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../x86_64-linux-gnu/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../x86_64-linux-gnu/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib/:/lib/x86_64-linux-gnu/7/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/7/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../x86_64-linux-gnu/lib/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../:/lib/:/usr/lib/
+
+Compiler stderr:
+ 
+Dependency dbus-1 found: YES 1.12.2
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'gio-2.0' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion gio-2.0` -> 0
+2.56.4
+Called `/usr/bin/pkg-config --cflags gio-2.0` -> 0
+-pthread -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+Called `/usr/bin/pkg-config gio-2.0 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -lgio-2.0 -lgobject-2.0 -lglib-2.0
+Called `/usr/bin/pkg-config gio-2.0 --libs` -> 0
+-lgio-2.0 -lgobject-2.0 -lglib-2.0
+Dependency gio-2.0 found: YES 2.56.4
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'gio-unix-2.0' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion gio-unix-2.0` -> 0
+2.56.4
+Called `/usr/bin/pkg-config --cflags gio-unix-2.0` -> 0
+-pthread -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+Called `/usr/bin/pkg-config gio-unix-2.0 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -lgio-2.0 -lgobject-2.0 -lglib-2.0
+Called `/usr/bin/pkg-config gio-unix-2.0 --libs` -> 0
+-lgio-2.0 -lgobject-2.0 -lglib-2.0
+Dependency gio-unix-2.0 found: YES 2.56.4
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'glib-2.0' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion glib-2.0` -> 0
+2.56.4
+Called `/usr/bin/pkg-config --cflags glib-2.0` -> 0
+-I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+Called `/usr/bin/pkg-config glib-2.0 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -lglib-2.0
+Called `/usr/bin/pkg-config glib-2.0 --libs` -> 0
+-lglib-2.0
+Dependency glib-2.0 found: YES 2.56.4
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'gmodule-2.0' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion gmodule-2.0` -> 0
+2.56.4
+Called `/usr/bin/pkg-config --cflags gmodule-2.0` -> 0
+-pthread -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+Called `/usr/bin/pkg-config gmodule-2.0 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -Wl,--export-dynamic -lgmodule-2.0 -pthread -lglib-2.0
+Called `/usr/bin/pkg-config gmodule-2.0 --libs` -> 0
+-Wl,--export-dynamic -lgmodule-2.0 -pthread -lglib-2.0
+Dependency gmodule-2.0 found: YES 2.56.4
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'gobject-2.0' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion gobject-2.0` -> 0
+2.56.4
+Called `/usr/bin/pkg-config --cflags gobject-2.0` -> 0
+-I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+Called `/usr/bin/pkg-config gobject-2.0 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -lgobject-2.0 -lglib-2.0
+Called `/usr/bin/pkg-config gobject-2.0 --libs` -> 0
+-lgobject-2.0 -lglib-2.0
+Dependency gobject-2.0 found: YES 2.56.4
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'gobject-introspection-1.0' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion gobject-introspection-1.0` -> 0
+1.56.1
+Called `/usr/bin/pkg-config --cflags gobject-introspection-1.0` -> 0
+-pthread -I/usr/include/gobject-introspection-1.0 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+Called `/usr/bin/pkg-config gobject-introspection-1.0 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -lgirepository-1.0 -lgobject-2.0 -lglib-2.0
+Called `/usr/bin/pkg-config gobject-introspection-1.0 --libs` -> 0
+-lgirepository-1.0 -lgobject-2.0 -lglib-2.0
+Dependency gobject-introspection-1.0 found: YES 1.56.1
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'icu-i18n' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion icu-i18n` -> 0
+60.2
+Called `/usr/bin/pkg-config --cflags icu-i18n` -> 0
+
+Called `/usr/bin/pkg-config icu-i18n --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -licui18n -licuuc -licudata
+Called `/usr/bin/pkg-config icu-i18n --libs` -> 0
+-licui18n -licuuc -licudata
+Dependency icu-i18n found: YES 60.2
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'icu-uc' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion icu-uc` -> 0
+60.2
+Called `/usr/bin/pkg-config --cflags icu-uc` -> 0
+
+Called `/usr/bin/pkg-config icu-uc --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -licuuc -licudata
+Called `/usr/bin/pkg-config icu-uc --libs` -> 0
+-licuuc -licudata
+Dependency icu-uc found: YES 60.2
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'json-glib-1.0' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion json-glib-1.0` -> 0
+1.4.2
+Called `/usr/bin/pkg-config --cflags json-glib-1.0` -> 0
+-pthread -I/usr/include/json-glib-1.0 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+Called `/usr/bin/pkg-config json-glib-1.0 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -ljson-glib-1.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+Called `/usr/bin/pkg-config json-glib-1.0 --libs` -> 0
+-ljson-glib-1.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+Dependency json-glib-1.0 found: YES 1.4.2
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'libsoup-2.4' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion libsoup-2.4` -> 0
+2.62.1
+Called `/usr/bin/pkg-config --cflags libsoup-2.4` -> 0
+-pthread -I/usr/include/libsoup-2.4 -I/usr/include/libxml2 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+Called `/usr/bin/pkg-config libsoup-2.4 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -lsoup-2.4 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+Called `/usr/bin/pkg-config libsoup-2.4 --libs` -> 0
+-lsoup-2.4 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+Dependency libsoup-2.4 found: YES 2.62.1
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'libxml-2.0' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion libxml-2.0` -> 0
+2.9.4
+Called `/usr/bin/pkg-config --cflags libxml-2.0` -> 0
+-I/usr/include/libxml2
+Called `/usr/bin/pkg-config libxml-2.0 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -lxml2
+Called `/usr/bin/pkg-config libxml-2.0 --libs` -> 0
+-lxml2
+Dependency libxml-2.0 found: YES 2.9.4
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'sqlite3' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion sqlite3` -> 0
+3.22.0
+Called `/usr/bin/pkg-config --cflags sqlite3` -> 0
+
+Called `/usr/bin/pkg-config sqlite3 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -lsqlite3
+Called `/usr/bin/pkg-config sqlite3 --libs` -> 0
+-lsqlite3
+Dependency sqlite3 found: YES 3.22.0
+Running compile:
+Working directory:  /tmp/tmpnm_hgx1q
+Command line:  cc /tmp/tmpnm_hgx1q/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpnm_hgx1q/output.exe -O0 -Wl,--start-group -lm -Wl,--end-group -Wl,--allow-shlib-undefined 
+
+Code:
+ int main(int argc, char **argv) { return 0; }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Library m found: YES
+Running compile:
+Working directory:  /tmp/tmpkt7q_9qd
+Command line:  cc /tmp/tmpkt7q_9qd/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpkt7q_9qd/output.exe -O0 -Wl,--start-group -luuid -Wl,--end-group -Wl,--allow-shlib-undefined 
+
+Code:
+ int main(int argc, char **argv) { return 0; }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Library uuid found: YES
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'libnm' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion libnm` -> 1
+
+CMake binary for MachineChoice.HOST is not cached
+CMake binary missing from cross or native file, or env var undefined.
+Trying a default CMake fallback at cmake
+Trying CMake binary cmake for machine MachineChoice.HOST at [None]
+Did not find CMake 'cmake'
+Found CMake: NO
+No CMake binary for machine MachineChoice.HOST not found. Giving up.
+Dependency libnm found: NO (tried pkgconfig and cmake)
+Running compile:
+Working directory:  /tmp/tmpbifh9ron
+Command line:  cc /tmp/tmpbifh9ron/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpbifh9ron/output.exe -O0 -Wl,--start-group -lstemmer -Wl,--end-group -Wl,--allow-shlib-undefined 
+
+Code:
+ int main(int argc, char **argv) { return 0; }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Library stemmer found: YES
+Running compile:
+Working directory:  /tmp/tmprdnkqf9r
+Command line:  cc /tmp/tmprdnkqf9r/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmprdnkqf9r/output.exe -Wl,--start-group /usr/lib/x86_64-linux-gnu/libsqlite3.so -Wl,--end-group -O0 
+
+Code:
+ 
+      #include <sqlite3.h>
+
+      int main (int argc, char *argv[]) {
+        sqlite3 *db;
+        int rc;
+        rc = sqlite3_open(":memory:", &db);
+        if (rc!=SQLITE_OK) return -1;
+        rc = sqlite3_exec(db, "create table a(text)", 0, 0, 0);
+        if (rc!=SQLITE_OK) return -1;
+        rc = sqlite3_exec(db, "create virtual table t using fts5(content='a',text)", 0, 0, 0);
+        if (rc!=SQLITE_OK) return -1;
+      }
+    
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Program stdout:
+
+
+Program stderr:
+
+
+Checking if "sqlite3 has builtin FTS5 module" with dependency sqlite3 runs: YES
+Message: Using sqlite3 builtin FTS module
+Called `/usr/bin/pkg-config --define-variable=datadir=/usr/share --variable=session_bus_services_dir dbus-1` -> 0
+/usr/share/dbus-1/services
+Got pkgconfig variable session_bus_services_dir : /usr/share/dbus-1/services
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'systemd' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion systemd` -> 0
+237
+Called `/usr/bin/pkg-config --cflags systemd` -> 0
+
+Called `/usr/bin/pkg-config systemd --libs` -> 0
+
+Called `/usr/bin/pkg-config systemd --libs` -> 0
+
+Dependency systemd found: YES 237
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'bash-completion' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion bash-completion` -> 0
+2.8
+Called `/usr/bin/pkg-config --cflags bash-completion` -> 0
+
+Called `/usr/bin/pkg-config bash-completion --libs` -> 0
+
+Called `/usr/bin/pkg-config bash-completion --libs` -> 0
+
+Dependency bash-completion found: YES 2.8
+Called `/usr/bin/pkg-config --define-variable=prefix=/usr --variable=completionsdir bash-completion` -> 0
+/usr/share/bash-completion/completions
+Got pkgconfig variable completionsdir : /usr/share/bash-completion/completions
+Running compile:
+Working directory:  /tmp/tmpu8hkogwe
+Command line:  cc /tmp/tmpu8hkogwe/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpu8hkogwe/output.exe -O0 
+
+Code:
+ #include <stdio.h>
+#include <limits.h>
+
+        #if defined __stub_getline || defined __stub___getline
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &getline;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "getline" : YES
+Running compile:
+Working directory:  /tmp/tmpumyvl48k
+Command line:  cc /tmp/tmpumyvl48k/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpumyvl48k/output.exe -O0 
+
+Code:
+ #include <fcntl.h>
+#include <limits.h>
+
+        #if defined __stub_posix_fadvise || defined __stub___posix_fadvise
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &posix_fadvise;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "posix_fadvise" : YES
+Running compile:
+Working directory:  /tmp/tmpvberzpl8
+Command line:  cc /tmp/tmpvberzpl8/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -c -o /tmp/tmpvberzpl8/output.obj -O0 -D_LARGEFILE64_SOURCE 
+
+Code:
+ 
+        #include <sys/statvfs.h>
+        int main () {
+            /* If it's not defined as a macro, try to use as a symbol */
+            #ifndef statvfs64
+                statvfs64;
+            #endif
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Header <sys/statvfs.h> has symbol "statvfs64" : YES
+Running compile:
+Working directory:  /tmp/tmpw7zxj7k1
+Command line:  cc /tmp/tmpw7zxj7k1/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpw7zxj7k1/output.exe -O0 
+
+Code:
+ #include <string.h>
+#include <limits.h>
+
+        #if defined __stub_strnlen || defined __stub___strnlen
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &strnlen;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "strnlen" : YES
+Configuring config.h using configuration
+Program glib-mkenums found: YES (/usr/bin/glib-mkenums)
+Called `/usr/bin/pkg-config --variable=g_ir_compiler gobject-introspection-1.0` -> 0
+/usr/bin/g-ir-compiler
+Got pkgconfig variable g_ir_compiler : /usr/bin/g-ir-compiler
+Program g-ir-compiler found: YES (/usr/bin/g-ir-compiler)
+Program g-ir-merge found: NO
+Program /home/sumaid/gsoc/tracker/utils/g-ir-merge/g-ir-merge found: YES (/home/sumaid/gsoc/tracker/utils/g-ir-merge/g-ir-merge)
+Called `/usr/bin/pkg-config --define-variable=datadir=/usr/share --variable=girdir gobject-introspection-1.0` -> 0
+/usr/share/gir-1.0
+Got pkgconfig variable girdir : /usr/share/gir-1.0
+Called `/usr/bin/pkg-config --define-variable=libdir=/usr/lib/x86_64-linux-gnu --variable=typelibdir gobject-introspection-1.0` -> 0
+/usr/lib/x86_64-linux-gnu/girepository-1.0
+Got pkgconfig variable typelibdir : /usr/lib/x86_64-linux-gnu/girepository-1.0
+Library libtracker-sparql-intermediate-c found: YES
+WARNING: Project targetting '>=0.47' but tried to use feature introduced in '0.50.0': install arg in configure_file
+Configuring tracker-sparql-2.0.pc using configuration
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'glib-2.0' with pkg-config executable '/usr/bin/pkg-config'
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'gobject-introspection-1.0' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --variable=girdir glib-2.0` -> 0
+
+Called `/usr/bin/pkg-config --print-variables glib-2.0` -> 0
+exec_prefix
+glib_genmarshal
+glib_mkenums
+gobject_query
+includedir
+libdir
+pcfiledir
+prefix
+Got pkgconfig variable girdir : 
+Called `/usr/bin/pkg-config --variable=girdir gio-2.0` -> 0
+
+Called `/usr/bin/pkg-config --print-variables gio-2.0` -> 0
+exec_prefix
+gdbus_codegen
+giomoduledir
+glib_compile_resources
+glib_compile_schemas
+includedir
+libdir
+pcfiledir
+prefix
+Got pkgconfig variable girdir : 
+Called `/usr/bin/pkg-config --variable=girdir gio-unix-2.0` -> 0
+
+Called `/usr/bin/pkg-config --print-variables gio-unix-2.0` -> 0
+exec_prefix
+includedir
+libdir
+pcfiledir
+prefix
+Got pkgconfig variable girdir : 
+Called `/usr/bin/pkg-config --variable=girdir json-glib-1.0` -> 0
+
+Called `/usr/bin/pkg-config --print-variables json-glib-1.0` -> 0
+includedir
+libdir
+pcfiledir
+prefix
+Got pkgconfig variable girdir : 
+Called `/usr/bin/pkg-config --variable=girdir libsoup-2.4` -> 0
+
+Called `/usr/bin/pkg-config --print-variables libsoup-2.4` -> 0
+exec_prefix
+includedir
+libdir
+pcfiledir
+prefix
+Got pkgconfig variable girdir : 
+Called `/usr/bin/pkg-config --variable=girdir libxml-2.0` -> 0
+
+Called `/usr/bin/pkg-config --print-variables libxml-2.0` -> 0
+exec_prefix
+includedir
+libdir
+modules
+pcfiledir
+prefix
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Configuring tracker-miner-2.0.pc using configuration
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Got pkgconfig variable girdir : 
+Configuring tracker-control-2.0.pc using configuration
+Configuring org.freedesktop.Tracker1.service using configuration
+Configuring tracker-store.service using configuration
+Program glib-compile-schemas found: YES (/usr/bin/glib-compile-schemas)
+Adding test "gvdb"
+Adding test "common-date-time"
+Adding test "common-dbus"
+Adding test "common-file-utils"
+Adding test "common-sched"
+Adding test "common-type-utils"
+Adding test "common-utils"
+Adding test "data-backup"
+Adding test "data-crc32"
+Adding test "data-db-journal"
+Adding test "data-ontology-change"
+Adding test "data-sparql-blank"
+Adding test "data-ontology"
+Adding test "data-sparql"
+Adding test "fts"
+Adding test "miner-crawler"
+Adding test "miner-file-enumerator"
+Adding test "miner-file-notifier"
+Adding test "miner-file-system"
+Adding test "miner-indexing-tree"
+Adding test "miner-priority-queue"
+Adding test "miner-task-pool"
+Adding test "miner-thumbnailer"
+Adding test "miner-miner-fs"
+Adding test "miner-monitor"
+Adding test "sparql-resource"
+Adding test "sparql-sparql"
+Adding test "steroids"
+Program test-runner.sh found: YES (/home/sumaid/gsoc/tracker/tests/functional-tests/test-runner.sh)
+Configuring configuration.json using configuration
+Adding test "functional-01-insertion"
+Adding test "functional-02-sparql-bugs"
+Adding test "functional-03-fts-functions"
+Adding test "functional-04-group-concat"
+Adding test "functional-05-coalesce"
+Adding test "functional-06-distance"
+Adding test "functional-07-graph"
+Adding test "functional-08-unique-insertions"
+Adding test "functional-09-concurrent-query"
+Adding test "functional-12-transactions"
+Adding test "functional-14-signals"
+Adding test "functional-15-statistics"
+Adding test "functional-16-collation"
+Adding test "functional-17-ontology-changes"
+Adding test "functional-13-threaded-store"
+Adding test "functional-ipc-insert-or-replace"
+Adding test "functional-ipc-bus-query-cancellation"
+Message: 
+Build Configuration:
+    Prefix:                                 /usr
+    Source code location:                   /home/sumaid/gsoc/tracker
+    Compiler:                               gcc
+
+Feature Support:
+    Support for network status detection:   false
+    Unicode support library:                icu
+    Build with Journal support:             true
+    Build with SQLite FTS support:          true (built-in FTS: true)
+    Build with Stemming support:            true
+    Bash completion support:                /usr/share/bash-completion/completions
+Build targets in project: 84
+WARNING: Project specifies a minimum meson_version '>=0.47' but uses features which were added in newer versions:
+ * 0.50.0: {'install arg in configure_file'}
+Found ninja-1.8.2 at /usr/bin/ninja

@@ -1,0 +1,22 @@
+ 0x000000000000000e (SONAME)             Library soname: [libtracker-control-2.0.so.0]
+tracker_miner_manager_error_quark T
+tracker_miner_manager_get_available T
+tracker_miner_manager_get_description T
+tracker_miner_manager_get_display_name T
+tracker_miner_manager_get_running T
+tracker_miner_manager_get_status T
+tracker_miner_manager_get_type T
+tracker_miner_manager_index_file T
+tracker_miner_manager_index_file_async T
+tracker_miner_manager_index_file_finish T
+tracker_miner_manager_index_file_for_process T
+tracker_miner_manager_index_file_for_process_async T
+tracker_miner_manager_index_file_for_process_finish T
+tracker_miner_manager_is_active T
+tracker_miner_manager_is_paused T
+tracker_miner_manager_new T
+tracker_miner_manager_new_full T
+tracker_miner_manager_pause T
+tracker_miner_manager_pause_for_process T
+tracker_miner_manager_reindex_by_mimetype T
+tracker_miner_manager_resume T
