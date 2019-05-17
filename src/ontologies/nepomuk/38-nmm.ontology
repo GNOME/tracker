@@ -13,7 +13,7 @@
 
 nmm: a tracker:Namespace, tracker:Ontology ;
 	tracker:prefix "nmm" ;
-	nao:lastModified "2014-09-19T11:05:00Z" .
+	nao:lastModified "2019-05-17T07:12:52" .
 
 nmm:MusicPiece a rdfs:Class ;
 	rdfs:label "Music" ;
@@ -224,6 +224,83 @@ nmm:setNumber a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicAlbumDisc ;
 	rdfs:range xsd:integer .
+
+nmm:mbtrackid a rdf:Property ;
+	rdfs:label "MusicBrainz Track Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
+
+nmm:mbartistid a rdf:Property ;
+	rdfs:label "MusicBrainz Artist Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
+
+nmm:mbalbumid a rdf:Property ;
+	rdfs:label "MusicBrainz Album Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
+
+nmm:mbalbumartistid a rdf:Property ;
+	rdfs:label "MusicBrainz Album Artist Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
+
+nmm:mbtrmid a rdf:Property ;
+	rdfs:label "MusicBrainz TRM Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
+
+nmm:mbrecordingid a rdf:Property ;
+	rdfs:label "MusicBrainz Recording Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
+
+nmm:mbreleasegroupid a rdf:Property ;
+	rdfs:label "MusicBrainz Release Group Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
+
+nmm:mbworkid a rdf:Property ;
+	rdfs:label "MusicBrainz Work Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
+
+nmm:mbdiscid a rdf:Property ;
+	rdfs:label "MusicBrainz Disc Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
+
+nmm:mboriginalartistid a rdf:Property ;
+	rdfs:label "MusicBrainz Original Artist Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
+
+nmm:mboriginalalbumid a rdf:Property ;
+	rdfs:label "MusicBrainz Original Album Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	tracker:indexed true ;
 
 # This property doesn't make sense... it is the other way around
 # From the list ot the item, not from the item to the list
