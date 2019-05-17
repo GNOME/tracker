@@ -1,0 +1,817 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<urn:webhistory:1> a nfo:WebHistory ;
+  nie:title                   "Web history 1" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "1" ;
+  nfo:uri                     "http://www.1.com/" .
+
+<urn:webhistory:2> a nfo:WebHistory ;
+  nie:title                   "Web history 2" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "2" ;
+  nfo:uri                     "http://www.2.com/" .
+
+<urn:webhistory:3> a nfo:WebHistory ;
+  nie:title                   "Web history 3" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "3" ;
+  nfo:uri                     "http://www.3.com/" .
+
+<urn:webhistory:4> a nfo:WebHistory ;
+  nie:title                   "Web history 4" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "4" ;
+  nfo:uri                     "http://www.4.com/" .
+
+<urn:webhistory:5> a nfo:WebHistory ;
+  nie:title                   "Web history 5" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "5" ;
+  nfo:uri                     "http://www.5.com/" .
+
+<urn:webhistory:6> a nfo:WebHistory ;
+  nie:title                   "Web history 6" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "6" ;
+  nfo:uri                     "http://www.6.com/" .
+
+<urn:webhistory:7> a nfo:WebHistory ;
+  nie:title                   "Web history 7" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "7" ;
+  nfo:uri                     "http://www.7.com/" .
+
+<urn:webhistory:8> a nfo:WebHistory ;
+  nie:title                   "Web history 8" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "8" ;
+  nfo:uri                     "http://www.8.com/" .
+
+<urn:webhistory:9> a nfo:WebHistory ;
+  nie:title                   "Web history 9" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "9" ;
+  nfo:uri                     "http://www.9.com/" .
+
+<urn:webhistory:10> a nfo:WebHistory ;
+  nie:title                   "Web history 10" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "0" ;
+  nfo:uri                     "http://www.10.com/" .
+
+<urn:webhistory:11> a nfo:WebHistory ;
+  nie:title                   "Web history 11" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "1" ;
+  nfo:uri                     "http://www.11.com/" .
+
+<urn:webhistory:12> a nfo:WebHistory ;
+  nie:title                   "Web history 12" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "2" ;
+  nfo:uri                     "http://www.12.com/" .
+
+<urn:webhistory:13> a nfo:WebHistory ;
+  nie:title                   "Web history 13" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "3" ;
+  nfo:uri                     "http://www.13.com/" .
+
+<urn:webhistory:14> a nfo:WebHistory ;
+  nie:title                   "Web history 14" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "4" ;
+  nfo:uri                     "http://www.14.com/" .
+
+<urn:webhistory:15> a nfo:WebHistory ;
+  nie:title                   "Web history 15" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "5" ;
+  nfo:uri                     "http://www.15.com/" .
+
+<urn:webhistory:16> a nfo:WebHistory ;
+  nie:title                   "Web history 16" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "6" ;
+  nfo:uri                     "http://www.16.com/" .
+
+<urn:webhistory:17> a nfo:WebHistory ;
+  nie:title                   "Web history 17" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "7" ;
+  nfo:uri                     "http://www.17.com/" .
+
+<urn:webhistory:18> a nfo:WebHistory ;
+  nie:title                   "Web history 18" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "8" ;
+  nfo:uri                     "http://www.18.com/" .
+
+<urn:webhistory:19> a nfo:WebHistory ;
+  nie:title                   "Web history 19" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "9" ;
+  nfo:uri                     "http://www.19.com/" .
+
+<urn:webhistory:20> a nfo:WebHistory ;
+  nie:title                   "Web history 20" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "0" ;
+  nfo:uri                     "http://www.20.com/" .
+
+<urn:webhistory:21> a nfo:WebHistory ;
+  nie:title                   "Web history 21" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "1" ;
+  nfo:uri                     "http://www.21.com/" .
+
+<urn:webhistory:22> a nfo:WebHistory ;
+  nie:title                   "Web history 22" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "2" ;
+  nfo:uri                     "http://www.22.com/" .
+
+<urn:webhistory:23> a nfo:WebHistory ;
+  nie:title                   "Web history 23" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "3" ;
+  nfo:uri                     "http://www.23.com/" .
+
+<urn:webhistory:24> a nfo:WebHistory ;
+  nie:title                   "Web history 24" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "4" ;
+  nfo:uri                     "http://www.24.com/" .
+
+<urn:webhistory:25> a nfo:WebHistory ;
+  nie:title                   "Web history 25" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "5" ;
+  nfo:uri                     "http://www.25.com/" .
+
+<urn:webhistory:26> a nfo:WebHistory ;
+  nie:title                   "Web history 26" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "6" ;
+  nfo:uri                     "http://www.26.com/" .
+
+<urn:webhistory:27> a nfo:WebHistory ;
+  nie:title                   "Web history 27" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "7" ;
+  nfo:uri                     "http://www.27.com/" .
+
+<urn:webhistory:28> a nfo:WebHistory ;
+  nie:title                   "Web history 28" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "8" ;
+  nfo:uri                     "http://www.28.com/" .
+
+<urn:webhistory:29> a nfo:WebHistory ;
+  nie:title                   "Web history 29" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "9" ;
+  nfo:uri                     "http://www.29.com/" .
+
+<urn:webhistory:30> a nfo:WebHistory ;
+  nie:title                   "Web history 30" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "0" ;
+  nfo:uri                     "http://www.30.com/" .
+
+<urn:webhistory:31> a nfo:WebHistory ;
+  nie:title                   "Web history 31" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "1" ;
+  nfo:uri                     "http://www.31.com/" .
+
+<urn:webhistory:32> a nfo:WebHistory ;
+  nie:title                   "Web history 32" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "2" ;
+  nfo:uri                     "http://www.32.com/" .
+
+<urn:webhistory:33> a nfo:WebHistory ;
+  nie:title                   "Web history 33" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "3" ;
+  nfo:uri                     "http://www.33.com/" .
+
+<urn:webhistory:34> a nfo:WebHistory ;
+  nie:title                   "Web history 34" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "4" ;
+  nfo:uri                     "http://www.34.com/" .
+
+<urn:webhistory:35> a nfo:WebHistory ;
+  nie:title                   "Web history 35" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "5" ;
+  nfo:uri                     "http://www.35.com/" .
+
+<urn:webhistory:36> a nfo:WebHistory ;
+  nie:title                   "Web history 36" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "6" ;
+  nfo:uri                     "http://www.36.com/" .
+
+<urn:webhistory:37> a nfo:WebHistory ;
+  nie:title                   "Web history 37" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "7" ;
+  nfo:uri                     "http://www.37.com/" .
+
+<urn:webhistory:38> a nfo:WebHistory ;
+  nie:title                   "Web history 38" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "8" ;
+  nfo:uri                     "http://www.38.com/" .
+
+<urn:webhistory:39> a nfo:WebHistory ;
+  nie:title                   "Web history 39" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "9" ;
+  nfo:uri                     "http://www.39.com/" .
+
+<urn:webhistory:40> a nfo:WebHistory ;
+  nie:title                   "Web history 40" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "0" ;
+  nfo:uri                     "http://www.40.com/" .
+
+<urn:webhistory:41> a nfo:WebHistory ;
+  nie:title                   "Web history 41" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "1" ;
+  nfo:uri                     "http://www.41.com/" .
+
+<urn:webhistory:42> a nfo:WebHistory ;
+  nie:title                   "Web history 42" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "2" ;
+  nfo:uri                     "http://www.42.com/" .
+
+<urn:webhistory:43> a nfo:WebHistory ;
+  nie:title                   "Web history 43" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "3" ;
+  nfo:uri                     "http://www.43.com/" .
+
+<urn:webhistory:44> a nfo:WebHistory ;
+  nie:title                   "Web history 44" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "4" ;
+  nfo:uri                     "http://www.44.com/" .
+
+<urn:webhistory:45> a nfo:WebHistory ;
+  nie:title                   "Web history 45" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "5" ;
+  nfo:uri                     "http://www.45.com/" .
+
+<urn:webhistory:46> a nfo:WebHistory ;
+  nie:title                   "Web history 46" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "6" ;
+  nfo:uri                     "http://www.46.com/" .
+
+<urn:webhistory:47> a nfo:WebHistory ;
+  nie:title                   "Web history 47" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "7" ;
+  nfo:uri                     "http://www.47.com/" .
+
+<urn:webhistory:48> a nfo:WebHistory ;
+  nie:title                   "Web history 48" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "8" ;
+  nfo:uri                     "http://www.48.com/" .
+
+<urn:webhistory:49> a nfo:WebHistory ;
+  nie:title                   "Web history 49" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "9" ;
+  nfo:uri                     "http://www.49.com/" .
+
+<urn:webhistory:50> a nfo:WebHistory ;
+  nie:title                   "Web history 50" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "0" ;
+  nfo:uri                     "http://www.50.com/" .
+
+<urn:webhistory:51> a nfo:WebHistory ;
+  nie:title                   "Web history 51" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "1" ;
+  nfo:uri                     "http://www.51.com/" .
+
+<urn:webhistory:52> a nfo:WebHistory ;
+  nie:title                   "Web history 52" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "2" ;
+  nfo:uri                     "http://www.52.com/" .
+
+<urn:webhistory:53> a nfo:WebHistory ;
+  nie:title                   "Web history 53" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "3" ;
+  nfo:uri                     "http://www.53.com/" .
+
+<urn:webhistory:54> a nfo:WebHistory ;
+  nie:title                   "Web history 54" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "4" ;
+  nfo:uri                     "http://www.54.com/" .
+
+<urn:webhistory:55> a nfo:WebHistory ;
+  nie:title                   "Web history 55" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "5" ;
+  nfo:uri                     "http://www.55.com/" .
+
+<urn:webhistory:56> a nfo:WebHistory ;
+  nie:title                   "Web history 56" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "6" ;
+  nfo:uri                     "http://www.56.com/" .
+
+<urn:webhistory:57> a nfo:WebHistory ;
+  nie:title                   "Web history 57" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "7" ;
+  nfo:uri                     "http://www.57.com/" .
+
+<urn:webhistory:58> a nfo:WebHistory ;
+  nie:title                   "Web history 58" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "8" ;
+  nfo:uri                     "http://www.58.com/" .
+
+<urn:webhistory:59> a nfo:WebHistory ;
+  nie:title                   "Web history 59" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "9" ;
+  nfo:uri                     "http://www.59.com/" .
+
+<urn:webhistory:60> a nfo:WebHistory ;
+  nie:title                   "Web history 60" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "0" ;
+  nfo:uri                     "http://www.60.com/" .
+
+<urn:webhistory:61> a nfo:WebHistory ;
+  nie:title                   "Web history 61" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "1" ;
+  nfo:uri                     "http://www.61.com/" .
+
+<urn:webhistory:62> a nfo:WebHistory ;
+  nie:title                   "Web history 62" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "2" ;
+  nfo:uri                     "http://www.62.com/" .
+
+<urn:webhistory:63> a nfo:WebHistory ;
+  nie:title                   "Web history 63" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "3" ;
+  nfo:uri                     "http://www.63.com/" .
+
+<urn:webhistory:64> a nfo:WebHistory ;
+  nie:title                   "Web history 64" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "4" ;
+  nfo:uri                     "http://www.64.com/" .
+
+<urn:webhistory:65> a nfo:WebHistory ;
+  nie:title                   "Web history 65" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "5" ;
+  nfo:uri                     "http://www.65.com/" .
+
+<urn:webhistory:66> a nfo:WebHistory ;
+  nie:title                   "Web history 66" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "6" ;
+  nfo:uri                     "http://www.66.com/" .
+
+<urn:webhistory:67> a nfo:WebHistory ;
+  nie:title                   "Web history 67" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "7" ;
+  nfo:uri                     "http://www.67.com/" .
+
+<urn:webhistory:68> a nfo:WebHistory ;
+  nie:title                   "Web history 68" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "8" ;
+  nfo:uri                     "http://www.68.com/" .
+
+<urn:webhistory:69> a nfo:WebHistory ;
+  nie:title                   "Web history 69" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "9" ;
+  nfo:uri                     "http://www.69.com/" .
+
+<urn:webhistory:70> a nfo:WebHistory ;
+  nie:title                   "Web history 70" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "0" ;
+  nfo:uri                     "http://www.70.com/" .
+
+<urn:webhistory:71> a nfo:WebHistory ;
+  nie:title                   "Web history 71" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "1" ;
+  nfo:uri                     "http://www.71.com/" .
+
+<urn:webhistory:72> a nfo:WebHistory ;
+  nie:title                   "Web history 72" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "2" ;
+  nfo:uri                     "http://www.72.com/" .
+
+<urn:webhistory:73> a nfo:WebHistory ;
+  nie:title                   "Web history 73" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "3" ;
+  nfo:uri                     "http://www.73.com/" .
+
+<urn:webhistory:74> a nfo:WebHistory ;
+  nie:title                   "Web history 74" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "4" ;
+  nfo:uri                     "http://www.74.com/" .
+
+<urn:webhistory:75> a nfo:WebHistory ;
+  nie:title                   "Web history 75" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "5" ;
+  nfo:uri                     "http://www.75.com/" .
+
+<urn:webhistory:76> a nfo:WebHistory ;
+  nie:title                   "Web history 76" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "6" ;
+  nfo:uri                     "http://www.76.com/" .
+
+<urn:webhistory:77> a nfo:WebHistory ;
+  nie:title                   "Web history 77" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "7" ;
+  nfo:uri                     "http://www.77.com/" .
+
+<urn:webhistory:78> a nfo:WebHistory ;
+  nie:title                   "Web history 78" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "8" ;
+  nfo:uri                     "http://www.78.com/" .
+
+<urn:webhistory:79> a nfo:WebHistory ;
+  nie:title                   "Web history 79" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "9" ;
+  nfo:uri                     "http://www.79.com/" .
+
+<urn:webhistory:80> a nfo:WebHistory ;
+  nie:title                   "Web history 80" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "0" ;
+  nfo:uri                     "http://www.80.com/" .
+
+<urn:webhistory:81> a nfo:WebHistory ;
+  nie:title                   "Web history 81" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "1" ;
+  nfo:uri                     "http://www.81.com/" .
+
+<urn:webhistory:82> a nfo:WebHistory ;
+  nie:title                   "Web history 82" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "2" ;
+  nfo:uri                     "http://www.82.com/" .
+
+<urn:webhistory:83> a nfo:WebHistory ;
+  nie:title                   "Web history 83" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "3" ;
+  nfo:uri                     "http://www.83.com/" .
+
+<urn:webhistory:84> a nfo:WebHistory ;
+  nie:title                   "Web history 84" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "4" ;
+  nfo:uri                     "http://www.84.com/" .
+
+<urn:webhistory:85> a nfo:WebHistory ;
+  nie:title                   "Web history 85" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "5" ;
+  nfo:uri                     "http://www.85.com/" .
+
+<urn:webhistory:86> a nfo:WebHistory ;
+  nie:title                   "Web history 86" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "6" ;
+  nfo:uri                     "http://www.86.com/" .
+
+<urn:webhistory:87> a nfo:WebHistory ;
+  nie:title                   "Web history 87" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "7" ;
+  nfo:uri                     "http://www.87.com/" .
+
+<urn:webhistory:88> a nfo:WebHistory ;
+  nie:title                   "Web history 88" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "8" ;
+  nfo:uri                     "http://www.88.com/" .
+
+<urn:webhistory:89> a nfo:WebHistory ;
+  nie:title                   "Web history 89" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "9" ;
+  nfo:uri                     "http://www.89.com/" .
+
+<urn:webhistory:90> a nfo:WebHistory ;
+  nie:title                   "Web history 90" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "0" ;
+  nfo:uri                     "http://www.90.com/" .
+
+<urn:webhistory:91> a nfo:WebHistory ;
+  nie:title                   "Web history 91" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "1" ;
+  nfo:uri                     "http://www.91.com/" .
+
+<urn:webhistory:92> a nfo:WebHistory ;
+  nie:title                   "Web history 92" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "2" ;
+  nfo:uri                     "http://www.92.com/" .
+
+<urn:webhistory:93> a nfo:WebHistory ;
+  nie:title                   "Web history 93" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "3" ;
+  nfo:uri                     "http://www.93.com/" .
+
+<urn:webhistory:94> a nfo:WebHistory ;
+  nie:title                   "Web history 94" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "4" ;
+  nfo:uri                     "http://www.94.com/" .
+
+<urn:webhistory:95> a nfo:WebHistory ;
+  nie:title                   "Web history 95" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "5" ;
+  nfo:uri                     "http://www.95.com/" .
+
+<urn:webhistory:96> a nfo:WebHistory ;
+  nie:title                   "Web history 96" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "6" ;
+  nfo:uri                     "http://www.96.com/" .
+
+<urn:webhistory:97> a nfo:WebHistory ;
+  nie:title                   "Web history 97" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "7" ;
+  nfo:uri                     "http://www.97.com/" .
+
+<urn:webhistory:98> a nfo:WebHistory ;
+  nie:title                   "Web history 98" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "8" ;
+  nfo:uri                     "http://www.98.com/" .
+
+<urn:webhistory:99> a nfo:WebHistory ;
+  nie:title                   "Web history 99" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "9" ;
+  nfo:uri                     "http://www.99.com/" .
+
+<urn:webhistory:100> a nfo:WebHistory ;
+  nie:title                   "Web history 100" ;
+  nie:informationElementDate  "2019-05-16T11:16:55Z" ;
+  nie:contentCreated          "2019-05-16T11:16:55Z" ;
+  nie:contentLastModified     "2019-05-16T11:16:55Z" ;
+  nie:usageCounter            "0" ;
+  nfo:uri                     "http://www.100.com/" .

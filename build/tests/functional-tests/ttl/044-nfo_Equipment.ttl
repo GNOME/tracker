@@ -1,0 +1,57 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<urn:equipment:NOKIA::> a nfo:Equipment;
+    nfo:manufacturer "NOKIA";
+    nfo:model "".
+
+<urn:equipment:Sumsong:B10:> a nfo:Equipment;
+    nfo:manufacturer "Sumsong";
+    nfo:model "B10".
+
+<urn:equipment:Zeuiss:B11:> a nfo:Equipment;
+    nfo:manufacturer "Zeuiss";
+    nfo:model "B11".
+
+<urn:equipment:Carl:A12:> a nfo:Equipment;
+    nfo:manufacturer "Carl";
+    nfo:model "A12".
+
+<urn:equipment:Photia:B11:> a nfo:Equipment;
+    nfo:manufacturer "Photia";
+    nfo:model "B11".
+
+<urn:equipment:Conan:RTS-68:> a nfo:Equipment;
+    nfo:manufacturer "Conan";
+    nfo:model "RTS-68".
+
+<urn:equipment:Sumsong:B10:> a nfo:Equipment;
+    nfo:manufacturer "Sumsong";
+    nfo:model "B10".
+
+<urn:equipment:Conan:A10:> a nfo:Equipment;
+    nfo:manufacturer "Conan";
+    nfo:model "A10".
+
+<urn:equipment:Carl:A10:> a nfo:Equipment;
+    nfo:manufacturer "Carl";
+    nfo:model "A10".
+
+<urn:equipment:Carl:B10:> a nfo:Equipment;
+    nfo:manufacturer "Carl";
+    nfo:model "B10".

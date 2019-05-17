@@ -1,0 +1,167 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<urn:artist:100> a nmm:Artist ;
+    nmm:artistName "Artist 100" .
+
+<urn:artist:200> a nmm:Artist ;
+    nmm:artistName "Artist 200" .
+
+<urn:artist:300> a nmm:Artist ;
+    nmm:artistName "Artist 300" .
+
+<urn:artist:400> a nmm:Artist ;
+    nmm:artistName "Artist 400" .
+
+<urn:artist:500> a nmm:Artist ;
+    nmm:artistName "Artist 500" .
+
+<urn:artist:600> a nmm:Artist ;
+    nmm:artistName "Artist 600" .
+
+<urn:artist:700> a nmm:Artist ;
+    nmm:artistName "Artist 700" .
+
+<urn:artist:800> a nmm:Artist ;
+    nmm:artistName "Artist 800" .
+
+<urn:artist:900> a nmm:Artist ;
+    nmm:artistName "Artist 900" .
+
+<urn:artist:1000> a nmm:Artist ;
+    nmm:artistName "Artist 0" .
+
+<urn:artist:1100> a nmm:Artist ;
+    nmm:artistName "Artist 100" .
+
+<urn:artist:1200> a nmm:Artist ;
+    nmm:artistName "Artist 200" .
+
+<urn:artist:1300> a nmm:Artist ;
+    nmm:artistName "Artist 300" .
+
+<urn:artist:1400> a nmm:Artist ;
+    nmm:artistName "Artist 400" .
+
+<urn:artist:1500> a nmm:Artist ;
+    nmm:artistName "Artist 500" .
+
+<urn:artist:1600> a nmm:Artist ;
+    nmm:artistName "Artist 600" .
+
+<urn:artist:1700> a nmm:Artist ;
+    nmm:artistName "Artist 700" .
+
+<urn:artist:1800> a nmm:Artist ;
+    nmm:artistName "Artist 800" .
+
+<urn:artist:1900> a nmm:Artist ;
+    nmm:artistName "Artist 900" .
+
+<urn:artist:2000> a nmm:Artist ;
+    nmm:artistName "Artist 0" .
+
+<urn:artist:2100> a nmm:Artist ;
+    nmm:artistName "Artist 100" .
+
+<urn:artist:2200> a nmm:Artist ;
+    nmm:artistName "Artist 200" .
+
+<urn:artist:2300> a nmm:Artist ;
+    nmm:artistName "Artist 300" .
+
+<urn:artist:2400> a nmm:Artist ;
+    nmm:artistName "Artist 400" .
+
+<urn:artist:2500> a nmm:Artist ;
+    nmm:artistName "Artist 500" .
+
+<urn:artist:2600> a nmm:Artist ;
+    nmm:artistName "Artist 600" .
+
+<urn:artist:2700> a nmm:Artist ;
+    nmm:artistName "Artist 700" .
+
+<urn:artist:2800> a nmm:Artist ;
+    nmm:artistName "Artist 800" .
+
+<urn:artist:2900> a nmm:Artist ;
+    nmm:artistName "Artist 900" .
+
+<urn:artist:3000> a nmm:Artist ;
+    nmm:artistName "Artist 0" .
+
+<urn:artist:3100> a nmm:Artist ;
+    nmm:artistName "Artist 100" .
+
+<urn:artist:3200> a nmm:Artist ;
+    nmm:artistName "Artist 200" .
+
+<urn:artist:3300> a nmm:Artist ;
+    nmm:artistName "Artist 300" .
+
+<urn:artist:3400> a nmm:Artist ;
+    nmm:artistName "Artist 400" .
+
+<urn:artist:3500> a nmm:Artist ;
+    nmm:artistName "Artist 500" .
+
+<urn:artist:3600> a nmm:Artist ;
+    nmm:artistName "Artist 600" .
+
+<urn:artist:3700> a nmm:Artist ;
+    nmm:artistName "Artist 700" .
+
+<urn:artist:3800> a nmm:Artist ;
+    nmm:artistName "Artist 800" .
+
+<urn:artist:3900> a nmm:Artist ;
+    nmm:artistName "Artist 900" .
+
+<urn:artist:4000> a nmm:Artist ;
+    nmm:artistName "Artist 0" .
+
+<urn:artist:4100> a nmm:Artist ;
+    nmm:artistName "Artist 100" .
+
+<urn:artist:4200> a nmm:Artist ;
+    nmm:artistName "Artist 200" .
+
+<urn:artist:4300> a nmm:Artist ;
+    nmm:artistName "Artist 300" .
+
+<urn:artist:4400> a nmm:Artist ;
+    nmm:artistName "Artist 400" .
+
+<urn:artist:4500> a nmm:Artist ;
+    nmm:artistName "Artist 500" .
+
+<urn:artist:4600> a nmm:Artist ;
+    nmm:artistName "Artist 600" .
+
+<urn:artist:4700> a nmm:Artist ;
+    nmm:artistName "Artist 700" .
+
+<urn:artist:4800> a nmm:Artist ;
+    nmm:artistName "Artist 800" .
+
+<urn:artist:4900> a nmm:Artist ;
+    nmm:artistName "Artist 900" .
+
+<urn:artist:5000> a nmm:Artist ;
+    nmm:artistName "Artist 0" .

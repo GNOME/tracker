@@ -1,0 +1,717 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/1> a mto:TransferElement ;
+  mto:source        <urn:photo:1784> ;
+  mto:destination   <http://www.uploadsite1.com/item1> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/2> a mto:TransferElement ;
+  mto:source        <urn:photo:8298> ;
+  mto:destination   <http://www.uploadsite2.com/item2> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/3> a mto:TransferElement ;
+  mto:source        <urn:photo:6197> ;
+  mto:destination   <http://www.uploadsite3.com/item3> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/4> a mto:TransferElement ;
+  mto:source        <urn:photo:7438> ;
+  mto:destination   <http://www.uploadsite4.com/item4> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/5> a mto:TransferElement ;
+  mto:source        <urn:photo:6830> ;
+  mto:destination   <http://www.uploadsite5.com/item5> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/6> a mto:TransferElement ;
+  mto:source        <urn:photo:6753> ;
+  mto:destination   <http://www.uploadsite6.com/item6> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/7> a mto:TransferElement ;
+  mto:source        <urn:photo:5722> ;
+  mto:destination   <http://www.uploadsite7.com/item7> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/8> a mto:TransferElement ;
+  mto:source        <urn:photo:4135> ;
+  mto:destination   <http://www.uploadsite8.com/item8> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/9> a mto:TransferElement ;
+  mto:source        <urn:photo:1793> ;
+  mto:destination   <http://www.uploadsite9.com/item9> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/10> a mto:TransferElement ;
+  mto:source        <urn:photo:5629> ;
+  mto:destination   <http://www.uploadsite10.com/item10> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/11> a mto:TransferElement ;
+  mto:source        <urn:photo:2516> ;
+  mto:destination   <http://www.uploadsite11.com/item11> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/12> a mto:TransferElement ;
+  mto:source        <urn:photo:9887> ;
+  mto:destination   <http://www.uploadsite12.com/item12> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/13> a mto:TransferElement ;
+  mto:source        <urn:photo:9004> ;
+  mto:destination   <http://www.uploadsite13.com/item13> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/14> a mto:TransferElement ;
+  mto:source        <urn:photo:3390> ;
+  mto:destination   <http://www.uploadsite14.com/item14> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/15> a mto:TransferElement ;
+  mto:source        <urn:photo:333> ;
+  mto:destination   <http://www.uploadsite15.com/item15> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/16> a mto:TransferElement ;
+  mto:source        <urn:photo:9497> ;
+  mto:destination   <http://www.uploadsite16.com/item16> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/17> a mto:TransferElement ;
+  mto:source        <urn:photo:2369> ;
+  mto:destination   <http://www.uploadsite17.com/item17> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/18> a mto:TransferElement ;
+  mto:source        <urn:photo:4145> ;
+  mto:destination   <http://www.uploadsite18.com/item18> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/19> a mto:TransferElement ;
+  mto:source        <urn:photo:8757> ;
+  mto:destination   <http://www.uploadsite19.com/item19> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/20> a mto:TransferElement ;
+  mto:source        <urn:photo:5831> ;
+  mto:destination   <http://www.uploadsite20.com/item20> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/21> a mto:TransferElement ;
+  mto:source        <urn:photo:5076> ;
+  mto:destination   <http://www.uploadsite21.com/item21> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/22> a mto:TransferElement ;
+  mto:source        <urn:photo:3883> ;
+  mto:destination   <http://www.uploadsite22.com/item22> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/23> a mto:TransferElement ;
+  mto:source        <urn:photo:2790> ;
+  mto:destination   <http://www.uploadsite23.com/item23> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/24> a mto:TransferElement ;
+  mto:source        <urn:photo:9851> ;
+  mto:destination   <http://www.uploadsite24.com/item24> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/25> a mto:TransferElement ;
+  mto:source        <urn:photo:8046> ;
+  mto:destination   <http://www.uploadsite25.com/item25> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/26> a mto:TransferElement ;
+  mto:source        <urn:photo:5195> ;
+  mto:destination   <http://www.uploadsite26.com/item26> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/27> a mto:TransferElement ;
+  mto:source        <urn:photo:6770> ;
+  mto:destination   <http://www.uploadsite27.com/item27> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/28> a mto:TransferElement ;
+  mto:source        <urn:photo:2564> ;
+  mto:destination   <http://www.uploadsite28.com/item28> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/29> a mto:TransferElement ;
+  mto:source        <urn:photo:7765> ;
+  mto:destination   <http://www.uploadsite29.com/item29> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/30> a mto:TransferElement ;
+  mto:source        <urn:photo:5910> ;
+  mto:destination   <http://www.uploadsite30.com/item30> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/31> a mto:TransferElement ;
+  mto:source        <urn:photo:3516> ;
+  mto:destination   <http://www.uploadsite31.com/item31> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/32> a mto:TransferElement ;
+  mto:source        <urn:photo:2426> ;
+  mto:destination   <http://www.uploadsite32.com/item32> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/33> a mto:TransferElement ;
+  mto:source        <urn:photo:5314> ;
+  mto:destination   <http://www.uploadsite33.com/item33> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/34> a mto:TransferElement ;
+  mto:source        <urn:photo:5745> ;
+  mto:destination   <http://www.uploadsite34.com/item34> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/35> a mto:TransferElement ;
+  mto:source        <urn:photo:179> ;
+  mto:destination   <http://www.uploadsite35.com/item35> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/36> a mto:TransferElement ;
+  mto:source        <urn:photo:6840> ;
+  mto:destination   <http://www.uploadsite36.com/item36> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/37> a mto:TransferElement ;
+  mto:source        <urn:photo:173> ;
+  mto:destination   <http://www.uploadsite37.com/item37> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/38> a mto:TransferElement ;
+  mto:source        <urn:photo:6159> ;
+  mto:destination   <http://www.uploadsite38.com/item38> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/39> a mto:TransferElement ;
+  mto:source        <urn:photo:9567> ;
+  mto:destination   <http://www.uploadsite39.com/item39> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/40> a mto:TransferElement ;
+  mto:source        <urn:photo:6303> ;
+  mto:destination   <http://www.uploadsite40.com/item40> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/41> a mto:TransferElement ;
+  mto:source        <urn:photo:5880> ;
+  mto:destination   <http://www.uploadsite41.com/item41> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/42> a mto:TransferElement ;
+  mto:source        <urn:photo:3765> ;
+  mto:destination   <http://www.uploadsite42.com/item42> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/43> a mto:TransferElement ;
+  mto:source        <urn:photo:4879> ;
+  mto:destination   <http://www.uploadsite43.com/item43> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/44> a mto:TransferElement ;
+  mto:source        <urn:photo:1370> ;
+  mto:destination   <http://www.uploadsite44.com/item44> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/45> a mto:TransferElement ;
+  mto:source        <urn:photo:1117> ;
+  mto:destination   <http://www.uploadsite45.com/item45> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/46> a mto:TransferElement ;
+  mto:source        <urn:photo:9000> ;
+  mto:destination   <http://www.uploadsite46.com/item46> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/47> a mto:TransferElement ;
+  mto:source        <urn:photo:4896> ;
+  mto:destination   <http://www.uploadsite47.com/item47> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/48> a mto:TransferElement ;
+  mto:source        <urn:photo:4963> ;
+  mto:destination   <http://www.uploadsite48.com/item48> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/49> a mto:TransferElement ;
+  mto:source        <urn:photo:329> ;
+  mto:destination   <http://www.uploadsite49.com/item49> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/50> a mto:TransferElement ;
+  mto:source        <urn:photo:7205> ;
+  mto:destination   <http://www.uploadsite50.com/item50> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/51> a mto:TransferElement ;
+  mto:source        <urn:photo:1837> ;
+  mto:destination   <http://www.uploadsite51.com/item51> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/52> a mto:TransferElement ;
+  mto:source        <urn:photo:7649> ;
+  mto:destination   <http://www.uploadsite52.com/item52> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/53> a mto:TransferElement ;
+  mto:source        <urn:photo:4145> ;
+  mto:destination   <http://www.uploadsite53.com/item53> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/54> a mto:TransferElement ;
+  mto:source        <urn:photo:9372> ;
+  mto:destination   <http://www.uploadsite54.com/item54> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/55> a mto:TransferElement ;
+  mto:source        <urn:photo:4247> ;
+  mto:destination   <http://www.uploadsite55.com/item55> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/56> a mto:TransferElement ;
+  mto:source        <urn:photo:8035> ;
+  mto:destination   <http://www.uploadsite56.com/item56> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/57> a mto:TransferElement ;
+  mto:source        <urn:photo:5255> ;
+  mto:destination   <http://www.uploadsite57.com/item57> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/58> a mto:TransferElement ;
+  mto:source        <urn:photo:7385> ;
+  mto:destination   <http://www.uploadsite58.com/item58> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/59> a mto:TransferElement ;
+  mto:source        <urn:photo:407> ;
+  mto:destination   <http://www.uploadsite59.com/item59> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/60> a mto:TransferElement ;
+  mto:source        <urn:photo:4533> ;
+  mto:destination   <http://www.uploadsite60.com/item60> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/61> a mto:TransferElement ;
+  mto:source        <urn:photo:5037> ;
+  mto:destination   <http://www.uploadsite61.com/item61> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/62> a mto:TransferElement ;
+  mto:source        <urn:photo:6233> ;
+  mto:destination   <http://www.uploadsite62.com/item62> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/63> a mto:TransferElement ;
+  mto:source        <urn:photo:9360> ;
+  mto:destination   <http://www.uploadsite63.com/item63> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/64> a mto:TransferElement ;
+  mto:source        <urn:photo:16> ;
+  mto:destination   <http://www.uploadsite64.com/item64> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/65> a mto:TransferElement ;
+  mto:source        <urn:photo:8393> ;
+  mto:destination   <http://www.uploadsite65.com/item65> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/66> a mto:TransferElement ;
+  mto:source        <urn:photo:7805> ;
+  mto:destination   <http://www.uploadsite66.com/item66> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/67> a mto:TransferElement ;
+  mto:source        <urn:photo:9203> ;
+  mto:destination   <http://www.uploadsite67.com/item67> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/68> a mto:TransferElement ;
+  mto:source        <urn:photo:82> ;
+  mto:destination   <http://www.uploadsite68.com/item68> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/69> a mto:TransferElement ;
+  mto:source        <urn:photo:9941> ;
+  mto:destination   <http://www.uploadsite69.com/item69> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/70> a mto:TransferElement ;
+  mto:source        <urn:photo:3482> ;
+  mto:destination   <http://www.uploadsite70.com/item70> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/71> a mto:TransferElement ;
+  mto:source        <urn:photo:4740> ;
+  mto:destination   <http://www.uploadsite71.com/item71> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/72> a mto:TransferElement ;
+  mto:source        <urn:photo:9611> ;
+  mto:destination   <http://www.uploadsite72.com/item72> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/73> a mto:TransferElement ;
+  mto:source        <urn:photo:8757> ;
+  mto:destination   <http://www.uploadsite73.com/item73> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/74> a mto:TransferElement ;
+  mto:source        <urn:photo:4870> ;
+  mto:destination   <http://www.uploadsite74.com/item74> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/75> a mto:TransferElement ;
+  mto:source        <urn:photo:524> ;
+  mto:destination   <http://www.uploadsite75.com/item75> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/76> a mto:TransferElement ;
+  mto:source        <urn:photo:3113> ;
+  mto:destination   <http://www.uploadsite76.com/item76> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/77> a mto:TransferElement ;
+  mto:source        <urn:photo:6143> ;
+  mto:destination   <http://www.uploadsite77.com/item77> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/78> a mto:TransferElement ;
+  mto:source        <urn:photo:4855> ;
+  mto:destination   <http://www.uploadsite78.com/item78> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/79> a mto:TransferElement ;
+  mto:source        <urn:photo:394> ;
+  mto:destination   <http://www.uploadsite79.com/item79> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/80> a mto:TransferElement ;
+  mto:source        <urn:photo:5766> ;
+  mto:destination   <http://www.uploadsite80.com/item80> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/81> a mto:TransferElement ;
+  mto:source        <urn:photo:3096> ;
+  mto:destination   <http://www.uploadsite81.com/item81> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/82> a mto:TransferElement ;
+  mto:source        <urn:photo:8582> ;
+  mto:destination   <http://www.uploadsite82.com/item82> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/83> a mto:TransferElement ;
+  mto:source        <urn:photo:2555> ;
+  mto:destination   <http://www.uploadsite83.com/item83> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/84> a mto:TransferElement ;
+  mto:source        <urn:photo:905> ;
+  mto:destination   <http://www.uploadsite84.com/item84> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/85> a mto:TransferElement ;
+  mto:source        <urn:photo:5128> ;
+  mto:destination   <http://www.uploadsite85.com/item85> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/86> a mto:TransferElement ;
+  mto:source        <urn:photo:1944> ;
+  mto:destination   <http://www.uploadsite86.com/item86> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/87> a mto:TransferElement ;
+  mto:source        <urn:photo:8965> ;
+  mto:destination   <http://www.uploadsite87.com/item87> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/88> a mto:TransferElement ;
+  mto:source        <urn:photo:1175> ;
+  mto:destination   <http://www.uploadsite88.com/item88> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/89> a mto:TransferElement ;
+  mto:source        <urn:photo:2728> ;
+  mto:destination   <http://www.uploadsite89.com/item89> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/90> a mto:TransferElement ;
+  mto:source        <urn:photo:2461> ;
+  mto:destination   <http://www.uploadsite90.com/item90> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/91> a mto:TransferElement ;
+  mto:source        <urn:photo:2728> ;
+  mto:destination   <http://www.uploadsite91.com/item91> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/92> a mto:TransferElement ;
+  mto:source        <urn:photo:1299> ;
+  mto:destination   <http://www.uploadsite92.com/item92> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/93> a mto:TransferElement ;
+  mto:source        <urn:photo:5812> ;
+  mto:destination   <http://www.uploadsite93.com/item93> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/94> a mto:TransferElement ;
+  mto:source        <urn:photo:6036> ;
+  mto:destination   <http://www.uploadsite94.com/item94> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/95> a mto:TransferElement ;
+  mto:source        <urn:photo:1087> ;
+  mto:destination   <http://www.uploadsite95.com/item95> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/96> a mto:TransferElement ;
+  mto:source        <urn:photo:4309> ;
+  mto:destination   <http://www.uploadsite96.com/item96> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/97> a mto:TransferElement ;
+  mto:source        <urn:photo:5332> ;
+  mto:destination   <http://www.uploadsite97.com/item97> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/98> a mto:TransferElement ;
+  mto:source        <urn:photo:3714> ;
+  mto:destination   <http://www.uploadsite98.com/item98> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/99> a mto:TransferElement ;
+  mto:source        <urn:photo:2914> ;
+  mto:destination   <http://www.uploadsite99.com/item99> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .
+
+<http://www.sopranolive.org/contexts/tracker/generated_unique_id/100> a mto:TransferElement ;
+  mto:source        <urn:photo:1153> ;
+  mto:destination   <http://www.uploadsite0.com/item100> ;
+  mto:startedTime   "2019-05-16T11:16:55Z" ;
+  mto:completedTime "2019-05-16T11:16:55Z" ;
+  mto:state         <http://www.tracker-project.org/temp/mto#state-done> .

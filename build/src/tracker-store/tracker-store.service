@@ -1,0 +1,10 @@
+[Unit]
+Description=Tracker metadata database store and lookup manager
+
+[Service]
+Type=dbus
+BusName=org.freedesktop.Tracker1
+ExecStart=/usr/libexec/tracker-store
+Restart=on-failure
+# Don't restart after tracker daemon -k (aka tracker-control -k)
+RestartPreventExitStatus=SIGKILL

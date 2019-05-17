@@ -1,0 +1,9 @@
+../src/libtracker-sparql/tracker-namespace-manager.c
+../src/libtracker-sparql/tracker-notifier.c
+../src/libtracker-sparql/tracker-resource.c
+../src/libtracker-sparql/tracker-uri.c
+../src/libtracker-sparql/tracker-version.c
+../src/libtracker-sparql/tracker-namespace-manager.h
+../src/libtracker-sparql/tracker-notifier.h
+../src/libtracker-sparql/tracker-resource.h
+../src/libtracker-sparql/tracker-version.h

@@ -1,0 +1,4017 @@
+
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
+@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
+@prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
+@prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
+@prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
+@prefix nfo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
+@prefix nie:   <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
+@prefix ncal:  <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#>.
+@prefix nmm:   <http://www.tracker-project.org/temp/nmm#>.
+@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#>.
+@prefix mfo:     <http://www.tracker-project.org/temp/mfo#> .
+@prefix mto:     <http://www.tracker-project.org/temp/mto#> .
+@prefix mlo:     <http://www.tracker-project.org/temp/mlo#> .
+@prefix slo:     <http://www.tracker-project.org/temp/slo#> .
+
+<urn:ima:1> a nco:IMAddress;
+    nco:imID         "IM ID 1" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:2> a nco:IMAddress;
+    nco:imID         "IM ID 2" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:3> a nco:IMAddress;
+    nco:imID         "IM ID 3" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:4> a nco:IMAddress;
+    nco:imID         "IM ID 4" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:5> a nco:IMAddress;
+    nco:imID         "IM ID 5" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:6> a nco:IMAddress;
+    nco:imID         "IM ID 6" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:7> a nco:IMAddress;
+    nco:imID         "IM ID 7" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:8> a nco:IMAddress;
+    nco:imID         "IM ID 8" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:9> a nco:IMAddress;
+    nco:imID         "IM ID 9" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:10> a nco:IMAddress;
+    nco:imID         "IM ID 10" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:11> a nco:IMAddress;
+    nco:imID         "IM ID 11" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:12> a nco:IMAddress;
+    nco:imID         "IM ID 12" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:13> a nco:IMAddress;
+    nco:imID         "IM ID 13" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:14> a nco:IMAddress;
+    nco:imID         "IM ID 14" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:15> a nco:IMAddress;
+    nco:imID         "IM ID 15" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:16> a nco:IMAddress;
+    nco:imID         "IM ID 16" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:17> a nco:IMAddress;
+    nco:imID         "IM ID 17" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:18> a nco:IMAddress;
+    nco:imID         "IM ID 18" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:19> a nco:IMAddress;
+    nco:imID         "IM ID 19" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:20> a nco:IMAddress;
+    nco:imID         "IM ID 20" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:21> a nco:IMAddress;
+    nco:imID         "IM ID 21" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:22> a nco:IMAddress;
+    nco:imID         "IM ID 22" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:23> a nco:IMAddress;
+    nco:imID         "IM ID 23" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:24> a nco:IMAddress;
+    nco:imID         "IM ID 24" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:25> a nco:IMAddress;
+    nco:imID         "IM ID 25" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:26> a nco:IMAddress;
+    nco:imID         "IM ID 26" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:27> a nco:IMAddress;
+    nco:imID         "IM ID 27" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:28> a nco:IMAddress;
+    nco:imID         "IM ID 28" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:29> a nco:IMAddress;
+    nco:imID         "IM ID 29" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:30> a nco:IMAddress;
+    nco:imID         "IM ID 30" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:31> a nco:IMAddress;
+    nco:imID         "IM ID 31" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:32> a nco:IMAddress;
+    nco:imID         "IM ID 32" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:33> a nco:IMAddress;
+    nco:imID         "IM ID 33" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:34> a nco:IMAddress;
+    nco:imID         "IM ID 34" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:35> a nco:IMAddress;
+    nco:imID         "IM ID 35" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:36> a nco:IMAddress;
+    nco:imID         "IM ID 36" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:37> a nco:IMAddress;
+    nco:imID         "IM ID 37" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:38> a nco:IMAddress;
+    nco:imID         "IM ID 38" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:39> a nco:IMAddress;
+    nco:imID         "IM ID 39" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:40> a nco:IMAddress;
+    nco:imID         "IM ID 40" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:41> a nco:IMAddress;
+    nco:imID         "IM ID 41" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:42> a nco:IMAddress;
+    nco:imID         "IM ID 42" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:43> a nco:IMAddress;
+    nco:imID         "IM ID 43" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:44> a nco:IMAddress;
+    nco:imID         "IM ID 44" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:45> a nco:IMAddress;
+    nco:imID         "IM ID 45" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:46> a nco:IMAddress;
+    nco:imID         "IM ID 46" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:47> a nco:IMAddress;
+    nco:imID         "IM ID 47" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:48> a nco:IMAddress;
+    nco:imID         "IM ID 48" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:49> a nco:IMAddress;
+    nco:imID         "IM ID 49" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:50> a nco:IMAddress;
+    nco:imID         "IM ID 50" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:51> a nco:IMAddress;
+    nco:imID         "IM ID 51" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:52> a nco:IMAddress;
+    nco:imID         "IM ID 52" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:53> a nco:IMAddress;
+    nco:imID         "IM ID 53" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:54> a nco:IMAddress;
+    nco:imID         "IM ID 54" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:55> a nco:IMAddress;
+    nco:imID         "IM ID 55" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:56> a nco:IMAddress;
+    nco:imID         "IM ID 56" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:57> a nco:IMAddress;
+    nco:imID         "IM ID 57" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:58> a nco:IMAddress;
+    nco:imID         "IM ID 58" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:59> a nco:IMAddress;
+    nco:imID         "IM ID 59" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:60> a nco:IMAddress;
+    nco:imID         "IM ID 60" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:61> a nco:IMAddress;
+    nco:imID         "IM ID 61" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:62> a nco:IMAddress;
+    nco:imID         "IM ID 62" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:63> a nco:IMAddress;
+    nco:imID         "IM ID 63" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:64> a nco:IMAddress;
+    nco:imID         "IM ID 64" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:65> a nco:IMAddress;
+    nco:imID         "IM ID 65" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:66> a nco:IMAddress;
+    nco:imID         "IM ID 66" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:67> a nco:IMAddress;
+    nco:imID         "IM ID 67" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:68> a nco:IMAddress;
+    nco:imID         "IM ID 68" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:69> a nco:IMAddress;
+    nco:imID         "IM ID 69" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:70> a nco:IMAddress;
+    nco:imID         "IM ID 70" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:71> a nco:IMAddress;
+    nco:imID         "IM ID 71" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:72> a nco:IMAddress;
+    nco:imID         "IM ID 72" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:73> a nco:IMAddress;
+    nco:imID         "IM ID 73" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:74> a nco:IMAddress;
+    nco:imID         "IM ID 74" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:75> a nco:IMAddress;
+    nco:imID         "IM ID 75" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:76> a nco:IMAddress;
+    nco:imID         "IM ID 76" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:77> a nco:IMAddress;
+    nco:imID         "IM ID 77" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:78> a nco:IMAddress;
+    nco:imID         "IM ID 78" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:79> a nco:IMAddress;
+    nco:imID         "IM ID 79" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:80> a nco:IMAddress;
+    nco:imID         "IM ID 80" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:81> a nco:IMAddress;
+    nco:imID         "IM ID 81" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:82> a nco:IMAddress;
+    nco:imID         "IM ID 82" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:83> a nco:IMAddress;
+    nco:imID         "IM ID 83" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:84> a nco:IMAddress;
+    nco:imID         "IM ID 84" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:85> a nco:IMAddress;
+    nco:imID         "IM ID 85" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:86> a nco:IMAddress;
+    nco:imID         "IM ID 86" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:87> a nco:IMAddress;
+    nco:imID         "IM ID 87" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:88> a nco:IMAddress;
+    nco:imID         "IM ID 88" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:89> a nco:IMAddress;
+    nco:imID         "IM ID 89" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:90> a nco:IMAddress;
+    nco:imID         "IM ID 90" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:91> a nco:IMAddress;
+    nco:imID         "IM ID 91" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:92> a nco:IMAddress;
+    nco:imID         "IM ID 92" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:93> a nco:IMAddress;
+    nco:imID         "IM ID 93" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:94> a nco:IMAddress;
+    nco:imID         "IM ID 94" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:95> a nco:IMAddress;
+    nco:imID         "IM ID 95" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:96> a nco:IMAddress;
+    nco:imID         "IM ID 96" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:97> a nco:IMAddress;
+    nco:imID         "IM ID 97" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:98> a nco:IMAddress;
+    nco:imID         "IM ID 98" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:99> a nco:IMAddress;
+    nco:imID         "IM ID 99" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:100> a nco:IMAddress;
+    nco:imID         "IM ID 100" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:101> a nco:IMAddress;
+    nco:imID         "IM ID 101" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:102> a nco:IMAddress;
+    nco:imID         "IM ID 102" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:103> a nco:IMAddress;
+    nco:imID         "IM ID 103" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:104> a nco:IMAddress;
+    nco:imID         "IM ID 104" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:105> a nco:IMAddress;
+    nco:imID         "IM ID 105" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:106> a nco:IMAddress;
+    nco:imID         "IM ID 106" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:107> a nco:IMAddress;
+    nco:imID         "IM ID 107" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:108> a nco:IMAddress;
+    nco:imID         "IM ID 108" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:109> a nco:IMAddress;
+    nco:imID         "IM ID 109" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:110> a nco:IMAddress;
+    nco:imID         "IM ID 110" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:111> a nco:IMAddress;
+    nco:imID         "IM ID 111" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:112> a nco:IMAddress;
+    nco:imID         "IM ID 112" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:113> a nco:IMAddress;
+    nco:imID         "IM ID 113" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:114> a nco:IMAddress;
+    nco:imID         "IM ID 114" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:115> a nco:IMAddress;
+    nco:imID         "IM ID 115" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:116> a nco:IMAddress;
+    nco:imID         "IM ID 116" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:117> a nco:IMAddress;
+    nco:imID         "IM ID 117" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:118> a nco:IMAddress;
+    nco:imID         "IM ID 118" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:119> a nco:IMAddress;
+    nco:imID         "IM ID 119" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:120> a nco:IMAddress;
+    nco:imID         "IM ID 120" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:121> a nco:IMAddress;
+    nco:imID         "IM ID 121" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:122> a nco:IMAddress;
+    nco:imID         "IM ID 122" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:123> a nco:IMAddress;
+    nco:imID         "IM ID 123" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:124> a nco:IMAddress;
+    nco:imID         "IM ID 124" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:125> a nco:IMAddress;
+    nco:imID         "IM ID 125" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:126> a nco:IMAddress;
+    nco:imID         "IM ID 126" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:127> a nco:IMAddress;
+    nco:imID         "IM ID 127" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:128> a nco:IMAddress;
+    nco:imID         "IM ID 128" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:129> a nco:IMAddress;
+    nco:imID         "IM ID 129" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:130> a nco:IMAddress;
+    nco:imID         "IM ID 130" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:131> a nco:IMAddress;
+    nco:imID         "IM ID 131" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:132> a nco:IMAddress;
+    nco:imID         "IM ID 132" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:133> a nco:IMAddress;
+    nco:imID         "IM ID 133" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:134> a nco:IMAddress;
+    nco:imID         "IM ID 134" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:135> a nco:IMAddress;
+    nco:imID         "IM ID 135" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:136> a nco:IMAddress;
+    nco:imID         "IM ID 136" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:137> a nco:IMAddress;
+    nco:imID         "IM ID 137" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:138> a nco:IMAddress;
+    nco:imID         "IM ID 138" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:139> a nco:IMAddress;
+    nco:imID         "IM ID 139" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:140> a nco:IMAddress;
+    nco:imID         "IM ID 140" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:141> a nco:IMAddress;
+    nco:imID         "IM ID 141" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:142> a nco:IMAddress;
+    nco:imID         "IM ID 142" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:143> a nco:IMAddress;
+    nco:imID         "IM ID 143" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:144> a nco:IMAddress;
+    nco:imID         "IM ID 144" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:145> a nco:IMAddress;
+    nco:imID         "IM ID 145" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:146> a nco:IMAddress;
+    nco:imID         "IM ID 146" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:147> a nco:IMAddress;
+    nco:imID         "IM ID 147" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:148> a nco:IMAddress;
+    nco:imID         "IM ID 148" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:149> a nco:IMAddress;
+    nco:imID         "IM ID 149" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:150> a nco:IMAddress;
+    nco:imID         "IM ID 150" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:151> a nco:IMAddress;
+    nco:imID         "IM ID 151" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:152> a nco:IMAddress;
+    nco:imID         "IM ID 152" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:153> a nco:IMAddress;
+    nco:imID         "IM ID 153" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:154> a nco:IMAddress;
+    nco:imID         "IM ID 154" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:155> a nco:IMAddress;
+    nco:imID         "IM ID 155" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:156> a nco:IMAddress;
+    nco:imID         "IM ID 156" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:157> a nco:IMAddress;
+    nco:imID         "IM ID 157" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:158> a nco:IMAddress;
+    nco:imID         "IM ID 158" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:159> a nco:IMAddress;
+    nco:imID         "IM ID 159" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:160> a nco:IMAddress;
+    nco:imID         "IM ID 160" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:161> a nco:IMAddress;
+    nco:imID         "IM ID 161" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:162> a nco:IMAddress;
+    nco:imID         "IM ID 162" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:163> a nco:IMAddress;
+    nco:imID         "IM ID 163" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:164> a nco:IMAddress;
+    nco:imID         "IM ID 164" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:165> a nco:IMAddress;
+    nco:imID         "IM ID 165" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:166> a nco:IMAddress;
+    nco:imID         "IM ID 166" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:167> a nco:IMAddress;
+    nco:imID         "IM ID 167" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:168> a nco:IMAddress;
+    nco:imID         "IM ID 168" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:169> a nco:IMAddress;
+    nco:imID         "IM ID 169" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:170> a nco:IMAddress;
+    nco:imID         "IM ID 170" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:171> a nco:IMAddress;
+    nco:imID         "IM ID 171" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:172> a nco:IMAddress;
+    nco:imID         "IM ID 172" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:173> a nco:IMAddress;
+    nco:imID         "IM ID 173" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:174> a nco:IMAddress;
+    nco:imID         "IM ID 174" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:175> a nco:IMAddress;
+    nco:imID         "IM ID 175" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:176> a nco:IMAddress;
+    nco:imID         "IM ID 176" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:177> a nco:IMAddress;
+    nco:imID         "IM ID 177" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:178> a nco:IMAddress;
+    nco:imID         "IM ID 178" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:179> a nco:IMAddress;
+    nco:imID         "IM ID 179" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:180> a nco:IMAddress;
+    nco:imID         "IM ID 180" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:181> a nco:IMAddress;
+    nco:imID         "IM ID 181" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:182> a nco:IMAddress;
+    nco:imID         "IM ID 182" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:183> a nco:IMAddress;
+    nco:imID         "IM ID 183" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:184> a nco:IMAddress;
+    nco:imID         "IM ID 184" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:185> a nco:IMAddress;
+    nco:imID         "IM ID 185" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:186> a nco:IMAddress;
+    nco:imID         "IM ID 186" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:187> a nco:IMAddress;
+    nco:imID         "IM ID 187" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:188> a nco:IMAddress;
+    nco:imID         "IM ID 188" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:189> a nco:IMAddress;
+    nco:imID         "IM ID 189" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:190> a nco:IMAddress;
+    nco:imID         "IM ID 190" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:191> a nco:IMAddress;
+    nco:imID         "IM ID 191" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:192> a nco:IMAddress;
+    nco:imID         "IM ID 192" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:193> a nco:IMAddress;
+    nco:imID         "IM ID 193" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:194> a nco:IMAddress;
+    nco:imID         "IM ID 194" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:195> a nco:IMAddress;
+    nco:imID         "IM ID 195" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:196> a nco:IMAddress;
+    nco:imID         "IM ID 196" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:197> a nco:IMAddress;
+    nco:imID         "IM ID 197" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:198> a nco:IMAddress;
+    nco:imID         "IM ID 198" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:199> a nco:IMAddress;
+    nco:imID         "IM ID 199" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:200> a nco:IMAddress;
+    nco:imID         "IM ID 200" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:201> a nco:IMAddress;
+    nco:imID         "IM ID 201" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:202> a nco:IMAddress;
+    nco:imID         "IM ID 202" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:203> a nco:IMAddress;
+    nco:imID         "IM ID 203" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:204> a nco:IMAddress;
+    nco:imID         "IM ID 204" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:205> a nco:IMAddress;
+    nco:imID         "IM ID 205" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:206> a nco:IMAddress;
+    nco:imID         "IM ID 206" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:207> a nco:IMAddress;
+    nco:imID         "IM ID 207" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:208> a nco:IMAddress;
+    nco:imID         "IM ID 208" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:209> a nco:IMAddress;
+    nco:imID         "IM ID 209" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:210> a nco:IMAddress;
+    nco:imID         "IM ID 210" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:211> a nco:IMAddress;
+    nco:imID         "IM ID 211" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:212> a nco:IMAddress;
+    nco:imID         "IM ID 212" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:213> a nco:IMAddress;
+    nco:imID         "IM ID 213" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:214> a nco:IMAddress;
+    nco:imID         "IM ID 214" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:215> a nco:IMAddress;
+    nco:imID         "IM ID 215" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:216> a nco:IMAddress;
+    nco:imID         "IM ID 216" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:217> a nco:IMAddress;
+    nco:imID         "IM ID 217" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:218> a nco:IMAddress;
+    nco:imID         "IM ID 218" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:219> a nco:IMAddress;
+    nco:imID         "IM ID 219" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:220> a nco:IMAddress;
+    nco:imID         "IM ID 220" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:221> a nco:IMAddress;
+    nco:imID         "IM ID 221" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:222> a nco:IMAddress;
+    nco:imID         "IM ID 222" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:223> a nco:IMAddress;
+    nco:imID         "IM ID 223" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:224> a nco:IMAddress;
+    nco:imID         "IM ID 224" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:225> a nco:IMAddress;
+    nco:imID         "IM ID 225" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:226> a nco:IMAddress;
+    nco:imID         "IM ID 226" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:227> a nco:IMAddress;
+    nco:imID         "IM ID 227" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:228> a nco:IMAddress;
+    nco:imID         "IM ID 228" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:229> a nco:IMAddress;
+    nco:imID         "IM ID 229" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:230> a nco:IMAddress;
+    nco:imID         "IM ID 230" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:231> a nco:IMAddress;
+    nco:imID         "IM ID 231" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:232> a nco:IMAddress;
+    nco:imID         "IM ID 232" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:233> a nco:IMAddress;
+    nco:imID         "IM ID 233" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:234> a nco:IMAddress;
+    nco:imID         "IM ID 234" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:235> a nco:IMAddress;
+    nco:imID         "IM ID 235" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:236> a nco:IMAddress;
+    nco:imID         "IM ID 236" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:237> a nco:IMAddress;
+    nco:imID         "IM ID 237" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:238> a nco:IMAddress;
+    nco:imID         "IM ID 238" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:239> a nco:IMAddress;
+    nco:imID         "IM ID 239" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:240> a nco:IMAddress;
+    nco:imID         "IM ID 240" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:241> a nco:IMAddress;
+    nco:imID         "IM ID 241" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:242> a nco:IMAddress;
+    nco:imID         "IM ID 242" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:243> a nco:IMAddress;
+    nco:imID         "IM ID 243" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:244> a nco:IMAddress;
+    nco:imID         "IM ID 244" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:245> a nco:IMAddress;
+    nco:imID         "IM ID 245" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:246> a nco:IMAddress;
+    nco:imID         "IM ID 246" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:247> a nco:IMAddress;
+    nco:imID         "IM ID 247" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:248> a nco:IMAddress;
+    nco:imID         "IM ID 248" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:249> a nco:IMAddress;
+    nco:imID         "IM ID 249" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:250> a nco:IMAddress;
+    nco:imID         "IM ID 250" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:251> a nco:IMAddress;
+    nco:imID         "IM ID 251" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:252> a nco:IMAddress;
+    nco:imID         "IM ID 252" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:253> a nco:IMAddress;
+    nco:imID         "IM ID 253" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:254> a nco:IMAddress;
+    nco:imID         "IM ID 254" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:255> a nco:IMAddress;
+    nco:imID         "IM ID 255" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:256> a nco:IMAddress;
+    nco:imID         "IM ID 256" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:257> a nco:IMAddress;
+    nco:imID         "IM ID 257" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:258> a nco:IMAddress;
+    nco:imID         "IM ID 258" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:259> a nco:IMAddress;
+    nco:imID         "IM ID 259" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:260> a nco:IMAddress;
+    nco:imID         "IM ID 260" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:261> a nco:IMAddress;
+    nco:imID         "IM ID 261" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:262> a nco:IMAddress;
+    nco:imID         "IM ID 262" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:263> a nco:IMAddress;
+    nco:imID         "IM ID 263" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:264> a nco:IMAddress;
+    nco:imID         "IM ID 264" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:265> a nco:IMAddress;
+    nco:imID         "IM ID 265" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:266> a nco:IMAddress;
+    nco:imID         "IM ID 266" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:267> a nco:IMAddress;
+    nco:imID         "IM ID 267" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:268> a nco:IMAddress;
+    nco:imID         "IM ID 268" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:269> a nco:IMAddress;
+    nco:imID         "IM ID 269" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:270> a nco:IMAddress;
+    nco:imID         "IM ID 270" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:271> a nco:IMAddress;
+    nco:imID         "IM ID 271" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:272> a nco:IMAddress;
+    nco:imID         "IM ID 272" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:273> a nco:IMAddress;
+    nco:imID         "IM ID 273" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:274> a nco:IMAddress;
+    nco:imID         "IM ID 274" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:275> a nco:IMAddress;
+    nco:imID         "IM ID 275" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:276> a nco:IMAddress;
+    nco:imID         "IM ID 276" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:277> a nco:IMAddress;
+    nco:imID         "IM ID 277" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:278> a nco:IMAddress;
+    nco:imID         "IM ID 278" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:279> a nco:IMAddress;
+    nco:imID         "IM ID 279" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:280> a nco:IMAddress;
+    nco:imID         "IM ID 280" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:281> a nco:IMAddress;
+    nco:imID         "IM ID 281" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:282> a nco:IMAddress;
+    nco:imID         "IM ID 282" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:283> a nco:IMAddress;
+    nco:imID         "IM ID 283" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:284> a nco:IMAddress;
+    nco:imID         "IM ID 284" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:285> a nco:IMAddress;
+    nco:imID         "IM ID 285" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:286> a nco:IMAddress;
+    nco:imID         "IM ID 286" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:287> a nco:IMAddress;
+    nco:imID         "IM ID 287" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:288> a nco:IMAddress;
+    nco:imID         "IM ID 288" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:289> a nco:IMAddress;
+    nco:imID         "IM ID 289" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:290> a nco:IMAddress;
+    nco:imID         "IM ID 290" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:291> a nco:IMAddress;
+    nco:imID         "IM ID 291" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:292> a nco:IMAddress;
+    nco:imID         "IM ID 292" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:293> a nco:IMAddress;
+    nco:imID         "IM ID 293" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:294> a nco:IMAddress;
+    nco:imID         "IM ID 294" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:295> a nco:IMAddress;
+    nco:imID         "IM ID 295" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:296> a nco:IMAddress;
+    nco:imID         "IM ID 296" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:297> a nco:IMAddress;
+    nco:imID         "IM ID 297" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:298> a nco:IMAddress;
+    nco:imID         "IM ID 298" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:299> a nco:IMAddress;
+    nco:imID         "IM ID 299" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:300> a nco:IMAddress;
+    nco:imID         "IM ID 300" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:301> a nco:IMAddress;
+    nco:imID         "IM ID 301" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:302> a nco:IMAddress;
+    nco:imID         "IM ID 302" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:303> a nco:IMAddress;
+    nco:imID         "IM ID 303" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:304> a nco:IMAddress;
+    nco:imID         "IM ID 304" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:305> a nco:IMAddress;
+    nco:imID         "IM ID 305" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:306> a nco:IMAddress;
+    nco:imID         "IM ID 306" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:307> a nco:IMAddress;
+    nco:imID         "IM ID 307" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:308> a nco:IMAddress;
+    nco:imID         "IM ID 308" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:309> a nco:IMAddress;
+    nco:imID         "IM ID 309" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:310> a nco:IMAddress;
+    nco:imID         "IM ID 310" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:311> a nco:IMAddress;
+    nco:imID         "IM ID 311" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:312> a nco:IMAddress;
+    nco:imID         "IM ID 312" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:313> a nco:IMAddress;
+    nco:imID         "IM ID 313" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:314> a nco:IMAddress;
+    nco:imID         "IM ID 314" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:315> a nco:IMAddress;
+    nco:imID         "IM ID 315" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:316> a nco:IMAddress;
+    nco:imID         "IM ID 316" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:317> a nco:IMAddress;
+    nco:imID         "IM ID 317" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:318> a nco:IMAddress;
+    nco:imID         "IM ID 318" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:319> a nco:IMAddress;
+    nco:imID         "IM ID 319" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:320> a nco:IMAddress;
+    nco:imID         "IM ID 320" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:321> a nco:IMAddress;
+    nco:imID         "IM ID 321" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:322> a nco:IMAddress;
+    nco:imID         "IM ID 322" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:323> a nco:IMAddress;
+    nco:imID         "IM ID 323" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:324> a nco:IMAddress;
+    nco:imID         "IM ID 324" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:325> a nco:IMAddress;
+    nco:imID         "IM ID 325" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:326> a nco:IMAddress;
+    nco:imID         "IM ID 326" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:327> a nco:IMAddress;
+    nco:imID         "IM ID 327" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:328> a nco:IMAddress;
+    nco:imID         "IM ID 328" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:329> a nco:IMAddress;
+    nco:imID         "IM ID 329" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:330> a nco:IMAddress;
+    nco:imID         "IM ID 330" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:331> a nco:IMAddress;
+    nco:imID         "IM ID 331" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:332> a nco:IMAddress;
+    nco:imID         "IM ID 332" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:333> a nco:IMAddress;
+    nco:imID         "IM ID 333" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:334> a nco:IMAddress;
+    nco:imID         "IM ID 334" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:335> a nco:IMAddress;
+    nco:imID         "IM ID 335" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:336> a nco:IMAddress;
+    nco:imID         "IM ID 336" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:337> a nco:IMAddress;
+    nco:imID         "IM ID 337" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:338> a nco:IMAddress;
+    nco:imID         "IM ID 338" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:339> a nco:IMAddress;
+    nco:imID         "IM ID 339" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:340> a nco:IMAddress;
+    nco:imID         "IM ID 340" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:341> a nco:IMAddress;
+    nco:imID         "IM ID 341" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:342> a nco:IMAddress;
+    nco:imID         "IM ID 342" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:343> a nco:IMAddress;
+    nco:imID         "IM ID 343" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:344> a nco:IMAddress;
+    nco:imID         "IM ID 344" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:345> a nco:IMAddress;
+    nco:imID         "IM ID 345" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:346> a nco:IMAddress;
+    nco:imID         "IM ID 346" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:347> a nco:IMAddress;
+    nco:imID         "IM ID 347" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:348> a nco:IMAddress;
+    nco:imID         "IM ID 348" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:349> a nco:IMAddress;
+    nco:imID         "IM ID 349" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:350> a nco:IMAddress;
+    nco:imID         "IM ID 350" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:351> a nco:IMAddress;
+    nco:imID         "IM ID 351" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:352> a nco:IMAddress;
+    nco:imID         "IM ID 352" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:353> a nco:IMAddress;
+    nco:imID         "IM ID 353" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:354> a nco:IMAddress;
+    nco:imID         "IM ID 354" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:355> a nco:IMAddress;
+    nco:imID         "IM ID 355" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:356> a nco:IMAddress;
+    nco:imID         "IM ID 356" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:357> a nco:IMAddress;
+    nco:imID         "IM ID 357" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:358> a nco:IMAddress;
+    nco:imID         "IM ID 358" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:359> a nco:IMAddress;
+    nco:imID         "IM ID 359" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:360> a nco:IMAddress;
+    nco:imID         "IM ID 360" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:361> a nco:IMAddress;
+    nco:imID         "IM ID 361" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:362> a nco:IMAddress;
+    nco:imID         "IM ID 362" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:363> a nco:IMAddress;
+    nco:imID         "IM ID 363" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:364> a nco:IMAddress;
+    nco:imID         "IM ID 364" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:365> a nco:IMAddress;
+    nco:imID         "IM ID 365" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:366> a nco:IMAddress;
+    nco:imID         "IM ID 366" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:367> a nco:IMAddress;
+    nco:imID         "IM ID 367" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:368> a nco:IMAddress;
+    nco:imID         "IM ID 368" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:369> a nco:IMAddress;
+    nco:imID         "IM ID 369" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:370> a nco:IMAddress;
+    nco:imID         "IM ID 370" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:371> a nco:IMAddress;
+    nco:imID         "IM ID 371" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:372> a nco:IMAddress;
+    nco:imID         "IM ID 372" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:373> a nco:IMAddress;
+    nco:imID         "IM ID 373" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:374> a nco:IMAddress;
+    nco:imID         "IM ID 374" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:375> a nco:IMAddress;
+    nco:imID         "IM ID 375" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:376> a nco:IMAddress;
+    nco:imID         "IM ID 376" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:377> a nco:IMAddress;
+    nco:imID         "IM ID 377" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:378> a nco:IMAddress;
+    nco:imID         "IM ID 378" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:379> a nco:IMAddress;
+    nco:imID         "IM ID 379" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:380> a nco:IMAddress;
+    nco:imID         "IM ID 380" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:381> a nco:IMAddress;
+    nco:imID         "IM ID 381" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:382> a nco:IMAddress;
+    nco:imID         "IM ID 382" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:383> a nco:IMAddress;
+    nco:imID         "IM ID 383" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:384> a nco:IMAddress;
+    nco:imID         "IM ID 384" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:385> a nco:IMAddress;
+    nco:imID         "IM ID 385" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:386> a nco:IMAddress;
+    nco:imID         "IM ID 386" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:387> a nco:IMAddress;
+    nco:imID         "IM ID 387" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:388> a nco:IMAddress;
+    nco:imID         "IM ID 388" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:389> a nco:IMAddress;
+    nco:imID         "IM ID 389" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:390> a nco:IMAddress;
+    nco:imID         "IM ID 390" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:391> a nco:IMAddress;
+    nco:imID         "IM ID 391" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:392> a nco:IMAddress;
+    nco:imID         "IM ID 392" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:393> a nco:IMAddress;
+    nco:imID         "IM ID 393" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:394> a nco:IMAddress;
+    nco:imID         "IM ID 394" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:395> a nco:IMAddress;
+    nco:imID         "IM ID 395" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:396> a nco:IMAddress;
+    nco:imID         "IM ID 396" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:397> a nco:IMAddress;
+    nco:imID         "IM ID 397" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:398> a nco:IMAddress;
+    nco:imID         "IM ID 398" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:399> a nco:IMAddress;
+    nco:imID         "IM ID 399" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:400> a nco:IMAddress;
+    nco:imID         "IM ID 400" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:401> a nco:IMAddress;
+    nco:imID         "IM ID 401" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:402> a nco:IMAddress;
+    nco:imID         "IM ID 402" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:403> a nco:IMAddress;
+    nco:imID         "IM ID 403" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:404> a nco:IMAddress;
+    nco:imID         "IM ID 404" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:405> a nco:IMAddress;
+    nco:imID         "IM ID 405" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:406> a nco:IMAddress;
+    nco:imID         "IM ID 406" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:407> a nco:IMAddress;
+    nco:imID         "IM ID 407" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:408> a nco:IMAddress;
+    nco:imID         "IM ID 408" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:409> a nco:IMAddress;
+    nco:imID         "IM ID 409" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:410> a nco:IMAddress;
+    nco:imID         "IM ID 410" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:411> a nco:IMAddress;
+    nco:imID         "IM ID 411" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:412> a nco:IMAddress;
+    nco:imID         "IM ID 412" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:413> a nco:IMAddress;
+    nco:imID         "IM ID 413" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:414> a nco:IMAddress;
+    nco:imID         "IM ID 414" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:415> a nco:IMAddress;
+    nco:imID         "IM ID 415" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:416> a nco:IMAddress;
+    nco:imID         "IM ID 416" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:417> a nco:IMAddress;
+    nco:imID         "IM ID 417" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:418> a nco:IMAddress;
+    nco:imID         "IM ID 418" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:419> a nco:IMAddress;
+    nco:imID         "IM ID 419" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:420> a nco:IMAddress;
+    nco:imID         "IM ID 420" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:421> a nco:IMAddress;
+    nco:imID         "IM ID 421" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:422> a nco:IMAddress;
+    nco:imID         "IM ID 422" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:423> a nco:IMAddress;
+    nco:imID         "IM ID 423" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:424> a nco:IMAddress;
+    nco:imID         "IM ID 424" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:425> a nco:IMAddress;
+    nco:imID         "IM ID 425" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:426> a nco:IMAddress;
+    nco:imID         "IM ID 426" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:427> a nco:IMAddress;
+    nco:imID         "IM ID 427" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:428> a nco:IMAddress;
+    nco:imID         "IM ID 428" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:429> a nco:IMAddress;
+    nco:imID         "IM ID 429" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:430> a nco:IMAddress;
+    nco:imID         "IM ID 430" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:431> a nco:IMAddress;
+    nco:imID         "IM ID 431" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:432> a nco:IMAddress;
+    nco:imID         "IM ID 432" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:433> a nco:IMAddress;
+    nco:imID         "IM ID 433" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:434> a nco:IMAddress;
+    nco:imID         "IM ID 434" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:435> a nco:IMAddress;
+    nco:imID         "IM ID 435" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:436> a nco:IMAddress;
+    nco:imID         "IM ID 436" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:437> a nco:IMAddress;
+    nco:imID         "IM ID 437" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:438> a nco:IMAddress;
+    nco:imID         "IM ID 438" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:439> a nco:IMAddress;
+    nco:imID         "IM ID 439" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:440> a nco:IMAddress;
+    nco:imID         "IM ID 440" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:441> a nco:IMAddress;
+    nco:imID         "IM ID 441" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:442> a nco:IMAddress;
+    nco:imID         "IM ID 442" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:443> a nco:IMAddress;
+    nco:imID         "IM ID 443" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:444> a nco:IMAddress;
+    nco:imID         "IM ID 444" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:445> a nco:IMAddress;
+    nco:imID         "IM ID 445" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:446> a nco:IMAddress;
+    nco:imID         "IM ID 446" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:447> a nco:IMAddress;
+    nco:imID         "IM ID 447" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:448> a nco:IMAddress;
+    nco:imID         "IM ID 448" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:449> a nco:IMAddress;
+    nco:imID         "IM ID 449" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:450> a nco:IMAddress;
+    nco:imID         "IM ID 450" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:451> a nco:IMAddress;
+    nco:imID         "IM ID 451" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:452> a nco:IMAddress;
+    nco:imID         "IM ID 452" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:453> a nco:IMAddress;
+    nco:imID         "IM ID 453" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:454> a nco:IMAddress;
+    nco:imID         "IM ID 454" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:455> a nco:IMAddress;
+    nco:imID         "IM ID 455" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:456> a nco:IMAddress;
+    nco:imID         "IM ID 456" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:457> a nco:IMAddress;
+    nco:imID         "IM ID 457" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:458> a nco:IMAddress;
+    nco:imID         "IM ID 458" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:459> a nco:IMAddress;
+    nco:imID         "IM ID 459" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:460> a nco:IMAddress;
+    nco:imID         "IM ID 460" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:461> a nco:IMAddress;
+    nco:imID         "IM ID 461" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:462> a nco:IMAddress;
+    nco:imID         "IM ID 462" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:463> a nco:IMAddress;
+    nco:imID         "IM ID 463" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:464> a nco:IMAddress;
+    nco:imID         "IM ID 464" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:465> a nco:IMAddress;
+    nco:imID         "IM ID 465" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:466> a nco:IMAddress;
+    nco:imID         "IM ID 466" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:467> a nco:IMAddress;
+    nco:imID         "IM ID 467" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:468> a nco:IMAddress;
+    nco:imID         "IM ID 468" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:469> a nco:IMAddress;
+    nco:imID         "IM ID 469" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:470> a nco:IMAddress;
+    nco:imID         "IM ID 470" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:471> a nco:IMAddress;
+    nco:imID         "IM ID 471" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:472> a nco:IMAddress;
+    nco:imID         "IM ID 472" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:473> a nco:IMAddress;
+    nco:imID         "IM ID 473" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:474> a nco:IMAddress;
+    nco:imID         "IM ID 474" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:475> a nco:IMAddress;
+    nco:imID         "IM ID 475" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:476> a nco:IMAddress;
+    nco:imID         "IM ID 476" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:477> a nco:IMAddress;
+    nco:imID         "IM ID 477" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:478> a nco:IMAddress;
+    nco:imID         "IM ID 478" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:479> a nco:IMAddress;
+    nco:imID         "IM ID 479" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:480> a nco:IMAddress;
+    nco:imID         "IM ID 480" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:481> a nco:IMAddress;
+    nco:imID         "IM ID 481" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:482> a nco:IMAddress;
+    nco:imID         "IM ID 482" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:483> a nco:IMAddress;
+    nco:imID         "IM ID 483" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:484> a nco:IMAddress;
+    nco:imID         "IM ID 484" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:485> a nco:IMAddress;
+    nco:imID         "IM ID 485" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:486> a nco:IMAddress;
+    nco:imID         "IM ID 486" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:487> a nco:IMAddress;
+    nco:imID         "IM ID 487" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:488> a nco:IMAddress;
+    nco:imID         "IM ID 488" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:489> a nco:IMAddress;
+    nco:imID         "IM ID 489" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:490> a nco:IMAddress;
+    nco:imID         "IM ID 490" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:491> a nco:IMAddress;
+    nco:imID         "IM ID 491" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:492> a nco:IMAddress;
+    nco:imID         "IM ID 492" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:493> a nco:IMAddress;
+    nco:imID         "IM ID 493" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:494> a nco:IMAddress;
+    nco:imID         "IM ID 494" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:495> a nco:IMAddress;
+    nco:imID         "IM ID 495" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:496> a nco:IMAddress;
+    nco:imID         "IM ID 496" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:497> a nco:IMAddress;
+    nco:imID         "IM ID 497" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:498> a nco:IMAddress;
+    nco:imID         "IM ID 498" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:499> a nco:IMAddress;
+    nco:imID         "IM ID 499" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:500> a nco:IMAddress;
+    nco:imID         "IM ID 500" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:501> a nco:IMAddress;
+    nco:imID         "IM ID 501" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:502> a nco:IMAddress;
+    nco:imID         "IM ID 502" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:503> a nco:IMAddress;
+    nco:imID         "IM ID 503" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:504> a nco:IMAddress;
+    nco:imID         "IM ID 504" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:505> a nco:IMAddress;
+    nco:imID         "IM ID 505" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:506> a nco:IMAddress;
+    nco:imID         "IM ID 506" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:507> a nco:IMAddress;
+    nco:imID         "IM ID 507" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:508> a nco:IMAddress;
+    nco:imID         "IM ID 508" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:509> a nco:IMAddress;
+    nco:imID         "IM ID 509" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:510> a nco:IMAddress;
+    nco:imID         "IM ID 510" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:511> a nco:IMAddress;
+    nco:imID         "IM ID 511" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:512> a nco:IMAddress;
+    nco:imID         "IM ID 512" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:513> a nco:IMAddress;
+    nco:imID         "IM ID 513" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:514> a nco:IMAddress;
+    nco:imID         "IM ID 514" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:515> a nco:IMAddress;
+    nco:imID         "IM ID 515" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:516> a nco:IMAddress;
+    nco:imID         "IM ID 516" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:517> a nco:IMAddress;
+    nco:imID         "IM ID 517" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:518> a nco:IMAddress;
+    nco:imID         "IM ID 518" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:519> a nco:IMAddress;
+    nco:imID         "IM ID 519" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:520> a nco:IMAddress;
+    nco:imID         "IM ID 520" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:521> a nco:IMAddress;
+    nco:imID         "IM ID 521" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:522> a nco:IMAddress;
+    nco:imID         "IM ID 522" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:523> a nco:IMAddress;
+    nco:imID         "IM ID 523" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:524> a nco:IMAddress;
+    nco:imID         "IM ID 524" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:525> a nco:IMAddress;
+    nco:imID         "IM ID 525" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:526> a nco:IMAddress;
+    nco:imID         "IM ID 526" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:527> a nco:IMAddress;
+    nco:imID         "IM ID 527" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:528> a nco:IMAddress;
+    nco:imID         "IM ID 528" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:529> a nco:IMAddress;
+    nco:imID         "IM ID 529" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:530> a nco:IMAddress;
+    nco:imID         "IM ID 530" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:531> a nco:IMAddress;
+    nco:imID         "IM ID 531" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:532> a nco:IMAddress;
+    nco:imID         "IM ID 532" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:533> a nco:IMAddress;
+    nco:imID         "IM ID 533" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:534> a nco:IMAddress;
+    nco:imID         "IM ID 534" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:535> a nco:IMAddress;
+    nco:imID         "IM ID 535" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:536> a nco:IMAddress;
+    nco:imID         "IM ID 536" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:537> a nco:IMAddress;
+    nco:imID         "IM ID 537" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:538> a nco:IMAddress;
+    nco:imID         "IM ID 538" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:539> a nco:IMAddress;
+    nco:imID         "IM ID 539" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:540> a nco:IMAddress;
+    nco:imID         "IM ID 540" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:541> a nco:IMAddress;
+    nco:imID         "IM ID 541" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:542> a nco:IMAddress;
+    nco:imID         "IM ID 542" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:543> a nco:IMAddress;
+    nco:imID         "IM ID 543" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:544> a nco:IMAddress;
+    nco:imID         "IM ID 544" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:545> a nco:IMAddress;
+    nco:imID         "IM ID 545" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:546> a nco:IMAddress;
+    nco:imID         "IM ID 546" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:547> a nco:IMAddress;
+    nco:imID         "IM ID 547" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:548> a nco:IMAddress;
+    nco:imID         "IM ID 548" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:549> a nco:IMAddress;
+    nco:imID         "IM ID 549" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:550> a nco:IMAddress;
+    nco:imID         "IM ID 550" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:551> a nco:IMAddress;
+    nco:imID         "IM ID 551" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:552> a nco:IMAddress;
+    nco:imID         "IM ID 552" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:553> a nco:IMAddress;
+    nco:imID         "IM ID 553" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:554> a nco:IMAddress;
+    nco:imID         "IM ID 554" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:555> a nco:IMAddress;
+    nco:imID         "IM ID 555" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:556> a nco:IMAddress;
+    nco:imID         "IM ID 556" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:557> a nco:IMAddress;
+    nco:imID         "IM ID 557" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:558> a nco:IMAddress;
+    nco:imID         "IM ID 558" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:559> a nco:IMAddress;
+    nco:imID         "IM ID 559" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:560> a nco:IMAddress;
+    nco:imID         "IM ID 560" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:561> a nco:IMAddress;
+    nco:imID         "IM ID 561" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:562> a nco:IMAddress;
+    nco:imID         "IM ID 562" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:563> a nco:IMAddress;
+    nco:imID         "IM ID 563" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:564> a nco:IMAddress;
+    nco:imID         "IM ID 564" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:565> a nco:IMAddress;
+    nco:imID         "IM ID 565" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:566> a nco:IMAddress;
+    nco:imID         "IM ID 566" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:567> a nco:IMAddress;
+    nco:imID         "IM ID 567" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:568> a nco:IMAddress;
+    nco:imID         "IM ID 568" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:569> a nco:IMAddress;
+    nco:imID         "IM ID 569" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:570> a nco:IMAddress;
+    nco:imID         "IM ID 570" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:571> a nco:IMAddress;
+    nco:imID         "IM ID 571" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:572> a nco:IMAddress;
+    nco:imID         "IM ID 572" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:573> a nco:IMAddress;
+    nco:imID         "IM ID 573" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:574> a nco:IMAddress;
+    nco:imID         "IM ID 574" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:575> a nco:IMAddress;
+    nco:imID         "IM ID 575" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:576> a nco:IMAddress;
+    nco:imID         "IM ID 576" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:577> a nco:IMAddress;
+    nco:imID         "IM ID 577" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:578> a nco:IMAddress;
+    nco:imID         "IM ID 578" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:579> a nco:IMAddress;
+    nco:imID         "IM ID 579" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:580> a nco:IMAddress;
+    nco:imID         "IM ID 580" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:581> a nco:IMAddress;
+    nco:imID         "IM ID 581" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:582> a nco:IMAddress;
+    nco:imID         "IM ID 582" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:583> a nco:IMAddress;
+    nco:imID         "IM ID 583" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:584> a nco:IMAddress;
+    nco:imID         "IM ID 584" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:585> a nco:IMAddress;
+    nco:imID         "IM ID 585" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:586> a nco:IMAddress;
+    nco:imID         "IM ID 586" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:587> a nco:IMAddress;
+    nco:imID         "IM ID 587" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:588> a nco:IMAddress;
+    nco:imID         "IM ID 588" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:589> a nco:IMAddress;
+    nco:imID         "IM ID 589" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:590> a nco:IMAddress;
+    nco:imID         "IM ID 590" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:591> a nco:IMAddress;
+    nco:imID         "IM ID 591" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:592> a nco:IMAddress;
+    nco:imID         "IM ID 592" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:593> a nco:IMAddress;
+    nco:imID         "IM ID 593" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:594> a nco:IMAddress;
+    nco:imID         "IM ID 594" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:595> a nco:IMAddress;
+    nco:imID         "IM ID 595" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:596> a nco:IMAddress;
+    nco:imID         "IM ID 596" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:597> a nco:IMAddress;
+    nco:imID         "IM ID 597" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:598> a nco:IMAddress;
+    nco:imID         "IM ID 598" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:599> a nco:IMAddress;
+    nco:imID         "IM ID 599" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:600> a nco:IMAddress;
+    nco:imID         "IM ID 600" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:601> a nco:IMAddress;
+    nco:imID         "IM ID 601" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:602> a nco:IMAddress;
+    nco:imID         "IM ID 602" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:603> a nco:IMAddress;
+    nco:imID         "IM ID 603" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:604> a nco:IMAddress;
+    nco:imID         "IM ID 604" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:605> a nco:IMAddress;
+    nco:imID         "IM ID 605" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:606> a nco:IMAddress;
+    nco:imID         "IM ID 606" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:607> a nco:IMAddress;
+    nco:imID         "IM ID 607" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:608> a nco:IMAddress;
+    nco:imID         "IM ID 608" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:609> a nco:IMAddress;
+    nco:imID         "IM ID 609" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:610> a nco:IMAddress;
+    nco:imID         "IM ID 610" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:611> a nco:IMAddress;
+    nco:imID         "IM ID 611" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:612> a nco:IMAddress;
+    nco:imID         "IM ID 612" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:613> a nco:IMAddress;
+    nco:imID         "IM ID 613" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:614> a nco:IMAddress;
+    nco:imID         "IM ID 614" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:615> a nco:IMAddress;
+    nco:imID         "IM ID 615" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:616> a nco:IMAddress;
+    nco:imID         "IM ID 616" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:617> a nco:IMAddress;
+    nco:imID         "IM ID 617" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:618> a nco:IMAddress;
+    nco:imID         "IM ID 618" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:619> a nco:IMAddress;
+    nco:imID         "IM ID 619" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:620> a nco:IMAddress;
+    nco:imID         "IM ID 620" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:621> a nco:IMAddress;
+    nco:imID         "IM ID 621" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:622> a nco:IMAddress;
+    nco:imID         "IM ID 622" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:623> a nco:IMAddress;
+    nco:imID         "IM ID 623" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:624> a nco:IMAddress;
+    nco:imID         "IM ID 624" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:625> a nco:IMAddress;
+    nco:imID         "IM ID 625" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:626> a nco:IMAddress;
+    nco:imID         "IM ID 626" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:627> a nco:IMAddress;
+    nco:imID         "IM ID 627" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:628> a nco:IMAddress;
+    nco:imID         "IM ID 628" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:629> a nco:IMAddress;
+    nco:imID         "IM ID 629" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:630> a nco:IMAddress;
+    nco:imID         "IM ID 630" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:631> a nco:IMAddress;
+    nco:imID         "IM ID 631" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:632> a nco:IMAddress;
+    nco:imID         "IM ID 632" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:633> a nco:IMAddress;
+    nco:imID         "IM ID 633" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:634> a nco:IMAddress;
+    nco:imID         "IM ID 634" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:635> a nco:IMAddress;
+    nco:imID         "IM ID 635" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:636> a nco:IMAddress;
+    nco:imID         "IM ID 636" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:637> a nco:IMAddress;
+    nco:imID         "IM ID 637" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:638> a nco:IMAddress;
+    nco:imID         "IM ID 638" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:639> a nco:IMAddress;
+    nco:imID         "IM ID 639" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:640> a nco:IMAddress;
+    nco:imID         "IM ID 640" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:641> a nco:IMAddress;
+    nco:imID         "IM ID 641" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:642> a nco:IMAddress;
+    nco:imID         "IM ID 642" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:643> a nco:IMAddress;
+    nco:imID         "IM ID 643" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:644> a nco:IMAddress;
+    nco:imID         "IM ID 644" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:645> a nco:IMAddress;
+    nco:imID         "IM ID 645" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:646> a nco:IMAddress;
+    nco:imID         "IM ID 646" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:647> a nco:IMAddress;
+    nco:imID         "IM ID 647" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:648> a nco:IMAddress;
+    nco:imID         "IM ID 648" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:649> a nco:IMAddress;
+    nco:imID         "IM ID 649" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:650> a nco:IMAddress;
+    nco:imID         "IM ID 650" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:651> a nco:IMAddress;
+    nco:imID         "IM ID 651" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:652> a nco:IMAddress;
+    nco:imID         "IM ID 652" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:653> a nco:IMAddress;
+    nco:imID         "IM ID 653" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:654> a nco:IMAddress;
+    nco:imID         "IM ID 654" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:655> a nco:IMAddress;
+    nco:imID         "IM ID 655" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:656> a nco:IMAddress;
+    nco:imID         "IM ID 656" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:657> a nco:IMAddress;
+    nco:imID         "IM ID 657" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:658> a nco:IMAddress;
+    nco:imID         "IM ID 658" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:659> a nco:IMAddress;
+    nco:imID         "IM ID 659" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:660> a nco:IMAddress;
+    nco:imID         "IM ID 660" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:661> a nco:IMAddress;
+    nco:imID         "IM ID 661" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:662> a nco:IMAddress;
+    nco:imID         "IM ID 662" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:663> a nco:IMAddress;
+    nco:imID         "IM ID 663" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:664> a nco:IMAddress;
+    nco:imID         "IM ID 664" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:665> a nco:IMAddress;
+    nco:imID         "IM ID 665" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:666> a nco:IMAddress;
+    nco:imID         "IM ID 666" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:667> a nco:IMAddress;
+    nco:imID         "IM ID 667" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:668> a nco:IMAddress;
+    nco:imID         "IM ID 668" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:669> a nco:IMAddress;
+    nco:imID         "IM ID 669" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:670> a nco:IMAddress;
+    nco:imID         "IM ID 670" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:671> a nco:IMAddress;
+    nco:imID         "IM ID 671" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:672> a nco:IMAddress;
+    nco:imID         "IM ID 672" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:673> a nco:IMAddress;
+    nco:imID         "IM ID 673" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:674> a nco:IMAddress;
+    nco:imID         "IM ID 674" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:675> a nco:IMAddress;
+    nco:imID         "IM ID 675" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:676> a nco:IMAddress;
+    nco:imID         "IM ID 676" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:677> a nco:IMAddress;
+    nco:imID         "IM ID 677" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:678> a nco:IMAddress;
+    nco:imID         "IM ID 678" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:679> a nco:IMAddress;
+    nco:imID         "IM ID 679" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:680> a nco:IMAddress;
+    nco:imID         "IM ID 680" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:681> a nco:IMAddress;
+    nco:imID         "IM ID 681" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:682> a nco:IMAddress;
+    nco:imID         "IM ID 682" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:683> a nco:IMAddress;
+    nco:imID         "IM ID 683" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:684> a nco:IMAddress;
+    nco:imID         "IM ID 684" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:685> a nco:IMAddress;
+    nco:imID         "IM ID 685" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:686> a nco:IMAddress;
+    nco:imID         "IM ID 686" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:687> a nco:IMAddress;
+    nco:imID         "IM ID 687" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:688> a nco:IMAddress;
+    nco:imID         "IM ID 688" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:689> a nco:IMAddress;
+    nco:imID         "IM ID 689" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:690> a nco:IMAddress;
+    nco:imID         "IM ID 690" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:691> a nco:IMAddress;
+    nco:imID         "IM ID 691" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:692> a nco:IMAddress;
+    nco:imID         "IM ID 692" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:693> a nco:IMAddress;
+    nco:imID         "IM ID 693" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:694> a nco:IMAddress;
+    nco:imID         "IM ID 694" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:695> a nco:IMAddress;
+    nco:imID         "IM ID 695" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:696> a nco:IMAddress;
+    nco:imID         "IM ID 696" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:697> a nco:IMAddress;
+    nco:imID         "IM ID 697" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:698> a nco:IMAddress;
+    nco:imID         "IM ID 698" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:699> a nco:IMAddress;
+    nco:imID         "IM ID 699" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:700> a nco:IMAddress;
+    nco:imID         "IM ID 700" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:701> a nco:IMAddress;
+    nco:imID         "IM ID 701" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:702> a nco:IMAddress;
+    nco:imID         "IM ID 702" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:703> a nco:IMAddress;
+    nco:imID         "IM ID 703" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:704> a nco:IMAddress;
+    nco:imID         "IM ID 704" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:705> a nco:IMAddress;
+    nco:imID         "IM ID 705" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:706> a nco:IMAddress;
+    nco:imID         "IM ID 706" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:707> a nco:IMAddress;
+    nco:imID         "IM ID 707" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:708> a nco:IMAddress;
+    nco:imID         "IM ID 708" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:709> a nco:IMAddress;
+    nco:imID         "IM ID 709" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:710> a nco:IMAddress;
+    nco:imID         "IM ID 710" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:711> a nco:IMAddress;
+    nco:imID         "IM ID 711" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:712> a nco:IMAddress;
+    nco:imID         "IM ID 712" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:713> a nco:IMAddress;
+    nco:imID         "IM ID 713" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:714> a nco:IMAddress;
+    nco:imID         "IM ID 714" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:715> a nco:IMAddress;
+    nco:imID         "IM ID 715" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:716> a nco:IMAddress;
+    nco:imID         "IM ID 716" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:717> a nco:IMAddress;
+    nco:imID         "IM ID 717" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:718> a nco:IMAddress;
+    nco:imID         "IM ID 718" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:719> a nco:IMAddress;
+    nco:imID         "IM ID 719" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:720> a nco:IMAddress;
+    nco:imID         "IM ID 720" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:721> a nco:IMAddress;
+    nco:imID         "IM ID 721" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:722> a nco:IMAddress;
+    nco:imID         "IM ID 722" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:723> a nco:IMAddress;
+    nco:imID         "IM ID 723" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:724> a nco:IMAddress;
+    nco:imID         "IM ID 724" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:725> a nco:IMAddress;
+    nco:imID         "IM ID 725" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:726> a nco:IMAddress;
+    nco:imID         "IM ID 726" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:727> a nco:IMAddress;
+    nco:imID         "IM ID 727" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:728> a nco:IMAddress;
+    nco:imID         "IM ID 728" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:729> a nco:IMAddress;
+    nco:imID         "IM ID 729" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:730> a nco:IMAddress;
+    nco:imID         "IM ID 730" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:731> a nco:IMAddress;
+    nco:imID         "IM ID 731" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:732> a nco:IMAddress;
+    nco:imID         "IM ID 732" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:733> a nco:IMAddress;
+    nco:imID         "IM ID 733" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:734> a nco:IMAddress;
+    nco:imID         "IM ID 734" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:735> a nco:IMAddress;
+    nco:imID         "IM ID 735" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:736> a nco:IMAddress;
+    nco:imID         "IM ID 736" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:737> a nco:IMAddress;
+    nco:imID         "IM ID 737" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:738> a nco:IMAddress;
+    nco:imID         "IM ID 738" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:739> a nco:IMAddress;
+    nco:imID         "IM ID 739" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:740> a nco:IMAddress;
+    nco:imID         "IM ID 740" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:741> a nco:IMAddress;
+    nco:imID         "IM ID 741" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:742> a nco:IMAddress;
+    nco:imID         "IM ID 742" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:743> a nco:IMAddress;
+    nco:imID         "IM ID 743" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:744> a nco:IMAddress;
+    nco:imID         "IM ID 744" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:745> a nco:IMAddress;
+    nco:imID         "IM ID 745" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:746> a nco:IMAddress;
+    nco:imID         "IM ID 746" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:747> a nco:IMAddress;
+    nco:imID         "IM ID 747" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:748> a nco:IMAddress;
+    nco:imID         "IM ID 748" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:749> a nco:IMAddress;
+    nco:imID         "IM ID 749" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:750> a nco:IMAddress;
+    nco:imID         "IM ID 750" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:751> a nco:IMAddress;
+    nco:imID         "IM ID 751" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:752> a nco:IMAddress;
+    nco:imID         "IM ID 752" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:753> a nco:IMAddress;
+    nco:imID         "IM ID 753" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:754> a nco:IMAddress;
+    nco:imID         "IM ID 754" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:755> a nco:IMAddress;
+    nco:imID         "IM ID 755" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:756> a nco:IMAddress;
+    nco:imID         "IM ID 756" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:757> a nco:IMAddress;
+    nco:imID         "IM ID 757" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:758> a nco:IMAddress;
+    nco:imID         "IM ID 758" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:759> a nco:IMAddress;
+    nco:imID         "IM ID 759" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:760> a nco:IMAddress;
+    nco:imID         "IM ID 760" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:761> a nco:IMAddress;
+    nco:imID         "IM ID 761" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:762> a nco:IMAddress;
+    nco:imID         "IM ID 762" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:763> a nco:IMAddress;
+    nco:imID         "IM ID 763" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:764> a nco:IMAddress;
+    nco:imID         "IM ID 764" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:765> a nco:IMAddress;
+    nco:imID         "IM ID 765" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:766> a nco:IMAddress;
+    nco:imID         "IM ID 766" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:767> a nco:IMAddress;
+    nco:imID         "IM ID 767" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:768> a nco:IMAddress;
+    nco:imID         "IM ID 768" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:769> a nco:IMAddress;
+    nco:imID         "IM ID 769" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:770> a nco:IMAddress;
+    nco:imID         "IM ID 770" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:771> a nco:IMAddress;
+    nco:imID         "IM ID 771" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:772> a nco:IMAddress;
+    nco:imID         "IM ID 772" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:773> a nco:IMAddress;
+    nco:imID         "IM ID 773" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:774> a nco:IMAddress;
+    nco:imID         "IM ID 774" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:775> a nco:IMAddress;
+    nco:imID         "IM ID 775" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:776> a nco:IMAddress;
+    nco:imID         "IM ID 776" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:777> a nco:IMAddress;
+    nco:imID         "IM ID 777" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:778> a nco:IMAddress;
+    nco:imID         "IM ID 778" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:779> a nco:IMAddress;
+    nco:imID         "IM ID 779" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:780> a nco:IMAddress;
+    nco:imID         "IM ID 780" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:781> a nco:IMAddress;
+    nco:imID         "IM ID 781" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:782> a nco:IMAddress;
+    nco:imID         "IM ID 782" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:783> a nco:IMAddress;
+    nco:imID         "IM ID 783" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:784> a nco:IMAddress;
+    nco:imID         "IM ID 784" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:785> a nco:IMAddress;
+    nco:imID         "IM ID 785" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:786> a nco:IMAddress;
+    nco:imID         "IM ID 786" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:787> a nco:IMAddress;
+    nco:imID         "IM ID 787" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:788> a nco:IMAddress;
+    nco:imID         "IM ID 788" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:789> a nco:IMAddress;
+    nco:imID         "IM ID 789" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:790> a nco:IMAddress;
+    nco:imID         "IM ID 790" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:791> a nco:IMAddress;
+    nco:imID         "IM ID 791" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:792> a nco:IMAddress;
+    nco:imID         "IM ID 792" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:793> a nco:IMAddress;
+    nco:imID         "IM ID 793" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:794> a nco:IMAddress;
+    nco:imID         "IM ID 794" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:795> a nco:IMAddress;
+    nco:imID         "IM ID 795" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:796> a nco:IMAddress;
+    nco:imID         "IM ID 796" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:797> a nco:IMAddress;
+    nco:imID         "IM ID 797" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:798> a nco:IMAddress;
+    nco:imID         "IM ID 798" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:799> a nco:IMAddress;
+    nco:imID         "IM ID 799" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:800> a nco:IMAddress;
+    nco:imID         "IM ID 800" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:801> a nco:IMAddress;
+    nco:imID         "IM ID 801" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:802> a nco:IMAddress;
+    nco:imID         "IM ID 802" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:803> a nco:IMAddress;
+    nco:imID         "IM ID 803" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:804> a nco:IMAddress;
+    nco:imID         "IM ID 804" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:805> a nco:IMAddress;
+    nco:imID         "IM ID 805" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:806> a nco:IMAddress;
+    nco:imID         "IM ID 806" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:807> a nco:IMAddress;
+    nco:imID         "IM ID 807" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:808> a nco:IMAddress;
+    nco:imID         "IM ID 808" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:809> a nco:IMAddress;
+    nco:imID         "IM ID 809" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:810> a nco:IMAddress;
+    nco:imID         "IM ID 810" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:811> a nco:IMAddress;
+    nco:imID         "IM ID 811" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:812> a nco:IMAddress;
+    nco:imID         "IM ID 812" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:813> a nco:IMAddress;
+    nco:imID         "IM ID 813" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:814> a nco:IMAddress;
+    nco:imID         "IM ID 814" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:815> a nco:IMAddress;
+    nco:imID         "IM ID 815" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:816> a nco:IMAddress;
+    nco:imID         "IM ID 816" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:817> a nco:IMAddress;
+    nco:imID         "IM ID 817" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:818> a nco:IMAddress;
+    nco:imID         "IM ID 818" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:819> a nco:IMAddress;
+    nco:imID         "IM ID 819" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:820> a nco:IMAddress;
+    nco:imID         "IM ID 820" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:821> a nco:IMAddress;
+    nco:imID         "IM ID 821" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:822> a nco:IMAddress;
+    nco:imID         "IM ID 822" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:823> a nco:IMAddress;
+    nco:imID         "IM ID 823" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:824> a nco:IMAddress;
+    nco:imID         "IM ID 824" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:825> a nco:IMAddress;
+    nco:imID         "IM ID 825" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:826> a nco:IMAddress;
+    nco:imID         "IM ID 826" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:827> a nco:IMAddress;
+    nco:imID         "IM ID 827" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:828> a nco:IMAddress;
+    nco:imID         "IM ID 828" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:829> a nco:IMAddress;
+    nco:imID         "IM ID 829" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:830> a nco:IMAddress;
+    nco:imID         "IM ID 830" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:831> a nco:IMAddress;
+    nco:imID         "IM ID 831" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:832> a nco:IMAddress;
+    nco:imID         "IM ID 832" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:833> a nco:IMAddress;
+    nco:imID         "IM ID 833" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:834> a nco:IMAddress;
+    nco:imID         "IM ID 834" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:835> a nco:IMAddress;
+    nco:imID         "IM ID 835" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:836> a nco:IMAddress;
+    nco:imID         "IM ID 836" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:837> a nco:IMAddress;
+    nco:imID         "IM ID 837" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:838> a nco:IMAddress;
+    nco:imID         "IM ID 838" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:839> a nco:IMAddress;
+    nco:imID         "IM ID 839" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:840> a nco:IMAddress;
+    nco:imID         "IM ID 840" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:841> a nco:IMAddress;
+    nco:imID         "IM ID 841" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:842> a nco:IMAddress;
+    nco:imID         "IM ID 842" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:843> a nco:IMAddress;
+    nco:imID         "IM ID 843" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:844> a nco:IMAddress;
+    nco:imID         "IM ID 844" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:845> a nco:IMAddress;
+    nco:imID         "IM ID 845" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:846> a nco:IMAddress;
+    nco:imID         "IM ID 846" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:847> a nco:IMAddress;
+    nco:imID         "IM ID 847" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:848> a nco:IMAddress;
+    nco:imID         "IM ID 848" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:849> a nco:IMAddress;
+    nco:imID         "IM ID 849" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:850> a nco:IMAddress;
+    nco:imID         "IM ID 850" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:851> a nco:IMAddress;
+    nco:imID         "IM ID 851" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:852> a nco:IMAddress;
+    nco:imID         "IM ID 852" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:853> a nco:IMAddress;
+    nco:imID         "IM ID 853" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:854> a nco:IMAddress;
+    nco:imID         "IM ID 854" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:855> a nco:IMAddress;
+    nco:imID         "IM ID 855" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:856> a nco:IMAddress;
+    nco:imID         "IM ID 856" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:857> a nco:IMAddress;
+    nco:imID         "IM ID 857" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:858> a nco:IMAddress;
+    nco:imID         "IM ID 858" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:859> a nco:IMAddress;
+    nco:imID         "IM ID 859" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:860> a nco:IMAddress;
+    nco:imID         "IM ID 860" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:861> a nco:IMAddress;
+    nco:imID         "IM ID 861" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:862> a nco:IMAddress;
+    nco:imID         "IM ID 862" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:863> a nco:IMAddress;
+    nco:imID         "IM ID 863" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:864> a nco:IMAddress;
+    nco:imID         "IM ID 864" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:865> a nco:IMAddress;
+    nco:imID         "IM ID 865" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:866> a nco:IMAddress;
+    nco:imID         "IM ID 866" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:867> a nco:IMAddress;
+    nco:imID         "IM ID 867" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:868> a nco:IMAddress;
+    nco:imID         "IM ID 868" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:869> a nco:IMAddress;
+    nco:imID         "IM ID 869" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:870> a nco:IMAddress;
+    nco:imID         "IM ID 870" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:871> a nco:IMAddress;
+    nco:imID         "IM ID 871" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:872> a nco:IMAddress;
+    nco:imID         "IM ID 872" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:873> a nco:IMAddress;
+    nco:imID         "IM ID 873" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:874> a nco:IMAddress;
+    nco:imID         "IM ID 874" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:875> a nco:IMAddress;
+    nco:imID         "IM ID 875" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:876> a nco:IMAddress;
+    nco:imID         "IM ID 876" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:877> a nco:IMAddress;
+    nco:imID         "IM ID 877" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:878> a nco:IMAddress;
+    nco:imID         "IM ID 878" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:879> a nco:IMAddress;
+    nco:imID         "IM ID 879" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:880> a nco:IMAddress;
+    nco:imID         "IM ID 880" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:881> a nco:IMAddress;
+    nco:imID         "IM ID 881" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:882> a nco:IMAddress;
+    nco:imID         "IM ID 882" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:883> a nco:IMAddress;
+    nco:imID         "IM ID 883" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:884> a nco:IMAddress;
+    nco:imID         "IM ID 884" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:885> a nco:IMAddress;
+    nco:imID         "IM ID 885" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:886> a nco:IMAddress;
+    nco:imID         "IM ID 886" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:887> a nco:IMAddress;
+    nco:imID         "IM ID 887" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:888> a nco:IMAddress;
+    nco:imID         "IM ID 888" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:889> a nco:IMAddress;
+    nco:imID         "IM ID 889" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:890> a nco:IMAddress;
+    nco:imID         "IM ID 890" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:891> a nco:IMAddress;
+    nco:imID         "IM ID 891" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:892> a nco:IMAddress;
+    nco:imID         "IM ID 892" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:893> a nco:IMAddress;
+    nco:imID         "IM ID 893" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:894> a nco:IMAddress;
+    nco:imID         "IM ID 894" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:895> a nco:IMAddress;
+    nco:imID         "IM ID 895" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:896> a nco:IMAddress;
+    nco:imID         "IM ID 896" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:897> a nco:IMAddress;
+    nco:imID         "IM ID 897" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:898> a nco:IMAddress;
+    nco:imID         "IM ID 898" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:899> a nco:IMAddress;
+    nco:imID         "IM ID 899" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:900> a nco:IMAddress;
+    nco:imID         "IM ID 900" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:901> a nco:IMAddress;
+    nco:imID         "IM ID 901" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:902> a nco:IMAddress;
+    nco:imID         "IM ID 902" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:903> a nco:IMAddress;
+    nco:imID         "IM ID 903" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:904> a nco:IMAddress;
+    nco:imID         "IM ID 904" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:905> a nco:IMAddress;
+    nco:imID         "IM ID 905" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:906> a nco:IMAddress;
+    nco:imID         "IM ID 906" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:907> a nco:IMAddress;
+    nco:imID         "IM ID 907" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:908> a nco:IMAddress;
+    nco:imID         "IM ID 908" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:909> a nco:IMAddress;
+    nco:imID         "IM ID 909" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:910> a nco:IMAddress;
+    nco:imID         "IM ID 910" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:911> a nco:IMAddress;
+    nco:imID         "IM ID 911" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:912> a nco:IMAddress;
+    nco:imID         "IM ID 912" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:913> a nco:IMAddress;
+    nco:imID         "IM ID 913" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:914> a nco:IMAddress;
+    nco:imID         "IM ID 914" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:915> a nco:IMAddress;
+    nco:imID         "IM ID 915" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:916> a nco:IMAddress;
+    nco:imID         "IM ID 916" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:917> a nco:IMAddress;
+    nco:imID         "IM ID 917" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:918> a nco:IMAddress;
+    nco:imID         "IM ID 918" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:919> a nco:IMAddress;
+    nco:imID         "IM ID 919" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:920> a nco:IMAddress;
+    nco:imID         "IM ID 920" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:921> a nco:IMAddress;
+    nco:imID         "IM ID 921" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:922> a nco:IMAddress;
+    nco:imID         "IM ID 922" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:923> a nco:IMAddress;
+    nco:imID         "IM ID 923" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:924> a nco:IMAddress;
+    nco:imID         "IM ID 924" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:925> a nco:IMAddress;
+    nco:imID         "IM ID 925" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:926> a nco:IMAddress;
+    nco:imID         "IM ID 926" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:927> a nco:IMAddress;
+    nco:imID         "IM ID 927" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:928> a nco:IMAddress;
+    nco:imID         "IM ID 928" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:929> a nco:IMAddress;
+    nco:imID         "IM ID 929" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:930> a nco:IMAddress;
+    nco:imID         "IM ID 930" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:931> a nco:IMAddress;
+    nco:imID         "IM ID 931" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:932> a nco:IMAddress;
+    nco:imID         "IM ID 932" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:933> a nco:IMAddress;
+    nco:imID         "IM ID 933" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:934> a nco:IMAddress;
+    nco:imID         "IM ID 934" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:935> a nco:IMAddress;
+    nco:imID         "IM ID 935" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:936> a nco:IMAddress;
+    nco:imID         "IM ID 936" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:937> a nco:IMAddress;
+    nco:imID         "IM ID 937" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:938> a nco:IMAddress;
+    nco:imID         "IM ID 938" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:939> a nco:IMAddress;
+    nco:imID         "IM ID 939" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:940> a nco:IMAddress;
+    nco:imID         "IM ID 940" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:941> a nco:IMAddress;
+    nco:imID         "IM ID 941" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:942> a nco:IMAddress;
+    nco:imID         "IM ID 942" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:943> a nco:IMAddress;
+    nco:imID         "IM ID 943" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:944> a nco:IMAddress;
+    nco:imID         "IM ID 944" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:945> a nco:IMAddress;
+    nco:imID         "IM ID 945" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:946> a nco:IMAddress;
+    nco:imID         "IM ID 946" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:947> a nco:IMAddress;
+    nco:imID         "IM ID 947" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:948> a nco:IMAddress;
+    nco:imID         "IM ID 948" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:949> a nco:IMAddress;
+    nco:imID         "IM ID 949" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:950> a nco:IMAddress;
+    nco:imID         "IM ID 950" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:951> a nco:IMAddress;
+    nco:imID         "IM ID 951" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:952> a nco:IMAddress;
+    nco:imID         "IM ID 952" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:953> a nco:IMAddress;
+    nco:imID         "IM ID 953" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:954> a nco:IMAddress;
+    nco:imID         "IM ID 954" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:955> a nco:IMAddress;
+    nco:imID         "IM ID 955" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:956> a nco:IMAddress;
+    nco:imID         "IM ID 956" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:957> a nco:IMAddress;
+    nco:imID         "IM ID 957" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:958> a nco:IMAddress;
+    nco:imID         "IM ID 958" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:959> a nco:IMAddress;
+    nco:imID         "IM ID 959" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:960> a nco:IMAddress;
+    nco:imID         "IM ID 960" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:961> a nco:IMAddress;
+    nco:imID         "IM ID 961" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:962> a nco:IMAddress;
+    nco:imID         "IM ID 962" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:963> a nco:IMAddress;
+    nco:imID         "IM ID 963" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:964> a nco:IMAddress;
+    nco:imID         "IM ID 964" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:965> a nco:IMAddress;
+    nco:imID         "IM ID 965" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:966> a nco:IMAddress;
+    nco:imID         "IM ID 966" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:967> a nco:IMAddress;
+    nco:imID         "IM ID 967" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:968> a nco:IMAddress;
+    nco:imID         "IM ID 968" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:969> a nco:IMAddress;
+    nco:imID         "IM ID 969" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:970> a nco:IMAddress;
+    nco:imID         "IM ID 970" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:971> a nco:IMAddress;
+    nco:imID         "IM ID 971" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:972> a nco:IMAddress;
+    nco:imID         "IM ID 972" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:973> a nco:IMAddress;
+    nco:imID         "IM ID 973" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:974> a nco:IMAddress;
+    nco:imID         "IM ID 974" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:975> a nco:IMAddress;
+    nco:imID         "IM ID 975" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:976> a nco:IMAddress;
+    nco:imID         "IM ID 976" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:977> a nco:IMAddress;
+    nco:imID         "IM ID 977" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:978> a nco:IMAddress;
+    nco:imID         "IM ID 978" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:979> a nco:IMAddress;
+    nco:imID         "IM ID 979" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:980> a nco:IMAddress;
+    nco:imID         "IM ID 980" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:981> a nco:IMAddress;
+    nco:imID         "IM ID 981" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:982> a nco:IMAddress;
+    nco:imID         "IM ID 982" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:983> a nco:IMAddress;
+    nco:imID         "IM ID 983" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:984> a nco:IMAddress;
+    nco:imID         "IM ID 984" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:985> a nco:IMAddress;
+    nco:imID         "IM ID 985" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:986> a nco:IMAddress;
+    nco:imID         "IM ID 986" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:987> a nco:IMAddress;
+    nco:imID         "IM ID 987" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:988> a nco:IMAddress;
+    nco:imID         "IM ID 988" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:989> a nco:IMAddress;
+    nco:imID         "IM ID 989" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:990> a nco:IMAddress;
+    nco:imID         "IM ID 990" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:991> a nco:IMAddress;
+    nco:imID         "IM ID 991" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:992> a nco:IMAddress;
+    nco:imID         "IM ID 992" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:993> a nco:IMAddress;
+    nco:imID         "IM ID 993" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:994> a nco:IMAddress;
+    nco:imID         "IM ID 994" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:995> a nco:IMAddress;
+    nco:imID         "IM ID 995" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:996> a nco:IMAddress;
+    nco:imID         "IM ID 996" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:997> a nco:IMAddress;
+    nco:imID         "IM ID 997" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:998> a nco:IMAddress;
+    nco:imID         "IM ID 998" ;
+    nco:imCapability  <nco:im-capability-text-chat> .
+
+<urn:ima:999> a nco:IMAddress;
+    nco:imID         "IM ID 999" ;
+    nco:imCapability  <nco:im-capability-audio-calls> .
+
+<urn:ima:1000> a nco:IMAddress;
+    nco:imID         "IM ID 0" ;
+    nco:imCapability  <nco:im-capability-text-chat> .

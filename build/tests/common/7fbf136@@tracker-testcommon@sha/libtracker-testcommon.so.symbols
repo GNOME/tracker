@@ -1,0 +1,8 @@
+ 0x000000000000000e (SONAME)             Library soname: [libtracker-testcommon.so]
+__bss_start B
+_edata D
+_end B
+_fini T
+_init T
+tracker_test_helpers_free_nonutf8 T
+tracker_test_helpers_get_nonutf8 T
