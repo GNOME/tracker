@@ -13,7 +13,7 @@
 
 nmm: a tracker:Namespace, tracker:Ontology ;
 	tracker:prefix "nmm" ;
-	nao:lastModified "2014-09-19T11:05:00Z" .
+	nao:lastModified "2019-05-17T07:12:52" .
 
 nmm:MusicPiece a rdfs:Class ;
 	rdfs:label "Music" ;
@@ -224,6 +224,41 @@ nmm:setNumber a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicAlbumDisc ;
 	rdfs:range xsd:integer .
+
+nmm:mbTrackID a rdf:Property ;
+	rdfs:label "MusicBrainz Track Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	rdfs:domain nmm:MusicPiece .
+
+nmm:mbArtistID a rdf:Property ;
+	rdfs:label "MusicBrainz Artist Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	rdfs:domain nmm:Artist .
+
+nmm:mbReleaseID a rdf:Property ;
+	rdfs:label "MusicBrainz Album Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	rdfs:domain nmm:MusicAlbum .
+
+nmm:mbRecordingID a rdf:Property ;
+	rdfs:label "MusicBrainz Recording Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	rdfs:domain nmm:MusicPiece .
+
+nmm:mbReleaseGroupID a rdf:Property ;
+	rdfs:label "MusicBrainz Release Group Id" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:indexed true ;
+	rdfs:domain nmm:MusicAlbum .
 
 # This property doesn't make sense... it is the other way around
 # From the list ot the item, not from the item to the list
