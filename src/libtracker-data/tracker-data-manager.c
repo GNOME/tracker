@@ -152,45 +152,61 @@ tracker_data_ontology_error_quark (void)
 	return g_quark_from_static_string ("tracker-data-ontology-error-quark");
 }
 
+static gboolean
+tracker_data_manager_ensure_graphs (TrackerDataManager  *manager,
+				    TrackerDBInterface  *iface,
+				    GError             **error)
+{
+	TrackerDBCursor *cursor = NULL;
+	TrackerDBStatement *stmt;
+	GHashTable *graphs;
+
+	if (manager->graphs)
+		return TRUE;
+
+	graphs = g_hash_table_new_full (g_str_hash,
+					g_str_equal,
+					g_free,
+					NULL);
+
+	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, error,
+						      "SELECT ID, Uri FROM Resource WHERE ID IN (SELECT ID FROM Graph)");
+	if (!stmt) {
+		g_hash_table_unref (graphs);
+		return FALSE;
+	}
+
+	cursor = tracker_db_statement_start_cursor (stmt, error);
+	g_object_unref (stmt);
+
+	if (!cursor) {
+		g_hash_table_unref (graphs);
+		return FALSE;
+	}
+
+	while (tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
+		const gchar *name;
+		gint id;
+
+		id = tracker_db_cursor_get_int (cursor, 0);
+		name = tracker_db_cursor_get_string (cursor, 1, NULL);
+
+		g_hash_table_insert (graphs, g_strdup (name),
+		                     GINT_TO_POINTER (id));
+	}
+
+	g_object_unref (cursor);
+	manager->graphs = graphs;
+	return TRUE;
+}
+
 static GHashTable *
 tracker_data_manager_get_graphs (TrackerDataManager  *manager,
                                  TrackerDBInterface  *iface,
                                  GError             **error)
 {
-	if (!manager->graphs) {
-		TrackerDBCursor *cursor = NULL;
-		TrackerDBStatement *stmt;
-
-		manager->graphs = g_hash_table_new_full (g_str_hash,
-		                                         g_str_equal,
-		                                         g_free,
-		                                         NULL);
-
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, error,
-		                                              "SELECT ID, Url FROM Resource WHERE ID IN (SELECT ID FROM Graph)");
-		if (stmt) {
-			cursor = tracker_db_statement_start_cursor (stmt, error);
-			g_object_unref (stmt);
-		}
-
-		if (cursor) {
-			while (tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
-				const gchar *name;
-				gint id;
-
-				id = tracker_db_cursor_get_int (cursor, 0);
-				name = tracker_db_cursor_get_string (cursor, 1, NULL);
-
-				g_hash_table_insert (manager->graphs,
-				                     g_strdup (name),
-				                     GINT_TO_POINTER (id));
-			}
-
-			g_object_unref (cursor);
-		} else {
-			return NULL;
-		}
-	}
+	if (!tracker_data_manager_ensure_graphs (manager, iface, error))
+		return NULL;
 
 	return manager->graphs;
 }
@@ -246,11 +262,10 @@ set_secondary_index_for_single_value_property (TrackerDBInterface  *iface,
 		         service_name, field_name, service_name, field_name, second_field_name);
 
 		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "CREATE INDEX \"%s\".\"%s_%s\" ON \"%s\".\"%s\" (\"%s\", \"%s\")",
+		                                    "CREATE INDEX \"%s\".\"%s_%s\" ON \"%s\" (\"%s\", \"%s\")",
 		                                    database,
 		                                    service_name,
 		                                    field_name,
-		                                    database,
 		                                    service_name,
 		                                    field_name,
 		                                    second_field_name);
@@ -300,11 +315,10 @@ set_index_for_single_value_property (TrackerDBInterface  *iface,
 		         service_name, field_name, service_name, expr);
 
 		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "CREATE INDEX \"%s\".\"%s_%s\" ON \"%s\".\"%s\" (%s)",
+		                                    "CREATE INDEX \"%s\".\"%s_%s\" ON \"%s\" (%s)",
 		                                    database,
 		                                    service_name,
 		                                    field_name,
-		                                    database,
 		                                    service_name,
 		                                    expr);
 		g_free (expr);
@@ -379,11 +393,10 @@ set_index_for_multi_value_property (TrackerDBInterface  *iface,
 		         field_name);
 
 		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "CREATE INDEX \"%s\".\"%s_%s_ID\" ON \"%s\".\"%s_%s\" (ID)",
+		                                    "CREATE INDEX \"%s\".\"%s_%s_ID\" ON \"%s_%s\" (ID)",
 		                                    database,
 		                                    service_name,
 		                                    field_name,
-		                                    database,
 		                                    service_name,
 		                                    field_name);
 
@@ -401,11 +414,10 @@ set_index_for_multi_value_property (TrackerDBInterface  *iface,
 		         expr);
 
 		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "CREATE UNIQUE INDEX \"%s\".\"%s_%s_ID_ID\" ON \"%s\".\"%s_%s\" (%s, ID)",
+		                                    "CREATE UNIQUE INDEX \"%s\".\"%s_%s_ID_ID\" ON \"%s_%s\" (%s, ID)",
 		                                    database,
 		                                    service_name,
 		                                    field_name,
-		                                    database,
 		                                    service_name,
 		                                    field_name,
 		                                    expr);
@@ -424,11 +436,10 @@ set_index_for_multi_value_property (TrackerDBInterface  *iface,
 		         expr);
 
 		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "CREATE UNIQUE INDEX \"%s\".\"%s_%s_ID_ID\" ON \"%s\".\"%s_%s\" (ID, %s)",
+		                                    "CREATE UNIQUE INDEX \"%s\".\"%s_%s_ID_ID\" ON \"%s_%s\" (ID, %s)",
 		                                    database,
 		                                    service_name,
 		                                    field_name,
-		                                    database,
 		                                    service_name,
 		                                    field_name,
 		                                    expr);
@@ -3887,6 +3898,81 @@ tracker_data_manager_get_data_location (TrackerDataManager *manager)
 	return manager->data_location ? g_object_ref (manager->data_location) : NULL;
 }
 
+static gboolean
+tracker_data_manager_update_union_tables (TrackerDataManager  *manager,
+                                          TrackerDBInterface  *iface,
+                                          GError             **error)
+{
+	TrackerOntologies *ontologies = manager->ontologies;
+	TrackerClass **classes;
+	TrackerProperty **properties;
+	TrackerDBStatement *stmt;
+	guint i, n_classes, n_properties;
+	GError *inner_error = NULL;
+
+	classes = tracker_ontologies_get_classes (ontologies, &n_classes);
+	properties = tracker_ontologies_get_properties (ontologies, &n_properties);
+
+	for (i = 0; !inner_error && i < n_classes; i++) {
+		if (g_str_has_prefix (tracker_class_get_name (classes[i]), "xsd:"))
+			continue;
+
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "DROP TABLE IF EXISTS temp.\"unionGraph_%s\"",
+		                                              tracker_class_get_name (classes[i]));
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, NULL);
+		g_object_unref (stmt);
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "CREATE VIRTUAL TABLE temp.\"unionGraph_%s\" USING tracker_union (\"%s\")",
+		                                              tracker_class_get_name (classes[i]),
+		                                              tracker_class_get_name (classes[i]));
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, &inner_error);
+		g_object_unref (stmt);
+	}
+
+	for (i = 0; !inner_error && i < n_properties; i++) {
+		TrackerClass *service;
+
+		if (!tracker_property_get_multiple_values (properties[i]))
+			continue;
+
+		service = tracker_property_get_domain (properties[i]);
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "DROP TABLE IF EXISTS temp.\"unionGraph_%s_%s\"",
+		                                              tracker_class_get_name (service),
+		                                              tracker_property_get_name (properties[i]));
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, NULL);
+		g_object_unref (stmt);
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "CREATE VIRTUAL TABLE temp.\"unionGraph_%s_%s\" USING tracker_union (\"%s_%s\")",
+		                                              tracker_class_get_name (service),
+		                                              tracker_property_get_name (properties[i]),
+		                                              tracker_class_get_name (service),
+		                                              tracker_property_get_name (properties[i]));
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, &inner_error);
+		g_object_unref (stmt);
+	}
+
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 TrackerDataManager *
 tracker_data_manager_new (TrackerDBManagerFlags   flags,
                           GFile                  *cache_location,
@@ -3948,9 +4034,16 @@ setup_interface_cb (TrackerDBManager   *db_manager,
                     TrackerDBInterface *iface,
                     TrackerDataManager *data_manager)
 {
+	GError *error = NULL;
+
 #if HAVE_TRACKER_FTS
 	tracker_data_manager_init_fts (iface, FALSE);
 #endif
+
+	if (!tracker_data_manager_update_union_tables (data_manager, iface, &error)) {
+		g_critical ("Could not update union tables: %s\n", error->message);
+		g_error_free (error);
+	}
 }
 
 static gboolean
@@ -4592,6 +4685,11 @@ skip_ontology_check:
 		tracker_ontologies_sort (manager->ontologies);
 	}
 
+	if (!tracker_data_manager_update_union_tables (manager, iface, &internal_error)) {
+		g_propagate_error (error, internal_error);
+		return FALSE;
+	}
+
 	manager->initialized = TRUE;
 
 	/* This is the only one which doesn't show the 'OPERATION' part */
@@ -4819,6 +4917,9 @@ tracker_data_manager_create_graph (TrackerDataManager  *manager,
 	                                     FALSE, error))
 		goto error;
 
+	if (!tracker_data_manager_ensure_graphs (manager, iface, error))
+		goto error;
+
 	id = tracker_data_ensure_graph (manager->data_update, name, error);
 	if (id == 0)
 		goto error;
@@ -4847,6 +4948,8 @@ tracker_data_manager_drop_graph (TrackerDataManager  *manager,
 	if (!tracker_data_delete_graph (manager->data_update, name, error))
 		return FALSE;
 
-	g_hash_table_remove (manager->graphs, name);
+	if (manager->graphs)
+		g_hash_table_remove (manager->graphs, name);
+
 	return TRUE;
 }
