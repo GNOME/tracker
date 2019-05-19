@@ -1096,21 +1096,18 @@ _add_quad (TrackerSparql  *sparql,
 
 		if (share_table) {
 			table = tracker_triple_context_lookup_table (triple_context,
-								     tracker_token_get_idstring (subject),
 								     db_table);
 		}
 
 		if (!table) {
 			table = tracker_triple_context_add_table (triple_context,
-								  tracker_token_get_idstring (subject),
 								  db_table);
 			new_table = TRUE;
 		}
 	} else if (tracker_token_get_variable (predicate)) {
 		/* Variable in predicate */
 		variable = tracker_token_get_variable (predicate);
-		table = tracker_triple_context_add_table (triple_context,
-		                                          variable->name, variable->name);
+		table = tracker_triple_context_add_table (triple_context, variable->name);
 		tracker_data_table_set_predicate_variable (table, TRUE);
 		new_table = TRUE;
 
@@ -1122,7 +1119,6 @@ _add_quad (TrackerSparql  *sparql,
 		g_object_unref (binding);
 	} else if (tracker_token_get_path (predicate)) {
 		table = tracker_triple_context_add_table (triple_context,
-		                                          "value",
 		                                          tracker_token_get_idstring (predicate));
 		new_table = TRUE;
 	} else {
