@@ -73,7 +73,6 @@ typedef struct _TrackerSolution TrackerSolution;
 typedef struct _TrackerPathElement TrackerPathElement;
 
 struct _TrackerDataTable {
-	gchar *subject; /* Subject this table is pulled from */
 	gchar *sql_db_tablename; /* as in db schema */
 	gchar *sql_query_tablename; /* temp. name, generated */
 	gboolean predicate_variable;
@@ -359,10 +358,8 @@ GType            tracker_triple_context_get_type (void) G_GNUC_CONST;
 TrackerContext * tracker_triple_context_new (void);
 
 TrackerDataTable * tracker_triple_context_lookup_table (TrackerTripleContext *context,
-                                                        const gchar          *subject,
                                                         const gchar          *table);
 TrackerDataTable * tracker_triple_context_add_table    (TrackerTripleContext *context,
-                                                        const gchar          *subject,
                                                         const gchar          *table);
 void tracker_triple_context_add_literal_binding  (TrackerTripleContext   *context,
 						  TrackerLiteralBinding  *binding);
