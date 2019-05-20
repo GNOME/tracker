@@ -24,31 +24,16 @@ An EU-funded project called Nepomuk was started to define some of
 the core ontologies to be modeled on the Desktop. Tracker uses this
 to define the data's relationships in a database.
 
-All discussion related to tracker happens on the Tracker
-mailing list
+All discussion related to tracker happens on the
+[Tracker mailing list](https://mail.gnome.org/mailman/listinfo/tracker-list).
 
-        https://mail.gnome.org/mailman/listinfo/tracker-list
+IRC channel #tracker on: [irc.gimp.net](irc://irc.gimp.net)
 
-IRC channel #tracker on:
+Development happens on:
+[gitlab.gnome.org](https://gitlab.gnome.org/GNOME/tracker).
 
-        irc.gimp.net
-
-Bugs and feature requests should be filed at:
-
-        https://gitlab.gnome.org/GNOME/tracker/issues
-
-More infomation on Tracker can be found at:
-
-        https://wiki.gnome.org/Projects/Tracker
-
-Repository can be found at:
-
-        https://gitlab.gnome.org/GNOME/tracker
-
-The official RoadMap (aka TODO) can be found at:
-
-        https://wiki.gnome.org/Projects/Tracker/Roadmap
-
+More infomation on Tracker can be found on
+[the project wiki](https://wiki.gnome.org/Projects/Tracker).
 
 ## Use Cases
 
