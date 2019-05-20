@@ -36,20 +36,90 @@ Related projects:
     extends Tracker to allow searching and indexing some kinds of online
     content.
 
+# Developing Tracker
+
+If you want to help develop and improve Tracker, great! Remember that Tracker
+is a middleware component, designed to be integrated into larger codebases. To
+fully test a change you may need to build and test Tracker as part of another
+project.
+
+For the GNOME desktop, consider using the documented [Building a System
+Component](https://wiki.gnome.org/Newcomers/BuildSystemComponent) workflow.
+
+It's also possible to build Tracker on its own and install it inside your home
+directory for testing purposes.  Read on for instructions on how to do this.
+
 ## Compilation
 
-To setup the project for compilation after checking it out from
-the git repository, use:
+Tracker uses the [Meson build system](http://mesonbuild.com), which you must
+have installed in order to build Tracker.
 
-        meson build --prefix=/usr --sysconfdir=/etc
+We recommend that you build tracker core as a subproject of tracker-miners.
+You can do this by cloning both repos, then creating a symlink in the
+`subprojects/` directory of tracker-miners.git to the tracker.git checkout.
 
-To start compiling the project use:
+    git clone https://gitlab.gnome.org/GNOME/tracker.git
+    git clone https://gitlab.gnome.org/GNOME/tracker-miners.git
 
-        ninja -C build
-        ninja install
+    mkdir tracker-miners/subprojects
+    ln -s ../../tracker tracker-miners/subprojects/
 
-If you install using any other prefix, you might have problems
-with files not being installed correctly. (You may need to copy
-and amend the dbus service file to the correct directory and/or
-might need to update ld_conf if you install into non-standard
-directories.)
+Now you can run the commands below to build Tracker and install it in a
+new, isolated prefix named `opt/tracker` inside your home folder.
+
+    cd tracker-miners
+    meson ./build --prefix=$HOME/opt/tracker -Dtracker_core=subproject
+    cd build
+    ninja install
+
+## Running the testsuite
+
+At this point you can run the Tracker test suite from the `build` directory:
+
+    meson test --print-errorlogs
+
+## Developing with tracker-sandbox
+
+Tracker normally runs automatically, indexing content in the background so that
+search results are available quickly when needed.
+
+When developing and testing Tracker you will normally want it to run in the
+foreground instead. The `tracker-sandbox` tool exists to help with this.
+
+You can run the tool directly from the tracker.git source tree. Ensure you are
+in the top of the tracker source tree and type this to see the --help output: 
+
+    ./utils/sandbox/tracker-sandbox.py --help
+
+You should always pass the `--prefix` option, which should be the same as the
+--prefix argument you passed to Meson. You also need to use `--index` which
+controls where internal state files like the database are kept. You may also
+want to pass `--debug` to see detailed log output.
+
+Now you can index some files using `--update` mode. Here's how to index files
+in `~/Documents` for example:
+
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
+        --update --content ~/Documents
+
+You can then list the files that have been indexed...
+
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
+        --list-files
+
+... run a full-text search ...
+
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
+        --search "bananas"
+
+... or run a SPARQL query on the content:
+
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
+        --sparql "SELECT ?url { ?resource a nfo:FileDataObject ; nie:url ?url . }"
+
+You can also open a shell inside the sandbox environment. From here you can run
+the `tracker` commandline tool, and you can run the Tracker daemons manually
+under a debugger such as GDB.
+
+For more information about developing Tracker, look at
+https://wiki.gnome.org/Projects/Tracker.
