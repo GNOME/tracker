@@ -1,28 +1,8 @@
 # Tracker
 
-Tracker is a search engine and that allows the user to find their
-data as fast as possible. Users can search for their files and
-search for content in their files too.  
-
-Tracker is a semantic data storage for desktop and mobile devices.
-Tracker uses W3C standards for RDF ontologies using Nepomuk with
-SPARQL to query and update the data.
-
-Tracker is a central repository of user information, that provides
-two big benefits for the desktop; shared data between applications
-and information which is relational to other information (for
-example: mixing contacts with files, locations, activities and
-etc.).
-
-This central repository works with a well defined data model that
-applications can rely on to store and recover their information.
-That data model is defined using a semantic web artifact called
-ontology. An ontology defines the relationships between the
-information stored in the repository.
-
-An EU-funded project called Nepomuk was started to define some of
-the core ontologies to be modeled on the Desktop. Tracker uses this
-to define the data's relationships in a database.
+Tracker is an efficient search engine and
+[triplestore](https://en.wikipedia.org/wiki/Triplestore) for desktop, embedded
+and mobile.
 
 More information on Tracker can be found at:
 
@@ -39,75 +19,6 @@ All discussion related to Tracker happens on:
 IRC channel #tracker on:
 
   * [irc.gimp.net](irc://irc.gimp.net)
-
-## Use Cases
-
-Tracker is the most powerful open source metadata database and
-indexer framework currently available and because it is built
-around a combination indexer and SQL database and not a
-dedicated indexer, it has much more powerful use cases:
-
-  * Provide search and indexing facilities similar to those on
-  other systems (Windows Vista and Mac OS X).
-
-  * Common database storage for all first class objects (e.g. a
-  common music/photo/contacts/email/bookmarks/history database)
-  complete with additional metadata and tags/keywords.
-
-  * Comprehensive one stop solution for all applications needing
-  an object database, powerful search (via RDF Query), first class
-  methods, related metadata and user-definable metadata/tags.
-
-  * Can provide a full semantic desktop with metadata everywhere.
-
-  * Can provide powerful criteria-based searching suitable for
-  creating smart file dialogs and vfolder systems.
-
-  * Can provide a more intelligent desktop using statistical
-  metadata.
-
-## Features
-
-  * Desktop-neutral design (it's a freedesktop product built
-  around other freedesktop technologies like D-Bus and XDGMime
-  but contains no GNOME-specific dependencies besides GLib).
-
-  * Very memory efficient. Unlike some other indexers, Tracker is
-  designed and built to run well on mobile and desktop systems with
-  lower memory (256MB or less).
-
-  * Non-bloated and written in C for maximum efficiency.
-
-  * Small size and minimal dependencies makes it easy to bundle
-  into various distros, including live CDs.
-
-  * Provides option to disable indexing when running on battery.
-
-  * Provides option to index removable devices.
-
-  * Implements the freedesktop specification for metadata
-  (https://freedesktop.org/wiki/Standards/shared-filemetadata-spec/).
-
-  * Extracts embedded File, Image, Document and Audio type
-  metadata from files.
-
-  * Supports the WC3's RDF Query syntax for querying metadata.
-
-  * Provides support for both free text search (like Beagle/Google)
-  as well as structured searches using RDF Query.
-
-  * Responds in real time to file system changes to keep its
-  metadata database up to date and in sync.
-
-  * Fully extensible with custom metadata - you can store,
-  retrieve, register and search via RDF Query all your own custom
-  metadata.
-
-  * Can extract a file's contents as plain text and index them.
-
-  * Can provide thumbnailing on the fly.
-
-  * It auto-pauses indexing when running low on diskspace.
 
 ## Compilation
 
