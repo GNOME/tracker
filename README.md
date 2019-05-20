@@ -2,6 +2,16 @@
 
 Tracker is a search engine for desktop and mobile.
 
+The Tracker project is divided into two main repositories:
+
+  * [Tracker core](https://gitlab.gnome.org/GNOME/tracker) contains the database
+    (*tracker-store*), the database schemas ("ontologies"), the commandline user
+    interface (`tracker`), and several support libraries.
+
+  * [Tracker Miners](https://gitlab.gnome.org/GNOME/tracker-miners) contains
+    the indexer daemon (*tracker-miner-fs*) and tools to extract metadata
+    from many different filetypes (extractors).
+
 More information on Tracker can be found at:
 
   * <https://wiki.gnome.org/Projects/Tracker>
@@ -17,6 +27,12 @@ All discussion related to Tracker happens on:
 IRC channel #tracker on:
 
   * [irc.gimp.net](irc://irc.gimp.net)
+
+Related projects:
+
+  * [GNOME Online Miners](https://gitlab.gnome.org/GNOME/gnome-online-miners/)
+    extends Tracker to allow searching and indexing some kinds of online
+    content.
 
 ## Compilation
 
