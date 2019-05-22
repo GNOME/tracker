@@ -360,12 +360,6 @@ def environment_set():
         environment_set_and_add_path('LD_LIBRARY_PATH', opts.prefix, 'lib')
         environment_set_and_add_path('XDG_DATA_DIRS', opts.prefix, 'share')
 
-        os.environ['TRACKER_DB_ONTOLOGIES_DIR'] = os.path.join(
-            opts.prefix, 'share', 'tracker', 'ontologies')
-        os.environ['TRACKER_EXTRACTOR_RULES_DIR'] = os.path.join(
-            opts.prefix, 'share', 'tracker', 'extract-rules')
-        os.environ['TRACKER_LANGUAGE_STOPWORDS_DIR'] = os.path.join(
-            opts.prefix, 'share', 'tracker', 'stop-words')
 
     # Preferences
     os.environ['TRACKER_USE_CONFIG_FILES'] = 'yes'
