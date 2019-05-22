@@ -59,6 +59,8 @@ from multiprocessing import Process
 
 import configparser
 
+import gi
+gi.require_version('Tracker', '2.0')
 from gi.repository import Tracker, GLib, GObject
 
 # Script
