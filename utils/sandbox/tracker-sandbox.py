@@ -163,19 +163,31 @@ def db_query_list_files():
         print('  ' + cursor.get_string(0)[0])
 
 
-def db_query_files_that_match():
+def db_search(search_text):
     conn = Tracker.SparqlConnection.get(None)
     cursor = conn.query(
-        'select nie:url(?urn) where { ?urn a nfo:FileDataObject . ?urn fts:match "%s" }' % (opts.query), None)
+        'select nie:url(?urn) where { ?urn a nfo:FileDataObject . ?urn fts:match "%s" }' % (search_text), None)
 
     print('Found:')
 
-    # Only expect one result here...
     while (cursor.next(None)):
         print('  ' + cursor.get_string(0)[0])
 
-# Index functions
 
+def db_sparql_query(sparql):
+    conn = Tracker.SparqlConnection.get(None)
+    cursor = conn.query(sparql)
+
+    print('Results:')
+
+    while (cursor.next(None)):
+        row = []
+        for column in range(0, cursor.get_n_columns()):
+            row.append(cursor.get_string(column)[0])
+        print('  ' + '\t'.join(row))
+
+
+# Index functions
 
 def index_clean():
     # tracker reset --hard
@@ -513,11 +525,16 @@ if __name__ == "__main__":
                     action='count',
                     dest='shell',
                     help='start a shell with the environment set up')
-    popt.add_option('-q', '--query',
+    popt.add_option('--search',
                     action='store',
                     metavar='CRITERIA',
-                    dest='query',
+                    dest='search',
                     help='what content to look for in files')
+    popt.add_option('-q', '--sparql',
+                    action='store',
+                    metavar='CRITERIA',
+                    dest='sparql_query',
+                    help='SPARQL query to execute')
 
     (opts, args) = popt.parse_args()
 
@@ -539,12 +556,12 @@ if __name__ == "__main__":
             print('These arguments are required to update the index databases')
             sys.exit(1)
 
-    if (opts.query or opts.query or opts.list_files or opts.shell) and not opts.index_location:
+    if (opts.sparql_query or opts.search or opts.list_files or opts.shell) and not opts.index_location:
         print('Expected index location (-i) to be specified')
         print('This arguments is required to use the content that has been indexed')
         sys.exit(1)
 
-    if not opts.update and not opts.query and not opts.list_files and not opts.shell:
+    if not opts.update and not opts.sparql_query and not opts.search and not opts.list_files and not opts.shell:
         print('No action specified (e.g. update (-u), shell (-s), list files (-l), etc)\n')
         print('%s %s\n%s\n' % (script_name, script_version, script_about))
         print(usage_invalid)
@@ -567,14 +584,18 @@ if __name__ == "__main__":
             index_shell()
             sys.exit(0)
 
-        if opts.query:
+        if opts.search or opts.sparql_query:
             if not os.path.exists(index_location_abs):
                 print(
                     'Can not query yet, index has not been created, see --update or -u')
                 print(usage_invalid)
                 sys.exit(1)
 
-            db_query_files_that_match()
+        if opts.search:
+            db_search(opts.search)
+
+        if opts.sparql_query:
+            db_sparql_query(opts.sparql_query)
 
     except KeyboardInterrupt:
         print('Handling Ctrl+C')
