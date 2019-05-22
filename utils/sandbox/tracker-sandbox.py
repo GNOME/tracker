@@ -388,8 +388,8 @@ def environment_set():
         debug('Using new D-Bus session with address "%s" with PID %d' %
               (dbus_session_address, dbus_session_pid))
     else:
-        debug('Using existing D-Bus session with address "%s" with PID %d' %
-              (dbus_session_address, dbus_session_pid))
+        debug('Using existing D-Bus session from file "%s" with address "%s" with PID %d' %
+              (dbus_session_file, dbus_session_address, dbus_session_pid))
 
     # Important, other subprocesses must use our new bus
     os.environ['DBUS_SESSION_BUS_ADDRESS'] = dbus_session_address
