@@ -65,6 +65,12 @@ You can do this by cloning both repos, then creating a symlink in the
 Now you can run the commands below to build Tracker and install it in a
 new, isolated prefix named `opt/tracker` inside your home folder.
 
+> NOTE: If you see 'dependency not found' errors from Meson, that means there
+> is a package missing on your computer that you need to install so you can
+> compile Tracker. On Ubuntu/Debian, you can run `apt build-dep tracker-miners`
+> and on Fedora `dnf build-dep tracker-miners` to install all the necessary
+> packages.
+
     cd tracker-miners
     meson ./build --prefix=$HOME/opt/tracker -Dtracker_core=subproject
     cd build
