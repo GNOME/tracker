@@ -51,17 +51,13 @@ import subprocess
 import optparse
 import signal
 import sys
-import string
 import errno
-import gi
-
-from multiprocessing import Process
 
 import configparser
 
 import gi
 gi.require_version('Tracker', '2.0')
-from gi.repository import Tracker, GLib, GObject
+from gi.repository import Tracker, GLib
 
 # Script
 script_name = 'tracker-sandbox'
@@ -118,7 +114,7 @@ enable-writeback=false
 def mkdir_p(path):
     try:
         os.makedirs(path)
-    except OSError as exc:  # Python >2.5
+    except OSError as exc:
         if exc.errno == errno.EEXIST:
             pass
         else:
@@ -165,8 +161,9 @@ def db_query_list_files():
 
 def db_search(search_text):
     conn = Tracker.SparqlConnection.get(None)
-    cursor = conn.query(
-        'select nie:url(?urn) where { ?urn a nfo:FileDataObject . ?urn fts:match "%s" }' % (search_text), None)
+    query = ('select nie:url(?urn) where { ?urn a nfo:FileDataObject . '
+             '?urn fts:match "%s" }')
+    cursor = conn.query(query % (search_text), None)
 
     print('Found:')
 
@@ -219,10 +216,10 @@ def index_update():
 
     # Start tracker-miner-fs
     binary = find_libexec_binaries('tracker-miner-fs')
-    if binary == None:
-        print(
-            'Could not find "tracker-miner-fs" in $prefix/lib{exec} directories')
-        print('Is Tracker installed properly?')
+    if binary is None:
+        print('Could not find "tracker-miner-fs" in $prefix/lib{exec} '
+              'directories', file=sys.stderr)
+        print('Is Tracker installed properly?', file=sys.stderr)
         sys.exit(1)
 
     try:
@@ -256,20 +253,19 @@ def dbus_session_get_from_content(content):
     global dbus_session_pid
 
     if len(content) < 1:
-        print(
-            'Content was empty ... can not get DBus session information from empty string')
+        print('Content was empty ... can not get DBus session information from'
+              ' empty string', file=sys.stderr)
         return False
 
     dbus_session_address = content.splitlines()[0]
     dbus_session_pid = int(content.splitlines()[1])
 
+    err_msg = 'DBus session file was corrupt (%s), please remove "%s"'
     if dbus_session_address == '':
-        print('DBus session file was corrupt (no address), please remove "%s"' % (
-            dbus_session_file))
+        print(err_msg % ("no address", dbus_session_file), file=sys.stderr)
         sys.exit(1)
     if dbus_session_pid < 0:
-        print('DBus session file was corrupt (no PID), please remove "%s"' %
-              (dbus_session_file))
+        print(err_msg % ("no PID", dbus_session_file), file=sys.stderr)
         sys.exit(1)
 
     return True
@@ -277,26 +273,22 @@ def dbus_session_get_from_content(content):
 
 def dbus_session_file_get():
     try:
-        f = open(dbus_session_file, 'r')
-        content = f.read()
-        f.close()
-    except IOError as e:
+        with open(dbus_session_file, 'r') as f:
+            content = f.read()
+            return dbus_session_get_from_content(content)
+    except (IOError, OSError) as e:
+        print("Unexpected error: %s %s" % (e.strerror, e.filename),
+              file=sys.stderr)
         # Expect this if we have a new session to set up
         return False
-    except:
-        print("Unexpected error:", sys.exc_info()[0])
-        raise
-
-    return dbus_session_get_from_content(content)
 
 
 def dbus_session_file_set():
     mkdir_p(os.environ['XDG_RUNTIME_DIR'])
 
     content = '%s\n%s' % (dbus_session_address, dbus_session_pid)
-    f = open(dbus_session_file, 'w')
-    f.write(content)
-    f.close()
+    with open(dbus_session_file, 'w') as f:
+        f.write(content)
 
 
 def environment_unset():
@@ -312,7 +304,8 @@ def environment_unset():
         debug('  Killing DBus session')
         try:
             os.kill(dbus_session_pid, signal.SIGTERM)
-        # (3, 'No such process') old python-schedutils incorrectly raised SystemError
+        # (3, 'No such process') old python-schedutils incorrectly
+        # raised SystemError
         except (SystemError, OSError):
             debug('    Process %d not found', dbus_session_pid)
 
@@ -360,12 +353,11 @@ def environment_set():
         environment_set_and_add_path('LD_LIBRARY_PATH', opts.prefix, 'lib')
         environment_set_and_add_path('XDG_DATA_DIRS', opts.prefix, 'share')
 
-
     # Preferences
     os.environ['TRACKER_USE_CONFIG_FILES'] = 'yes'
 
     # if opts.debug:
-    #	os.environ['TRACKER_USE_LOG_FILES'] = 'yes'
+    #     os.environ['TRACKER_USE_LOG_FILES'] = 'yes'
 
     if opts.debug:
         os.environ['G_MESSAGES_DEBUG'] = 'all'
@@ -382,7 +374,7 @@ def environment_set():
     dbus_session_file = os.path.join(
         os.environ['XDG_RUNTIME_DIR'], 'dbus-session')
 
-    if dbus_session_file_get() == False:
+    if dbus_session_file_get() is False:
         output = subprocess.check_output(["dbus-daemon",
                                           "--session",
                                           "--print-address=1",
@@ -394,7 +386,8 @@ def environment_set():
         debug('Using new D-Bus session with address "%s" with PID %d' %
               (dbus_session_address, dbus_session_pid))
     else:
-        debug('Using existing D-Bus session from file "%s" with address "%s" with PID %d' %
+        debug('Using existing D-Bus session from file "%s" with address "%s"'
+              ' with PID %d' %
               (dbus_session_file, dbus_session_address, dbus_session_pid))
 
     # Important, other subprocesses must use our new bus
@@ -459,7 +452,8 @@ def link_to_mime_data():
     old_mime_dir = os.path.join(original_xdg_data_home, 'mime')
     if os.path.exists(old_mime_dir):
         new_mime_dir = os.path.join(new_xdg_data_home, 'mime')
-        if not os.path.exists(new_mime_dir) and not os.path.islink(new_mime_dir):
+        if (not os.path.exists(new_mime_dir)
+                and not os.path.islink(new_mime_dir)):
             mkdir_p(new_xdg_data_home)
             os.symlink(
                 os.path.join(original_xdg_data_home, 'mime'), new_mime_dir)
@@ -489,7 +483,8 @@ if __name__ == "__main__":
                     metavar='PATH',
                     dest='prefix',
                     default=default_prefix,
-                    help='use a non-standard prefix (default="%s")' % default_prefix)
+                    help='use a non-standard prefix (default="%s")' %
+                         (default_prefix))
     popt.add_option('-i', '--index',
                     action='store',
                     metavar='DIR',
@@ -499,8 +494,8 @@ if __name__ == "__main__":
                     action='append',
                     metavar='DIR',
                     dest='content_locations_recursive',
-                    help='directory storing the content which is indexed (can be '
-                    'specified multiple times)')
+                    help='directory storing the content which is indexed (can '
+                         'be specified multiple times)')
     popt.add_option('-C', '--content-non-recursive',
                     action='append',
                     metavar='DIR',
@@ -539,26 +534,37 @@ if __name__ == "__main__":
     if not opts.index_location:
         if not opts.content_locations_recursive and not \
                 opts.content_locations_single:
-            print('Expected index (-i) or content (-c) locations to be specified')
+            print('Expected index (-i) or content (-c) locations to be '
+                  'specified', file=sys.stderr)
             print(usage_invalid)
             sys.exit(1)
 
     if opts.update:
         if not opts.index_location or not (opts.content_locations_recursive or
                                            opts.content_locations_single):
-            print('Expected index (-i) and content (-c) locations to be specified')
-            print('These arguments are required to update the index databases')
+            print('Expected index (-i) and content (-c) locations to be '
+                  'specified', file=sys.stderr)
+            print('These arguments are required to update the index databases',
+                  file=sys.stderr)
             sys.exit(1)
 
-    if (opts.sparql_query or opts.search or opts.list_files or opts.shell) and not opts.index_location:
-        print('Expected index location (-i) to be specified')
-        print('This arguments is required to use the content that has been indexed')
+    if ((opts.sparql_query or opts.search or opts.list_files or opts.shell)
+            and not opts.index_location):
+        print('Expected index location (-i) to be specified', file=sys.stderr)
+        print('This arguments is required to use the content that has been '
+              'indexed', file=sys.stderr)
         sys.exit(1)
 
-    if not opts.update and not opts.sparql_query and not opts.search and not opts.list_files and not opts.shell:
-        print('No action specified (e.g. update (-u), shell (-s), list files (-l), etc)\n')
-        print('%s %s\n%s\n' % (script_name, script_version, script_about))
-        print(usage_invalid)
+    if (not opts.update
+            and not opts.sparql_query
+            and not opts.search
+            and not opts.list_files
+            and not opts.shell):
+        print('No action specified (e.g. update (-u), shell (-s), '
+              'list files (-l), etc)\n', file=sys.stderr)
+        print('%s %s\n%s\n' % (script_name, script_version, script_about),
+              file=sys.stderr)
+        print(usage_invalid, file=sys.stderr)
         sys.exit(1)
 
     # Set up environment variables and foo needed to get started.
@@ -580,9 +586,9 @@ if __name__ == "__main__":
 
         if opts.search or opts.sparql_query:
             if not os.path.exists(index_location_abs):
-                print(
-                    'Can not query yet, index has not been created, see --update or -u')
-                print(usage_invalid)
+                print('Can not query yet, index has not been created, see '
+                      '--update or -u', file=sys.stderr)
+                print(usage_invalid, file=sys.stderr)
                 sys.exit(1)
 
         if opts.search:
