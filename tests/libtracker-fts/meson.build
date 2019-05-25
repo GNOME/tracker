@@ -6,5 +6,6 @@ fts_test = executable('tracker-fts-test',
 
 tests += {
   'name': 'fts',
-  'exe': fts_test
+  'exe': fts_test,
+  'requires_dbus': true,
 }

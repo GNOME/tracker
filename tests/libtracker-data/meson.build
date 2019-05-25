@@ -24,7 +24,8 @@ foreach base_name: libtracker_data_tests
 
     tests += {
       'name': test_name,
-      'exe': binary
+      'exe': binary,
+      'requires_dbus': true,
     }
 endforeach
 
@@ -40,6 +41,7 @@ foreach base_name: libtracker_data_slow_tests
       tests += {
         'name': test_name,
         'exe': binary,
+        'requires_dbus': true,
         'timeout': 180
     }
 endforeach

@@ -9,5 +9,6 @@ steroids_test = executable('tracker-steroids-test',
   c_args: [tracker_c_args, test_c_args])
 tests += {
   'name': 'steroids',
-  'exe': steroids_test
+  'exe': steroids_test,
+  'requires_dbus': true,
 }
