@@ -83,10 +83,10 @@ struct _TrackerDataUpdateBufferProperty {
 	const gchar *name;
 	GValue value;
 	gint graph;
-	gboolean date_time : 1;
+	guint date_time : 1;
 
 #if HAVE_TRACKER_FTS
-	gboolean fts : 1;
+	guint fts : 1;
 #endif
 };
 
