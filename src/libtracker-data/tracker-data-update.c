@@ -124,14 +124,6 @@ struct _TrackerCommitDelegate {
 	gpointer user_data;
 };
 
-typedef struct {
-	gchar *graph;
-	gchar *subject;
-	gchar *predicate;
-	gchar *object;
-	gboolean is_uri;
-} QueuedStatement;
-
 struct _TrackerData {
 	GObject parent_instance;
 
