@@ -41,7 +41,6 @@
 
 typedef struct _TrackerDataUpdateBuffer TrackerDataUpdateBuffer;
 typedef struct _TrackerDataUpdateBufferResource TrackerDataUpdateBufferResource;
-typedef struct _TrackerDataUpdateBufferPredicate TrackerDataUpdateBufferPredicate;
 typedef struct _TrackerDataUpdateBufferProperty TrackerDataUpdateBufferProperty;
 typedef struct _TrackerDataUpdateBufferTable TrackerDataUpdateBufferTable;
 typedef struct _TrackerDataBlankBuffer TrackerDataBlankBuffer;
