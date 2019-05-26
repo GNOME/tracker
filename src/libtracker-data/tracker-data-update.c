@@ -803,8 +803,9 @@ add_class_count (TrackerData  *data,
 }
 
 static void
-tracker_data_resource_buffer_flush (TrackerData  *data,
-                                    GError      **error)
+tracker_data_resource_buffer_flush (TrackerData                      *data,
+				    TrackerDataUpdateBufferResource  *resource,
+                                    GError                          **error)
 {
 	TrackerDBInterface             *iface;
 	TrackerDBStatement             *stmt;
@@ -817,7 +818,7 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 
 	iface = tracker_data_manager_get_writable_db_interface (data->manager);
 
-	g_hash_table_iter_init (&iter, data->resource_buffer->tables);
+	g_hash_table_iter_init (&iter, resource->tables);
 	while (g_hash_table_iter_next (&iter, (gpointer*) &table_name, (gpointer*) &table)) {
 		if (table->multiple_values) {
 			for (i = 0; i < table->properties->len; i++) {
@@ -844,7 +845,7 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 
 				param = 0;
 
-				tracker_db_statement_bind_int (stmt, param++, data->resource_buffer->id);
+				tracker_db_statement_bind_int (stmt, param++, resource->id);
 				statement_bind_gvalue (stmt, &param, &property->value);
 
 				if (property->graph != 0) {
@@ -870,7 +871,7 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 				                                              "DELETE FROM \"rdfs:Resource_rdf:type\" WHERE ID = ? AND \"rdf:type\" = ?");
 
 				if (stmt) {
-					tracker_db_statement_bind_int (stmt, 0, data->resource_buffer->id);
+					tracker_db_statement_bind_int (stmt, 0, resource->id);
 					tracker_db_statement_bind_int (stmt, 1, ensure_resource_id (data, tracker_class_get_uri (table->class), NULL));
 					tracker_db_statement_execute (stmt, &actual_error);
 					g_object_unref (stmt);
@@ -890,7 +891,7 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 				                                              "DELETE FROM \"%s\" WHERE ID = ?", table_name);
 
 				if (stmt) {
-					tracker_db_statement_bind_int (stmt, 0, data->resource_buffer->id);
+					tracker_db_statement_bind_int (stmt, 0, resource->id);
 					tracker_db_statement_execute (stmt, &actual_error);
 					g_object_unref (stmt);
 				}
@@ -964,7 +965,7 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 			}
 
 			if (table->insert) {
-				tracker_db_statement_bind_int (stmt, 0, data->resource_buffer->id);
+				tracker_db_statement_bind_int (stmt, 0, resource->id);
 
 				if (strcmp (table_name, "rdfs:Resource") == 0) {
 					g_warn_if_fail	(data->resource_time != 0);
@@ -994,7 +995,7 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 			}
 
 			if (!table->insert) {
-				tracker_db_statement_bind_int (stmt, param++, data->resource_buffer->id);
+				tracker_db_statement_bind_int (stmt, param++, resource->id);
 			}
 
 			tracker_db_statement_execute (stmt, &actual_error);
@@ -1008,13 +1009,13 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 	}
 
 #if HAVE_TRACKER_FTS
-	if (data->resource_buffer->fts_updated) {
+	if (resource->fts_updated) {
 		TrackerProperty *prop;
 		GArray *values;
 		GPtrArray *properties, *text;
 
 		properties = text = NULL;
-		g_hash_table_iter_init (&iter, data->resource_buffer->predicates);
+		g_hash_table_iter_init (&iter, resource->predicates);
 		while (g_hash_table_iter_next (&iter, (gpointer*) &prop, (gpointer*) &values)) {
 			if (tracker_property_get_fulltext_indexed (prop)) {
 				GString *fts;
@@ -1041,7 +1042,7 @@ tracker_data_resource_buffer_flush (TrackerData  *data,
 			g_ptr_array_add (text, NULL);
 
 			tracker_db_interface_sqlite_fts_update_text (iface,
-			                                             data->resource_buffer->id,
+			                                             resource->id,
 			                                             (const gchar **) properties->pdata,
 			                                             (const gchar **) text->pdata);
 			data->update_buffer.fts_ever_updated = TRUE;
@@ -1068,12 +1069,13 @@ void
 tracker_data_update_buffer_flush (TrackerData  *data,
                                   GError      **error)
 {
+	TrackerDataUpdateBufferResource *resource;
 	GHashTableIter iter;
 	GError *actual_error = NULL;
 
 	g_hash_table_iter_init (&iter, data->update_buffer.resources);
-	while (g_hash_table_iter_next (&iter, NULL, (gpointer*) &data->resource_buffer)) {
-		tracker_data_resource_buffer_flush (data, &actual_error);
+	while (g_hash_table_iter_next (&iter, NULL, (gpointer*) &resource)) {
+		tracker_data_resource_buffer_flush (data, resource, &actual_error);
 		if (actual_error) {
 			g_propagate_error (error, actual_error);
 			break;
