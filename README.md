@@ -1,189 +1,131 @@
 # Tracker
 
-Tracker is a search engine and that allows the user to find their
-data as fast as possible. Users can search for their files and
-search for content in their files too.  
+Tracker is an efficient search engine and
+[triplestore](https://en.wikipedia.org/wiki/Triplestore) for desktop, embedded
+and mobile.
 
-Tracker is a semantic data storage for desktop and mobile devices.
-Tracker uses W3C standards for RDF ontologies using Nepomuk with
-SPARQL to query and update the data.
+The Tracker project is divided into two main repositories:
 
-Tracker is a central repository of user information, that provides
-two big benefits for the desktop; shared data between applications
-and information which is relational to other information (for
-example: mixing contacts with files, locations, activities and
-etc.).
+  * [Tracker core](https://gitlab.gnome.org/GNOME/tracker) contains the database
+    (*tracker-store*), the database ontologies, the commandline user
+    interface (`tracker`), and several support libraries.
 
-This central repository works with a well defined data model that
-applications can rely on to store and recover their information.
-That data model is defined using a semantic web artifact called
-ontology. An ontology defines the relationships between the
-information stored in the repository.
+  * [Tracker Miners](https://gitlab.gnome.org/GNOME/tracker-miners) contains
+    the indexer daemon (*tracker-miner-fs*) and tools to extract metadata
+    from many different filetypes.
 
-An EU-funded project called Nepomuk was started to define some of
-the core ontologies to be modeled on the Desktop. Tracker uses this
-to define the data's relationships in a database.
+More information on Tracker can be found at:
 
-All discussion related to tracker happens on the Tracker
-mailing list
+  * <https://wiki.gnome.org/Projects/Tracker>
 
-        https://mail.gnome.org/mailman/listinfo/tracker-list
+Source code and issue tracking:
+
+  * <https://gitlab.gnome.org/GNOME/tracker>
+
+All discussion related to Tracker happens on:
+
+  * <https://mail.gnome.org/mailman/listinfo/tracker-list>
 
 IRC channel #tracker on:
 
-        irc.gimp.net
+  * [irc.gimp.net](irc://irc.gimp.net)
 
-Bugs and feature requests should be filed at:
+Related projects:
 
-        https://gitlab.gnome.org/GNOME/tracker/issues
+  * [GNOME Online Miners](https://gitlab.gnome.org/GNOME/gnome-online-miners/)
+    extends Tracker to allow searching and indexing some kinds of online
+    content.
 
-More infomation on Tracker can be found at:
+# Developing Tracker
 
-        https://wiki.gnome.org/Projects/Tracker
+If you want to help develop and improve Tracker, great! Remember that Tracker
+is a middleware component, designed to be integrated into larger codebases. To
+fully test a change you may need to build and test Tracker as part of another
+project.
 
-Repository can be found at:
+For the GNOME desktop, consider using the documented [Building a System
+Component](https://wiki.gnome.org/Newcomers/BuildSystemComponent) workflow.
 
-        https://gitlab.gnome.org/GNOME/tracker
-
-The official RoadMap (aka TODO) can be found at:
-
-        https://wiki.gnome.org/Projects/Tracker/Roadmap
-
-
-## Use Cases
-
-Tracker is the most powerful open source metadata database and
-indexer framework currently available and because it is built
-around a combination indexer and SQL database and not a
-dedicated indexer, it has much more powerful use cases:
-
-  * Provide search and indexing facilities similar to those on
-  other systems (Windows Vista and Mac OS X).
-
-  * Common database storage for all first class objects (e.g. a
-  common music/photo/contacts/email/bookmarks/history database)
-  complete with additional metadata and tags/keywords.
-
-  * Comprehensive one stop solution for all applications needing
-  an object database, powerful search (via RDF Query), first class
-  methods, related metadata and user-definable metadata/tags.
-
-  * Can provide a full semantic desktop with metadata everywhere.
-
-  * Can provide powerful criteria-based searching suitable for
-  creating smart file dialogs and vfolder systems.
-
-  * Can provide a more intelligent desktop using statistical
-  metadata.
-
-## Features
-
-  * Desktop-neutral design (it's a freedesktop product built
-  around other freedesktop technologies like D-Bus and XDGMime
-  but contains no GNOME-specific dependencies besides GLib).
-
-  * Very memory efficient. Unlike some other indexers, Tracker is
-  designed and built to run well on mobile and desktop systems with
-  lower memory (256MB or less).
-
-  * Non-bloated and written in C for maximum efficiency.
-
-  * Small size and minimal dependencies makes it easy to bundle
-  into various distros, including live CDs.
-
-  * Provides option to disable indexing when running on battery.
-
-  * Provides option to index removable devices.
-
-  * Implements the freedesktop specification for metadata
-  (https://freedesktop.org/wiki/Standards/shared-filemetadata-spec/).
-
-  * Extracts embedded File, Image, Document and Audio type
-  metadata from files.
-
-  * Supports the WC3's RDF Query syntax for querying metadata.
-
-  * Provides support for both free text search (like Beagle/Google)
-  as well as structured searches using RDF Query.
-
-  * Responds in real time to file system changes to keep its
-  metadata database up to date and in sync.
-
-  * Fully extensible with custom metadata - you can store,
-  retrieve, register and search via RDF Query all your own custom
-  metadata.
-
-  * Can extract a file's contents as plain text and index them.
-
-  * Can provide thumbnailing on the fly.
-
-  * It auto-pauses indexing when running low on diskspace.
+It's also possible to build Tracker on its own and install it inside your home
+directory for testing purposes.  Read on for instructions on how to do this.
 
 ## Compilation
 
-To setup the project for compilation after checking it out from
-the git repository, use:
+Tracker uses the [Meson build system](http://mesonbuild.com), which you must
+have installed in order to build Tracker.
 
-        meson build --prefix=/usr --sysconfdir=/etc
+We recommend that you build tracker core as a subproject of tracker-miners.
+You can do this by cloning both repos, then creating a symlink in the
+`subprojects/` directory of tracker-miners.git to the tracker.git checkout.
 
-To start compiling the project use:
+    git clone https://gitlab.gnome.org/GNOME/tracker.git
+    git clone https://gitlab.gnome.org/GNOME/tracker-miners.git
 
-        ninja -C build
-        ninja install
+    mkdir tracker-miners/subprojects
+    ln -s ../../tracker tracker-miners/subprojects/
 
-If you install using any other prefix, you might have problems
-with files not being installed correctly. (You may need to copy
-and amend the dbus service file to the correct directory and/or
-might need to update ld_conf if you install into non-standard
-directories.)
+Now you can run the commands below to build Tracker and install it in a
+new, isolated prefix named `opt/tracker` inside your home folder.
 
-## Running Tracker
+> NOTE: If you see 'dependency not found' errors from Meson, that means there
+> is a package missing on your computer that you need to install so you can
+> compile Tracker. On Ubuntu/Debian, you can run `apt build-dep tracker-miners`
+> and on Fedora `dnf build-dep tracker-miners` to install all the necessary
+> packages.
 
-### Usage
+    cd tracker-miners
+    meson ./build --prefix=$HOME/opt/tracker -Dtracker_core=subproject
+    cd build
+    ninja install
 
-Tracker normally starts itself when users log in. You can indexing by running:
+## Running the testsuite
 
-    $prefix/libexec/tracker-miner-fs
+At this point you can run the Tracker test suite from the `build` directory:
 
-You can configure how this works using:
+    meson test --print-errorlogs
 
-    $prefix/bin/tracker-preferences
+## Developing with tracker-sandbox
 
-You can monitor data miners using:
+Tracker normally runs automatically, indexing content in the background so that
+search results are available quickly when needed.
 
-    $prefix/bin/tracker-status-icon
+When developing and testing Tracker you will normally want it to run in the
+foreground instead. The `tracker-sandbox` tool exists to help with this.
 
-You can do simple searching using an applet:
+You can run the tool directly from the tracker.git source tree. Ensure you are
+in the top of the tracker source tree and type this to see the --help output: 
 
-    $prefix/libexec/tracker-search-bar
+    ./utils/sandbox/tracker-sandbox.py --help
 
-You can do more extensive searching using:
+You should always pass the `--prefix` option, which should be the same as the
+--prefix argument you passed to Meson. You also need to use `--index` which
+controls where internal state files like the database are kept. You may also
+want to pass `--debug` to see detailed log output.
 
-    $prefix/bin/tracker-search-tool
+Now you can index some files using `--update` mode. Here's how to index files
+in `~/Documents` for example:
 
-### Setting Inotify Watch Limit
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
+        --update --content ~/Documents
 
-When watching large numbers of folders, its possible to exceed
-the default number of inotify watches. In order to get real time
-updates when this value is exceeded it is necessary to increase
-the number of allowed watches. This can be done as follows:
+You can then list the files that have been indexed...
 
-  1. Add this line to /etc/sysctl.conf:
-     "fs.inotify.max_user_watches = (number of folders to be
-      watched; default used to be 8192 and now is 524288)"
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
+        --list-files
 
-  2. Reboot the system OR (on a Debian-like system) run
-     "sudo /etc/init.d/procps restart"
+... run a full-text search ...
 
-## Further Help
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
+        --search "bananas"
 
-### Man pages
+... or run a SPARQL query on the content:
 
-Every config file and every binary has a man page. If you start with
-tracker-store, you should be able to find out about most other
-commands on the SEE ALSO section.
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
+        --sparql "SELECT ?url { ?resource a nfo:FileDataObject ; nie:url ?url . }"
 
-### Utilities
+You can also open a shell inside the sandbox environment. From here you can run
+the `tracker` commandline tool, and you can run the Tracker daemons manually
+under a debugger such as GDB.
 
-There are a range of tracker utilities that help you query for data.
-
+For more information about developing Tracker, look at
+https://wiki.gnome.org/Projects/Tracker.

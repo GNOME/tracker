@@ -1,8 +1,3 @@
-libtracker_sparql_tests = [
-    'resource',
-    'sparql',
-]
-
 libtracker_sparql_test_c_args = tracker_c_args + [
   '-DTEST',
   '-DTEST_DOMAIN_ONTOLOGY_RULE="@0@"'.format(tracker_uninstalled_domain_rule),
@@ -13,19 +8,24 @@ libtracker_sparql_test_deps = [
     tracker_common_dep, tracker_sparql_dep
 ]
 
-libtracker_sparql_test_environment = environment()
-libtracker_sparql_test_environment.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', '@0@/src/libtracker-common/stop-words'.format(source_root))
-libtracker_sparql_test_environment.set('GSETTINGS_SCHEMA_DIR', join_paths(meson.build_root(), 'data'))
+tracker_resource_test = executable('tracker-resource-test',
+  'tracker-resource-test.c',
+  dependencies: libtracker_sparql_test_deps,
+  c_args: libtracker_sparql_test_c_args)
 
-foreach base_name: libtracker_sparql_tests
-    source = 'tracker-@0@-test.c'.format(base_name)
-    binary_name = 'tracker-@0@-test'.format(base_name)
-    test_name = 'sparql-@0@'.format(base_name)
+tests += {
+  'name': 'tracker-resource-test',
+  'exe': tracker_resource_test,
+}
 
-    binary = executable(binary_name, source,
-      dependencies: libtracker_sparql_test_deps,
-      c_args: libtracker_sparql_test_c_args)
+tracker_sparql_test = executable('tracker-sparql-test',
+  'tracker-sparql-test.c',
+  dependencies: libtracker_sparql_test_deps,
+  c_args: libtracker_sparql_test_c_args)
 
-    test(test_name, binary,
-      env: libtracker_sparql_test_environment)
-endforeach
+tests += {
+  'name': 'tracker-sparql-test',
+  'exe': tracker_sparql_test,
+  'is_parallel': false,
+  'requires_dbus': true,
+}
