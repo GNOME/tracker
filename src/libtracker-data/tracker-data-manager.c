@@ -4946,25 +4946,23 @@ tracker_data_manager_create_graph (TrackerDataManager  *manager,
 	gint id;
 
 	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
+
 	if (!tracker_db_manager_attach_database (manager->db_manager, iface,
 	                                         name, TRUE, error))
 		return FALSE;
 
 	if (!tracker_data_ontology_setup_db (manager, iface, name,
 	                                     FALSE, error))
-		goto error;
-
-	if (!tracker_data_manager_ensure_graphs (manager, iface, error))
-		goto error;
+		goto detach;
 
 	id = tracker_data_ensure_graph (manager->data_update, name, error);
 	if (id == 0)
-		goto error;
+		goto detach;
 
 	g_hash_table_insert (manager->graphs, g_strdup (name), GINT_TO_POINTER (id));
 	return TRUE;
 
-error:
+detach:
 	tracker_db_manager_detach_database (manager->db_manager, iface, name, NULL);
 	return FALSE;
 }
@@ -4989,4 +4987,44 @@ tracker_data_manager_drop_graph (TrackerDataManager  *manager,
 		g_hash_table_remove (manager->graphs, name);
 
 	return TRUE;
+}
+
+gint
+tracker_data_manager_find_graph (TrackerDataManager *manager,
+                                 const gchar        *name)
+{
+	TrackerDBInterface *iface;
+	GHashTable *graphs;
+
+	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
+	graphs = tracker_data_manager_get_graphs (manager, iface, NULL);
+
+	if (!graphs)
+		return 0;
+
+	return GPOINTER_TO_UINT (g_hash_table_lookup (graphs, name));
+}
+
+const gchar *
+tracker_data_manager_find_graph_by_id (TrackerDataManager *manager,
+                                       gint                id)
+{
+	TrackerDBInterface *iface;
+	GHashTableIter iter;
+	GHashTable *graphs;
+	gpointer key, value;
+
+	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
+	graphs = tracker_data_manager_get_graphs (manager, iface, NULL);
+
+	if (!graphs)
+		return NULL;
+
+	g_hash_table_iter_init (&iter, graphs);
+	while (g_hash_table_iter_next (&iter, &key, &value)) {
+		if (id == GPOINTER_TO_INT (value))
+			return key;
+	}
+
+	return NULL;
 }
