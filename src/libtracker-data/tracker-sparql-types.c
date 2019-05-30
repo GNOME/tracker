@@ -33,11 +33,13 @@ enum {
 /* Helper structs */
 static TrackerDataTable *
 tracker_data_table_new (const gchar *tablename,
+                        const gchar *graph,
                         gint         idx)
 {
 	TrackerDataTable *table;
 
 	table = g_new0 (TrackerDataTable, 1);
+	table->graph = g_strdup (graph);
 	table->sql_db_tablename = g_strdup (tablename);
 	table->sql_query_tablename = g_strdup_printf ("%s%d", tablename, idx);
 
@@ -47,6 +49,7 @@ tracker_data_table_new (const gchar *tablename,
 static void
 tracker_data_table_free (TrackerDataTable *table)
 {
+	g_free (table->graph);
 	g_free (table->sql_db_tablename);
 	g_free (table->sql_query_tablename);
 	g_free (table);
@@ -874,6 +877,7 @@ tracker_triple_context_new (void)
 
 TrackerDataTable *
 tracker_triple_context_lookup_table (TrackerTripleContext *context,
+                                     const gchar          *graph,
                                      const gchar          *tablename)
 {
 	TrackerDataTable *table = NULL;
@@ -884,7 +888,8 @@ tracker_triple_context_lookup_table (TrackerTripleContext *context,
 
 		table = g_ptr_array_index (context->sql_tables, i);
 
-		if (g_strcmp0 (table->sql_db_tablename, tablename) == 0)
+		if (g_strcmp0 (table->graph, graph) == 0 &&
+		    g_strcmp0 (table->sql_db_tablename, tablename) == 0)
 			return table;
 	}
 
@@ -893,11 +898,12 @@ tracker_triple_context_lookup_table (TrackerTripleContext *context,
 
 TrackerDataTable *
 tracker_triple_context_add_table (TrackerTripleContext *context,
+                                  const gchar          *graph,
                                   const gchar          *tablename)
 {
 	TrackerDataTable *table;
 
-	table = tracker_data_table_new (tablename, ++context->table_counter);
+	table = tracker_data_table_new (tablename, graph, ++context->table_counter);
 	g_ptr_array_add (context->sql_tables, table);
 
 	return table;
