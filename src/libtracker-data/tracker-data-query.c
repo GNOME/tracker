@@ -35,6 +35,7 @@
 
 GPtrArray*
 tracker_data_query_rdf_type (TrackerDataManager *manager,
+                             const gchar        *graph,
                              gint                id)
 {
 	TrackerDBCursor *cursor = NULL;
@@ -49,8 +50,9 @@ tracker_data_query_rdf_type (TrackerDataManager *manager,
 
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &error,
 	                                              "SELECT (SELECT Uri FROM Resource WHERE ID = \"rdf:type\") "
-	                                              "FROM \"rdfs:Resource_rdf:type\" "
-	                                              "WHERE ID = ?");
+	                                              "FROM \"%s\".\"rdfs:Resource_rdf:type\" "
+	                                              "WHERE ID = ?",
+	                                              graph ? graph : "main");
 
 	if (stmt) {
 		tracker_db_statement_bind_int (stmt, 0, id);
