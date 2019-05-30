@@ -4076,11 +4076,32 @@ setup_interface_cb (TrackerDBManager   *db_manager,
                     TrackerDBInterface *iface,
                     TrackerDataManager *data_manager)
 {
+	GHashTable *graphs;
 	GError *error = NULL;
 
 #if HAVE_TRACKER_FTS
 	tracker_data_manager_init_fts (iface, FALSE);
 #endif
+	graphs = tracker_data_manager_get_graphs (data_manager, iface, NULL);
+
+	if (graphs) {
+		GHashTableIter iter;
+		gpointer value;
+		GError *error = NULL;
+
+		g_hash_table_iter_init (&iter, graphs);
+
+		while (g_hash_table_iter_next (&iter, &value, NULL)) {
+			if (!tracker_db_manager_attach_database (db_manager,
+			                                         iface, value, FALSE,
+			                                         &error)) {
+				g_critical ("Could not attach database '%s': %s\n",
+				            (gchar *) value, error->message);
+				g_clear_error (&error);
+				continue;
+			}
+		}
+	}
 
 	if (!tracker_data_manager_update_union_views (data_manager, iface, &error)) {
 		g_critical ("Could not update union views: %s\n", error->message);
@@ -4678,27 +4699,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 				g_clear_error (&n_error);
 			}
 		}
-	}
-
-	graphs = tracker_data_manager_get_graphs (manager, iface, &internal_error);
-
-	if (graphs) {
-		GHashTableIter iter;
-		gpointer value;
-
-		g_hash_table_iter_init (&iter, graphs);
-
-		while (g_hash_table_iter_next (&iter, &value, NULL)) {
-			if (!tracker_db_manager_attach_database (manager->db_manager,
-			                                         iface, value, FALSE,
-			                                         &internal_error))
-				break;
-		}
-	}
-
-	if (internal_error) {
-		g_propagate_error (error, internal_error);
-		return FALSE;
 	}
 
 skip_ontology_check:
