@@ -40,6 +40,7 @@
 #include "tracker-sparql.h"
 
 typedef struct _TrackerDataUpdateBuffer TrackerDataUpdateBuffer;
+typedef struct _TrackerDataUpdateBufferGraph TrackerDataUpdateBufferGraph;
 typedef struct _TrackerDataUpdateBufferResource TrackerDataUpdateBufferResource;
 typedef struct _TrackerDataUpdateBufferProperty TrackerDataUpdateBufferProperty;
 typedef struct _TrackerDataUpdateBufferTable TrackerDataUpdateBufferTable;
@@ -50,8 +51,8 @@ typedef struct _TrackerCommitDelegate TrackerCommitDelegate;
 struct _TrackerDataUpdateBuffer {
 	/* string -> integer */
 	GHashTable *resource_cache;
-	/* string -> TrackerDataUpdateBufferResource */
-	GHashTable *resources;
+	/* string -> TrackerDataUpdateBufferGraph */
+	GPtrArray *graphs;
 
 	/* the following two fields are valid per sqlite transaction, not just for same subject */
 	/* TrackerClass -> integer */
@@ -62,7 +63,16 @@ struct _TrackerDataUpdateBuffer {
 #endif
 };
 
+struct _TrackerDataUpdateBufferGraph {
+	gchar *graph;
+	gint id;
+
+	/* string -> TrackerDataUpdateBufferResource */
+	GHashTable *resources;
+};
+
 struct _TrackerDataUpdateBufferResource {
+	const TrackerDataUpdateBufferGraph *graph;
 	const gchar *subject;
 	gint id;
 	gboolean create;
@@ -82,7 +92,6 @@ struct _TrackerDataUpdateBufferResource {
 struct _TrackerDataUpdateBufferProperty {
 	const gchar *name;
 	GValue value;
-	gint graph;
 	guint date_time : 1;
 
 #if HAVE_TRACKER_FTS
@@ -165,7 +174,6 @@ static void         cache_insert_value         (TrackerData      *data,
                                                 const gchar      *table_name,
                                                 const gchar      *field_name,
                                                 GValue           *value,
-                                                gint              graph,
                                                 gboolean          multiple_values,
                                                 gboolean          fts,
                                                 gboolean          date_time);
@@ -569,8 +577,7 @@ cache_ensure_table (TrackerData *data,
 		g_value_init (&gvalue, G_TYPE_INT64);
 		g_value_set_int64 (&gvalue, get_transaction_modseq (data));
 		cache_insert_value (data, "rdfs:Resource", "tracker:modified",
-		                    &gvalue, 0,
-		                    FALSE, FALSE, FALSE);
+		                    &gvalue, FALSE, FALSE, FALSE);
 	}
 
 	table = g_hash_table_lookup (data->resource_buffer->tables, table_name);
@@ -599,7 +606,6 @@ cache_insert_value (TrackerData *data,
                     const gchar *table_name,
                     const gchar *field_name,
                     GValue      *value,
-                    gint         graph,
                     gboolean     multiple_values,
                     gboolean     fts,
                     gboolean     date_time)
@@ -612,7 +618,6 @@ cache_insert_value (TrackerData *data,
 	property.name = field_name;
 
 	property.value = *value;
-	property.graph = graph;
 #if HAVE_TRACKER_FTS
 	property.fts = fts;
 #endif
@@ -647,7 +652,6 @@ cache_delete_value (TrackerData *data,
 
 	property.name = field_name;
 	property.value = *value;
-	property.graph = 0;
 #if HAVE_TRACKER_FTS
 	property.fts = fts;
 #endif
@@ -720,27 +724,6 @@ ensure_resource_id (TrackerData *data,
 	return id;
 }
 
-static gint
-ensure_graph_id (TrackerData *data,
-                 const gchar *uri,
-		 gboolean    *create)
-{
-	GError *error = NULL;
-	gint id;
-
-	id = GPOINTER_TO_INT (g_hash_table_lookup (data->update_buffer.resource_cache, uri));
-	if (id != 0)
-		return id;
-
-	id = tracker_data_ensure_graph (data, uri, &error);
-	if (error) {
-		g_critical ("Could not ensure graph existence: %s", error->message);
-		g_error_free (error);
-	}
-
-	return id;
-}
-
 static void
 statement_bind_gvalue (TrackerDBStatement *stmt,
                        gint               *idx,
@@ -804,7 +787,7 @@ add_class_count (TrackerData  *data,
 
 static void
 tracker_data_resource_buffer_flush (TrackerData                      *data,
-				    TrackerDataUpdateBufferResource  *resource,
+                                    TrackerDataUpdateBufferResource  *resource,
                                     GError                          **error)
 {
 	TrackerDBInterface             *iface;
@@ -812,11 +795,12 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 	TrackerDataUpdateBufferTable    *table;
 	TrackerDataUpdateBufferProperty *property;
 	GHashTableIter                  iter;
-	const gchar                    *table_name;
+	const gchar                    *table_name, *database;
 	gint                            i, param;
 	GError                         *actual_error = NULL;
 
 	iface = tracker_data_manager_get_writable_db_interface (data->manager);
+	database = resource->graph->graph ? resource->graph->graph : "main";
 
 	g_hash_table_iter_init (&iter, resource->tables);
 	while (g_hash_table_iter_next (&iter, (gpointer*) &table_name, (gpointer*) &table)) {
@@ -827,12 +811,14 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 				if (table->delete_value) {
 					/* delete rows for multiple value properties */
 					stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &actual_error,
-					                                              "DELETE FROM \"%s\" WHERE ID = ? AND \"%s\" = ?",
+					                                              "DELETE FROM \"%s\".\"%s\" WHERE ID = ? AND \"%s\" = ?",
+					                                              database,
 					                                              table_name,
 					                                              property->name);
 				} else {
 					stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &actual_error,
-					                                              "INSERT OR IGNORE INTO \"%s\" (ID, \"%s\", \"%s:graph\") VALUES (?, ?, ?)",
+					                                              "INSERT OR IGNORE INTO \"%s\".\"%s\" (ID, \"%s\", \"%s:graph\") VALUES (?, ?, ?)",
+					                                              database,
 					                                              table_name,
 					                                              property->name,
 					                                              property->name);
@@ -848,8 +834,8 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 				tracker_db_statement_bind_int (stmt, param++, resource->id);
 				statement_bind_gvalue (stmt, &param, &property->value);
 
-				if (property->graph != 0) {
-					tracker_db_statement_bind_int (stmt, param++, property->graph);
+				if (resource->graph->id != 0) {
+					tracker_db_statement_bind_int (stmt, param++, resource->graph->id);
 				} else {
 					tracker_db_statement_bind_null (stmt, param++);
 				}
@@ -868,7 +854,8 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 			if (table->delete_row) {
 				/* remove entry from rdf:type table */
 				stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &actual_error,
-				                                              "DELETE FROM \"rdfs:Resource_rdf:type\" WHERE ID = ? AND \"rdf:type\" = ?");
+				                                              "DELETE FROM \"%s\".\"rdfs:Resource_rdf:type\" WHERE ID = ? AND \"rdf:type\" = ?",
+				                                              database);
 
 				if (stmt) {
 					tracker_db_statement_bind_int (stmt, 0, resource->id);
@@ -888,7 +875,8 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 
 				/* remove row from class table */
 				stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &actual_error,
-				                                              "DELETE FROM \"%s\" WHERE ID = ?", table_name);
+				                                              "DELETE FROM \"%s\".\"%s\" WHERE ID = ?",
+				                                              database, table_name);
 
 				if (stmt) {
 					tracker_db_statement_bind_int (stmt, 0, resource->id);
@@ -905,17 +893,18 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 			}
 
 			if (table->insert) {
-				sql = g_string_new ("INSERT INTO \"");
+				sql = g_string_new ("INSERT INTO ");
 				values_sql = g_string_new ("VALUES (?");
 			} else {
-				sql = g_string_new ("UPDATE \"");
+				sql = g_string_new ("UPDATE ");
 				values_sql = NULL;
 			}
 
-			g_string_append (sql, table_name);
+			g_string_append_printf (sql, "\"%s\".\"%s\"",
+			                        database, table_name);
 
 			if (table->insert) {
-				g_string_append (sql, "\" (ID");
+				g_string_append (sql, " (ID");
 
 				if (strcmp (table_name, "rdfs:Resource") == 0) {
 					g_string_append (sql, ", \"tracker:added\", \"tracker:modified\"");
@@ -923,7 +912,7 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 				} else {
 				}
 			} else {
-				g_string_append (sql, "\" SET ");
+				g_string_append (sql, " SET ");
 			}
 
 			for (i = 0; i < table->properties->len; i++) {
@@ -987,8 +976,8 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 				} else {
 					statement_bind_gvalue (stmt, &param, &property->value);
 				}
-				if (property->graph != 0) {
-					tracker_db_statement_bind_int (stmt, param++, property->graph);
+				if (resource->graph->id != 0) {
+					tracker_db_statement_bind_int (stmt, param++, resource->graph->id);
 				} else {
 					tracker_db_statement_bind_null (stmt, param++);
 				}
@@ -1053,6 +1042,14 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 #endif
 }
 
+static void
+graph_buffer_free (TrackerDataUpdateBufferGraph *graph)
+{
+	g_hash_table_unref (graph->resources);
+	g_free (graph->graph);
+	g_slice_free (TrackerDataUpdateBufferGraph, graph);
+}
+
 static void resource_buffer_free (TrackerDataUpdateBufferResource *resource)
 {
 	g_hash_table_unref (resource->predicates);
@@ -1069,20 +1066,26 @@ void
 tracker_data_update_buffer_flush (TrackerData  *data,
                                   GError      **error)
 {
+	TrackerDataUpdateBufferGraph *graph;
 	TrackerDataUpdateBufferResource *resource;
 	GHashTableIter iter;
 	GError *actual_error = NULL;
+	gint i;
 
-	g_hash_table_iter_init (&iter, data->update_buffer.resources);
-	while (g_hash_table_iter_next (&iter, NULL, (gpointer*) &resource)) {
-		tracker_data_resource_buffer_flush (data, resource, &actual_error);
-		if (actual_error) {
-			g_propagate_error (error, actual_error);
-			break;
+	for (i = 0; i < data->update_buffer.graphs->len; i++) {
+		graph = g_ptr_array_index (data->update_buffer.graphs, i);
+		g_hash_table_iter_init (&iter, graph->resources);
+
+		while (g_hash_table_iter_next (&iter, NULL, (gpointer*) &resource)) {
+			tracker_data_resource_buffer_flush (data, resource, &actual_error);
+			if (actual_error) {
+				g_propagate_error (error, actual_error);
+				break;
+			}
 		}
 	}
 
-	g_hash_table_remove_all (data->update_buffer.resources);
+	g_ptr_array_set_size (data->update_buffer.graphs, 0);
 	data->resource_buffer = NULL;
 }
 
@@ -1090,16 +1093,24 @@ void
 tracker_data_update_buffer_might_flush (TrackerData  *data,
                                         GError      **error)
 {
-	/* avoid high memory usage by update buffer */
-	if (g_hash_table_size (data->update_buffer.resources) >= 1000) {
-		tracker_data_update_buffer_flush (data, error);
+	TrackerDataUpdateBufferGraph *graph;
+	gint i, count = 0;
+
+	for (i = 0; i < data->update_buffer.graphs->len; i++) {
+		graph = g_ptr_array_index (data->update_buffer.graphs, i);
+		count += g_hash_table_size (graph->resources);
+
+		if (count >= 1000) {
+			tracker_data_update_buffer_flush (data, error);
+			break;
+		}
 	}
 }
 
 static void
 tracker_data_update_buffer_clear (TrackerData *data)
 {
-	g_hash_table_remove_all (data->update_buffer.resources);
+	g_ptr_array_set_size (data->update_buffer.graphs, 0);
 	g_hash_table_remove_all (data->update_buffer.resource_cache);
 	data->resource_buffer = NULL;
 
@@ -1211,7 +1222,7 @@ cache_create_service_decomposed (TrackerData  *data,
 	TrackerClass       **super_classes;
 	TrackerProperty    **domain_indexes;
 	GValue              gvalue = { 0 };
-	gint                i, final_graph_id, class_id;
+	gint                i, class_id;
 	TrackerOntologies  *ontologies;
 
 	/* also create instance of all super classes */
@@ -1234,8 +1245,6 @@ cache_create_service_decomposed (TrackerData  *data,
 
 	cache_insert_row (data, cl);
 
-	final_graph_id = (graph != NULL ? ensure_graph_id (data, graph, NULL) : graph_id);
-
 	/* This is the original, no idea why tracker_class_get_id wasn't used here:
 	 * class_id = ensure_resource_id (tracker_class_get_uri (cl), NULL); */
 
@@ -1244,8 +1253,7 @@ cache_create_service_decomposed (TrackerData  *data,
 
 	g_value_set_int64 (&gvalue, class_id);
 	cache_insert_value (data, "rdfs:Resource_rdf:type", "rdf:type",
-	                    &gvalue, final_graph_id,
-	                    TRUE, FALSE, FALSE);
+	                    &gvalue, TRUE, FALSE, FALSE);
 
 	add_class_count (data, cl, 1);
 
@@ -1256,7 +1264,7 @@ cache_create_service_decomposed (TrackerData  *data,
 			TrackerStatementDelegate *delegate;
 
 			delegate = g_ptr_array_index (data->insert_callbacks, n);
-			delegate->callback (final_graph_id, graph, data->resource_buffer->id, data->resource_buffer->subject,
+			delegate->callback (graph_id, graph, data->resource_buffer->id, data->resource_buffer->subject,
 			                    tracker_property_get_id (tracker_ontologies_get_rdf_type (ontologies)),
 			                    class_id,
 			                    tracker_class_get_uri (cl),
@@ -1309,7 +1317,6 @@ cache_create_service_decomposed (TrackerData  *data,
 			                    tracker_class_get_name (cl),
 			                    tracker_property_get_name (*domain_indexes),
 			                    &gvalue_copy,
-			                    graph != NULL ? ensure_graph_id (data, graph, NULL) : graph_id,
 			                    tracker_property_get_multiple_values (*domain_indexes),
 			                    tracker_property_get_fulltext_indexed (*domain_indexes),
 			                    tracker_property_get_data_type (*domain_indexes) == TRACKER_PROPERTY_TYPE_DATETIME);
@@ -1696,7 +1703,6 @@ process_domain_indexes (TrackerData     *data,
 			                    tracker_class_get_name (*domain_index_classes),
 			                    field_name,
 			                    &gvalue_copy,
-			                    graph != NULL ? ensure_graph_id (data, graph, NULL) : graph_id,
 			                    FALSE,
 			                    tracker_property_get_fulltext_indexed (property),
 			                    tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME);
@@ -1807,7 +1813,6 @@ cache_insert_metadata_decomposed (TrackerData      *data,
 	} else {
 		cache_insert_value (data, table_name, field_name,
 		                    &gvalue,
-		                    graph != NULL ? ensure_graph_id (data, graph, NULL) : graph_id,
 		                    multiple_values,
 		                    tracker_property_get_fulltext_indexed (property),
 		                    tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME);
@@ -1984,7 +1989,6 @@ cache_update_metadata_decomposed (TrackerData      *data,
 
 	cache_insert_value (data, table_name, field_name,
 	                    &gvalue,
-	                    graph != NULL ? ensure_graph_id (data, graph, NULL) : graph_id,
 	                    multiple_values,
 	                    tracker_property_get_fulltext_indexed (property),
 	                    tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME);
@@ -2296,15 +2300,12 @@ cache_delete_resource_type_full (TrackerData  *data,
 
 	if (data->delete_callbacks) {
 		guint n;
-		gint final_graph_id;
-
-		final_graph_id = (graph != NULL ? ensure_graph_id (data, graph, NULL) : graph_id);
 
 		for (n = 0; n < data->delete_callbacks->len; n++) {
 			TrackerStatementDelegate *delegate;
 
 			delegate = g_ptr_array_index (data->delete_callbacks, n);
-			delegate->callback (final_graph_id, graph, data->resource_buffer->id, data->resource_buffer->subject,
+			delegate->callback (graph_id, graph, data->resource_buffer->id, data->resource_buffer->subject,
 			                    tracker_property_get_id (tracker_ontologies_get_rdf_type (ontologies)),
 			                    tracker_class_get_id (class),
 			                    tracker_class_get_uri (class),
@@ -2325,25 +2326,64 @@ cache_delete_resource_type (TrackerData  *data,
 	cache_delete_resource_type_full (data, class, graph, graph_id, FALSE);
 }
 
+static TrackerDataUpdateBufferGraph *
+ensure_graph_buffer (TrackerDataUpdateBuffer *buffer,
+                     TrackerData             *data,
+                     const gchar             *name)
+{
+	TrackerDataUpdateBufferGraph *graph_buffer;
+	gint i;
+
+	for (i = 0; i < buffer->graphs->len; i++) {
+		graph_buffer = g_ptr_array_index (buffer->graphs, i);
+		if (g_strcmp0 (graph_buffer->graph, name) == 0)
+			return graph_buffer;
+	}
+
+	graph_buffer = g_slice_new0 (TrackerDataUpdateBufferGraph);
+	graph_buffer->graph = g_strdup (name);
+	if (graph_buffer->graph) {
+		graph_buffer->id = tracker_data_manager_find_graph (data->manager,
+								    graph_buffer->graph);
+	}
+
+	graph_buffer->resources =
+		g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+		                       (GDestroyNotify) resource_buffer_free);
+	g_ptr_array_add (buffer->graphs, graph_buffer);
+
+	return graph_buffer;
+}
+
 static void
 resource_buffer_switch (TrackerData *data,
                         const gchar *graph,
                         const gchar *subject,
                         gint         subject_id)
 {
-	if (data->resource_buffer == NULL || strcmp (data->resource_buffer->subject, subject) != 0) {
-		/* switch subject */
-		data->resource_buffer = g_hash_table_lookup (data->update_buffer.resources, subject);
+	TrackerDataUpdateBufferGraph *graph_buffer;
+
+	if (data->resource_buffer != NULL &&
+	    g_strcmp0 (data->resource_buffer->graph->graph, graph) == 0 &&
+	    strcmp (data->resource_buffer->subject, subject) == 0) {
+		/* Resource buffer stays the same */
+		return;
 	}
+
+	/* large INSERTs with thousands of resources could lead to
+	   high peak memory usage due to the update buffer
+	   flush the buffer if it already contains 1000 resources */
+	tracker_data_update_buffer_might_flush (data, NULL);
+
+	data->resource_buffer = NULL;
+
+	graph_buffer = ensure_graph_buffer (&data->update_buffer, data, graph);
+	data->resource_buffer =
+		g_hash_table_lookup (graph_buffer->resources, subject);
 
 	if (data->resource_buffer == NULL) {
 		TrackerDataUpdateBufferResource *resource_buffer;
 		gchar *subject_dup = NULL;
-
-		/* large INSERTs with thousands of resources could lead to
-		   high peak memory usage due to the update buffer
-		   flush the buffer if it already contains 1000 resources */
-		tracker_data_update_buffer_might_flush (data, NULL);
 
 		/* subject not yet in cache, retrieve or create ID */
 		resource_buffer = g_slice_new0 (TrackerDataUpdateBufferResource);
@@ -2366,13 +2406,9 @@ resource_buffer_switch (TrackerData *data,
 		}
 		resource_buffer->predicates = g_hash_table_new_full (g_direct_hash, g_direct_equal, g_object_unref, (GDestroyNotify) g_array_unref);
 		resource_buffer->tables = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) cache_table_free);
+		resource_buffer->graph = graph_buffer;
 
-		g_hash_table_insert (data->update_buffer.resources, subject_dup, resource_buffer);
-
-		/* Ensure the graph gets an ID */
-		if (graph != NULL) {
-			ensure_graph_id (data, graph, NULL);
-		}
+		g_hash_table_insert (graph_buffer->resources, subject_dup, resource_buffer);
 
 		data->resource_buffer = resource_buffer;
 	}
@@ -2387,7 +2423,7 @@ tracker_data_delete_statement (TrackerData  *data,
                                GError      **error)
 {
 	TrackerClass       *class;
-	gint                subject_id = 0;
+	gint                subject_id = 0, graph_id = 0;
 	gboolean            change = FALSE;
 	TrackerOntologies  *ontologies;
 
@@ -2405,21 +2441,21 @@ tracker_data_delete_statement (TrackerData  *data,
 
 	resource_buffer_switch (data, graph, subject, subject_id);
 	ontologies = tracker_data_manager_get_ontologies (data->manager);
+	graph_id = tracker_data_manager_find_graph (data->manager, graph);
 
 	if (object && g_strcmp0 (predicate, TRACKER_PREFIX_RDF "type") == 0) {
 		class = tracker_ontologies_get_class_by_uri (ontologies, object);
 		if (class != NULL) {
 			data->has_persistent = TRUE;
-			cache_delete_resource_type (data, class, graph, 0);
+			cache_delete_resource_type (data, class, graph, graph_id);
 		} else {
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_CLASS,
 			             "Class '%s' not found in the ontology", object);
 		}
 	} else {
-		gint pred_id = 0, graph_id = 0, object_id = 0;
+		gint pred_id = 0, object_id = 0;
 		TrackerProperty *field;
 
-		graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 		field = tracker_ontologies_get_property_by_uri (ontologies, predicate);
 		if (field != NULL) {
 			pred_id = tracker_property_get_id (field);
@@ -2696,19 +2732,21 @@ tracker_data_insert_statement_with_uri (TrackerData  *data,
 		return;
 	}
 
+	if (graph)
+		graph_id = tracker_data_manager_find_graph (data->manager, graph);
+
 	if (property == tracker_ontologies_get_rdf_type (ontologies)) {
 		/* handle rdf:type statements specially to
 		   cope with inference and insert blank rows */
 		class = tracker_ontologies_get_class_by_uri (ontologies, object);
 		if (class != NULL) {
-			cache_create_service_decomposed (data, class, graph, 0);
+			cache_create_service_decomposed (data, class, graph, graph_id);
 		} else {
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_CLASS,
 			             "Class '%s' not found in the ontology", object);
 			return;
 		}
 
-		graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 		final_prop_id = (prop_id != 0) ? prop_id : tracker_data_query_resource_id (data->manager, iface, predicate);
 		object_id = query_resource_id (data, object);
 
@@ -2722,7 +2760,6 @@ tracker_data_insert_statement_with_uri (TrackerData  *data,
 		}
 
 		if (change) {
-			graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 			final_prop_id = (prop_id != 0) ? prop_id : tracker_data_query_resource_id (data->manager, iface, predicate);
 			object_id = query_resource_id (data, object);
 
@@ -2879,20 +2916,21 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 		return;
 	}
 
+	graph_id = tracker_data_manager_find_graph (data->manager, graph);
+
 	if (property == tracker_ontologies_get_rdf_type (ontologies)) {
 		/* handle rdf:type statements specially to
 		   cope with inference and insert blank rows */
 		class = tracker_ontologies_get_class_by_uri (ontologies, object);
 		if (class != NULL) {
 			/* Create here is fine for Update too */
-			cache_create_service_decomposed (data, class, graph, 0);
+			cache_create_service_decomposed (data, class, graph, graph_id);
 		} else {
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_CLASS,
 			             "Class '%s' not found in the ontology", object);
 			return;
 		}
 
-		graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 		final_prop_id = (prop_id != 0) ? prop_id : tracker_data_query_resource_id (data->manager, iface, predicate);
 		object_id = query_resource_id (data, object);
 
@@ -2974,7 +3012,6 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 		}
 
 		if (change) {
-			graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 			final_prop_id = (prop_id != 0) ? prop_id : tracker_data_query_resource_id (data->manager, iface, predicate);
 			object_id = query_resource_id (data, object);
 
@@ -3209,7 +3246,7 @@ tracker_data_begin_transaction (TrackerData  *data,
 	if (data->update_buffer.resource_cache == NULL) {
 		data->update_buffer.resource_cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 		/* used for normal transactions */
-		data->update_buffer.resources = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) resource_buffer_free);
+		data->update_buffer.graphs = g_ptr_array_new_with_free_func ((GDestroyNotify) graph_buffer_free);
 	}
 
 	data->resource_buffer = NULL;
@@ -3284,7 +3321,7 @@ tracker_data_commit_transaction (TrackerData  *data,
 
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA cache_size = %d", TRACKER_DB_CACHE_SIZE_DEFAULT);
 
-	g_hash_table_remove_all (data->update_buffer.resources);
+	g_ptr_array_set_size (data->update_buffer.graphs, 0);
 	g_hash_table_remove_all (data->update_buffer.resource_cache);
 
 	if (data->commit_callbacks) {
