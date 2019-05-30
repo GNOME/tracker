@@ -3899,9 +3899,9 @@ tracker_data_manager_get_data_location (TrackerDataManager *manager)
 }
 
 static gboolean
-tracker_data_manager_update_union_tables (TrackerDataManager  *manager,
-                                          TrackerDBInterface  *iface,
-                                          GError             **error)
+tracker_data_manager_update_union_views (TrackerDataManager  *manager,
+                                         TrackerDBInterface  *iface,
+                                         GError             **error)
 {
 	TrackerOntologies *ontologies = manager->ontologies;
 	TrackerClass **classes;
@@ -3909,26 +3909,51 @@ tracker_data_manager_update_union_tables (TrackerDataManager  *manager,
 	TrackerDBStatement *stmt;
 	guint i, n_classes, n_properties;
 	GError *inner_error = NULL;
+	GHashTableIter iter;
+	GHashTable *graphs;
+	gpointer graph_name, graph_id;
+	GString *str;
 
 	classes = tracker_ontologies_get_classes (ontologies, &n_classes);
 	properties = tracker_ontologies_get_properties (ontologies, &n_properties);
+	graphs = tracker_data_manager_get_graphs (manager, iface, error);
+
+	if (!graphs)
+		return FALSE;
 
 	for (i = 0; !inner_error && i < n_classes; i++) {
+		GString *str;
+
 		if (g_str_has_prefix (tracker_class_get_name (classes[i]), "xsd:"))
 			continue;
 
 		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "DROP TABLE IF EXISTS temp.\"unionGraph_%s\"",
+		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_%s\"",
 		                                              tracker_class_get_name (classes[i]));
 		if (!stmt)
 			break;
 
 		tracker_db_statement_execute (stmt, NULL);
 		g_object_unref (stmt);
+
+		str = g_string_new (NULL);
+		g_string_append_printf (str,
+		                        "CREATE VIEW temp.\"unionGraph_%s\" AS "
+		                        "SELECT 0 AS graph, * FROM \"main\".\"%s\" ",
+		                        tracker_class_get_name (classes[i]),
+		                        tracker_class_get_name (classes[i]));
+
+		g_hash_table_iter_init (&iter, graphs);
+		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
+			g_string_append_printf (str, "UNION ALL SELECT %d AS graph, * FROM \"%s\".\"%s\" ",
+			                        GPOINTER_TO_INT (graph_id),
+			                        (gchar *) graph_name,
+			                        tracker_class_get_name (classes[i]));
+		}
+
 		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "CREATE VIRTUAL TABLE temp.\"unionGraph_%s\" USING tracker_union (\"%s\")",
-		                                              tracker_class_get_name (classes[i]),
-		                                              tracker_class_get_name (classes[i]));
+		                                              "%s", str->str);
+		g_string_free (str, TRUE);
 		if (!stmt)
 			break;
 
@@ -3944,7 +3969,7 @@ tracker_data_manager_update_union_tables (TrackerDataManager  *manager,
 
 		service = tracker_property_get_domain (properties[i]);
 		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "DROP TABLE IF EXISTS temp.\"unionGraph_%s_%s\"",
+		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_%s_%s\"",
 		                                              tracker_class_get_name (service),
 		                                              tracker_property_get_name (properties[i]));
 		if (!stmt)
@@ -3952,12 +3977,29 @@ tracker_data_manager_update_union_tables (TrackerDataManager  *manager,
 
 		tracker_db_statement_execute (stmt, NULL);
 		g_object_unref (stmt);
+
+		str = g_string_new (NULL);
+		g_string_append_printf (str,
+		                        "CREATE VIEW temp.\"unionGraph_%s_%s\" AS "
+		                        "SELECT 0 AS graph, * FROM \"main\".\"%s_%s\" ",
+		                        tracker_class_get_name (service),
+		                        tracker_property_get_name (properties[i]),
+		                        tracker_class_get_name (service),
+		                        tracker_property_get_name (properties[i]));
+
+		g_hash_table_iter_init (&iter, graphs);
+		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
+			g_string_append_printf (str, "UNION ALL SELECT %d AS graph, * FROM \"%s\".\"%s_%s\" ",
+			                        GPOINTER_TO_INT (graph_id),
+			                        (gchar *) graph_name,
+			                        tracker_class_get_name (service),
+			                        tracker_property_get_name (properties[i]));
+		}
+
 		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "CREATE VIRTUAL TABLE temp.\"unionGraph_%s_%s\" USING tracker_union (\"%s_%s\")",
-		                                              tracker_class_get_name (service),
-		                                              tracker_property_get_name (properties[i]),
-		                                              tracker_class_get_name (service),
-		                                              tracker_property_get_name (properties[i]));
+		                                              "%s", str->str);
+		g_string_free (str, TRUE);
+
 		if (!stmt)
 			break;
 
@@ -4040,8 +4082,8 @@ setup_interface_cb (TrackerDBManager   *db_manager,
 	tracker_data_manager_init_fts (iface, FALSE);
 #endif
 
-	if (!tracker_data_manager_update_union_tables (data_manager, iface, &error)) {
-		g_critical ("Could not update union tables: %s\n", error->message);
+	if (!tracker_data_manager_update_union_views (data_manager, iface, &error)) {
+		g_critical ("Could not update union views: %s\n", error->message);
 		g_error_free (error);
 	}
 }
@@ -4683,11 +4725,6 @@ skip_ontology_check:
 
 	if (!read_only) {
 		tracker_ontologies_sort (manager->ontologies);
-	}
-
-	if (!tracker_data_manager_update_union_tables (manager, iface, &internal_error)) {
-		g_propagate_error (error, internal_error);
-		return FALSE;
 	}
 
 	manager->initialized = TRUE;
