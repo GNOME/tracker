@@ -1423,7 +1423,8 @@ static GArray *
 get_property_values (TrackerData     *data,
                      TrackerProperty *property)
 {
-	gboolean            multiple_values;
+	gboolean multiple_values;
+	const gchar *database;
 	GArray *old_values;
 
 	multiple_values = tracker_property_get_multiple_values (property);
@@ -1431,6 +1432,9 @@ get_property_values (TrackerData     *data,
 	old_values = g_array_sized_new (FALSE, TRUE, sizeof (GValue), multiple_values ? 4 : 1);
 	g_array_set_clear_func (old_values, (GDestroyNotify) g_value_unset);
 	g_hash_table_insert (data->resource_buffer->predicates, g_object_ref (property), old_values);
+
+	database = data->resource_buffer->graph->graph ?
+		data->resource_buffer->graph->graph : "main";
 
 	if (!data->resource_buffer->create) {
 		TrackerDBInterface *iface;
@@ -1446,8 +1450,8 @@ get_property_values (TrackerData     *data,
 		iface = tracker_data_manager_get_writable_db_interface (data->manager);
 
 		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &error,
-		                                              "SELECT \"%s\" FROM \"%s\" WHERE ID = ?",
-		                                              field_name, table_name);
+		                                              "SELECT \"%s\" FROM \"%s\".\"%s\" WHERE ID = ?",
+		                                              field_name, database, table_name);
 
 		if (stmt) {
 			tracker_db_statement_bind_int (stmt, 0, data->resource_buffer->id);
@@ -2084,6 +2088,7 @@ delete_metadata_decomposed (TrackerData      *data,
 
 static void
 db_delete_row (TrackerDBInterface *iface,
+               const gchar        *database,
                const gchar        *table_name,
                gint                id)
 {
@@ -2091,8 +2096,8 @@ db_delete_row (TrackerDBInterface *iface,
 	GError *error = NULL;
 
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &error,
-	                                              "DELETE FROM \"%s\" WHERE ID = ?",
-	                                              table_name);
+	                                              "DELETE FROM \"%s\".\"%s\" WHERE ID = ?",
+	                                              database, table_name);
 
 	if (stmt) {
 		tracker_db_statement_bind_int (stmt, 0, id);
@@ -2123,9 +2128,12 @@ cache_delete_resource_type_full (TrackerData  *data,
 	guint               p, n_props;
 	GError             *error = NULL;
 	TrackerOntologies  *ontologies;
+	const gchar        *database;
 
 	iface = tracker_data_manager_get_writable_db_interface (data->manager);
 	ontologies = tracker_data_manager_get_ontologies (data->manager);
+	database = data->resource_buffer->graph->graph ?
+		data->resource_buffer->graph->graph : "main";
 
 	if (!single_type) {
 		if (strcmp (tracker_class_get_uri (class), TRACKER_PREFIX_RDFS "Resource") == 0 &&
@@ -2166,9 +2174,10 @@ cache_delete_resource_type_full (TrackerData  *data,
 		/* retrieve all subclasses we need to remove from the subject
 		 * before we can remove the class specified as object of the statement */
 		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &error,
-			                                      "SELECT (SELECT Uri FROM Resource WHERE ID = \"rdfs:Class_rdfs:subClassOf\".ID) "
-			                                      "FROM \"rdfs:Resource_rdf:type\" INNER JOIN \"rdfs:Class_rdfs:subClassOf\" ON (\"rdf:type\" = \"rdfs:Class_rdfs:subClassOf\".ID) "
-			                                      "WHERE \"rdfs:Resource_rdf:type\".ID = ? AND \"rdfs:subClassOf\" = (SELECT ID FROM Resource WHERE Uri = ?)");
+			                                      "SELECT (SELECT Uri FROM Resource WHERE ID = subclass.ID) "
+			                                      "FROM \"%s\".\"rdfs:Resource_rdf:type\" AS type INNER JOIN \"%s\".\"rdfs:Class_rdfs:subClassOf\" AS subclass ON (type.\"rdf:type\" = subclass.ID) "
+		                                              "WHERE type.ID = ? AND subclass.\"rdfs:subClassOf\" = (SELECT ID FROM Resource WHERE Uri = ?)",
+		                                              database, database);
 
 		if (stmt) {
 			tracker_db_statement_bind_int (stmt, 0, data->resource_buffer->id);
@@ -2222,7 +2231,7 @@ cache_delete_resource_type_full (TrackerData  *data,
 
 		if (direct_delete) {
 			if (multiple_values) {
-				db_delete_row (iface, table_name, data->resource_buffer->id);
+				db_delete_row (iface, database, table_name, data->resource_buffer->id);
 			}
 			/* single-valued property values are deleted right after the loop by deleting the row in the class table */
 			continue;
@@ -2270,7 +2279,7 @@ cache_delete_resource_type_full (TrackerData  *data,
 
 	if (direct_delete) {
 		/* delete row from class table */
-		db_delete_row (iface, tracker_class_get_name (class), data->resource_buffer->id);
+		db_delete_row (iface, database, tracker_class_get_name (class), data->resource_buffer->id);
 
 		if (!single_type) {
 			/* delete row from rdfs:Resource_rdf:type table */
@@ -2402,7 +2411,7 @@ resource_buffer_switch (TrackerData *data,
 		if (resource_buffer->create) {
 			resource_buffer->types = g_ptr_array_new ();
 		} else {
-			resource_buffer->types = tracker_data_query_rdf_type (data->manager, resource_buffer->id);
+			resource_buffer->types = tracker_data_query_rdf_type (data->manager, graph, resource_buffer->id);
 		}
 		resource_buffer->predicates = g_hash_table_new_full (g_direct_hash, g_direct_equal, g_object_unref, (GDestroyNotify) g_array_unref);
 		resource_buffer->tables = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) cache_table_free);
@@ -2441,7 +2450,9 @@ tracker_data_delete_statement (TrackerData  *data,
 
 	resource_buffer_switch (data, graph, subject, subject_id);
 	ontologies = tracker_data_manager_get_ontologies (data->manager);
-	graph_id = tracker_data_manager_find_graph (data->manager, graph);
+
+	if (graph)
+		graph_id = tracker_data_manager_find_graph (data->manager, graph);
 
 	if (object && g_strcmp0 (predicate, TRACKER_PREFIX_RDF "type") == 0) {
 		class = tracker_ontologies_get_class_by_uri (ontologies, object);
@@ -2753,7 +2764,7 @@ tracker_data_insert_statement_with_uri (TrackerData  *data,
 		change = TRUE;
 	} else {
 		/* add value to metadata database */
-		change = cache_insert_metadata_decomposed (data, property, object, 0, graph, 0, &actual_error);
+		change = cache_insert_metadata_decomposed (data, property, object, 0, graph, graph_id, &actual_error);
 		if (actual_error) {
 			g_propagate_error (error, actual_error);
 			return;
@@ -2828,8 +2839,11 @@ tracker_data_insert_statement_with_string (TrackerData  *data,
 		return;
 	}
 
+	if (graph)
+		graph_id = tracker_data_manager_find_graph (data->manager, graph);
+
 	/* add value to metadata database */
-	change = cache_insert_metadata_decomposed (data, property, object, 0, graph, 0, &actual_error);
+	change = cache_insert_metadata_decomposed (data, property, object, 0, graph, graph_id, &actual_error);
 	if (actual_error) {
 		g_propagate_error (error, actual_error);
 		return;
@@ -2838,7 +2852,6 @@ tracker_data_insert_statement_with_string (TrackerData  *data,
 	if (data->insert_callbacks && change) {
 		guint n;
 
-		graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 		pred_id = (pred_id != 0) ? pred_id : tracker_data_query_resource_id (data->manager, iface, predicate);
 
 		for (n = 0; n < data->insert_callbacks->len; n++) {
@@ -2916,7 +2929,8 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 		return;
 	}
 
-	graph_id = tracker_data_manager_find_graph (data->manager, graph);
+	if (graph)
+		graph_id = tracker_data_manager_find_graph (data->manager, graph);
 
 	if (property == tracker_ontologies_get_rdf_type (ontologies)) {
 		/* handle rdf:type statements specially to
@@ -3128,8 +3142,10 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 		return;
 	}
 
+	if (graph)
+		graph_id = tracker_data_manager_find_graph (data->manager, graph);
+
 	if (((!multiple_values && data->delete_callbacks) || data->insert_callbacks) && change) {
-		graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 		pred_id = (pred_id != 0) ? pred_id : tracker_data_query_resource_id (data->manager, iface, predicate);
 	}
 
