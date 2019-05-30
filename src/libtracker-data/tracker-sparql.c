@@ -2423,26 +2423,33 @@ translate_Create (TrackerSparql  *sparql,
 		silent = TRUE;
 
 	_call_rule (sparql, NAMED_RULE_GraphRef, error);
+	g_assert (!tracker_token_is_empty (&sparql->current_state.graph));
 
-	if (!tracker_token_is_empty (&sparql->current_state.graph)) {
-		const gchar *graph_name;
+	graph_name = tracker_token_get_idstring (&sparql->current_state.graph);
 
-		graph_name = tracker_token_get_idstring (&sparql->current_state.graph);
-
-		if (!tracker_data_manager_create_graph (sparql->data_manager,
-		                                        graph_name,
-		                                        &inner_error)) {
-			if (silent) {
-				g_error_free (inner_error);
-				return TRUE;
-			} else {
-				g_propagate_error (error, inner_error);
-				return FALSE;
-			}
-		}
+	if (tracker_data_manager_find_graph (sparql->data_manager, graph_name) != 0) {
+		inner_error = g_error_new (TRACKER_SPARQL_ERROR,
+		                           TRACKER_SPARQL_ERROR_CONSTRAINT,
+		                           "Graph '%s' already exists",
+		                           graph_name);
+		goto error;
 	}
 
+	if (!tracker_data_manager_create_graph (sparql->data_manager,
+	                                        graph_name,
+	                                        &inner_error))
+		goto error;
+
 	return TRUE;
+
+error:
+	if (silent) {
+		g_error_free (inner_error);
+		return TRUE;
+	} else {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
 }
 
 static gboolean
