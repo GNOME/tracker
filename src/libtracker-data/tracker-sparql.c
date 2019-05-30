@@ -1655,6 +1655,13 @@ translate_SelectClause (TrackerSparql  *sparql,
 		TrackerVariable *var;
 		GHashTableIter iter;
 
+		if (!select_context->variables) {
+			g_set_error (error, TRACKER_SPARQL_ERROR,
+			             TRACKER_SPARQL_ERROR_TYPE,
+			             "Glob used but no variables defined");
+			return FALSE;
+		}
+
 		g_hash_table_iter_init (&iter, select_context->variables);
 
 		while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &var)) {
