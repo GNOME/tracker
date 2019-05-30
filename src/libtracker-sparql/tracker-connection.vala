@@ -55,6 +55,7 @@ namespace Tracker {
  * @TRACKER_SPARQL_NO_SPACE: There was no disk space available to perform the request.
  * @TRACKER_SPARQL_INTERNAL: Internal error.
  * @TRACKER_SPARQL_UNSUPPORTED: Unsupported feature or method.
+ * @TRACKER_SPARQL_UNKNOWN_GRAPH: Unknown graph.
  *
  * Error domain for Tracker Sparql. Errors in this domain will be from the
  * #TrackerSparqlError enumeration. See #GError for more information on error
@@ -71,7 +72,8 @@ public errordomain Tracker.Sparql.Error {
 	CONSTRAINT,
 	NO_SPACE,
 	INTERNAL,
-	UNSUPPORTED
+	UNSUPPORTED,
+	UNKNOWN_GRAPH
 }
 
 public enum Tracker.Sparql.ConnectionFlags {
