@@ -381,16 +381,16 @@ public class Tracker.TurtleReader : Object {
 		}
 	}
 
-	public static void load (File file, Data.Update data) throws Error, FileError, Sparql.Error, DateError, DBInterfaceError {
+	public static void load (File file, Data.Update data, string graph) throws Error, FileError, Sparql.Error, DateError, DBInterfaceError {
 		try {
 			data.begin_transaction ();
 
 			var reader = new TurtleReader (file);
 			while (reader.next ()) {
 				if (reader.object_is_uri) {
-					data.insert_statement_with_uri (reader.graph, reader.subject, reader.predicate, reader.object);
+					data.insert_statement_with_uri (graph, reader.subject, reader.predicate, reader.object);
 				} else {
-					data.insert_statement_with_string (reader.graph, reader.subject, reader.predicate, reader.object);
+					data.insert_statement_with_string (graph, reader.subject, reader.predicate, reader.object);
 				}
 				data.update_buffer_might_flush ();
 			}
