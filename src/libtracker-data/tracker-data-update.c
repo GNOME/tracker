@@ -3435,11 +3435,12 @@ tracker_data_update_sparql_blank (TrackerData  *data,
 void
 tracker_data_load_turtle_file (TrackerData  *data,
                                GFile        *file,
+                               const gchar  *graph,
                                GError      **error)
 {
 	g_return_if_fail (G_IS_FILE (file));
 
-	tracker_turtle_reader_load (file, data, error);
+	tracker_turtle_reader_load (file, data, graph, error);
 }
 
 gint

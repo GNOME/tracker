@@ -114,6 +114,7 @@ void     tracker_data_update_buffer_might_flush     (TrackerData               *
                                                      GError                   **error);
 void     tracker_data_load_turtle_file              (TrackerData               *data,
                                                      GFile                     *file,
+                                                     const gchar               *graph,
                                                      GError                   **error);
 
 void     tracker_data_sync                          (TrackerData               *data);
