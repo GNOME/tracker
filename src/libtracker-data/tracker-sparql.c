@@ -29,6 +29,7 @@
 #include "tracker-sparql-grammar.h"
 #include "tracker-collation.h"
 #include "tracker-db-interface-sqlite.h"
+#include "tracker-sparql-query.h"
 
 #define TRACKER_NS "http://www.tracker-project.org/ontologies/tracker#"
 #define RDF_NS "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
