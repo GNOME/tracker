@@ -381,7 +381,7 @@ public class Tracker.TurtleReader : Object {
 		}
 	}
 
-	public static void load (File file, Data.Update data, string graph) throws Error, FileError, Sparql.Error, DateError, DBInterfaceError {
+	public static void load (File file, Data.Update data, string? graph) throws Error, FileError, Sparql.Error, DateError, DBInterfaceError {
 		try {
 			data.begin_transaction ();
 
