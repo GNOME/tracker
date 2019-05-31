@@ -2394,7 +2394,43 @@ static gboolean
 translate_Load (TrackerSparql  *sparql,
                 GError        **error)
 {
-	_unimplemented ("LOAD");
+	TrackerToken resource;
+	gboolean silent = FALSE;
+	GError *inner_error = NULL;
+	const gchar *graph = NULL;
+	GFile *file;
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_LOAD);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_iri, error);
+	_init_token (&resource, sparql->current_state.prev_node, sparql);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_INTO)) {
+		_call_rule (sparql, NAMED_RULE_GraphRefAll, error);
+
+		if (!tracker_token_is_empty (&sparql->current_state.graph))
+			graph = tracker_token_get_idstring (&sparql->current_state.graph);
+	}
+
+	file = g_file_new_for_uri (tracker_token_get_idstring (&resource));
+	tracker_token_unset (&resource);
+
+	tracker_data_load_turtle_file (tracker_data_manager_get_data (sparql->data_manager),
+	                               file, graph, &inner_error);
+
+	if (inner_error) {
+		g_clear_object (&file);
+
+		if (!silent) {
+			g_propagate_error (error, inner_error);
+			return FALSE;
+		}
+	}
+
+	return TRUE;
 }
 
 static gboolean
