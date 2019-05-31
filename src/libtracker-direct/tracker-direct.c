@@ -151,7 +151,7 @@ update_thread_func (gpointer data,
 		destroy_notify = (GDestroyNotify) g_variant_unref;
 		break;
 	case TASK_TYPE_TURTLE:
-		tracker_data_load_turtle_file (tracker_data, task_data->data.turtle_file, &error);
+		tracker_data_load_turtle_file (tracker_data, task_data->data.turtle_file, NULL, &error);
 		break;
 	}
 
@@ -696,7 +696,7 @@ tracker_direct_connection_load (TrackerSparqlConnection  *self,
 
 	g_mutex_lock (&priv->mutex);
 	data = tracker_data_manager_get_data (priv->data_manager);
-	tracker_data_load_turtle_file (data, file, error);
+	tracker_data_load_turtle_file (data, file, NULL, error);
 	g_mutex_unlock (&priv->mutex);
 }
 
