@@ -1951,14 +1951,107 @@ static gboolean
 translate_ConstructQuery (TrackerSparql  *sparql,
                           GError        **error)
 {
-	_unimplemented ("CONSTRUCT");
+	/* ConstructQuery ::= 'CONSTRUCT' ( ConstructTemplate DatasetClause* WhereClause SolutionModifier |
+	 *                                  DatasetClause* 'WHERE' '{' TriplesTemplate? '}' SolutionModifier )
+	 */
+	sparql->context = g_object_ref_sink (tracker_select_context_new ());
+	sparql->current_state.select_context = sparql->context;
+	tracker_sparql_push_context (sparql, sparql->context);
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CONSTRUCT);
+
+	if (_current_rule (sparql) == NAMED_RULE_ConstructTemplate) {
+		_call_rule (sparql, NAMED_RULE_ConstructTemplate, error);
+
+		while (_current_rule (sparql) == NAMED_RULE_DatasetClause)
+			_call_rule (sparql, NAMED_RULE_DatasetClause, error);
+
+		_call_rule (sparql, NAMED_RULE_WhereClause, error);
+		_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+	} else {
+		while (_current_rule (sparql) == NAMED_RULE_DatasetClause)
+			_call_rule (sparql, NAMED_RULE_DatasetClause, error);
+
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_WHERE);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_BRACE);
+
+		if (_current_rule (sparql) == NAMED_RULE_TriplesTemplate) {
+			_begin_triples_block (sparql);
+			_call_rule (sparql, NAMED_RULE_TriplesTemplate, error);
+			if (!_end_triples_block (sparql, error))
+				return FALSE;
+		}
+
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_BRACE);
+		_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+	}
+
+	tracker_sparql_pop_context (sparql, FALSE);
+
+	return TRUE;
 }
 
 static gboolean
 translate_DescribeQuery (TrackerSparql  *sparql,
                          GError        **error)
 {
-	_unimplemented ("DESCRIBE");
+	/* DescribeQuery ::= 'DESCRIBE' ( VarOrIri+ | '*' ) DatasetClause* WhereClause? SolutionModifier
+	 */
+	sparql->context = g_object_ref_sink (tracker_select_context_new ());
+	sparql->current_state.select_context = sparql->context;
+	tracker_sparql_push_context (sparql, sparql->context);
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_DESCRIBE);
+	_append_string (sparql,
+	                "SELECT "
+	                "  (SELECT Uri FROM Resource WHERE ID = subject),"
+	                "  (SELECT Uri FROM Resource WHERE ID = predicate),"
+	                "  object "
+	                "FROM tracker_triples "
+	                "WHERE object IS NOT NULL AND subject IN (");
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GLOB)) {
+	} else {
+		TrackerContext *context;
+
+		context = tracker_triple_context_new ();
+		tracker_sparql_push_context (sparql, context);
+
+		while (_check_in_rule (sparql, NAMED_RULE_VarOrIri)) {
+			TrackerBinding *binding;
+			TrackerToken resource;
+
+			_call_rule (sparql, NAMED_RULE_VarOrIri, error);
+			_init_token (&resource, sparql->current_state.prev_node, sparql);
+
+			if (tracker_token_get_literal (&resource)) {
+				binding = tracker_literal_binding_new (tracker_token_get_literal (&resource),
+				                                       NULL);
+				tracker_binding_set_data_type (binding, TRACKER_PROPERTY_TYPE_RESOURCE);
+				_add_binding (sparql, binding);
+				_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+			} else {
+			}
+
+			tracker_token_unset (&resource);
+		}
+
+		tracker_sparql_pop_context (sparql, FALSE);
+	}
+
+	while (_check_in_rule (sparql, NAMED_RULE_DatasetClause))
+		_call_rule (sparql, NAMED_RULE_DatasetClause, error);
+
+	if (_check_in_rule (sparql, NAMED_RULE_WhereClause)) {
+		_append_string (sparql, "SELECT * ");
+		_call_rule (sparql, NAMED_RULE_WhereClause, error);
+	}
+
+	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+	tracker_sparql_pop_context (sparql, FALSE);
+	_append_string (sparql, ") ");
+
+	return TRUE;
 }
 
 static gboolean
@@ -3810,12 +3903,15 @@ translate_ConstructTemplate (TrackerSparql  *sparql,
 	/* ConstructTemplate ::= '{' ConstructTriples? '}'
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_BRACE);
+	_begin_triples_block (sparql);
 
 	if (_check_in_rule (sparql, NAMED_RULE_ConstructTriples)) {
 		_call_rule (sparql, NAMED_RULE_ConstructTriples, error);
 	}
 
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_BRACE);
+	if (!_end_triples_block (sparql, error))
+		return FALSE;
 
 	return TRUE;
 }
