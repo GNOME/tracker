@@ -150,6 +150,7 @@ struct _TrackerDBManager {
 
 enum {
 	SETUP_INTERFACE,
+	UPDATE_INTERFACE,
 	N_SIGNALS
 };
 
@@ -1066,7 +1067,9 @@ tracker_db_manager_get_db_interface (TrackerDBManager *db_manager)
 		interface = NULL;
 	}
 
-	if (!interface) {
+	if (interface) {
+		g_signal_emit (db_manager, signals[UPDATE_INTERFACE], 0, interface);
+	} else {
 		/* Create a new one to satisfy the request */
 		interface = tracker_db_manager_create_db_interface (db_manager,
 		                                                    TRUE, &internal_error);
@@ -1107,6 +1110,14 @@ tracker_db_manager_class_init (TrackerDBManagerClass *klass)
 
 	signals[SETUP_INTERFACE] =
                g_signal_new ("setup-interface",
+                             G_TYPE_FROM_CLASS (klass),
+                             G_SIGNAL_RUN_LAST, 0,
+                             NULL, NULL,
+                             g_cclosure_marshal_VOID__OBJECT,
+                             G_TYPE_NONE,
+                             1, TRACKER_TYPE_DB_INTERFACE);
+	signals[UPDATE_INTERFACE] =
+               g_signal_new ("update-interface",
                              G_TYPE_FROM_CLASS (klass),
                              G_SIGNAL_RUN_LAST, 0,
                              NULL, NULL,

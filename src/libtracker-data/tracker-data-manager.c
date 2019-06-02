@@ -86,6 +86,7 @@ struct _TrackerDataManager {
 	GHashTable *graphs;
 
 	gchar *status;
+	guint64 cache_mtime;
 };
 
 struct _TrackerDataManagerClass {
@@ -4109,6 +4110,57 @@ setup_interface_cb (TrackerDBManager   *db_manager,
 	}
 }
 
+static void
+update_interface_cb (TrackerDBManager   *db_manager,
+                     TrackerDBInterface *iface,
+                     TrackerDataManager *data_manager)
+{
+	GError *error = NULL;
+	guint64 cache_mtime;
+	gchar *cache_dir;
+
+	cache_dir = g_file_get_path (data_manager->cache_location);
+	cache_mtime = tracker_file_get_mtime (cache_dir);
+
+	if (cache_mtime > data_manager->cache_mtime) {
+		GHashTable *graphs;
+
+		graphs = data_manager->graphs;
+		data_manager->graphs = NULL;
+
+		tracker_data_manager_ensure_graphs (data_manager, iface, NULL);
+
+		if (data_manager->graphs) {
+			GHashTableIter iter;
+			gpointer value;
+			GError *error = NULL;
+
+			g_hash_table_iter_init (&iter, data_manager->graphs);
+
+			while (g_hash_table_iter_next (&iter, &value, NULL)) {
+				if (g_hash_table_contains (graphs, value))
+					continue;
+
+				if (!tracker_db_manager_attach_database (db_manager,
+				                                         iface, value, FALSE,
+				                                         &error)) {
+					g_critical ("Could not attach database '%s': %s\n",
+					            (gchar *) value, error->message);
+					g_clear_error (&error);
+					continue;
+				}
+			}
+		}
+
+		if (!tracker_data_manager_update_union_views (data_manager, iface, &error)) {
+			g_critical ("Could not update union views: %s\n", error->message);
+			g_error_free (error);
+		}
+	}
+
+	data_manager->cache_mtime = cache_mtime;
+}
+
 static gboolean
 tracker_data_manager_initable_init (GInitable     *initable,
                                     GCancellable  *cancellable,
@@ -4165,6 +4217,8 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 	g_signal_connect (manager->db_manager, "setup-interface",
 	                  G_CALLBACK (setup_interface_cb), manager);
+	g_signal_connect (manager->db_manager, "update-interface",
+	                  G_CALLBACK (update_interface_cb), manager);
 
 	manager->first_time_index = is_first_time_index;
 
@@ -4244,6 +4298,9 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		tracker_data_manager_init_fts (iface, TRUE);
 #endif
 
+		// FIXME
+		setup_interface_cb (manager->db_manager, iface, manager);
+
 		/* store ontology in database */
 		for (l = sorted; l; l = l->next) {
 			import_ontology_file (manager, l->data, FALSE);
@@ -4296,6 +4353,9 @@ tracker_data_manager_initable_init (GInitable     *initable,
 #if HAVE_TRACKER_FTS
 		tracker_data_manager_init_fts (iface, FALSE);
 #endif
+
+		// FIXME: a bit hackish
+		setup_interface_cb (manager->db_manager, iface, manager);
 	}
 
 	if (!read_only) {
@@ -4727,6 +4787,9 @@ skip_ontology_check:
 		tracker_ontologies_sort (manager->ontologies);
 	}
 
+	// FIXME: a bit hackish
+	manager->cache_mtime = tracker_file_get_mtime (g_file_get_path (manager->cache_location));
+
 	manager->initialized = TRUE;
 
 	/* This is the only one which doesn't show the 'OPERATION' part */
@@ -4945,6 +5008,7 @@ tracker_data_manager_create_graph (TrackerDataManager  *manager,
 	TrackerDBInterface *iface;
 	gint id;
 
+
 	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
 
 	if (!tracker_db_manager_attach_database (manager->db_manager, iface,
@@ -4960,6 +5024,10 @@ tracker_data_manager_create_graph (TrackerDataManager  *manager,
 		goto detach;
 
 	g_hash_table_insert (manager->graphs, g_strdup (name), GINT_TO_POINTER (id));
+
+	if (!tracker_data_manager_update_union_views (manager, iface, error))
+		goto detach;
+
 	return TRUE;
 
 detach:
@@ -4981,6 +5049,9 @@ tracker_data_manager_drop_graph (TrackerDataManager  *manager,
 		return FALSE;
 
 	if (!tracker_data_delete_graph (manager->data_update, name, error))
+		return FALSE;
+
+	if (!tracker_data_manager_update_union_views (manager, iface, error))
 		return FALSE;
 
 	if (manager->graphs)
