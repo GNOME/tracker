@@ -5219,14 +5219,14 @@ handle_property_function (TrackerSparql    *sparql,
 		convert_expression_to_string (sparql, tracker_property_get_data_type (property));
 		tracker_sparql_swap_builder (sparql, old);
 
-		_append_string_printf (sparql, ", ',') FROM \"%s\" WHERE ID = ",
+		_append_string_printf (sparql, ", ',') FROM \"unionGraph_%s\" WHERE ID = ",
 				       tracker_property_get_table_name (property));
 
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else {
 		_append_string_printf (sparql,
-				       "(SELECT \"%s\" FROM \"%s\" WHERE ID = ",
+				       "(SELECT \"%s\" FROM \"unionGraph_%s\" WHERE ID = ",
 				       tracker_property_get_name (property),
 				       tracker_property_get_table_name (property));
 
