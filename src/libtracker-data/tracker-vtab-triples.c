@@ -362,20 +362,17 @@ init_stmt (TrackerTriplesCursor *cursor)
 
 		sql = g_string_new (NULL);
 		g_string_append_printf (sql,
-		                        "SELECT t.\"%s:graph\", t.ID, "
+		                        "SELECT t.graph, t.ID, "
 		                        "       (SELECT ID From Resource WHERE Uri = \"%s\"), "
 		                        "       %s "
-		                        "FROM \"%s\" AS t "
+		                        "FROM \"unionGraph_%s\" AS t "
 		                        "WHERE 1 ",
-		                        tracker_property_get_name (property),
 		                        tracker_property_get_uri (property),
 		                        string_expr,
 		                        tracker_property_get_table_name (property));
 
 		if (cursor->match.graph) {
-			g_string_append_printf (sql,
-			                        "AND t.\"%s:graph\" ",
-			                        tracker_property_get_name (property));
+			g_string_append (sql, "AND t.graph ");
 			add_arg_check (sql, cursor->match.graph,
 			               !!(cursor->match.idxFlags & IDX_MATCH_GRAPH_NEG),
 			               "@g");
