@@ -2527,10 +2527,48 @@ translate_Load (TrackerSparql  *sparql,
 }
 
 static gboolean
+handle_silent (gboolean   silent,
+               GError    *error_in,
+               GError   **error)
+{
+	if (silent) {
+		g_error_free (error_in);
+		return TRUE;
+	} else {
+		g_propagate_error (error, error_in);
+		return FALSE;
+	}
+}
+
+static gboolean
 translate_Clear (TrackerSparql  *sparql,
                  GError        **error)
 {
-	_unimplemented ("CLEAR");
+	gboolean silent = FALSE;
+	GError *inner_error = NULL;
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLEAR);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_GraphRefAll, error);
+
+	if (!tracker_token_is_empty (&sparql->current_state.graph)) {
+		const gchar *graph;
+
+		/* FIXME: check that graph exists */
+		graph = tracker_token_get_idstring (&sparql->current_state.graph);
+
+		if (!tracker_data_manager_clear_graph (sparql->data_manager,
+		                                       graph, &inner_error)) {
+			return handle_silent (silent, inner_error, error);
+		}
+	} else {
+		g_assert_not_reached ();
+	}
+
+	return TRUE;
 }
 
 static gboolean
@@ -2548,19 +2586,13 @@ translate_Drop (TrackerSparql  *sparql,
 	_call_rule (sparql, NAMED_RULE_GraphRefAll, error);
 
 	if (!tracker_token_is_empty (&sparql->current_state.graph)) {
-		const gchar *graph_name;
+		const gchar *graph;
 
-		graph_name = tracker_token_get_idstring (&sparql->current_state.graph);
+		graph = tracker_token_get_idstring (&sparql->current_state.graph);
+
 		if (!tracker_data_manager_drop_graph (sparql->data_manager,
-		                                      graph_name,
-		                                      &inner_error)) {
-			if (silent) {
-				g_error_free (inner_error);
-				return TRUE;
-			} else {
-				g_propagate_error (error, inner_error);
-				return FALSE;
-			}
+		                                      graph, &inner_error)) {
+			return handle_silent (silent, inner_error, error);
 		}
 	}
 
@@ -2601,34 +2633,124 @@ translate_Create (TrackerSparql  *sparql,
 	return TRUE;
 
 error:
-	if (silent) {
-		g_error_free (inner_error);
-		return TRUE;
-	} else {
-		g_propagate_error (error, inner_error);
-		return FALSE;
-	}
+	return handle_silent (silent, inner_error, error);
 }
 
 static gboolean
 translate_Add (TrackerSparql  *sparql,
                GError        **error)
 {
-	_unimplemented ("ADD");
+	gboolean silent = FALSE;
+	gchar *source, *destination;
+	GError *inner_error = NULL;
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_ADD);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	/* FIXME: check that graphs exist */
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	g_assert (!tracker_token_is_empty (&sparql->current_state.graph));
+	source = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_TO);
+
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	g_assert (!tracker_token_is_empty (&sparql->current_state.graph));
+	destination = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	if (!tracker_data_manager_copy_graph (sparql->data_manager,
+	                                      source, destination,
+	                                      &inner_error)) {
+		return handle_silent (silent, inner_error, error);
+	}
+
+	return TRUE;
 }
 
 static gboolean
 translate_Move (TrackerSparql  *sparql,
                 GError        **error)
 {
-	_unimplemented ("MOVE");
+	gboolean silent = FALSE;
+	gchar *source, *destination;
+	GError *inner_error = NULL;
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_MOVE);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	/* FIXME: check that source exist, and destination doesn't */
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	g_assert (!tracker_token_is_empty (&sparql->current_state.graph));
+	source = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_TO);
+
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	g_assert (!tracker_token_is_empty (&sparql->current_state.graph));
+	destination = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	if (!tracker_data_manager_create_graph (sparql->data_manager,
+	                                        destination, &inner_error))
+		goto error;
+
+	if (!tracker_data_manager_copy_graph (sparql->data_manager,
+	                                      source, destination,
+	                                      &inner_error))
+		goto error;
+
+	if (!tracker_data_manager_drop_graph (sparql->data_manager,
+	                                      source,
+	                                      &inner_error))
+		goto error;
+
+	return TRUE;
+
+error:
+	return handle_silent (silent, inner_error, error);
 }
 
 static gboolean
 translate_Copy (TrackerSparql  *sparql,
                 GError        **error)
 {
-	_unimplemented ("COPY");
+	gboolean silent = FALSE;
+	gchar *source, *destination;
+	GError *inner_error = NULL;
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_COPY);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	/* FIXME: check that source exist, and destination doesn't */
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	g_assert (!tracker_token_is_empty (&sparql->current_state.graph));
+	source = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_TO);
+
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	g_assert (!tracker_token_is_empty (&sparql->current_state.graph));
+	destination = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	/* FIXME: check that source exists, dest may be already there or not */
+	if (!tracker_data_manager_clear_graph (sparql->data_manager,
+	                                       destination, &inner_error))
+		goto error;
+
+	if (!tracker_data_manager_copy_graph (sparql->data_manager,
+	                                      source, destination,
+	                                      &inner_error))
+		goto error;
+
+	return TRUE;
+
+error:
+	return handle_silent (silent, inner_error, error);
 }
 
 static gboolean
@@ -3044,10 +3166,12 @@ translate_GraphOrDefault (TrackerSparql  *sparql,
 	/* GraphOrDefault ::= 'DEFAULT' | 'GRAPH'? iri
 	 */
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DEFAULT)) {
-
+		tracker_token_unset (&sparql->current_state.graph);
 	} else {
 		_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GRAPH);
 		_call_rule (sparql, NAMED_RULE_iri, error);
+		_init_token (&sparql->current_state.graph,
+		             sparql->current_state.prev_node, sparql);
 	}
 
 	return TRUE;

@@ -5099,3 +5099,137 @@ tracker_data_manager_find_graph_by_id (TrackerDataManager *manager,
 
 	return NULL;
 }
+
+gboolean
+tracker_data_manager_clear_graph (TrackerDataManager  *manager,
+                                  const gchar         *graph,
+                                  GError             **error)
+{
+	TrackerOntologies *ontologies = manager->ontologies;
+	TrackerClass **classes;
+	TrackerProperty **properties;
+	TrackerDBStatement *stmt;
+	guint i, n_classes, n_properties;
+	GError *inner_error = NULL;
+	TrackerDBInterface *iface;
+
+	if (!graph)
+		graph = "main";
+
+	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
+	classes = tracker_ontologies_get_classes (ontologies, &n_classes);
+	properties = tracker_ontologies_get_properties (ontologies, &n_properties);
+
+	for (i = 0; !inner_error && i < n_classes; i++) {
+		if (g_str_has_prefix (tracker_class_get_name (classes[i]), "xsd:"))
+			continue;
+
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "DELETE FROM \"%s\".\"%s\" WHERE ID >= 100000",
+		                                              graph,
+		                                              tracker_class_get_name (classes[i]));
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, &inner_error);
+		g_object_unref (stmt);
+	}
+
+	for (i = 0; !inner_error && i < n_properties; i++) {
+		TrackerClass *service;
+
+		if (!tracker_property_get_multiple_values (properties[i]))
+			continue;
+
+		service = tracker_property_get_domain (properties[i]);
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "DELETE FROM \"%s\".\"%s_%s\" WHERE ID >= 100000",
+		                                              graph,
+		                                              tracker_class_get_name (service),
+		                                              tracker_property_get_name (properties[i]));
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, &inner_error);
+		g_object_unref (stmt);
+	}
+
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+gboolean
+tracker_data_manager_copy_graph (TrackerDataManager  *manager,
+                                 const gchar         *source,
+                                 const gchar         *destination,
+                                 GError             **error)
+{
+	TrackerOntologies *ontologies = manager->ontologies;
+	TrackerClass **classes;
+	TrackerProperty **properties;
+	TrackerDBStatement *stmt;
+	guint i, n_classes, n_properties;
+	GError *inner_error = NULL;
+	TrackerDBInterface *iface;
+
+	if (!source)
+		source = "main";
+	if (!destination)
+		destination = "main";
+
+	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
+	classes = tracker_ontologies_get_classes (ontologies, &n_classes);
+	properties = tracker_ontologies_get_properties (ontologies, &n_properties);
+
+	for (i = 0; !inner_error && i < n_classes; i++) {
+		if (g_str_has_prefix (tracker_class_get_name (classes[i]), "xsd:"))
+			continue;
+
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "INSERT INTO \"%s\".\"%s\" "
+		                                              "SELECT * from \"%s\".\"%s\" WHERE ID >= 100000",
+		                                              source,
+		                                              tracker_class_get_name (classes[i]),
+		                                              destination,
+		                                              tracker_class_get_name (classes[i]));
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, &inner_error);
+		g_object_unref (stmt);
+	}
+
+	for (i = 0; !inner_error && i < n_properties; i++) {
+		TrackerClass *service;
+
+		if (!tracker_property_get_multiple_values (properties[i]))
+			continue;
+
+		service = tracker_property_get_domain (properties[i]);
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "INSERT INTO \"%s\".\"%s_%s\" "
+		                                              "SELECT * from \"%s\".\"%s_%s\" WHERE ID >= 100000",
+		                                              source,
+		                                              tracker_class_get_name (service),
+		                                              tracker_property_get_name (properties[i]),
+		                                              destination,
+		                                              tracker_class_get_name (service),
+		                                              tracker_property_get_name (properties[i]));
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, &inner_error);
+		g_object_unref (stmt);
+	}
+
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
