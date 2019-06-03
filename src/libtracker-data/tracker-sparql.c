@@ -5311,21 +5311,11 @@ handle_xpath_function (TrackerSparql  *sparql,
 			return FALSE;
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 	} else if (g_str_equal (function, FN_NS "timezone-from-dateTime")) {
-		TrackerVariable *variable;
-
 		_step (sparql);
-		_append_string (sparql, "( ");
+		_append_string (sparql, "SparqlTimezoneDuration( ");
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 
 		_call_rule (sparql, NAMED_RULE_Expression, error);
-		variable = _last_node_variable (sparql);
-
-		if (!variable) {
-			_raise (PARSE, "Expected variable", "fn:timezone-from-dateTime");
-		} else {
-			_append_string_printf (sparql, " - %s ",
-					       tracker_variable_get_sql_expression (variable));
-		}
 
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 		_append_string (sparql, ") ");
