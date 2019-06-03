@@ -1,11 +1,14 @@
 PREFIX ex: <http://example/>
 PREFIX ns: <http://www.w3.org/2005/xpath-functions#>
 
-SELECT ?location xsd:integer(tracker:cartesian-distance(?lat1,?lat2,?lon1,?lon2)) xsd:integer(tracker:haversine-distance(?lat1,?lat2,?lon1,?lon2))
+SELECT ?location ?cartesian ?harvesine
 { ?_x a ex:Location ;
       ex:name ?location ;
       ex:latitude ?lat1 ;
       ex:longitude ?lon1 .
  ex:x ex:latitude ?lat2 ;
       ex:longitude ?lon2 .
+ BIND (xsd:integer(tracker:cartesian-distance(?lat1,?lat2,?lon1,?lon2)) AS ?cartesian) .
+ BIND (xsd:integer(tracker:haversine-distance(?lat1,?lat2,?lon1,?lon2)) AS ?harvesine) .
 }
+ORDER BY ?cartesian ?harvesine
