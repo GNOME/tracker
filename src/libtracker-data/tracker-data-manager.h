@@ -88,6 +88,14 @@ gboolean             tracker_data_manager_drop_graph (TrackerDataManager  *manag
                                                       const gchar         *name,
                                                       GError             **error);
 
+gboolean             tracker_data_manager_clear_graph (TrackerDataManager  *manager,
+                                                       const gchar         *graph,
+                                                       GError             **error);
+gboolean             tracker_data_manager_copy_graph  (TrackerDataManager  *manager,
+                                                       const gchar         *source,
+                                                       const gchar         *destination,
+                                                       GError             **error);
+
 gint                 tracker_data_manager_find_graph       (TrackerDataManager *manager,
                                                             const gchar        *name);
 const gchar *        tracker_data_manager_find_graph_by_id (TrackerDataManager *manager,
