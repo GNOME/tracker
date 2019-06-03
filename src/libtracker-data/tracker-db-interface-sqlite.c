@@ -463,9 +463,10 @@ function_sparql_timestamp (sqlite3_context *context,
 		GError *error = NULL;
 		const gchar *str;
 		gdouble time;
+		gint offset;
 
 		str = sqlite3_value_text (argv[0]);
-		time = tracker_string_to_date (str, NULL, &error);
+		time = tracker_string_to_date (str, &offset, &error);
 
 		if (error) {
 			sqlite3_result_error (context, "Failed time string conversion", -1);
@@ -473,7 +474,7 @@ function_sparql_timestamp (sqlite3_context *context,
 			return;
 		}
 
-		sqlite3_result_double (context, time);
+		sqlite3_result_double (context, time + offset);
 	} else {
 		sqlite3_result_error (context, "Invalid argument type", -1);
 	}
@@ -521,6 +522,41 @@ function_sparql_time_sort (sqlite3_context *context,
 	}
 
 	sqlite3_result_int64 (context, sort_key);
+}
+
+static void
+function_sparql_time_zone_duration (sqlite3_context *context,
+                                    int              argc,
+                                    sqlite3_value   *argv[])
+{
+	if (argc != 1) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	if (sqlite3_value_type (argv[0]) == SQLITE_NULL) {
+		sqlite3_result_null (context);
+		return;
+	} else if (sqlite3_value_numeric_type (argv[0]) == SQLITE_INTEGER) {
+		sqlite3_result_int (context, 0);
+	} else if (sqlite3_value_type (argv[0]) == SQLITE_TEXT) {
+		GError *error = NULL;
+		const gchar *str;
+		gint offset;
+
+		str = sqlite3_value_text (argv[0]);
+		tracker_string_to_date (str, &offset, &error);
+
+		if (error) {
+			sqlite3_result_error (context, "Invalid date", -1);
+			g_error_free (error);
+			return;
+		}
+
+		sqlite3_result_int (context, offset);
+	} else {
+		sqlite3_result_error (context, "Invalid argument type", -1);
+	}
 }
 
 static void
@@ -1532,6 +1568,8 @@ initialize_functions (TrackerDBInterface *db_interface)
 		  function_sparql_timestamp },
 		{ "SparqlTimeSort", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_time_sort },
+		{ "SparqlTimezoneDuration", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		  function_sparql_time_zone_duration },
 		/* Paths and filenames */
 		{ "SparqlStringFromFilename", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_string_from_filename },
