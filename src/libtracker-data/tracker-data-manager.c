@@ -2634,9 +2634,9 @@ create_decomposed_metadata_property_table (TrackerDBInterface *iface,
 				}
 
 				tracker_db_interface_execute_query (iface, &internal_error,
-				                                    "ALTER TABLE \"%s\".\"%s_%s\" RENAME TO \"%s\".\"%s_%s_TEMP\"",
+				                                    "ALTER TABLE \"%s\".\"%s_%s\" RENAME TO \"%s_%s_TEMP\"",
 				                                    database, service_name, field_name,
-				                                    database, service_name, field_name);
+				                                    service_name, field_name);
 
 				if (internal_error) {
 					g_propagate_error (error, internal_error);
@@ -3055,8 +3055,8 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 	if (in_change && !tracker_class_get_is_new (service)) {
 		g_debug ("Rename: ALTER TABLE \"%s\" RENAME TO \"%s_TEMP\"", service_name, service_name);
 		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "ALTER TABLE \"%s\".\"%s\" RENAME TO \"%s\".\"%s_TEMP\"",
-		                                    database, service_name, database, service_name);
+		                                    "ALTER TABLE \"%s\".\"%s\" RENAME TO \"%s_TEMP\"",
+		                                    database, service_name, service_name);
 		in_col_sql = g_string_new ("ID");
 		sel_col_sql = g_string_new ("ID");
 		if (internal_error) {
