@@ -559,6 +559,49 @@ function_sparql_time_zone_duration (sqlite3_context *context,
 }
 
 static void
+function_sparql_time_zone_substr (sqlite3_context *context,
+                                  int              argc,
+                                  sqlite3_value   *argv[])
+{
+	if (argc != 1) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	if (sqlite3_value_type (argv[0]) == SQLITE_NULL) {
+		sqlite3_result_null (context);
+		return;
+	} else if (sqlite3_value_numeric_type (argv[0]) == SQLITE_INTEGER) {
+		sqlite3_result_text (context, "", -1, NULL);
+	} else if (sqlite3_value_type (argv[0]) == SQLITE_TEXT) {
+		const gchar *str;
+		gint len;
+
+		str = sqlite3_value_text (argv[0]);
+		len = strlen (str);
+
+		if (g_str_has_suffix (str, "Z")) {
+			sqlite3_result_text (context, "Z", -1, NULL);
+		} else if (len > strlen ("0000-00-00T00:00:00Z")) {
+			const gchar *tz = "";
+
+			/* [+-]HHMM */
+			if (str[len - 5] == '+' || str[len - 5] == '-')
+				tz = &str[len - 5];
+			/* [+-]HH:MM */
+			else if (str[len - 6] == '+' || str[len - 6] == '-')
+				tz = &str[len - 6];
+
+			sqlite3_result_text (context, g_strdup (tz), -1, g_free);
+		} else {
+			sqlite3_result_text (context, "", -1, NULL);
+		}
+	} else {
+		sqlite3_result_error (context, "Invalid argument type", -1);
+	}
+}
+
+static void
 function_sparql_cartesian_distance (sqlite3_context *context,
                                     int              argc,
                                     sqlite3_value   *argv[])
@@ -1569,6 +1612,8 @@ initialize_functions (TrackerDBInterface *db_interface)
 		  function_sparql_time_sort },
 		{ "SparqlTimezoneDuration", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_time_zone_duration },
+		{ "SparqlTimezoneString", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		  function_sparql_time_zone_substr },
 		/* Paths and filenames */
 		{ "SparqlStringFromFilename", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_string_from_filename },

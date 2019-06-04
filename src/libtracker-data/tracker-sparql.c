@@ -5961,7 +5961,13 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_TIMEZONE)) {
 		_unimplemented ("TIMEZONE");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_TZ)) {
-		_unimplemented ("TZ");
+		sparql->current_state.convert_to_string = TRUE;
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		_append_string (sparql, "SparqlTimezoneString (");
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+		_append_string (sparql, ") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_MD5)) {
 		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
