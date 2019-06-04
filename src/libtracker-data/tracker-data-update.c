@@ -817,10 +817,9 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 					                                              property->name);
 				} else {
 					stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &actual_error,
-					                                              "INSERT OR IGNORE INTO \"%s\".\"%s\" (ID, \"%s\", \"%s:graph\") VALUES (?, ?, ?)",
+					                                              "INSERT OR IGNORE INTO \"%s\".\"%s\" (ID, \"%s\") VALUES (?, ?)",
 					                                              database,
 					                                              table_name,
-					                                              property->name,
 					                                              property->name);
 				}
 
@@ -920,15 +919,11 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 				if (table->insert) {
 					g_string_append_printf (sql, ", \"%s\"", property->name);
 					g_string_append (values_sql, ", ?");
-
-					g_string_append_printf (sql, ", \"%s:graph\"", property->name);
-					g_string_append (values_sql, ", ?");
 				} else {
 					if (i > 0) {
 						g_string_append (sql, ", ");
 					}
 					g_string_append_printf (sql, "\"%s\" = ?", property->name);
-					g_string_append_printf (sql, ", \"%s:graph\" = ?", property->name);
 				}
 			}
 
@@ -975,11 +970,6 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 					tracker_db_statement_bind_null (stmt, param++);
 				} else {
 					statement_bind_gvalue (stmt, &param, &property->value);
-				}
-				if (resource->graph->id != 0) {
-					tracker_db_statement_bind_int (stmt, param++, resource->graph->id);
-				} else {
-					tracker_db_statement_bind_null (stmt, param++);
 				}
 			}
 

@@ -2538,25 +2538,20 @@ range_change_for (TrackerProperty *property,
 	 * should forbid conversion from anything to resource or datetime in error
 	 * handling earlier */
 
-	g_string_append_printf (in_col_sql, ", \"%s\", \"%s:graph\"",
-	                        field_name, field_name);
+	g_string_append_printf (in_col_sql, ", \"%s\"", field_name);
 
 	if (tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_INTEGER ||
 	    tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DOUBLE) {
-			g_string_append_printf (sel_col_sql, ", \"%s\" + 0, \"%s:graph\"",
-			                        field_name, field_name);
+			g_string_append_printf (sel_col_sql, ", \"%s\" + 0", field_name);
 	} else if (tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME) {
 
 		/* TODO (see above) */
 
-		g_string_append_printf (sel_col_sql, ", \"%s\", \"%s:graph\"",
-		                        field_name, field_name);
+		g_string_append_printf (sel_col_sql, ", \"%s\"", field_name);
 	} else if (tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_BOOLEAN) {
-		g_string_append_printf (sel_col_sql, ", \"%s\" != 0, \"%s:graph\"",
-		                        field_name, field_name);
+		g_string_append_printf (sel_col_sql, ", \"%s\" != 0", field_name);
 	} else {
-		g_string_append_printf (sel_col_sql, ", \"%s\", \"%s:graph\"",
-		                        field_name, field_name);
+		g_string_append_printf (sel_col_sql, ", \"%s\"", field_name);
 	}
 }
 
@@ -2655,14 +2650,12 @@ create_decomposed_metadata_property_table (TrackerDBInterface *iface,
 			g_string_append_printf (sql,
 			                        "CREATE TABLE \"%s\".\"%s_%s\" ("
 			                        "ID INTEGER NOT NULL, "
-			                        "\"%s\" %s NOT NULL, "
-			                        "\"%s:graph\" INTEGER",
+			                        "\"%s\" %s NOT NULL",
 			                        database,
 			                        service_name,
 			                        field_name,
 			                        field_name,
-			                        sql_type,
-			                        field_name);
+			                        sql_type);
 
 			if (in_change && !tracker_property_get_is_new (property)) {
 				in_col_sql = g_string_new ("ID");
@@ -3149,13 +3142,6 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 					if (tracker_property_get_is_inverse_functional_property (property)) {
 						g_string_append (create_sql, " UNIQUE");
 					}
-
-					g_string_append_printf (create_sql, ", \"%s:graph\" INTEGER",
-					                        field_name);
-
-					if (is_domain_index && tracker_property_get_is_new_domain_index (property, service)) {
-						schedule_copy (copy_schedule, property, field_name, ":graph");
-					}
 				} else if ((!is_domain_index && tracker_property_get_is_new (property)) ||
 				           (is_domain_index && tracker_property_get_is_new_domain_index (property, service))) {
 					GString *alter_sql = NULL;
@@ -3206,32 +3192,6 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 						                                     field_name, TRUE,
 						                                     datetime,
 						                                     &internal_error);
-						if (internal_error) {
-							g_string_free (alter_sql, TRUE);
-							g_propagate_error (error, internal_error);
-							goto error_out;
-						}
-					}
-
-					g_string_free (alter_sql, TRUE);
-
-					alter_sql = g_string_new ("ALTER TABLE ");
-					g_string_append_printf (alter_sql, "\"%s\".\"%s\" ADD COLUMN \"%s:graph\" INTEGER",
-					                        database,
-					                        service_name,
-					                        field_name);
-					g_debug ("Altering: '%s'", alter_sql->str);
-					tracker_db_interface_execute_query (iface, &internal_error,
-					                                    "%s", alter_sql->str);
-					if (internal_error) {
-						g_string_free (alter_sql, TRUE);
-						g_propagate_error (error, internal_error);
-						goto error_out;
-					} else if (is_domain_index) {
-						copy_from_domain_to_domain_index (iface, database, property,
-						                                  field_name, ":graph",
-						                                  service,
-						                                  &internal_error);
 						if (internal_error) {
 							g_string_free (alter_sql, TRUE);
 							g_propagate_error (error, internal_error);
