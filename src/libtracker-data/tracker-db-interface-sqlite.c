@@ -596,6 +596,69 @@ function_sparql_time_zone_substr (sqlite3_context *context,
 	}
 }
 
+static gchar *
+offset_to_duration (gint offset)
+{
+	GString *str = g_string_new (NULL);
+	gint hours, minutes, seconds;
+
+	if (offset > 0)
+		g_string_append (str, "+PT");
+	else
+		g_string_append (str, "-PT");
+
+	offset = ABS (offset);
+	hours = offset / 3600;
+	minutes = offset % 3600 / 60;
+	seconds = offset % 60;
+
+	if (hours > 0)
+		g_string_append_printf (str, "%dH", hours);
+	if (minutes > 0)
+		g_string_append_printf (str, "%dM", minutes);
+	if (seconds > 0)
+		g_string_append_printf (str, "%dS", seconds);
+
+	return g_string_free (str, FALSE);
+}
+
+static void
+function_sparql_time_zone (sqlite3_context *context,
+                           int              argc,
+                           sqlite3_value   *argv[])
+{
+	if (argc != 1) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	if (sqlite3_value_type (argv[0]) == SQLITE_NULL) {
+		sqlite3_result_null (context);
+		return;
+	} else if (sqlite3_value_numeric_type (argv[0]) == SQLITE_INTEGER) {
+		sqlite3_result_text (context, "PT0S", -1, NULL);
+	} else if (sqlite3_value_type (argv[0]) == SQLITE_TEXT) {
+		GError *error = NULL;
+		const gchar *str;
+		gchar *duration;
+		gint offset;
+
+		str = sqlite3_value_text (argv[0]);
+		tracker_string_to_date (str, &offset, &error);
+
+		if (error) {
+			sqlite3_result_error (context, "Invalid date", -1);
+			g_error_free (error);
+			return;
+		}
+
+		duration = offset_to_duration (offset);
+		sqlite3_result_text (context, g_strdup (duration), -1, g_free);
+	} else {
+		sqlite3_result_error (context, "Invalid argument type", -1);
+	}
+}
+
 static void
 function_sparql_cartesian_distance (sqlite3_context *context,
                                     int              argc,
@@ -1609,6 +1672,8 @@ initialize_functions (TrackerDBInterface *db_interface)
 		  function_sparql_time_zone_duration },
 		{ "SparqlTimezoneString", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_time_zone_substr },
+		{ "SparqlTimezone", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		  function_sparql_time_zone },
 		/* Paths and filenames */
 		{ "SparqlStringFromFilename", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_string_from_filename },
