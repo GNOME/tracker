@@ -1741,6 +1741,7 @@ initialize_functions (TrackerDBInterface *db_interface)
 		{ "SparqlRand", 0, SQLITE_ANY, function_sparql_rand },
 		/* UUID */
 		{ "SparqlUUID", 0, SQLITE_ANY, function_sparql_uuid },
+		{ "SparqlBNODE", -1, SQLITE_ANY | SQLITE_DETERMINISTIC, function_sparql_uuid },
 	};
 
 	for (i = 0; i < G_N_ELEMENTS (functions); i++) {

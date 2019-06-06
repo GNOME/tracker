@@ -724,25 +724,30 @@ _convert_terminal (TrackerSparql *sparql)
 {
 	const TrackerGrammarRule *rule;
 	TrackerBinding *binding;
+	gboolean is_parameter;
+	GHashTable *ht;
 	gchar *str;
 
 	str = _dup_last_string (sparql);
 	g_assert (str != NULL);
 
 	rule = tracker_parser_node_get_rule (sparql->current_state.prev_node);
+	is_parameter = tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL,
+	                                          TERMINAL_TYPE_PARAMETERIZED_VAR);
+	ht = is_parameter ? sparql->parameters : sparql->cached_bindings;
 
-	binding = g_hash_table_lookup (sparql->cached_bindings, str);
+	binding = g_hash_table_lookup (ht, str);
 	if (binding)
-		return binding;
+		return g_object_ref (binding);
 
-	if (tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR)) {
+	if (is_parameter) {
 		binding = tracker_parameter_binding_new (str, NULL);
 	} else {
 		binding = tracker_literal_binding_new (str, NULL);
 		tracker_binding_set_data_type (binding, sparql->current_state.expression_type);
 	}
 
-	g_hash_table_insert (sparql->cached_bindings, str, g_object_ref (binding));
+	g_hash_table_insert (ht, str, g_object_ref (binding));
 
 	return binding;
 }
@@ -6158,7 +6163,17 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_append_string (sparql, "IS NOT NULL) ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_BNODE)) {
-		_unimplemented ("BNODE");
+		if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL)) {
+			_append_string (sparql, "SparqlUUID() ");
+		} else {
+			_append_string (sparql, "SparqlBNODE( ");
+			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+			_call_rule (sparql, NAMED_RULE_Expression, error);
+			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+			_append_string (sparql, ") ");
+		}
+
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_RAND)) {
 		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL);
 		_append_string (sparql, "SparqlRand() ");
@@ -6924,7 +6939,8 @@ tracker_sparql_init (TrackerSparql *sparql)
 	                                            g_free, g_free);
 	sparql->cached_bindings = g_hash_table_new_full (g_str_hash, g_str_equal,
 							 g_free, g_object_unref);
-	sparql->parameters = g_hash_table_new (g_str_hash, g_str_equal);
+	sparql->parameters = g_hash_table_new_full (g_str_hash, g_str_equal,
+	                                            g_free, g_object_unref);
 	sparql->var_names = g_ptr_array_new_with_free_func (g_free);
 	sparql->var_types = g_array_new (FALSE, FALSE, sizeof (TrackerPropertyType));
 	sparql->anon_graphs = g_ptr_array_new_with_free_func (g_free);
