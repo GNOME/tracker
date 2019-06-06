@@ -114,6 +114,7 @@ struct _TrackerSparql
 
 	GPtrArray *var_names;
 	GArray *var_types;
+	GHashTable *cached_bindings;
 
 	GVariantBuilder *blank_nodes;
 	GHashTable *solution_var_map;
@@ -163,6 +164,7 @@ tracker_sparql_finalize (GObject *object)
 	g_object_unref (sparql->data_manager);
 	g_hash_table_destroy (sparql->prefix_map);
 	g_hash_table_destroy (sparql->parameters);
+	g_hash_table_destroy (sparql->cached_bindings);
 
 	if (sparql->sql)
 		tracker_string_builder_free (sparql->sql);
@@ -729,6 +731,10 @@ _convert_terminal (TrackerSparql *sparql)
 
 	rule = tracker_parser_node_get_rule (sparql->current_state.prev_node);
 
+	binding = g_hash_table_lookup (sparql->cached_bindings, str);
+	if (binding)
+		return binding;
+
 	if (tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR)) {
 		binding = tracker_parameter_binding_new (str, NULL);
 	} else {
@@ -736,7 +742,7 @@ _convert_terminal (TrackerSparql *sparql)
 		tracker_binding_set_data_type (binding, sparql->current_state.expression_type);
 	}
 
-	g_free (str);
+	g_hash_table_insert (sparql->cached_bindings, str, g_object_ref (binding));
 
 	return binding;
 }
@@ -6845,6 +6851,8 @@ tracker_sparql_init (TrackerSparql *sparql)
 {
 	sparql->prefix_map = g_hash_table_new_full (g_str_hash, g_str_equal,
 	                                            g_free, g_free);
+	sparql->cached_bindings = g_hash_table_new_full (g_str_hash, g_str_equal,
+							 g_free, g_object_unref);
 	sparql->parameters = g_hash_table_new (g_str_hash, g_str_equal);
 	sparql->var_names = g_ptr_array_new_with_free_func (g_free);
 	sparql->var_types = g_array_new (FALSE, FALSE, sizeof (TrackerPropertyType));
