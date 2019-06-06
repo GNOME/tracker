@@ -775,11 +775,18 @@ void
 tracker_select_context_add_literal_binding (TrackerSelectContext  *context,
                                             TrackerLiteralBinding *binding)
 {
+	gint i;
+
 	/* Literal bindings are reserved to the root context */
 	g_assert (TRACKER_CONTEXT (context)->parent == NULL);
 
 	if (!context->literal_bindings)
 		context->literal_bindings = g_ptr_array_new_with_free_func (g_object_unref);
+
+	for (i = 0; i < context->literal_bindings->len; i++) {
+		if (binding == g_ptr_array_index (context->literal_bindings, i))
+			return;
+	}
 
 	g_ptr_array_add (context->literal_bindings, g_object_ref (binding));
 }
