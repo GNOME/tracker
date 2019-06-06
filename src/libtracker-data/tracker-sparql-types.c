@@ -775,11 +775,18 @@ void
 tracker_select_context_add_literal_binding (TrackerSelectContext  *context,
                                             TrackerLiteralBinding *binding)
 {
+	gint i;
+
 	/* Literal bindings are reserved to the root context */
 	g_assert (TRACKER_CONTEXT (context)->parent == NULL);
 
 	if (!context->literal_bindings)
 		context->literal_bindings = g_ptr_array_new_with_free_func (g_object_unref);
+
+	for (i = 0; i < context->literal_bindings->len; i++) {
+		if (binding == g_ptr_array_index (context->literal_bindings, i))
+			return;
+	}
 
 	g_ptr_array_add (context->literal_bindings, g_object_ref (binding));
 }
@@ -844,7 +851,6 @@ tracker_triple_context_finalize (GObject *object)
 	TrackerTripleContext *context = TRACKER_TRIPLE_CONTEXT (object);
 
 	g_ptr_array_unref (context->sql_tables);
-	g_ptr_array_unref (context->literal_bindings);
 	g_hash_table_unref (context->variable_bindings);
 
 	G_OBJECT_CLASS (tracker_triple_context_parent_class)->finalize (object);
@@ -862,7 +868,6 @@ static void
 tracker_triple_context_init (TrackerTripleContext *context)
 {
 	context->sql_tables = g_ptr_array_new_with_free_func ((GDestroyNotify) tracker_data_table_free);
-	context->literal_bindings = g_ptr_array_new_with_free_func (g_object_unref);
 	context->variable_bindings =
 		g_hash_table_new_full (tracker_variable_hash,
 		                       tracker_variable_equal, NULL,
