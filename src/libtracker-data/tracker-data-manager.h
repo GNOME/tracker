@@ -96,6 +96,8 @@ gboolean             tracker_data_manager_copy_graph  (TrackerDataManager  *mana
                                                        const gchar         *destination,
                                                        GError             **error);
 
+GHashTable *         tracker_data_manager_get_graphs       (TrackerDataManager *manager);
+
 gint                 tracker_data_manager_find_graph       (TrackerDataManager *manager,
                                                             const gchar        *name);
 const gchar *        tracker_data_manager_find_graph_by_id (TrackerDataManager *manager,
