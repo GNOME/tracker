@@ -98,17 +98,24 @@ tracker_triples_vtab_free (gpointer data)
 }
 
 static void
+tracker_triples_cursor_reset (TrackerTriplesCursor *cursor)
+{
+	g_clear_pointer (&cursor->stmt, sqlite3_finalize);
+	g_clear_pointer (&cursor->match.graph, sqlite3_value_free);
+	g_clear_pointer (&cursor->match.subject, sqlite3_value_free);
+	g_clear_pointer (&cursor->match.predicate, sqlite3_value_free);
+	g_clear_pointer (&cursor->properties, g_list_free);
+	cursor->match.idxFlags = 0;
+	cursor->rowid = 0;
+	cursor->finished = FALSE;
+}
+
+static void
 tracker_triples_cursor_free (gpointer data)
 {
 	TrackerTriplesCursor *cursor = data;
 
-	if (cursor->stmt)
-		sqlite3_finalize (cursor->stmt);
-
-	g_clear_pointer (&cursor->match.graph, sqlite3_value_free);
-	g_clear_pointer (&cursor->match.subject, sqlite3_value_free);
-	g_clear_pointer (&cursor->match.predicate, sqlite3_value_free);
-	g_list_free (cursor->properties);
+	tracker_triples_cursor_reset (cursor);
 	g_free (cursor);
 }
 
@@ -410,6 +417,8 @@ triples_filter (sqlite3_vtab_cursor  *vtab_cursor,
 {
 	TrackerTriplesCursor *cursor = (TrackerTriplesCursor *) vtab_cursor;
 	int rc;
+
+	tracker_triples_cursor_reset (cursor);
 
 	if (idx & IDX_COL_GRAPH) {
 		int idx = idx_str[COL_GRAPH];
