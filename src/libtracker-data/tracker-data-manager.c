@@ -153,7 +153,7 @@ tracker_data_ontology_error_quark (void)
 	return g_quark_from_static_string ("tracker-data-ontology-error-quark");
 }
 
-static gboolean
+static GHashTable *
 tracker_data_manager_ensure_graphs (TrackerDataManager  *manager,
 				    TrackerDBInterface  *iface,
 				    GError             **error)
@@ -163,7 +163,7 @@ tracker_data_manager_ensure_graphs (TrackerDataManager  *manager,
 	GHashTable *graphs;
 
 	if (manager->graphs)
-		return TRUE;
+		return manager->graphs;
 
 	graphs = g_hash_table_new_full (g_str_hash,
 					g_str_equal,
@@ -182,7 +182,7 @@ tracker_data_manager_ensure_graphs (TrackerDataManager  *manager,
 
 	if (!cursor) {
 		g_hash_table_unref (graphs);
-		return FALSE;
+		return NULL;
 	}
 
 	while (tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
@@ -198,17 +198,12 @@ tracker_data_manager_ensure_graphs (TrackerDataManager  *manager,
 
 	g_object_unref (cursor);
 	manager->graphs = graphs;
-	return TRUE;
+	return graphs;
 }
 
-static GHashTable *
-tracker_data_manager_get_graphs (TrackerDataManager  *manager,
-                                 TrackerDBInterface  *iface,
-                                 GError             **error)
+GHashTable *
+tracker_data_manager_get_graphs (TrackerDataManager *manager)
 {
-	if (!tracker_data_manager_ensure_graphs (manager, iface, error))
-		return NULL;
-
 	return manager->graphs;
 }
 
@@ -682,7 +677,7 @@ fix_indexed (TrackerDataManager  *manager,
 	gpointer value;
 
 	iface = tracker_data_manager_get_writable_db_interface (manager);
-	graphs = tracker_data_manager_get_graphs (manager, iface, &internal_error);
+	graphs = tracker_data_manager_ensure_graphs (manager, iface, &internal_error);
 	if (internal_error) {
 		g_propagate_error (error, internal_error);
 		return;
@@ -3877,7 +3872,7 @@ tracker_data_manager_update_union_views (TrackerDataManager  *manager,
 
 	classes = tracker_ontologies_get_classes (ontologies, &n_classes);
 	properties = tracker_ontologies_get_properties (ontologies, &n_properties);
-	graphs = tracker_data_manager_get_graphs (manager, iface, error);
+	graphs = tracker_data_manager_ensure_graphs (manager, iface, error);
 
 	if (!graphs)
 		return FALSE;
@@ -4041,7 +4036,7 @@ setup_interface_cb (TrackerDBManager   *db_manager,
 #if HAVE_TRACKER_FTS
 	tracker_data_manager_init_fts (iface, FALSE);
 #endif
-	graphs = tracker_data_manager_get_graphs (data_manager, iface, NULL);
+	graphs = tracker_data_manager_ensure_graphs (data_manager, iface, NULL);
 
 	if (graphs) {
 		GHashTableIter iter;
@@ -4081,9 +4076,9 @@ update_interface_cb (TrackerDBManager   *db_manager,
 	cache_mtime = tracker_file_get_mtime (cache_dir);
 
 	if (cache_mtime > data_manager->cache_mtime) {
-		GHashTable *graphs;
+		GHashTable *prev_graphs;
 
-		graphs = data_manager->graphs;
+		prev_graphs = data_manager->graphs;
 		data_manager->graphs = NULL;
 
 		tracker_data_manager_ensure_graphs (data_manager, iface, NULL);
@@ -4096,7 +4091,7 @@ update_interface_cb (TrackerDBManager   *db_manager,
 			g_hash_table_iter_init (&iter, data_manager->graphs);
 
 			while (g_hash_table_iter_next (&iter, &value, NULL)) {
-				if (g_hash_table_contains (graphs, value))
+				if (g_hash_table_contains (prev_graphs, value))
 					continue;
 
 				if (!tracker_db_manager_attach_database (db_manager,
@@ -4605,7 +4600,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 				tracker_data_ontology_setup_db (manager, iface, "main", TRUE,
 				                                &ontology_error);
 
-				graphs = tracker_data_manager_get_graphs (manager, iface, &ontology_error);
+				graphs = tracker_data_manager_ensure_graphs (manager, iface, &ontology_error);
 
 				if (graphs) {
 					GHashTableIter iter;
@@ -5034,7 +5029,7 @@ tracker_data_manager_find_graph (TrackerDataManager *manager,
 	GHashTable *graphs;
 
 	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
-	graphs = tracker_data_manager_get_graphs (manager, iface, NULL);
+	graphs = tracker_data_manager_ensure_graphs (manager, iface, NULL);
 
 	if (!graphs)
 		return 0;
@@ -5052,7 +5047,7 @@ tracker_data_manager_find_graph_by_id (TrackerDataManager *manager,
 	gpointer key, value;
 
 	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
-	graphs = tracker_data_manager_get_graphs (manager, iface, NULL);
+	graphs = tracker_data_manager_ensure_graphs (manager, iface, NULL);
 
 	if (!graphs)
 		return NULL;
