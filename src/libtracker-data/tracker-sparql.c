@@ -47,6 +47,12 @@ enum {
 	TIME_FORMAT_HOURS
 };
 
+enum {
+	GRAPH_OP_DEFAULT,
+	GRAPH_OP_NAMED,
+	GRAPH_OP_ALL
+};
+
 static inline gboolean _call_rule_func (TrackerSparql            *sparql,
                                         TrackerGrammarNamedRule   rule,
                                         GError                  **error);
@@ -149,6 +155,7 @@ struct _TrackerSparql
 		const gchar *expression_list_separator;
 		TrackerPropertyType expression_type;
 		guint type;
+		guint graph_op;
 
 		gboolean convert_to_string;
 	} current_state;
@@ -2571,7 +2578,9 @@ handle_silent (gboolean   silent,
                GError    *error_in,
                GError   **error)
 {
-	if (silent) {
+	if (!error_in) {
+		return TRUE;
+	} else if (silent) {
 		g_error_free (error_in);
 		return TRUE;
 	} else {
@@ -2641,7 +2650,11 @@ translate_Drop (TrackerSparql  *sparql,
 {
 	gboolean silent = FALSE;
 	GError *inner_error = NULL;
+	GList *graphs = NULL, *l;
+	const gchar *graph;
 
+	/* Drop ::= 'DROP' 'SILENT'? GraphRefAll
+	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_DROP);
 
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
@@ -2649,18 +2662,37 @@ translate_Drop (TrackerSparql  *sparql,
 
 	_call_rule (sparql, NAMED_RULE_GraphRefAll, error);
 
-	if (!tracker_token_is_empty (&sparql->current_state.graph)) {
-		const gchar *graph;
-
-		graph = tracker_token_get_idstring (&sparql->current_state.graph);
-
-		if (!tracker_data_manager_drop_graph (sparql->data_manager,
-		                                      graph, &inner_error)) {
-			return handle_silent (silent, inner_error, error);
+	if (tracker_token_is_empty (&sparql->current_state.graph)) {
+		if (sparql->current_state.graph_op == GRAPH_OP_DEFAULT ||
+		    sparql->current_state.graph_op == GRAPH_OP_ALL) {
+			graphs = g_list_prepend (graphs, "main");
 		}
+
+		if (sparql->current_state.graph_op == GRAPH_OP_ALL ||
+		    sparql->current_state.graph_op == GRAPH_OP_NAMED) {
+			GHashTable *ht;
+			GHashTableIter iter;
+
+			ht = tracker_data_manager_get_graphs (sparql->data_manager);
+			g_hash_table_iter_init (&iter, ht);
+
+			while (g_hash_table_iter_next (&iter, (gpointer *) &graph, NULL))
+				graphs = g_list_prepend (graphs, (gpointer) graph);
+		}
+	} else {
+		graph = tracker_token_get_idstring (&sparql->current_state.graph);
+		graphs = g_list_prepend (graphs, (gpointer) graph);
 	}
 
-	return TRUE;
+	for (l = graphs; l; l = l->next) {
+		if (!tracker_data_manager_drop_graph (sparql->data_manager,
+		                                      l->data, &inner_error))
+			break;
+	}
+
+	g_list_free (graphs);
+
+	return handle_silent (silent, inner_error, error);
 }
 
 static gboolean
@@ -2671,6 +2703,8 @@ translate_Create (TrackerSparql  *sparql,
 	GError *inner_error = NULL;
 	const gchar *graph_name;
 
+	/* Create ::= 'CREATE' 'SILENT'? GraphRef
+	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CREATE);
 
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
@@ -3262,11 +3296,11 @@ translate_GraphRefAll (TrackerSparql  *sparql,
 	/* GraphRefAll ::= GraphRef | 'DEFAULT' | 'NAMED' | 'ALL'
 	 */
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DEFAULT)) {
-		_unimplemented ("DROP/CLEAR DEFAULT");
+		sparql->current_state.graph_op = GRAPH_OP_DEFAULT;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_NAMED)) {
-		_unimplemented ("DROP/CLEAR NAMED");
+		sparql->current_state.graph_op = GRAPH_OP_NAMED;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ALL)) {
-		_unimplemented ("DROP/CLEAR ALL");
+		sparql->current_state.graph_op = GRAPH_OP_ALL;
 	} else {
 		_call_rule (sparql, NAMED_RULE_GraphRef, error);
 	}
