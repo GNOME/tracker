@@ -7,7 +7,7 @@
 
 rdf: a tracker:Namespace, tracker:Ontology ;
 	tracker:prefix "rdf" ;
-	nao:lastModified "2011-01-31T15:00:00Z" .
+	nao:lastModified "2019-06-09T21:00:00Z" .
 
 rdfs: a tracker:Namespace ;
 	tracker:prefix "rdfs" .
@@ -59,6 +59,27 @@ rdfs:range a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range rdfs:Class .
+
+rdf:List a rdfs:Class ;
+	rdfs:label "List" ;
+	rdfs:comment "The class of RDF Lists." ;
+	rdfs:subClassOf rdfs:Resource .
+
+rdf:nil a rdf:List ;
+	rdfs:label "nil" ;
+	rdfs:comment "The empty list, with no items in it. If the rest of a list is nil then the list has no more items in it." .
+
+rdf:first a rdf:Property ;
+	rdfs:label "first" ;
+	rdfs:comment "The first item in the subject RDF list." ;
+	rdfs:domain rdf:List ;
+	rdfs:range rdfs:Resource .
+
+rdf:rest a rdf:Property ;
+	rdfs:label "rest" ;
+	rdfs:comment "The rest of the subject RDF list after the first item." ;
+	rdfs:domain rdf:List ;
+	rdfs:range rdf:List .
 
 tracker: a tracker:Namespace ;
 	tracker:prefix "tracker" .
