@@ -323,3 +323,119 @@ tracker_unescape_unichars (const gchar  *str,
 
 	return g_string_free (copy, FALSE);
 }
+
+gboolean
+parse_abs_uri (const gchar  *uri,
+               gchar       **base,
+               const gchar **rel_path)
+{
+	const gchar *loc, *end;
+
+	end = &uri[strlen (uri)];
+	loc = uri;
+
+	if (!g_ascii_isalpha (loc[0]))
+		return FALSE;
+
+	while (loc != end) {
+		if (loc[0] == ':')
+			break;
+		if (!g_ascii_isalpha (loc[0]) &&
+		    loc[0] != '+' && loc[0] != '-' && loc[0] != '.')
+			return FALSE;
+		loc++;
+	}
+
+	if (loc == uri)
+		return FALSE;
+
+	if (strncmp (loc, "://", 3) == 0) {
+		/* Include authority in base */
+		loc += 3;
+		loc = strchr (loc, '/');
+		if (!loc)
+			loc = end;
+	}
+
+	*base = g_strndup (uri, loc - uri);
+	*rel_path = loc + 1;
+
+	return TRUE;
+}
+
+GPtrArray *
+remove_dot_segments (gchar **uri_elems)
+{
+	GPtrArray *array;
+	gint i;
+
+	array = g_ptr_array_new ();
+
+	for (i = 0; uri_elems[i] != NULL; i++) {
+		if (g_strcmp0 (uri_elems[i], ".") == 0) {
+			continue;
+		} else if (g_strcmp0 (uri_elems[i], "..") == 0) {
+			if (array->len > 0)
+				g_ptr_array_remove_index (array, array->len - 1);
+			continue;
+		} else if (*uri_elems[i] != '\0') {
+			/* NB: Not a copy */
+			g_ptr_array_add (array, uri_elems[i]);
+		}
+	}
+
+	return array;
+}
+
+gchar *
+tracker_resolve_relative_uri (const gchar  *base,
+                              const gchar  *rel_uri)
+{
+	gchar **base_split, **rel_split, *host;
+	GPtrArray *base_norm, *rel_norm;
+	GString *str;
+	gint i;
+
+	/* Relative IRIs are combined with base IRIs with a simplified version
+	 * of the algorithm described at RFC3986, Section 5.2. We don't care
+	 * about query and fragment parts of an URI, and some simplifications
+	 * are taken on base uri parsing and relative uri validation.
+	 */
+	rel_split = g_strsplit (rel_uri, "/", -1);
+
+	/* Rel uri is a full uri? */
+	if (strchr (rel_split[0], ':')) {
+		g_strfreev (rel_split);
+		return g_strdup (rel_uri);
+	}
+
+	if (!parse_abs_uri (base, &host, &base)) {
+		g_strfreev (rel_split);
+		return g_strdup (rel_uri);
+	}
+
+	base_split = g_strsplit (base, "/", -1);
+
+	base_norm = remove_dot_segments (base_split);
+	rel_norm = remove_dot_segments (rel_split);
+
+	for (i = 0; i < rel_norm->len; i++) {
+		g_ptr_array_add (base_norm,
+		                 g_ptr_array_index (rel_norm, i));
+	}
+
+	str = g_string_new (host);
+	for (i = 0; i < base_norm->len; i++) {
+		g_string_append_c (str, '/');
+		g_string_append (str,
+		                 g_ptr_array_index (base_norm, i));
+	}
+
+	g_ptr_array_unref (base_norm);
+	g_ptr_array_unref (rel_norm);
+	g_strfreev (base_split);
+	g_strfreev (rel_split);
+	g_free (host);
+
+	return g_string_free (str, FALSE);
+}
