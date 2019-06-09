@@ -1335,6 +1335,57 @@ _add_quad (TrackerSparql  *sparql,
 	return TRUE;
 }
 
+static gboolean
+tracker_sparql_apply_quad (TrackerSparql  *sparql,
+                           GError        **error)
+{
+	GError *inner_error = NULL;
+
+	switch (sparql->current_state.type) {
+	case TRACKER_SPARQL_TYPE_SELECT:
+		_add_quad (sparql,
+		           &sparql->current_state.graph,
+		           &sparql->current_state.subject,
+		           &sparql->current_state.predicate,
+		           &sparql->current_state.object,
+		           &inner_error);
+		break;
+	case TRACKER_SPARQL_TYPE_INSERT:
+		tracker_data_insert_statement (tracker_data_manager_get_data (sparql->data_manager),
+		                               tracker_token_get_idstring (&sparql->current_state.graph),
+		                               tracker_token_get_idstring (&sparql->current_state.subject),
+		                               tracker_token_get_idstring (&sparql->current_state.predicate),
+		                               tracker_token_get_idstring (&sparql->current_state.object),
+		                               &inner_error);
+		break;
+	case TRACKER_SPARQL_TYPE_DELETE:
+		tracker_data_delete_statement (tracker_data_manager_get_data (sparql->data_manager),
+		                               tracker_token_get_idstring (&sparql->current_state.graph),
+		                               tracker_token_get_idstring (&sparql->current_state.subject),
+		                               tracker_token_get_idstring (&sparql->current_state.predicate),
+		                               tracker_token_get_idstring (&sparql->current_state.object),
+		                               &inner_error);
+		break;
+	case TRACKER_SPARQL_TYPE_UPDATE:
+		tracker_data_update_statement (tracker_data_manager_get_data (sparql->data_manager),
+		                               tracker_token_get_idstring (&sparql->current_state.graph),
+		                               tracker_token_get_idstring (&sparql->current_state.subject),
+		                               tracker_token_get_idstring (&sparql->current_state.predicate),
+		                               tracker_token_get_idstring (&sparql->current_state.object),
+		                               &inner_error);
+		break;
+	default:
+		g_assert_not_reached ();
+	}
+
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static TrackerParserNode *
 _skip_rule (TrackerSparql *sparql,
             guint          named_rule)
@@ -4930,43 +4981,7 @@ translate_GraphNode (TrackerSparql  *sparql,
 	     sparql->current_state.type != TRACKER_SPARQL_TYPE_UPDATE))
 		return TRUE;
 
-	switch (sparql->current_state.type) {
-	case TRACKER_SPARQL_TYPE_SELECT:
-		_add_quad (sparql,
-		           &sparql->current_state.graph,
-		           &sparql->current_state.subject,
-		           &sparql->current_state.predicate,
-		           &sparql->current_state.object,
-		           &inner_error);
-		break;
-	case TRACKER_SPARQL_TYPE_INSERT:
-		tracker_data_insert_statement (tracker_data_manager_get_data (sparql->data_manager),
-		                               tracker_token_get_idstring (&sparql->current_state.graph),
-		                               tracker_token_get_idstring (&sparql->current_state.subject),
-		                               tracker_token_get_idstring (&sparql->current_state.predicate),
-		                               tracker_token_get_idstring (&sparql->current_state.object),
-		                               &inner_error);
-		break;
-	case TRACKER_SPARQL_TYPE_DELETE:
-		tracker_data_delete_statement (tracker_data_manager_get_data (sparql->data_manager),
-		                               tracker_token_get_idstring (&sparql->current_state.graph),
-		                               tracker_token_get_idstring (&sparql->current_state.subject),
-		                               tracker_token_get_idstring (&sparql->current_state.predicate),
-		                               tracker_token_get_idstring (&sparql->current_state.object),
-		                               &inner_error);
-		break;
-	case TRACKER_SPARQL_TYPE_UPDATE:
-		tracker_data_update_statement (tracker_data_manager_get_data (sparql->data_manager),
-		                               tracker_token_get_idstring (&sparql->current_state.graph),
-		                               tracker_token_get_idstring (&sparql->current_state.subject),
-		                               tracker_token_get_idstring (&sparql->current_state.predicate),
-		                               tracker_token_get_idstring (&sparql->current_state.object),
-		                               &inner_error);
-		break;
-	default:
-		g_assert_not_reached ();
-	}
-
+	tracker_sparql_apply_quad (sparql, error);
 	tracker_token_unset (&sparql->current_state.object);
 
 	if (inner_error && !sparql->silent) {
