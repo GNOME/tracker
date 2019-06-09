@@ -30,6 +30,7 @@
 #include "tracker-collation.h"
 #include "tracker-db-interface-sqlite.h"
 #include "tracker-sparql-query.h"
+#include "tracker-utils.h"
 
 #define TRACKER_NS "http://www.tracker-project.org/ontologies/tracker#"
 #define RDF_NS "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -132,6 +133,7 @@ struct _TrackerSparql
 
 	GPtrArray *anon_graphs;
 	GPtrArray *named_graphs;
+	gchar *base;
 
 	struct {
 		TrackerContext *context;
@@ -190,6 +192,7 @@ tracker_sparql_finalize (GObject *object)
 	g_ptr_array_unref (sparql->anon_graphs);
 	g_ptr_array_unref (sparql->var_names);
 	g_array_unref (sparql->var_types);
+	g_free (sparql->base);
 
 	if (sparql->blank_nodes)
 		g_variant_builder_unref (sparql->blank_nodes);
@@ -246,6 +249,16 @@ tracker_sparql_swap_current_expression_list_separator (TrackerSparql *sparql,
 	sparql->current_state.expression_list_separator = sep;
 
 	return old;
+}
+
+static inline gchar *
+tracker_sparql_expand_base (TrackerSparql *sparql,
+                            const gchar   *term)
+{
+	if (sparql->base)
+		return tracker_resolve_relative_uri (sparql->base, term);
+	else
+		return g_strdup (term);
 }
 
 static inline gchar *
@@ -678,9 +691,17 @@ _extract_node_string (TrackerParserNode *node,
 			add_start = subtract_end = 3;
 			compress = TRUE;
 			break;
-		case TERMINAL_TYPE_IRIREF:
+		case TERMINAL_TYPE_IRIREF: {
+			gchar *unexpanded;
+
 			add_start = subtract_end = 1;
+			unexpanded = g_strndup (terminal_start + add_start,
+			                        terminal_end - terminal_start -
+			                        add_start - subtract_end);
+			str = tracker_sparql_expand_base (sparql, unexpanded);
+			g_free (unexpanded);
 			break;
+		}
 		case TERMINAL_TYPE_BLANK_NODE_LABEL:
 			add_start = 2;
 			break;
@@ -1812,10 +1833,14 @@ translate_BaseDecl (TrackerSparql  *sparql,
 	/* BaseDecl ::= 'BASE' IRIREF
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_BASE);
-
-	/* FIXME: BASE is unimplemented, and we never raised an error */
-
 	_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_IRIREF);
+
+	/* Sparql syntax allows for multiple BaseDecl, but it only makes
+	 * sense to keep one. Given that the sparql1.1-query recommendation
+	 * does not define the behavior, just pick the first one.
+	 */
+	if (!sparql->base)
+		sparql->base = _dup_last_string (sparql);
 
 	return TRUE;
 }
