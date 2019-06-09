@@ -4928,18 +4928,141 @@ static gboolean
 translate_Collection (TrackerSparql  *sparql,
                       GError        **error)
 {
+	TrackerToken old_subject, old_predicate, old_object, *old_token;
+	TrackerVariable *cur, *first = NULL, *rest = NULL;
+
+	old_subject = sparql->current_state.subject;
+	old_predicate = sparql->current_state.predicate;
+	old_object = sparql->current_state.object;
+	old_token = sparql->current_state.token;
+
 	/* Collection ::= '(' GraphNode+ ')'
 	 */
-	_unimplemented ("Collections are not supported");
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+	while (_check_in_rule (sparql, NAMED_RULE_GraphNode)) {
+		if (rest) {
+			cur = rest;
+			rest = NULL;
+		} else {
+			cur = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+			first = cur;
+		}
+
+		tracker_token_variable_init (&sparql->current_state.subject, cur);
+
+		/* rdf:first */
+		tracker_token_literal_init (&sparql->current_state.predicate,
+		                            RDF_NS "first");
+		sparql->current_state.token = &sparql->current_state.object;
+		_call_rule (sparql, NAMED_RULE_GraphNode, error);
+		sparql->current_state.token = NULL;
+		tracker_token_unset (&sparql->current_state.predicate);
+
+		/* rdf:rest */
+		tracker_token_literal_init (&sparql->current_state.predicate,
+		                            RDF_NS "rest");
+
+		if (_check_in_rule (sparql, NAMED_RULE_GraphNode)) {
+			/* Generate variable for next element */
+			rest = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+			tracker_token_variable_init (&sparql->current_state.object, rest);
+		} else {
+			/* Make last element point to rdf:nil */
+			tracker_token_literal_init (&sparql->current_state.object,
+			                            RDF_NS "nil");
+		}
+
+		if (!tracker_sparql_apply_quad (sparql, error))
+			return FALSE;
+
+		tracker_token_unset (&sparql->current_state.object);
+		tracker_token_unset (&sparql->current_state.predicate);
+
+		tracker_token_unset (&sparql->current_state.subject);
+	}
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+	sparql->current_state.subject = old_subject;
+	sparql->current_state.predicate = old_predicate;
+	sparql->current_state.object = old_object;
+	sparql->current_state.token = old_token;
+	tracker_token_variable_init (sparql->current_state.token, first);
+
+	return TRUE;
 }
 
 static gboolean
 translate_CollectionPath (TrackerSparql  *sparql,
                           GError        **error)
 {
+	TrackerToken old_subject, old_predicate, old_object, *old_token;
+	TrackerVariable *cur, *first = NULL, *rest = NULL;
+
+	old_subject = sparql->current_state.subject;
+	old_predicate = sparql->current_state.predicate;
+	old_object = sparql->current_state.object;
+	old_token = sparql->current_state.token;
+
 	/* CollectionPath ::= '(' GraphNodePath+ ')'
 	 */
-	_unimplemented ("Collections are not supported");
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+	while (_check_in_rule (sparql, NAMED_RULE_GraphNodePath)) {
+		if (rest) {
+			cur = rest;
+			rest = NULL;
+		} else {
+			cur = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+			first = cur;
+		}
+
+		tracker_token_variable_init (&sparql->current_state.subject, cur);
+
+		/* rdf:first */
+		tracker_token_literal_init (&sparql->current_state.predicate,
+		                            RDF_NS "first");
+		sparql->current_state.token = &sparql->current_state.object;
+		_call_rule (sparql, NAMED_RULE_GraphNodePath, error);
+		sparql->current_state.token = NULL;
+		tracker_token_unset (&sparql->current_state.predicate);
+
+		/* rdf:rest */
+		tracker_token_literal_init (&sparql->current_state.predicate,
+		                            RDF_NS "rest");
+
+		if (_check_in_rule (sparql, NAMED_RULE_GraphNodePath)) {
+			/* Generate variable for next element */
+			rest = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+			tracker_token_variable_init (&sparql->current_state.object, rest);
+		} else {
+			/* Make last element point to rdf:nil */
+			tracker_token_literal_init (&sparql->current_state.object,
+			                            RDF_NS "nil");
+		}
+
+		if (!_add_quad (sparql,
+		                &sparql->current_state.graph,
+		                &sparql->current_state.subject,
+		                &sparql->current_state.predicate,
+		                &sparql->current_state.object,
+		                error))
+			return FALSE;
+
+		tracker_token_unset (&sparql->current_state.object);
+		tracker_token_unset (&sparql->current_state.predicate);
+
+		tracker_token_unset (&sparql->current_state.subject);
+	}
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+	sparql->current_state.subject = old_subject;
+	sparql->current_state.predicate = old_predicate;
+	sparql->current_state.object = old_object;
+	sparql->current_state.token = old_token;
+	tracker_token_variable_init (sparql->current_state.token, first);
+
+	return TRUE;
 }
 
 static gboolean
