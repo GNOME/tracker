@@ -444,7 +444,10 @@ triples_filter (sqlite3_vtab_cursor  *vtab_cursor,
 
 	rc = init_stmt (cursor);
 
-	if (rc == SQLITE_ROW)
+	if (rc == SQLITE_DONE)
+		cursor->finished = TRUE;
+
+	if (rc == SQLITE_ROW || rc == SQLITE_DONE)
 		return SQLITE_OK;
 
 	return rc;
