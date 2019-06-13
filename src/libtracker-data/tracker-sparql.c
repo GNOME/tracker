@@ -1387,6 +1387,22 @@ tracker_sparql_apply_quad (TrackerSparql  *sparql,
 	return TRUE;
 }
 
+static void
+tracker_sparql_init_string_builder (TrackerSparql *sparql)
+{
+	TrackerStringBuilder *str;
+
+	g_clear_pointer (&sparql->sql, tracker_string_builder_free);
+	sparql->sql = sparql->current_state.sql = tracker_string_builder_new ();
+	sparql->current_state.with_clauses = _prepend_placeholder (sparql);
+
+	/* Ensure the select clause goes to a different substring than the
+	 * WITH clauses, so _prepend_string() works as expected.
+	 */
+	str = _append_placeholder (sparql);
+	tracker_sparql_swap_builder (sparql, str);
+}
+
 static TrackerParserNode *
 _skip_rule (TrackerSparql *sparql,
             guint          named_rule)
@@ -3054,10 +3070,7 @@ get_solution_for_pattern (TrackerSparql      *sparql,
 	sparql->current_state.select_context = sparql->context;
 	tracker_sparql_push_context (sparql, sparql->context);
 
-	g_clear_pointer (&sparql->sql, tracker_string_builder_free);
-	sparql->sql = tracker_string_builder_new ();
-	tracker_sparql_swap_builder (sparql, sparql->sql);
-	sparql->current_state.with_clauses = _prepend_placeholder (sparql);
+	tracker_sparql_init_string_builder (sparql);
 
 	retval = prepare_solution_select (sparql, pattern, error);
 	tracker_sparql_pop_context (sparql, FALSE);
@@ -7313,11 +7326,8 @@ tracker_sparql_new (TrackerDataManager *manager,
 					   &sparql->parser_error);
 	if (tree) {
 		sparql->tree = tree;
-		sparql->sql = tracker_string_builder_new ();
-
 		sparql->current_state.node = tracker_node_tree_get_root (sparql->tree);
-		sparql->current_state.sql = sparql->sql;
-		sparql->current_state.with_clauses = _prepend_placeholder (sparql);
+		tracker_sparql_init_string_builder (sparql);
 	}
 
 	return sparql;
@@ -7491,11 +7501,8 @@ tracker_sparql_new_update (TrackerDataManager *manager,
 
 	if (tree) {
 		sparql->tree = tree;
-		sparql->sql = tracker_string_builder_new ();
-
 		sparql->current_state.node = tracker_node_tree_get_root (sparql->tree);
-		sparql->current_state.sql = sparql->sql;
-		sparql->current_state.with_clauses = _prepend_placeholder (sparql);
+		tracker_sparql_init_string_builder (sparql);
 	}
 
 	return sparql;
