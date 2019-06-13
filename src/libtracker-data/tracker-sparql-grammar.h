@@ -1149,7 +1149,7 @@ static const TrackerGrammarRule helper_InlineDataFull_seq_1[] = { L(OPEN_PARENS)
 static const TrackerGrammarRule helper_InlineDataFull_or_1[] = { T(NIL), S(helper_InlineDataFull_seq_1), NIL };
 static const TrackerGrammarRule helper_InlineDataFull_gte0_2[] = { R(DataBlockValue), NIL };
 static const TrackerGrammarRule helper_InlineDataFull_seq_2[] = { L(OPEN_PARENS), GTE0(helper_InlineDataFull_gte0_2), L(CLOSE_PARENS), NIL };
-static const TrackerGrammarRule helper_InlineDataFull_or_2[] = { S(helper_InlineDataFull_seq_2), T(NIL), NIL };
+static const TrackerGrammarRule helper_InlineDataFull_or_2[] = { T(NIL), S(helper_InlineDataFull_seq_2), NIL };
 static const TrackerGrammarRule helper_InlineDataFull_gte0_3[] = { OR(helper_InlineDataFull_or_2), NIL };
 static const TrackerGrammarRule rule_InlineDataFull[] = { OR(helper_InlineDataFull_or_1), L(OPEN_BRACE), GTE0(helper_InlineDataFull_gte0_3), L(CLOSE_BRACE), NIL };
 
