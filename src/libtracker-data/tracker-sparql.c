@@ -158,6 +158,7 @@ struct _TrackerSparql
 		TrackerPropertyType expression_type;
 		guint type;
 		guint graph_op;
+		gint values_idx;
 
 		gboolean convert_to_string;
 	} current_state;
@@ -2551,7 +2552,10 @@ translate_ValuesClause (TrackerSparql  *sparql,
 	/* ValuesClause ::= ( 'VALUES' DataBlock )?
 	 */
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_VALUES)) {
-		_unimplemented ("VALUES");
+		_prepend_string (sparql, "SELECT * FROM (");
+		_append_string (sparql, ") NATURAL INNER JOIN (");
+		_call_rule (sparql, NAMED_RULE_DataBlock, error);
+		_append_string (sparql, ") ");
 	}
 
 	return TRUE;
@@ -3935,9 +3939,24 @@ static gboolean
 translate_InlineData (TrackerSparql  *sparql,
                       GError        **error)
 {
+	gboolean do_join;
+
 	/* InlineData ::= 'VALUES' DataBlock
 	 */
-	_unimplemented ("VALUES");
+	do_join = !tracker_string_builder_is_empty (sparql->current_state.sql);
+
+	if (do_join) {
+		_prepend_string (sparql, "SELECT * FROM (");
+		_append_string (sparql, ") NATURAL INNER JOIN (");
+	}
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_VALUES);
+	_call_rule (sparql, NAMED_RULE_DataBlock, error);
+
+	if (do_join)
+		_append_string (sparql, ")");
+
+	return TRUE;
 }
 
 static gboolean
@@ -3945,9 +3964,20 @@ translate_DataBlock (TrackerSparql  *sparql,
                      GError        **error)
 {
 	TrackerGrammarNamedRule rule;
+	TrackerStringBuilder *old;
 
 	/* DataBlock ::= InlineDataOneVar | InlineDataFull
 	 */
+	old = tracker_sparql_swap_builder (sparql, sparql->current_state.with_clauses);
+
+	if (tracker_string_builder_is_empty (sparql->current_state.with_clauses))
+		_append_string (sparql, "WITH ");
+	else
+		_append_string (sparql, ", ");
+
+	sparql->current_state.values_idx++;
+	_append_string_printf (sparql, "\"dataBlock%d\"",
+	                       sparql->current_state.values_idx);
 	rule = _current_rule (sparql);
 
 	switch (rule) {
@@ -3959,6 +3989,11 @@ translate_DataBlock (TrackerSparql  *sparql,
 		g_assert_not_reached ();
 	}
 
+	tracker_sparql_swap_builder (sparql, old);
+
+	_append_string_printf (sparql, "SELECT * FROM \"dataBlock%d\"",
+	                       sparql->current_state.values_idx);
+
 	return TRUE;
 }
 
@@ -3966,17 +4001,41 @@ static gboolean
 translate_InlineDataOneVar (TrackerSparql  *sparql,
                             GError        **error)
 {
+	TrackerVariable *var;
+	TrackerBinding *binding;
+	gint n_values = 0;
+
 	/* InlineDataOneVar ::= Var '{' DataBlockValue* '}'
 	 */
 	_call_rule (sparql, NAMED_RULE_Var, error);
 
+	var = _last_node_variable (sparql);
+	binding = tracker_variable_binding_new (var, NULL, NULL);
+	tracker_variable_set_sample_binding (var, TRACKER_VARIABLE_BINDING (binding));
+
+	_append_string (sparql, "(");
+	_append_variable_sql (sparql, var);
+	_append_string (sparql, ") AS ( ");
+
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_BRACE);
 
 	while (_check_in_rule (sparql, NAMED_RULE_DataBlockValue)) {
+		if (n_values == 0)
+			_append_string (sparql, "VALUES ");
+		else
+			_append_string (sparql, ", ");
+
+		_append_string (sparql, "(");
 		_call_rule (sparql, NAMED_RULE_DataBlockValue, error);
+		_append_string (sparql, ") ");
+		n_values++;
 	}
 
+	if (n_values == 0)
+		_append_string (sparql, "SELECT NULL WHERE FALSE");
+
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_BRACE);
+	_append_string (sparql, ") ");
 
 	return TRUE;
 }
@@ -3985,13 +4044,30 @@ static gboolean
 translate_InlineDataFull (TrackerSparql  *sparql,
                           GError        **error)
 {
+	TrackerVariable *var;
+	TrackerBinding *binding;
+	gint n_params, n_args = 0, n_values = 0;
+
 	/* InlineDataFull ::= ( NIL | '(' Var* ')' ) '{' ( '(' DataBlockValue* ')' | NIL )* '}'
 	 */
-	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL)) {
+	_append_string (sparql, "(");
 
+	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL)) {
+		_append_string (sparql, "NONE");
+		n_args = 0;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS)) {
 		while (_check_in_rule (sparql, NAMED_RULE_Var)) {
+			if (n_args != 0)
+				_append_string (sparql, ", ");
+
 			_call_rule (sparql, NAMED_RULE_Var, error);
+
+			var = _last_node_variable (sparql);
+			binding = tracker_variable_binding_new (var, NULL, NULL);
+			tracker_variable_set_sample_binding (var, TRACKER_VARIABLE_BINDING (binding));
+			n_args++;
+
+			_append_variable_sql (sparql, var);
 		}
 
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
@@ -3999,20 +4075,57 @@ translate_InlineDataFull (TrackerSparql  *sparql,
 		g_assert_not_reached ();
 	}
 
+	_append_string (sparql, ") AS ( ");
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_BRACE);
 
 	do {
-		if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL)) {
-		} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS)) {
+		gboolean is_nil = FALSE;
+
+		if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL))
+			is_nil = TRUE;
+		else if (!_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS))
+			break;
+
+		if (n_values == 0)
+			_append_string (sparql, "VALUES ");
+		else
+			_append_string (sparql, ", ");
+
+		if (is_nil) {
+			_append_string (sparql, "(NULL)");
+			n_params = 0;
+		} else {
+			n_params = 0;
+
+			_append_string (sparql, "(");
+
 			while (_check_in_rule (sparql, NAMED_RULE_DataBlockValue)) {
+				if (n_params != 0)
+					_append_string (sparql, ", ");
+
 				_call_rule (sparql, NAMED_RULE_DataBlockValue, error);
+				n_params++;
 			}
 
 			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
-		} else {
-			break;
+			_append_string (sparql, ") ");
 		}
+
+		if (n_params != n_args) {
+			g_set_error (error, TRACKER_SPARQL_ERROR,
+			             TRACKER_SPARQL_ERROR_PARSE,
+			             "VALUES defined %d arguments but set has %d parameters",
+			             n_args, n_params);
+			return FALSE;
+		}
+
+		n_values++;
 	} while (TRUE);
+
+	if (n_values == 0)
+		_append_string (sparql, "SELECT NULL WHERE FALSE");
+
+	_append_string (sparql, ") ");
 
 	return TRUE;
 }
@@ -4022,10 +4135,12 @@ translate_DataBlockValue (TrackerSparql  *sparql,
                           GError        **error)
 {
 	TrackerGrammarNamedRule rule;
+	TrackerBinding *binding;
 
 	/* DataBlockValue ::= iri | RDFLiteral | NumericLiteral | BooleanLiteral | 'UNDEF'
 	 */
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_UNDEF)) {
+		_append_string (sparql, "NULL ");
 		return TRUE;
 	}
 
@@ -4037,6 +4152,11 @@ translate_DataBlockValue (TrackerSparql  *sparql,
 	case NAMED_RULE_NumericLiteral:
 	case NAMED_RULE_BooleanLiteral:
 		_call_rule (sparql, rule, error);
+		binding = _convert_terminal (sparql);
+		tracker_select_context_add_literal_binding (TRACKER_SELECT_CONTEXT (sparql->current_state.select_context),
+		                                            TRACKER_LITERAL_BINDING (binding));
+		_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+		g_object_unref (binding);
 		break;
 	default:
 		g_assert_not_reached ();
