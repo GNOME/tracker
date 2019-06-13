@@ -1642,6 +1642,10 @@ translate_Query (TrackerSparql  *sparql,
 {
 	TrackerGrammarNamedRule rule;
 
+	sparql->context = g_object_ref_sink (tracker_select_context_new ());
+	sparql->current_state.select_context = sparql->context;
+	tracker_sparql_push_context (sparql, sparql->context);
+
 	/* Query ::= Prologue
 	 *           ( SelectQuery | ConstructQuery | DescribeQuery | AskQuery )
 	 *           ValuesClause
@@ -1662,6 +1666,8 @@ translate_Query (TrackerSparql  *sparql,
 	}
 
 	_call_rule (sparql, NAMED_RULE_ValuesClause, error);
+
+	tracker_sparql_pop_context (sparql, FALSE);
 
 	return TRUE;
 }
@@ -1974,9 +1980,6 @@ translate_SelectQuery (TrackerSparql  *sparql,
 
 	/* SelectQuery ::= SelectClause DatasetClause* WhereClause SolutionModifier
 	 */
-	sparql->context = g_object_ref_sink (tracker_select_context_new ());
-	sparql->current_state.select_context = sparql->context;
-	tracker_sparql_push_context (sparql, sparql->context);
 
 	/* Skip select clause here */
 	str = _append_placeholder (sparql);
@@ -1998,8 +2001,6 @@ translate_SelectQuery (TrackerSparql  *sparql,
 		return FALSE;
 
 	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
-
-	tracker_sparql_pop_context (sparql, FALSE);
 
 	return TRUE;
 }
@@ -2060,10 +2061,6 @@ translate_DescribeQuery (TrackerSparql  *sparql,
 
 	/* DescribeQuery ::= 'DESCRIBE' ( VarOrIri+ | '*' ) DatasetClause* WhereClause? SolutionModifier
 	 */
-	sparql->context = g_object_ref_sink (tracker_select_context_new ());
-	sparql->current_state.select_context = sparql->context;
-	tracker_sparql_push_context (sparql, sparql->context);
-
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_DESCRIBE);
 	_append_string (sparql,
 	                "SELECT "
@@ -2169,7 +2166,6 @@ translate_DescribeQuery (TrackerSparql  *sparql,
 	}
 
 	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
-	tracker_sparql_pop_context (sparql, FALSE);
 	_append_string (sparql, ") ");
 	g_list_free_full (resources, g_object_unref);
 	g_clear_pointer (&where_str, tracker_string_builder_free);
@@ -2185,10 +2181,6 @@ translate_AskQuery (TrackerSparql  *sparql,
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_ASK);
 
-	sparql->context = g_object_ref_sink (tracker_select_context_new ());
-	sparql->current_state.select_context = sparql->context;
-	tracker_sparql_push_context (sparql, sparql->context);
-
 	_append_string (sparql, "SELECT CASE EXISTS (SELECT 1 ");
 
 	while (_check_in_rule (sparql, NAMED_RULE_DatasetClause)) {
@@ -2197,8 +2189,6 @@ translate_AskQuery (TrackerSparql  *sparql,
 
 	_call_rule (sparql, NAMED_RULE_WhereClause, error);
 	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
-
-	tracker_sparql_pop_context (sparql, FALSE);
 
 	_append_string (sparql, ") WHEN 1 THEN 'true' WHEN 0 THEN 'false' ELSE NULL END");
 
