@@ -154,6 +154,8 @@ typedef enum {
 	TRACKER_PATH_OPERATOR_ZEROORONE,   /* ? */
 	TRACKER_PATH_OPERATOR_ONEORMORE,   /* + */
 	TRACKER_PATH_OPERATOR_ZEROORMORE,  /* * */
+	TRACKER_PATH_OPERATOR_NEGATED,     /* ! */
+	TRACKER_PATH_OPERATOR_INTERSECTION, /* Used for negated paths */
 } TrackerPathOperator;
 
 struct _TrackerPathElement {
@@ -317,7 +319,8 @@ void              tracker_solution_add_value       (TrackerSolution *solution,
 GHashTable      * tracker_solution_get_bindings    (TrackerSolution *solution);
 
 /* Property path element */
-TrackerPathElement * tracker_path_element_property_new (TrackerProperty *prop);
+TrackerPathElement * tracker_path_element_property_new (TrackerPathOperator  op,
+                                                        TrackerProperty     *prop);
 TrackerPathElement * tracker_path_element_operator_new (TrackerPathOperator  op,
                                                         TrackerPathElement  *child1,
                                                         TrackerPathElement  *child2);

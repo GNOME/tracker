@@ -523,14 +523,17 @@ tracker_path_element_free (TrackerPathElement *elem)
 }
 
 TrackerPathElement *
-tracker_path_element_property_new (TrackerProperty *prop)
+tracker_path_element_property_new (TrackerPathOperator  op,
+                                   TrackerProperty     *prop)
 {
 	TrackerPathElement *elem;
 
 	g_return_val_if_fail (TRACKER_IS_PROPERTY (prop), NULL);
+	g_return_val_if_fail (op == TRACKER_PATH_OPERATOR_NONE ||
+	                      op == TRACKER_PATH_OPERATOR_NEGATED, NULL);
 
 	elem = g_new0 (TrackerPathElement, 1);
-	elem->op = TRACKER_PATH_OPERATOR_NONE;
+	elem->op = op;
 	elem->type = tracker_property_get_data_type (prop);
 	elem->data.property = prop;
 
@@ -544,11 +547,13 @@ tracker_path_element_operator_new (TrackerPathOperator  op,
 {
 	TrackerPathElement *elem;
 
-	g_return_val_if_fail (op != TRACKER_PATH_OPERATOR_NONE, NULL);
+	g_return_val_if_fail (op != TRACKER_PATH_OPERATOR_NONE &&
+	                      op != TRACKER_PATH_OPERATOR_NEGATED, NULL);
 	g_return_val_if_fail (child1 != NULL, NULL);
 	g_return_val_if_fail (child2 == NULL ||
 	                      op == TRACKER_PATH_OPERATOR_SEQUENCE ||
-	                      op == TRACKER_PATH_OPERATOR_ALTERNATIVE, NULL);
+	                      op == TRACKER_PATH_OPERATOR_ALTERNATIVE ||
+	                      op == TRACKER_PATH_OPERATOR_INTERSECTION, NULL);
 
 	elem = g_new0 (TrackerPathElement, 1);
 	elem->op = op;
@@ -586,6 +591,12 @@ tracker_path_element_set_unique_name (TrackerPathElement *elem,
 		break;
 	case TRACKER_PATH_OPERATOR_ONEORMORE:
 		name = "oneormore";
+		break;
+	case TRACKER_PATH_OPERATOR_NEGATED:
+		name = "neg";
+		break;
+	case TRACKER_PATH_OPERATOR_INTERSECTION:
+		name = "intersect";
 		break;
 	default:
 		g_assert_not_reached ();
