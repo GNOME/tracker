@@ -640,6 +640,27 @@ _prepend_path_element (TrackerSparql      *sparql,
 				       path_elem->data.composite.child1->name,
 				       path_elem->data.composite.child1->name);
 		break;
+	case TRACKER_PATH_OPERATOR_NEGATED:
+		_append_string_printf (sparql,
+		                       "\"%s\" (ID, value, graph) AS "
+		                       "(SELECT subject AS ID, object AS value, graph "
+		                       "FROM \"tracker_triples\" "
+		                       "WHERE predicate != %d",
+		                       path_elem->name,
+		                       tracker_property_get_id (path_elem->data.property));
+		break;
+	case TRACKER_PATH_OPERATOR_INTERSECTION:
+		_append_string_printf (sparql,
+		                       "\"%s\" (ID, value, graph) AS "
+		                       "(SELECT ID, value, graph "
+				       "FROM \"%s\" "
+				       "INTERSECT "
+				       "SELECT ID, value, graph "
+				       "FROM \"%s\") ",
+				       path_elem->name,
+				       path_elem->data.composite.child1->name,
+				       path_elem->data.composite.child2->name);
+		break;
 	}
 
 	tracker_sparql_swap_builder (sparql, old);
@@ -4890,7 +4911,7 @@ translate_PathPrimary (TrackerSparql  *sparql,
 			                                                         prop);
 
 		if (!path_elem) {
-			path_elem = tracker_path_element_property_new (prop);
+			path_elem = tracker_path_element_property_new (TRACKER_PATH_OPERATOR_NONE, prop);
 			tracker_select_context_add_path_element (TRACKER_SELECT_CONTEXT (sparql->context),
 			                                         path_elem);
 			_prepend_path_element (sparql, path_elem);
@@ -4909,9 +4930,54 @@ static gboolean
 translate_PathNegatedPropertySet (TrackerSparql  *sparql,
                                   GError        **error)
 {
+	TrackerPathElement *path_elem;
+
 	/* PathNegatedPropertySet ::= PathOneInPropertySet | '(' ( PathOneInPropertySet ( '|' PathOneInPropertySet )* )? ')'
 	 */
-	_unimplemented ("Negated property set in property paths");
+	if (_check_in_rule (sparql, NAMED_RULE_PathOneInPropertySet))
+		_call_rule (sparql, NAMED_RULE_PathOneInPropertySet, error);
+	else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS)) {
+		GPtrArray *path_elems;
+
+		path_elems = g_ptr_array_new ();
+
+		_call_rule (sparql, NAMED_RULE_PathEltOrInverse, error);
+		g_ptr_array_add (path_elems, sparql->current_state.path);
+
+		while (_check_in_rule (sparql, NAMED_RULE_PathOneInPropertySet)) {
+			_call_rule (sparql, NAMED_RULE_PathOneInPropertySet, error);
+			g_ptr_array_add (path_elems, sparql->current_state.path);
+		}
+
+		if (path_elems->len > 1) {
+			gint i;
+
+			path_elem = tracker_path_element_operator_new (TRACKER_PATH_OPERATOR_INTERSECTION,
+			                                               g_ptr_array_index (path_elems, 0),
+			                                               g_ptr_array_index (path_elems, 1));
+			tracker_select_context_add_path_element (TRACKER_SELECT_CONTEXT (sparql->context),
+			                                         path_elem);
+			_prepend_path_element (sparql, path_elem);
+
+			for (i = 2; i < path_elems->len; i++) {
+				TrackerPathElement *child;
+
+				child = g_ptr_array_index (path_elems, i);
+				path_elem = tracker_path_element_operator_new (TRACKER_PATH_OPERATOR_INTERSECTION,
+				                                               child, path_elem);
+				tracker_select_context_add_path_element (TRACKER_SELECT_CONTEXT (sparql->context),
+				                                         path_elem);
+				_prepend_path_element (sparql, path_elem);
+			}
+
+			sparql->current_state.path = path_elem;
+		}
+
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+	} else {
+		g_assert_not_reached ();
+	}
+
 	return FALSE;
 }
 
@@ -4919,8 +4985,62 @@ static gboolean
 translate_PathOneInPropertySet (TrackerSparql  *sparql,
                                 GError        **error)
 {
+	TrackerPathElement *path_elem;
+	gboolean inverse = FALSE;
+
 	/* PathOneInPropertySet ::= iri | 'a' | '^' ( iri | 'a' )
 	 */
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_PATH_INVERSE))
+		inverse = TRUE;
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_A) ||
+	    _check_in_rule (sparql, NAMED_RULE_iri)) {
+		TrackerOntologies *ontologies;
+		TrackerProperty *prop;
+		gchar *str;
+
+		if (_check_in_rule (sparql, NAMED_RULE_iri))
+			_call_rule (sparql, NAMED_RULE_iri, error);
+
+		str = _dup_last_string (sparql);
+		ontologies = tracker_data_manager_get_ontologies (sparql->data_manager);
+		prop = tracker_ontologies_get_property_by_uri (ontologies, str);
+
+		if (!prop) {
+			g_set_error (error, TRACKER_SPARQL_ERROR,
+			             TRACKER_SPARQL_ERROR_UNKNOWN_PROPERTY,
+			             "Unknown property '%s'", str);
+			g_free (str);
+			return FALSE;
+		}
+
+		path_elem =
+			tracker_select_context_lookup_path_element_for_property (TRACKER_SELECT_CONTEXT (sparql->context),
+			                                                         prop);
+
+		if (!path_elem) {
+			path_elem = tracker_path_element_property_new (TRACKER_PATH_OPERATOR_NEGATED, prop);
+			tracker_select_context_add_path_element (TRACKER_SELECT_CONTEXT (sparql->context),
+			                                         path_elem);
+			_prepend_path_element (sparql, path_elem);
+		}
+
+		sparql->current_state.path = path_elem;
+		g_free (str);
+	} else {
+		g_assert_not_reached ();
+	}
+
+	if (inverse) {
+		path_elem = tracker_path_element_operator_new (TRACKER_PATH_OPERATOR_INVERSE,
+		                                               sparql->current_state.path,
+		                                               NULL);
+		tracker_select_context_add_path_element (TRACKER_SELECT_CONTEXT (sparql->context),
+		                                         path_elem);
+		_prepend_path_element (sparql, path_elem);
+		sparql->current_state.path = path_elem;
+	}
+
 	return FALSE;
 }
 
