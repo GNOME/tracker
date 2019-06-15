@@ -1449,6 +1449,38 @@ _skip_rule (TrackerSparql *sparql,
 	return current;
 }
 
+static TrackerPropertyType
+rdf_type_to_property_type (const gchar *type)
+{
+	if (g_str_equal (type, XSD_NS "boolean")) {
+		return TRACKER_PROPERTY_TYPE_BOOLEAN;
+	} else if (g_str_equal (type, XSD_NS "integer") ||
+	           g_str_equal (type, XSD_NS "nonPositiveInteger") ||
+	           g_str_equal (type, XSD_NS "negativeInteger") ||
+	           g_str_equal (type, XSD_NS "long") ||
+	           g_str_equal (type, XSD_NS "int") ||
+	           g_str_equal (type, XSD_NS "short") ||
+	           g_str_equal (type, XSD_NS "byte") ||
+	           g_str_equal (type, XSD_NS "nonNegativeInteger") ||
+	           g_str_equal (type, XSD_NS "unsignedLong") ||
+	           g_str_equal (type, XSD_NS "unsignedInt") ||
+	           g_str_equal (type, XSD_NS "unsignedShort") ||
+	           g_str_equal (type, XSD_NS "unsignedByte") ||
+	           g_str_equal (type, XSD_NS "positiveInteger")) {
+		return TRACKER_PROPERTY_TYPE_INTEGER;
+	} else if (g_str_equal (type, XSD_NS "double")) {
+		return TRACKER_PROPERTY_TYPE_DOUBLE;
+	} else if (g_str_equal (type, XSD_NS "date")) {
+		return TRACKER_PROPERTY_TYPE_DATE;
+	} else if (g_str_equal (type, XSD_NS "dateTime")) {
+		return TRACKER_PROPERTY_TYPE_DATETIME;
+	} else if (g_str_equal (type, XSD_NS "string")) {
+		return TRACKER_PROPERTY_TYPE_STRING;
+	} else {
+		return TRACKER_PROPERTY_TYPE_UNKNOWN;
+	}
+}
+
 static void
 convert_expression_to_string (TrackerSparql       *sparql,
                               TrackerPropertyType  type)
@@ -6942,37 +6974,12 @@ translate_RDFLiteral (TrackerSparql  *sparql,
 		g_object_unref (binding);
 		_unimplemented ("LANGTAG");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DOUBLE_CIRCUMFLEX)) {
+		TrackerPropertyType type;
 		gchar *cast;
 
 		_call_rule (sparql, NAMED_RULE_iri, error);
 		cast = _dup_last_string (sparql);
-
-		if (g_str_equal (cast, XSD_NS "boolean")) {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
-		} else if (g_str_equal (cast, XSD_NS "integer") ||
-		           g_str_equal (cast, XSD_NS "nonPositiveInteger") ||
-		           g_str_equal (cast, XSD_NS "negativeInteger") ||
-		           g_str_equal (cast, XSD_NS "long") ||
-		           g_str_equal (cast, XSD_NS "int") ||
-		           g_str_equal (cast, XSD_NS "short") ||
-		           g_str_equal (cast, XSD_NS "byte") ||
-		           g_str_equal (cast, XSD_NS "nonNegativeInteger") ||
-		           g_str_equal (cast, XSD_NS "unsignedLong") ||
-		           g_str_equal (cast, XSD_NS "unsignedInt") ||
-		           g_str_equal (cast, XSD_NS "unsignedShort") ||
-		           g_str_equal (cast, XSD_NS "unsignedByte") ||
-		           g_str_equal (cast, XSD_NS "positiveInteger")) {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
-		} else if (g_str_equal (cast, XSD_NS "double")) {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DOUBLE;
-		} else if (g_str_equal (cast, XSD_NS "date")) {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DATE;
-		} else if (g_str_equal (cast, XSD_NS "dateTime")) {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DATETIME;
-		} else {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
-		}
-
+		sparql->current_state.expression_type = rdf_type_to_property_type (cast);
 		g_free (cast);
 	}
 
