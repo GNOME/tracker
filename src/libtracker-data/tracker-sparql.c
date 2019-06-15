@@ -6642,7 +6642,56 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRLANG)) {
 		_unimplemented ("STRLANG");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRDT)) {
-		_unimplemented ("STRDT");
+		TrackerParserNode *expr, *node, *iri_node = NULL;
+		TrackerPropertyType type;
+		gchar *type_iri;
+		gboolean retval = TRUE;
+
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		expr = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA);
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		if (g_node_n_nodes ((GNode *) node, G_TRAVERSE_LEAVES) == 1)
+			iri_node = tracker_sparql_parser_tree_find_first (node, TRUE);
+
+		if (!iri_node)
+			_raise (PARSE, "Second argument must be IRI", "STRDT");
+
+		type_iri = _extract_node_string (iri_node, sparql);
+		type = rdf_type_to_property_type (type_iri);
+		g_free (type_iri);
+
+		switch (type) {
+		case TRACKER_PROPERTY_TYPE_UNKNOWN:
+		case TRACKER_PROPERTY_TYPE_STRING:
+		case TRACKER_PROPERTY_TYPE_RESOURCE:
+			retval = _postprocess_rule (sparql, expr, NULL, error);
+			break;
+		case TRACKER_PROPERTY_TYPE_BOOLEAN:
+			retval = _postprocess_rule (sparql, expr, NULL, error);
+			break;
+		case TRACKER_PROPERTY_TYPE_INTEGER:
+			_append_string (sparql, "CAST (");
+			retval = _postprocess_rule (sparql, expr, NULL, error);
+			_append_string (sparql, "AS INTEGER) ");
+			break;
+		case TRACKER_PROPERTY_TYPE_DOUBLE:
+			_append_string (sparql, "CAST (");
+			retval = _postprocess_rule (sparql, expr, NULL, error);
+			_append_string (sparql, "AS REAL) ");
+			break;
+		case TRACKER_PROPERTY_TYPE_DATE:
+		case TRACKER_PROPERTY_TYPE_DATETIME:
+			retval = _postprocess_rule (sparql, expr, NULL, error);
+			break;
+		}
+
+		if (!retval)
+			return FALSE;
+
+		sparql->current_state.expression_type = type;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SAMETERM)) {
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, " ( ");
