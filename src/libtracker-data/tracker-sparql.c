@@ -1102,7 +1102,7 @@ _add_quad (TrackerSparql  *sparql,
 		property = tracker_ontologies_get_property_by_uri (ontologies,
 		                                                   tracker_token_get_literal (predicate));
 
-		if (!tracker_token_get_variable (object) &&
+		if (tracker_token_get_literal (object) &&
 		    g_strcmp0 (tracker_token_get_literal (predicate), RDF_NS "type") == 0) {
 			/* rdf:type query */
 			subject_type = tracker_ontologies_get_class_by_uri (ontologies,
