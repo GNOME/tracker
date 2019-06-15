@@ -1256,7 +1256,6 @@ _add_quad (TrackerSparql  *sparql,
 			tracker_variable_set_sample_binding (variable, TRACKER_VARIABLE_BINDING (binding));
 
 		if (tracker_token_get_variable (predicate)) {
-			tracker_binding_set_data_type (binding, TRACKER_PROPERTY_TYPE_STRING);
 			tracker_binding_set_db_column_name (binding, "object");
 			tracker_variable_binding_set_nullable (TRACKER_VARIABLE_BINDING (binding), TRUE);
 		} else if (tracker_token_get_path (predicate)) {
