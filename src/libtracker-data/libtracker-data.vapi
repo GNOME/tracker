@@ -122,7 +122,6 @@ namespace Tracker {
 	public class Class : GLib.Object {
 		public string name { get; set; }
 		public string uri { get; set; }
-		public int count { get; set; }
 		[CCode (array_length = false, array_null_terminated = true)]
 		public unowned Class[] get_super_classes ();
 		public void transact_events ();

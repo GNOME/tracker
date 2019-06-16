@@ -23,11 +23,15 @@ public class Tracker.Statistics : Object {
 
 	static bool initialized;
 
+	static GLib.HashTable<Tracker.Class, int> class_counts;
+
 	[DBus (signature = "aas")]
 	public new Variant get (BusName sender) throws GLib.Error {
 		var request = DBusRequest.begin (sender, "Statistics.Get");
 		var data_manager = Tracker.Main.get_data_manager ();
 		var ontologies = data_manager.get_ontologies ();
+
+		class_counts = new HashTable<Tracker.Class, int> (direct_hash, direct_equal);
 
 		if (!initialized) {
 			var iface = data_manager.get_db_interface ();
@@ -42,7 +46,7 @@ public class Tracker.Statistics : Object {
 
 					var stat_cursor = stmt.start_cursor ();
 					if (stat_cursor.next ()) {
-						cl.count = (int) stat_cursor.get_integer (0);
+						class_counts.insert (cl, (int) stat_cursor.get_integer (0));
 					} else {
 						warning ("Unable to query instance count for class %s", cl.name);
 					}
@@ -55,14 +59,15 @@ public class Tracker.Statistics : Object {
 		var builder = new VariantBuilder ((VariantType) "aas");
 
 		foreach (var cl in ontologies.get_classes ()) {
-			if (cl.count == 0) {
+			int count = class_counts.lookup (cl);
+			if (count == 0) {
 				/* skip classes without resources */
 				continue;
 			}
 
 			builder.open ((VariantType) "as");
 			builder.add ("s", cl.name);
-			builder.add ("s", cl.count.to_string ());
+			builder.add ("s", count.to_string ());
 			builder.close ();
 		}
 
