@@ -180,12 +180,9 @@ static void         cache_insert_value         (TrackerData      *data,
 static GArray      *get_old_property_values    (TrackerData      *data,
                                                 TrackerProperty  *property,
                                                 GError          **error);
-static gchar*       gvalue_to_string           (TrackerPropertyType  type,
-                                                GValue           *gvalue);
 static gboolean     delete_metadata_decomposed (TrackerData      *data,
                                                 TrackerProperty  *property,
-                                                const gchar      *value,
-                                                gint              value_id,
+                                                GValue           *gvalue,
                                                 GError          **error);
 static void         resource_buffer_switch     (TrackerData *data,
                                                 const gchar *graph,
@@ -1619,49 +1616,6 @@ string_to_gvalue (const gchar         *value,
 	}
 }
 
-static gchar*
-gvalue_to_string (TrackerPropertyType  type,
-                  GValue              *gvalue)
-{
-	gchar *retval = NULL;
-	gint64 datet;
-	gint offset;
-
-	switch (type) {
-	case TRACKER_PROPERTY_TYPE_STRING:
-		retval = g_value_dup_string (gvalue);
-		break;
-	case TRACKER_PROPERTY_TYPE_INTEGER:
-		retval = g_strdup_printf ("%" G_GINT64_FORMAT, g_value_get_int64 (gvalue));
-		break;
-	case TRACKER_PROPERTY_TYPE_BOOLEAN:
-		retval = g_value_get_int64 (gvalue) == 0 ? g_strdup ("false") : g_strdup ("true");
-		break;
-	case TRACKER_PROPERTY_TYPE_DOUBLE:
-		retval = g_new0 (char, G_ASCII_DTOSTR_BUF_SIZE);
-		g_ascii_dtostr (retval, G_ASCII_DTOSTR_BUF_SIZE,
-		                g_value_get_double (gvalue));
-		break;
-	case TRACKER_PROPERTY_TYPE_DATE:
-		datet = g_value_get_int64 (gvalue);
-		retval = tracker_date_to_string (datet, 0);
-		/* it's a date-only, cut off the time */
-		retval[10] = '\0';
-		break;
-	case TRACKER_PROPERTY_TYPE_DATETIME:
-		datet = tracker_date_time_get_time (gvalue);
-		offset = tracker_date_time_get_offset (gvalue);
-		retval = tracker_date_to_string (datet, offset);
-		break;
-	case TRACKER_PROPERTY_TYPE_RESOURCE:
-	default:
-		g_warn_if_reached ();
-		break;
-	}
-
-	return retval;
-}
-
 static gboolean
 resource_in_domain_index_class (TrackerData  *data,
                                 TrackerClass *domain_index_class)
@@ -1706,15 +1660,13 @@ process_domain_indexes (TrackerData     *data,
 static gboolean
 cache_insert_metadata_decomposed (TrackerData      *data,
                                   TrackerProperty  *property,
-                                  const gchar      *value,
-                                  gint              value_id,
+                                  GValue           *value,
                                   GError          **error)
 {
 	gboolean            multiple_values;
 	const gchar        *table_name;
 	const gchar        *field_name;
 	TrackerProperty   **super_properties;
-	GValue              gvalue = { 0 };
 	GArray             *old_values;
 	GError             *new_error = NULL;
 	gboolean            change = FALSE;
@@ -1736,7 +1688,7 @@ cache_insert_metadata_decomposed (TrackerData      *data,
 		super_is_multi = tracker_property_get_multiple_values (*super_properties);
 
 		if (super_is_multi || old_values->len == 0) {
-			change |= cache_insert_metadata_decomposed (data, *super_properties, value, value_id,
+			change |= cache_insert_metadata_decomposed (data, *super_properties, value,
 			                                            &new_error);
 			if (new_error) {
 				g_propagate_error (error, new_error);
@@ -1749,20 +1701,9 @@ cache_insert_metadata_decomposed (TrackerData      *data,
 	table_name = tracker_property_get_table_name (property);
 	field_name = tracker_property_get_name (property);
 
-	if (value) {
-		string_to_gvalue (value, tracker_property_get_data_type (property), &gvalue, data, &new_error);
-		if (new_error) {
-			g_propagate_error (error, new_error);
-			return FALSE;
-		}
-	} else {
-		g_value_init (&gvalue, G_TYPE_INT64);
-		g_value_set_int64 (&gvalue, value_id);
-	}
-
-	if (!value_set_add_value (old_values, &gvalue)) {
+	if (!value_set_add_value (old_values, value)) {
 		/* value already inserted */
-		g_value_unset (&gvalue);
+		g_value_unset (value);
 	} else if (!multiple_values && old_values->len > 1) {
 		/* trying to add second value to single valued property */
 		GValue old_value = { 0 };
@@ -1798,17 +1739,16 @@ cache_insert_metadata_decomposed (TrackerData      *data,
 		g_free (new_value_str);
 		g_value_unset (&old_value);
 		g_value_unset (&new_value);
-		g_value_unset (&gvalue);
-
+		g_value_unset (value);
 	} else {
 		cache_insert_value (data, table_name, field_name,
-		                    &gvalue,
+		                    value,
 		                    multiple_values,
 		                    tracker_property_get_fulltext_indexed (property),
 		                    tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME);
 
 		if (!multiple_values) {
-			process_domain_indexes (data, property, &gvalue, field_name);
+			process_domain_indexes (data, property, value, field_name);
 		}
 
 		change = TRUE;
@@ -1835,29 +1775,30 @@ delete_first_object (TrackerData      *data,
 
 	if (tracker_property_get_data_type (field) == TRACKER_PROPERTY_TYPE_RESOURCE) {
 		GError *new_error = NULL;
-		GValue *v;
+		GValue *v, copy;
 
 		v = &g_array_index (old_values, GValue, 0);
-		object_id = (gint) g_value_get_int64 (v);
+		g_value_init (&copy, G_VALUE_TYPE (v));
+		g_value_copy (&copy, v);
 
 		/* This influences old_values, which is a reference, not a copy */
-		change = delete_metadata_decomposed (data, field, NULL, object_id, &new_error);
+		change = delete_metadata_decomposed (data, field, &copy, &new_error);
 
 		if (new_error) {
 			g_propagate_error (error, new_error);
 			return change;
 		}
 	} else {
-		GValue *v;
+		GValue *v, copy;
 		GError *new_error = NULL;
-		gchar *object_str = NULL;
 
 		object_id = 0;
 		v = &g_array_index (old_values, GValue, 0);
-		object_str = gvalue_to_string (tracker_property_get_data_type (field), v);
+		g_value_init (&copy, G_VALUE_TYPE (v));
+		g_value_copy (&copy, v);
 
 		/* This influences old_values, which is a reference, not a copy */
-		change = delete_metadata_decomposed (data, field, object_str, 0, &new_error);
+		change = delete_metadata_decomposed (data, field, &copy, &new_error);
 
 		if (new_error) {
 			g_propagate_error (error, new_error);
@@ -1875,13 +1816,11 @@ delete_first_object (TrackerData      *data,
 				                    data->resource_buffer->id,
 				                    data->resource_buffer->subject,
 				                    pred_id, object_id,
-				                    object_str,
+				                    g_value_get_string (v),
 				                    data->resource_buffer->types,
 				                    delegate->user_data);
 			}
 		}
-
-		g_free (object_str);
 	}
 
 	return change;
@@ -1890,8 +1829,7 @@ delete_first_object (TrackerData      *data,
 static gboolean
 cache_update_metadata_decomposed (TrackerData      *data,
                                   TrackerProperty  *property,
-                                  const gchar      *value,
-                                  gint              value_id,
+                                  GValue           *value,
                                   const gchar      *graph,
                                   GError          **error)
 {
@@ -1899,7 +1837,6 @@ cache_update_metadata_decomposed (TrackerData      *data,
 	const gchar        *table_name;
 	const gchar        *field_name;
 	TrackerProperty   **super_properties;
-	GValue              gvalue = { 0 };
 	GError             *new_error = NULL;
 	gboolean            change = FALSE;
 
@@ -1951,7 +1888,7 @@ cache_update_metadata_decomposed (TrackerData      *data,
 			g_free (subject);
 		}
 
-		change |= cache_update_metadata_decomposed (data, *super_properties, value, value_id,
+		change |= cache_update_metadata_decomposed (data, *super_properties, value,
 		                                            graph, &new_error);
 		if (new_error) {
 			g_propagate_error (error, new_error);
@@ -1963,25 +1900,14 @@ cache_update_metadata_decomposed (TrackerData      *data,
 	table_name = tracker_property_get_table_name (property);
 	field_name = tracker_property_get_name (property);
 
-	if (value) {
-		string_to_gvalue (value, tracker_property_get_data_type (property), &gvalue, data, &new_error);
-		if (new_error) {
-			g_propagate_error (error, new_error);
-			return FALSE;
-		}
-	} else {
-		g_value_init (&gvalue, G_TYPE_INT64);
-		g_value_set_int64 (&gvalue, value_id);
-	}
-
 	cache_insert_value (data, table_name, field_name,
-	                    &gvalue,
+	                    value,
 	                    multiple_values,
 	                    tracker_property_get_fulltext_indexed (property),
 	                    tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME);
 
 	if (!multiple_values) {
-		process_domain_indexes (data, property, &gvalue, field_name);
+		process_domain_indexes (data, property, value, field_name);
 	}
 
 	return TRUE;
@@ -1990,15 +1916,13 @@ cache_update_metadata_decomposed (TrackerData      *data,
 static gboolean
 delete_metadata_decomposed (TrackerData      *data,
                             TrackerProperty  *property,
-                            const gchar      *value,
-                            gint              value_id,
+                            GValue           *value,
                             GError          **error)
 {
 	gboolean            multiple_values;
 	const gchar        *table_name;
 	const gchar        *field_name;
 	TrackerProperty   **super_properties;
-	GValue gvalue = { 0 };
 	GArray             *old_values;
 	GError             *new_error = NULL;
 	gboolean            change = FALSE;
@@ -2015,23 +1939,12 @@ delete_metadata_decomposed (TrackerData      *data,
 		return FALSE;
 	}
 
-	if (value) {
-		string_to_gvalue (value, tracker_property_get_data_type (property), &gvalue, data, &new_error);
-		if (new_error) {
-			g_propagate_error (error, new_error);
-			return FALSE;
-		}
-	} else {
-		g_value_init (&gvalue, G_TYPE_INT64);
-		g_value_set_int64 (&gvalue, value_id);
-	}
-
-	if (!value_set_remove_value (old_values, &gvalue)) {
+	if (!value_set_remove_value (old_values, value)) {
 		/* value not found */
-		g_value_unset (&gvalue);
+		g_value_unset (value);
 	} else {
 		cache_delete_value (data, table_name, field_name,
-		                    &gvalue, multiple_values,
+		                    value, multiple_values,
 		                    tracker_property_get_fulltext_indexed (property),
 		                    tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME);
 
@@ -2043,8 +1956,8 @@ delete_metadata_decomposed (TrackerData      *data,
 			while (*domain_index_classes) {
 				if (resource_in_domain_index_class (data, *domain_index_classes)) {
 					GValue gvalue_copy = { 0 };
-					g_value_init (&gvalue_copy, G_VALUE_TYPE (&gvalue));
-					g_value_copy (&gvalue, &gvalue_copy);
+					g_value_init (&gvalue_copy, G_VALUE_TYPE (value));
+					g_value_copy (value, &gvalue_copy);
 					cache_delete_value (data,
 					                    tracker_class_get_name (*domain_index_classes),
 					                    field_name,
@@ -2062,7 +1975,7 @@ delete_metadata_decomposed (TrackerData      *data,
 	/* also delete super property values */
 	super_properties = tracker_property_get_super_properties (property);
 	while (*super_properties) {
-		change |= delete_metadata_decomposed (data, *super_properties, value, value_id, error);
+		change |= delete_metadata_decomposed (data, *super_properties, value, error);
 		super_properties++;
 	}
 
@@ -2442,9 +2355,19 @@ tracker_data_delete_statement (TrackerData  *data,
 
 		field = tracker_ontologies_get_property_by_uri (ontologies, predicate);
 		if (field != NULL) {
+			GError *inner_error = NULL;
+			GValue object_value = G_VALUE_INIT;
+
 			pred_id = tracker_property_get_id (field);
 			data->has_persistent = TRUE;
-			change = delete_metadata_decomposed (data, field, object, 0, error);
+
+			string_to_gvalue (object, tracker_property_get_data_type (field), &object_value, data, &inner_error);
+			if (inner_error) {
+				g_propagate_error (error, inner_error);
+				return;
+			}
+
+			change = delete_metadata_decomposed (data, field, &object_value, error);
 		} else {
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_PROPERTY,
 			             "Property '%s' not found in the ontology", predicate);
@@ -2736,8 +2659,16 @@ tracker_data_insert_statement_with_uri (TrackerData  *data,
 
 		change = TRUE;
 	} else {
+		GValue object_value = G_VALUE_INIT;
+
+		string_to_gvalue (object, tracker_property_get_data_type (property), &object_value, data, &actual_error);
+		if (actual_error) {
+			g_propagate_error (error, actual_error);
+			return;
+		}
+
 		/* add value to metadata database */
-		change = cache_insert_metadata_decomposed (data, property, object, 0, &actual_error);
+		change = cache_insert_metadata_decomposed (data, property, &object_value, &actual_error);
 		if (actual_error) {
 			g_propagate_error (error, actual_error);
 			return;
@@ -2778,6 +2709,7 @@ tracker_data_insert_statement_with_string (TrackerData  *data,
 	gint             graph_id = 0, pred_id = 0;
 	TrackerOntologies *ontologies;
 	TrackerDBInterface *iface;
+	GValue object_value = G_VALUE_INIT;
 
 	g_return_if_fail (subject != NULL);
 	g_return_if_fail (predicate != NULL);
@@ -2815,8 +2747,14 @@ tracker_data_insert_statement_with_string (TrackerData  *data,
 	if (graph)
 		graph_id = tracker_data_manager_find_graph (data->manager, graph);
 
+	string_to_gvalue (object, tracker_property_get_data_type (property), &object_value, data, &actual_error);
+	if (actual_error) {
+		g_propagate_error (error, actual_error);
+		return;
+	}
+
 	/* add value to metadata database */
-	change = cache_insert_metadata_decomposed (data, property, object, 0, &actual_error);
+	change = cache_insert_metadata_decomposed (data, property, &object_value, &actual_error);
 	if (actual_error) {
 		g_propagate_error (error, actual_error);
 		return;
@@ -2928,6 +2866,7 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 		gboolean multiple_values;
 		GError *new_error = NULL;
 		gboolean domain_unchecked = TRUE;
+		GValue object_value = G_VALUE_INIT;
 
 		multiple_values = tracker_property_get_multiple_values (property);
 
@@ -2991,8 +2930,14 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 			return;
 		}
 
+		string_to_gvalue (object, tracker_property_get_data_type (property), &object_value, data, &new_error);
+		if (new_error) {
+			g_propagate_error (error, new_error);
+			return;
+		}
+
 		/* update or add value to metadata database */
-		change = cache_update_metadata_decomposed (data, property, object, 0, graph, &actual_error);
+		change = cache_update_metadata_decomposed (data, property, &object_value, graph, &actual_error);
 		if (actual_error) {
 			g_propagate_error (error, actual_error);
 			return;
@@ -3051,6 +2996,7 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 	gboolean multiple_values;
 	TrackerOntologies *ontologies;
 	TrackerDBInterface *iface;
+	GValue object_value = G_VALUE_INIT;
 #if HAVE_TRACKER_FTS
 	GError *new_error = NULL;
 #endif /* HAVE_TRACKER_FTS */
@@ -3108,8 +3054,14 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 	}
 #endif /* HAVE_TRACKER_FTS */
 
+	string_to_gvalue (object, tracker_property_get_data_type (property), &object_value, data, &new_error);
+	if (new_error) {
+		g_propagate_error (error, new_error);
+		return;
+	}
+
 	/* add or update value to metadata database */
-	change = cache_update_metadata_decomposed (data, property, object, 0, graph, &actual_error);
+	change = cache_update_metadata_decomposed (data, property, &object_value, graph, &actual_error);
 	if (actual_error) {
 		g_propagate_error (error, actual_error);
 		return;
