@@ -142,10 +142,10 @@ tracker_variable_equal (gconstpointer data1,
 void
 tracker_token_literal_init (TrackerToken *token,
                             const gchar  *literal,
-                            gsize         len)
+                            gssize        len)
 {
 	if (len < 0)
-		len = strlen (literal);
+		len = strlen (literal) + 1;
 	token->type = TOKEN_TYPE_LITERAL;
 	token->content.literal = g_bytes_new (literal, len);
 }

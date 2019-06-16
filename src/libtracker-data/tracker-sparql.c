@@ -1382,7 +1382,7 @@ tracker_sparql_apply_quad (TrackerSparql  *sparql,
 		                               tracker_token_get_idstring (&sparql->current_state.graph),
 		                               tracker_token_get_idstring (&sparql->current_state.subject),
 		                               tracker_token_get_idstring (&sparql->current_state.predicate),
-		                               tracker_token_get_idstring (&sparql->current_state.object),
+		                               tracker_token_get_literal (&sparql->current_state.object),
 		                               &inner_error);
 		break;
 	case TRACKER_SPARQL_TYPE_DELETE:
@@ -1390,7 +1390,7 @@ tracker_sparql_apply_quad (TrackerSparql  *sparql,
 		                               tracker_token_get_idstring (&sparql->current_state.graph),
 		                               tracker_token_get_idstring (&sparql->current_state.subject),
 		                               tracker_token_get_idstring (&sparql->current_state.predicate),
-		                               tracker_token_get_idstring (&sparql->current_state.object),
+		                               tracker_token_get_literal (&sparql->current_state.object),
 		                               &inner_error);
 		break;
 	case TRACKER_SPARQL_TYPE_UPDATE:
@@ -1398,7 +1398,7 @@ tracker_sparql_apply_quad (TrackerSparql  *sparql,
 		                               tracker_token_get_idstring (&sparql->current_state.graph),
 		                               tracker_token_get_idstring (&sparql->current_state.subject),
 		                               tracker_token_get_idstring (&sparql->current_state.predicate),
-		                               tracker_token_get_idstring (&sparql->current_state.object),
+		                               tracker_token_get_literal (&sparql->current_state.object),
 		                               &inner_error);
 		break;
 	default:
