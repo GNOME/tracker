@@ -141,10 +141,13 @@ tracker_variable_equal (gconstpointer data1,
 
 void
 tracker_token_literal_init (TrackerToken *token,
-                            const gchar  *literal)
+                            const gchar  *literal,
+                            gsize         len)
 {
+	if (len < 0)
+		len = strlen (literal);
 	token->type = TOKEN_TYPE_LITERAL;
-	token->content.literal = g_strdup (literal);
+	token->content.literal = g_bytes_new (literal, len);
 }
 
 void
@@ -175,7 +178,7 @@ void
 tracker_token_unset (TrackerToken *token)
 {
 	if (token->type == TOKEN_TYPE_LITERAL)
-		g_clear_pointer (&token->content.literal, g_free);
+		g_clear_pointer (&token->content.literal, g_bytes_unref);
 	else if (token->type == TOKEN_TYPE_PARAMETER)
 		g_clear_pointer (&token->content.parameter, g_free);
 	token->type = TOKEN_TYPE_NONE;
@@ -187,7 +190,7 @@ tracker_token_is_empty (TrackerToken *token)
 	return token->type == TOKEN_TYPE_NONE;
 }
 
-const gchar *
+GBytes *
 tracker_token_get_literal (TrackerToken *token)
 {
 	if (token->type == TOKEN_TYPE_LITERAL)
@@ -223,7 +226,7 @@ const gchar *
 tracker_token_get_idstring (TrackerToken *token)
 {
 	if (token->type == TOKEN_TYPE_LITERAL)
-		return token->content.literal;
+		return g_bytes_get_data (token->content.literal, NULL);
 	else if (token->type == TOKEN_TYPE_VARIABLE)
 		return token->content.var->sql_expression;
 	else if (token->type == TOKEN_TYPE_PATH)
@@ -391,7 +394,7 @@ tracker_literal_binding_finalize (GObject *object)
 {
 	TrackerLiteralBinding *binding = TRACKER_LITERAL_BINDING (object);
 
-	g_free (binding->literal);
+	g_bytes_unref (binding->bytes);
 
 	G_OBJECT_CLASS (tracker_literal_binding_parent_class)->finalize (object);
 }
@@ -410,14 +413,15 @@ tracker_literal_binding_init (TrackerLiteralBinding *binding)
 }
 
 TrackerBinding *
-tracker_literal_binding_new (const gchar      *literal,
+tracker_literal_binding_new (GBytes           *bytes,
 			     TrackerDataTable *table)
 {
 	TrackerBinding *binding;
 
 	binding = g_object_new (TRACKER_TYPE_LITERAL_BINDING, NULL);
 	binding->table = table;
-	TRACKER_LITERAL_BINDING (binding)->literal = g_strdup (literal);
+	TRACKER_LITERAL_BINDING (binding)->bytes = g_bytes_ref (bytes);
+	TRACKER_LITERAL_BINDING (binding)->literal = g_bytes_get_data (bytes, NULL);
 
 	return binding;
 }

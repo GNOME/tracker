@@ -94,7 +94,8 @@ struct _TrackerBindingClass {
 /* Represents a mapping of a SPARQL literal to a SQL table and column */
 struct _TrackerLiteralBinding {
 	TrackerBinding parent_instance;
-	gchar *literal;
+	GBytes *bytes;
+	const gchar *literal;
 };
 
 struct _TrackerLiteralBindingClass {
@@ -132,7 +133,7 @@ struct _TrackerVariable {
 struct _TrackerToken {
 	guint type;
 	union {
-		gchar *literal;
+		GBytes *literal;
 		gchar *parameter;
 		TrackerVariable *var;
 		TrackerPathElement *path;
@@ -258,7 +259,7 @@ gchar * tracker_binding_get_extra_sql_expression (TrackerBinding *binding,
 
 /* Literal binding */
 GType            tracker_literal_binding_get_type (void) G_GNUC_CONST;
-TrackerBinding * tracker_literal_binding_new (const gchar      *literal,
+TrackerBinding * tracker_literal_binding_new (GBytes           *bytes,
 					      TrackerDataTable *table);
 
 /* Parameter binding */
@@ -290,7 +291,8 @@ TrackerVariableBinding * tracker_variable_get_sample_binding (TrackerVariable *v
 
 /* Token */
 void tracker_token_literal_init  (TrackerToken    *token,
-				  const gchar     *literal);
+                                  const gchar     *literal,
+                                  gsize            len);
 void tracker_token_variable_init (TrackerToken    *token,
                                   TrackerVariable *variable);
 void tracker_token_parameter_init (TrackerToken   *token,
@@ -300,7 +302,7 @@ void tracker_token_path_init      (TrackerToken       *token,
 void tracker_token_unset (TrackerToken *token);
 
 gboolean           tracker_token_is_empty     (TrackerToken *token);
-const gchar      * tracker_token_get_literal  (TrackerToken *token);
+GBytes           * tracker_token_get_literal  (TrackerToken *token);
 TrackerVariable  * tracker_token_get_variable (TrackerToken *token);
 const gchar      * tracker_token_get_idstring (TrackerToken *token);
 const gchar      * tracker_token_get_parameter (TrackerToken *token);
