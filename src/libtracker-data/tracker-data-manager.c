@@ -481,6 +481,7 @@ update_property_value (TrackerDataManager  *manager,
 	GError *error = NULL;
 	gboolean needed = TRUE;
 	gboolean is_new = FALSE;
+	GBytes *bytes;
 
 	if (class) {
 		is_new = tracker_class_get_is_new (class);
@@ -521,7 +522,10 @@ update_property_value (TrackerDataManager  *manager,
 				}
 
 				if (!unsup_onto_err) {
-					tracker_data_delete_statement (manager->data_update, NULL, subject, predicate, str, &error);
+					bytes = g_bytes_new (str, strlen (str) + 1);
+					tracker_data_delete_statement (manager->data_update, NULL, subject, predicate, bytes, &error);
+					g_bytes_unref (bytes);
+
 					if (!error)
 						tracker_data_update_buffer_flush (manager->data_update, &error);
 				}
@@ -544,9 +548,12 @@ update_property_value (TrackerDataManager  *manager,
 
 
 	if (!error && needed && object) {
+		bytes = g_bytes_new (object, strlen (object) + 1);
 		tracker_data_insert_statement (manager->data_update, NULL, subject,
-		                               predicate, object,
+		                               predicate, bytes,
 		                               &error);
+		g_bytes_unref (bytes);
+
 		if (!error)
 			tracker_data_update_buffer_flush (manager->data_update, &error);
 	}
@@ -1332,17 +1339,22 @@ check_for_deleted_domain_index (TrackerDataManager *manager,
 		for (l = deleted; l != NULL; l = l->next) {
 			GError *error = NULL;
 			TrackerProperty *prop = l->data;
+			const gchar *uri;
+			GBytes *bytes;
 
 			g_debug ("Ontology change: deleting tracker:domainIndex: %s",
 			         tracker_property_get_name (prop));
 			tracker_property_del_domain_index (prop, class);
 			tracker_class_del_domain_index (class, prop);
 
+			uri = tracker_property_get_uri (prop);
+			bytes = g_bytes_new (uri, strlen (uri) + 1);
 			tracker_data_delete_statement (manager->data_update, NULL,
 			                               tracker_class_get_uri (class),
 			                               TRACKER_PREFIX_TRACKER "domainIndex",
-			                               tracker_property_get_uri (prop),
+			                               bytes,
 			                               &error);
+			g_bytes_unref (bytes);
 
 			if (error) {
 				g_critical ("Ontology change, %s", error->message);
@@ -1511,12 +1523,15 @@ check_for_deleted_super_properties (TrackerDataManager  *manager,
 			TrackerProperty *prop_to_remove = copy->data;
 			const gchar *object = tracker_property_get_uri (prop_to_remove);
 			const gchar *subject = tracker_property_get_uri (property);
+			GBytes *bytes;
 
 			tracker_property_del_super_property (property, prop_to_remove);
 
+			bytes = g_bytes_new (object, strlen (object) + 1);
 			tracker_data_delete_statement (manager->data_update, NULL, subject,
 			                               TRACKER_PREFIX_RDFS "subPropertyOf",
-			                               object, &n_error);
+			                               bytes, &n_error);
+			g_bytes_unref (bytes);
 
 			if (!n_error) {
 				tracker_data_update_buffer_flush (manager->data_update, &n_error);
@@ -1945,6 +1960,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
                                          gboolean            in_update)
 {
 	GError *error = NULL;
+	GBytes *bytes;
 
 	if (g_strcmp0 (predicate, RDF_TYPE) == 0) {
 		if (g_strcmp0 (object, RDFS_CLASS) == 0) {
@@ -2019,27 +2035,24 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 		}
 	}
 
+	bytes = g_bytes_new (object, strlen (object) + 1);
+
 	if (is_uri) {
 		tracker_data_insert_statement_with_uri (manager->data_update, NULL, subject,
-		                                        predicate, object,
+		                                        predicate, bytes,
 		                                        &error);
-
-		if (error != NULL) {
-			g_critical ("%s", error->message);
-			g_error_free (error);
-			return;
-		}
-
 	} else {
 		tracker_data_insert_statement_with_string (manager->data_update, NULL, subject,
-		                                           predicate, object,
+		                                           predicate, bytes,
 		                                           &error);
+	}
 
-		if (error != NULL) {
-			g_critical ("%s", error->message);
-			g_error_free (error);
-			return;
-		}
+	g_bytes_unref (bytes);
+
+	if (error != NULL) {
+		g_critical ("%s", error->message);
+		g_error_free (error);
+		return;
 	}
 }
 
