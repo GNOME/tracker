@@ -1205,9 +1205,7 @@ tracker_data_blank_buffer_flush (TrackerData  *data,
 
 static void
 cache_create_service_decomposed (TrackerData  *data,
-                                 TrackerClass *cl,
-                                 const gchar  *graph,
-                                 gint          graph_id)
+                                 TrackerClass *cl)
 {
 	TrackerClass       **super_classes;
 	TrackerProperty    **domain_indexes;
@@ -1218,7 +1216,7 @@ cache_create_service_decomposed (TrackerData  *data,
 	/* also create instance of all super classes */
 	super_classes = tracker_class_get_super_classes (cl);
 	while (*super_classes) {
-		cache_create_service_decomposed (data, *super_classes, graph, graph_id);
+		cache_create_service_decomposed (data, *super_classes);
 		super_classes++;
 	}
 
@@ -1254,7 +1252,9 @@ cache_create_service_decomposed (TrackerData  *data,
 			TrackerStatementDelegate *delegate;
 
 			delegate = g_ptr_array_index (data->insert_callbacks, n);
-			delegate->callback (graph_id, graph, data->resource_buffer->id, data->resource_buffer->subject,
+			delegate->callback (data->resource_buffer->graph->id,
+			                    data->resource_buffer->graph->graph,
+			                    data->resource_buffer->id, data->resource_buffer->subject,
 			                    tracker_property_get_id (tracker_ontologies_get_rdf_type (ontologies)),
 			                    class_id,
 			                    tracker_class_get_uri (cl),
@@ -1679,9 +1679,7 @@ static void
 process_domain_indexes (TrackerData     *data,
                         TrackerProperty *property,
                         GValue          *gvalue,
-                        const gchar     *field_name,
-                        const gchar     *graph,
-                        gint             graph_id)
+                        const gchar     *field_name)
 {
 	TrackerClass **domain_index_classes;
 
@@ -1710,8 +1708,6 @@ cache_insert_metadata_decomposed (TrackerData      *data,
                                   TrackerProperty  *property,
                                   const gchar      *value,
                                   gint              value_id,
-                                  const gchar      *graph,
-                                  gint              graph_id,
                                   GError          **error)
 {
 	gboolean            multiple_values;
@@ -1741,7 +1737,7 @@ cache_insert_metadata_decomposed (TrackerData      *data,
 
 		if (super_is_multi || old_values->len == 0) {
 			change |= cache_insert_metadata_decomposed (data, *super_properties, value, value_id,
-			                                            graph, graph_id, &new_error);
+			                                            &new_error);
 			if (new_error) {
 				g_propagate_error (error, new_error);
 				return FALSE;
@@ -1812,7 +1808,7 @@ cache_insert_metadata_decomposed (TrackerData      *data,
 		                    tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME);
 
 		if (!multiple_values) {
-			process_domain_indexes (data, property, &gvalue, field_name, graph, graph_id);
+			process_domain_indexes (data, property, &gvalue, field_name);
 		}
 
 		change = TRUE;
@@ -1825,10 +1821,9 @@ static gboolean
 delete_first_object (TrackerData      *data,
                      TrackerProperty  *field,
                      GArray           *old_values,
-                     const gchar      *graph,
                      GError          **error)
 {
-	gint pred_id = 0, graph_id = 0;
+	gint pred_id = 0;
 	gint object_id = 0;
 	gboolean change = FALSE;
 
@@ -1837,7 +1832,6 @@ delete_first_object (TrackerData      *data,
 	}
 
 	pred_id = tracker_property_get_id (field);
-	graph_id = (graph != NULL ? query_resource_id (data, graph) : 0);
 
 	if (tracker_property_get_data_type (field) == TRACKER_PROPERTY_TYPE_RESOURCE) {
 		GError *new_error = NULL;
@@ -1876,7 +1870,8 @@ delete_first_object (TrackerData      *data,
 				TrackerStatementDelegate *delegate;
 
 				delegate = g_ptr_array_index (data->delete_callbacks, n);
-				delegate->callback (graph_id, graph,
+				delegate->callback (data->resource_buffer->graph->id,
+				                    data->resource_buffer->graph->graph,
 				                    data->resource_buffer->id,
 				                    data->resource_buffer->subject,
 				                    pred_id, object_id,
@@ -1898,7 +1893,6 @@ cache_update_metadata_decomposed (TrackerData      *data,
                                   const gchar      *value,
                                   gint              value_id,
                                   const gchar      *graph,
-                                  gint              graph_id,
                                   GError          **error)
 {
 	gboolean            multiple_values;
@@ -1933,7 +1927,6 @@ cache_update_metadata_decomposed (TrackerData      *data,
 			/* Delete old values from super */
 			change |= delete_first_object (data, *super_properties,
 			                               old_values,
-			                               graph,
 			                               &new_error);
 
 			if (new_error) {
@@ -1959,7 +1952,7 @@ cache_update_metadata_decomposed (TrackerData      *data,
 		}
 
 		change |= cache_update_metadata_decomposed (data, *super_properties, value, value_id,
-		                                            graph, graph_id, &new_error);
+		                                            graph, &new_error);
 		if (new_error) {
 			g_propagate_error (error, new_error);
 			return FALSE;
@@ -1988,7 +1981,7 @@ cache_update_metadata_decomposed (TrackerData      *data,
 	                    tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME);
 
 	if (!multiple_values) {
-		process_domain_indexes (data, property, &gvalue, field_name, graph, graph_id);
+		process_domain_indexes (data, property, &gvalue, field_name);
 	}
 
 	return TRUE;
@@ -2104,8 +2097,6 @@ db_delete_row (TrackerDBInterface *iface,
 static void
 cache_delete_resource_type_full (TrackerData  *data,
                                  TrackerClass *class,
-                                 const gchar  *graph,
-                                 gint          graph_id,
                                  gboolean      single_type)
 {
 	TrackerDBInterface *iface;
@@ -2135,10 +2126,7 @@ cache_delete_resource_type_full (TrackerData  *data,
 
 				type = g_ptr_array_index (data->resource_buffer->types,
 				                          data->resource_buffer->types->len - 1);
-				cache_delete_resource_type_full (data, type,
-				                                 graph,
-				                                 graph_id,
-				                                 TRUE);
+				cache_delete_resource_type_full (data, type, TRUE);
 			}
 
 			return;
@@ -2177,7 +2165,7 @@ cache_delete_resource_type_full (TrackerData  *data,
 
 				class_uri = tracker_db_cursor_get_string (cursor, 0, NULL);
 				cache_delete_resource_type_full (data, tracker_ontologies_get_class_by_uri (ontologies, class_uri),
-					                         graph, graph_id, FALSE);
+					                         FALSE);
 			}
 
 			g_object_unref (cursor);
@@ -2299,7 +2287,9 @@ cache_delete_resource_type_full (TrackerData  *data,
 			TrackerStatementDelegate *delegate;
 
 			delegate = g_ptr_array_index (data->delete_callbacks, n);
-			delegate->callback (graph_id, graph, data->resource_buffer->id, data->resource_buffer->subject,
+			delegate->callback (data->resource_buffer->graph->id,
+			                    data->resource_buffer->graph->graph,
+			                    data->resource_buffer->id, data->resource_buffer->subject,
 			                    tracker_property_get_id (tracker_ontologies_get_rdf_type (ontologies)),
 			                    tracker_class_get_id (class),
 			                    tracker_class_get_uri (class),
@@ -2313,11 +2303,9 @@ cache_delete_resource_type_full (TrackerData  *data,
 
 static void
 cache_delete_resource_type (TrackerData  *data,
-                            TrackerClass *class,
-                            const gchar  *graph,
-                            gint          graph_id)
+                            TrackerClass *class)
 {
-	cache_delete_resource_type_full (data, class, graph, graph_id, FALSE);
+	cache_delete_resource_type_full (data, class, FALSE);
 }
 
 static TrackerDataUpdateBufferGraph *
@@ -2443,7 +2431,7 @@ tracker_data_delete_statement (TrackerData  *data,
 		class = tracker_ontologies_get_class_by_uri (ontologies, object);
 		if (class != NULL) {
 			data->has_persistent = TRUE;
-			cache_delete_resource_type (data, class, graph, graph_id);
+			cache_delete_resource_type (data, class);
 		} else {
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_CLASS,
 			             "Class '%s' not found in the ontology", object);
@@ -2520,7 +2508,7 @@ delete_all_objects (TrackerData  *data,
 		while (old_values->len > 0) {
 			GError *new_error = NULL;
 
-			change |= delete_first_object (data, field, old_values, graph, &new_error);
+			change |= delete_first_object (data, field, old_values, &new_error);
 
 			if (new_error) {
 				g_propagate_error (error, new_error);
@@ -2736,7 +2724,7 @@ tracker_data_insert_statement_with_uri (TrackerData  *data,
 		   cope with inference and insert blank rows */
 		class = tracker_ontologies_get_class_by_uri (ontologies, object);
 		if (class != NULL) {
-			cache_create_service_decomposed (data, class, graph, graph_id);
+			cache_create_service_decomposed (data, class);
 		} else {
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_CLASS,
 			             "Class '%s' not found in the ontology", object);
@@ -2749,7 +2737,7 @@ tracker_data_insert_statement_with_uri (TrackerData  *data,
 		change = TRUE;
 	} else {
 		/* add value to metadata database */
-		change = cache_insert_metadata_decomposed (data, property, object, 0, graph, graph_id, &actual_error);
+		change = cache_insert_metadata_decomposed (data, property, object, 0, &actual_error);
 		if (actual_error) {
 			g_propagate_error (error, actual_error);
 			return;
@@ -2828,7 +2816,7 @@ tracker_data_insert_statement_with_string (TrackerData  *data,
 		graph_id = tracker_data_manager_find_graph (data->manager, graph);
 
 	/* add value to metadata database */
-	change = cache_insert_metadata_decomposed (data, property, object, 0, graph, graph_id, &actual_error);
+	change = cache_insert_metadata_decomposed (data, property, object, 0, &actual_error);
 	if (actual_error) {
 		g_propagate_error (error, actual_error);
 		return;
@@ -2923,7 +2911,7 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 		class = tracker_ontologies_get_class_by_uri (ontologies, object);
 		if (class != NULL) {
 			/* Create here is fine for Update too */
-			cache_create_service_decomposed (data, class, graph, graph_id);
+			cache_create_service_decomposed (data, class);
 		} else {
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_CLASS,
 			             "Class '%s' not found in the ontology", object);
@@ -3004,7 +2992,7 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 		}
 
 		/* update or add value to metadata database */
-		change = cache_update_metadata_decomposed (data, property, object, 0, graph, 0, &actual_error);
+		change = cache_update_metadata_decomposed (data, property, object, 0, graph, &actual_error);
 		if (actual_error) {
 			g_propagate_error (error, actual_error);
 			return;
@@ -3121,7 +3109,7 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 #endif /* HAVE_TRACKER_FTS */
 
 	/* add or update value to metadata database */
-	change = cache_update_metadata_decomposed (data, property, object, 0, graph, 0, &actual_error);
+	change = cache_update_metadata_decomposed (data, property, object, 0, graph, &actual_error);
 	if (actual_error) {
 		g_propagate_error (error, actual_error);
 		return;
