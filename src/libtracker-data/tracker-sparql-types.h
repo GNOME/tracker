@@ -292,7 +292,7 @@ TrackerVariableBinding * tracker_variable_get_sample_binding (TrackerVariable *v
 /* Token */
 void tracker_token_literal_init  (TrackerToken    *token,
                                   const gchar     *literal,
-                                  gsize            len);
+                                  gssize           len);
 void tracker_token_variable_init (TrackerToken    *token,
                                   TrackerVariable *variable);
 void tracker_token_parameter_init (TrackerToken   *token,
