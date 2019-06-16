@@ -1090,7 +1090,7 @@ _add_quad (TrackerSparql  *sparql,
 			g_set_error (error, TRACKER_SPARQL_ERROR,
 			             TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
 			             "Unknown graph '%s'",
-			             tracker_token_get_literal (graph));
+			             tracker_token_get_idstring (graph));
 			return FALSE;
 		}
 	}
@@ -1100,25 +1100,25 @@ _add_quad (TrackerSparql  *sparql,
 		const gchar *db_table;
 
 		property = tracker_ontologies_get_property_by_uri (ontologies,
-		                                                   tracker_token_get_literal (predicate));
+		                                                   tracker_token_get_idstring(predicate));
 
 		if (tracker_token_get_literal (object) &&
-		    g_strcmp0 (tracker_token_get_literal (predicate), RDF_NS "type") == 0) {
+		    g_strcmp0 (tracker_token_get_idstring (predicate), RDF_NS "type") == 0) {
 			/* rdf:type query */
 			subject_type = tracker_ontologies_get_class_by_uri (ontologies,
-			                                                    tracker_token_get_literal (object));
+			                                                    tracker_token_get_idstring (object));
 			if (!subject_type) {
 				g_set_error (error, TRACKER_SPARQL_ERROR,
 					     TRACKER_SPARQL_ERROR_UNKNOWN_CLASS,
 					     "Unknown class '%s'",
-				             tracker_token_get_literal (object));
+				             tracker_token_get_idstring (object));
 				return FALSE;
 			}
 
 			is_rdf_type = TRUE;
 			db_table = tracker_class_get_name (subject_type);
 			share_table = !tracker_token_is_empty (graph);
-		} else if (g_strcmp0 (tracker_token_get_literal (predicate), FTS_NS "match") == 0) {
+		} else if (g_strcmp0 (tracker_token_get_idstring (predicate), FTS_NS "match") == 0) {
 			db_table = "fts5";
 			share_table = FALSE;
 			is_fts = TRUE;
@@ -1172,7 +1172,7 @@ _add_quad (TrackerSparql  *sparql,
 			g_set_error (error, TRACKER_SPARQL_ERROR,
 				     TRACKER_SPARQL_ERROR_UNKNOWN_PROPERTY,
 				     "Unknown property '%s'",
-			             tracker_token_get_literal (predicate));
+			             tracker_token_get_idstring (predicate));
 			return FALSE;
 		}
 
@@ -1218,7 +1218,7 @@ _add_quad (TrackerSparql  *sparql,
 			variable = tracker_token_get_variable (subject);
 			binding = tracker_variable_binding_new (variable, subject_type, table);
 		} else if (tracker_token_get_literal (subject)) {
-			binding = tracker_literal_binding_new (tracker_token_get_literal (subject),
+			binding = tracker_literal_binding_new (tracker_token_get_idstring (subject),
 			                                       table);
 		} else if (tracker_token_get_parameter (subject)) {
 			binding = tracker_parameter_binding_new (tracker_token_get_parameter (subject),
@@ -1282,7 +1282,7 @@ _add_quad (TrackerSparql  *sparql,
 		g_object_unref (binding);
 	} else if (is_fts) {
 		if (tracker_token_get_literal (object)) {
-			binding = tracker_literal_binding_new (tracker_token_get_literal (object), table);
+			binding = tracker_literal_binding_new (tracker_token_get_idstring (object), table);
 		} else if (tracker_token_get_parameter (object)) {
 			binding = tracker_parameter_binding_new (tracker_token_get_parameter (object), table);
 		} else {
@@ -1330,7 +1330,7 @@ _add_quad (TrackerSparql  *sparql,
 		}
 	} else {
 		if (tracker_token_get_literal (object)) {
-			binding = tracker_literal_binding_new (tracker_token_get_literal (object), table);
+			binding = tracker_literal_binding_new (tracker_token_get_idstring (object), table);
 		} else if (tracker_token_get_parameter (object)) {
 			binding = tracker_parameter_binding_new (tracker_token_get_parameter (object), table);
 		} else {
@@ -2157,7 +2157,7 @@ translate_DescribeQuery (TrackerSparql  *sparql,
 			_init_token (&resource, sparql->current_state.prev_node, sparql);
 
 			if (tracker_token_get_literal (&resource)) {
-				binding = tracker_literal_binding_new (tracker_token_get_literal (&resource),
+				binding = tracker_literal_binding_new (tracker_token_get_idstring (&resource),
 				                                       NULL);
 			} else {
 				TrackerVariable *variable;
