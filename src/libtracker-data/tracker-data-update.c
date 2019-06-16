@@ -54,10 +54,6 @@ struct _TrackerDataUpdateBuffer {
 	/* string -> TrackerDataUpdateBufferGraph */
 	GPtrArray *graphs;
 
-	/* the following two fields are valid per sqlite transaction, not just for same subject */
-	/* TrackerClass -> integer */
-	GHashTable *class_counts;
-
 #if HAVE_TRACKER_FTS
 	gboolean fts_ever_updated;
 #endif
@@ -750,25 +746,6 @@ statement_bind_gvalue (TrackerDBStatement *stmt,
 }
 
 static void
-add_class_count (TrackerData  *data,
-                 TrackerClass *class,
-                 gint          count)
-{
-	gint old_count_entry;
-
-	tracker_class_set_count (class, tracker_class_get_count (class) + count);
-
-	/* update class_counts table so that the count change can be reverted in case of rollback */
-	if (!data->update_buffer.class_counts) {
-		data->update_buffer.class_counts = g_hash_table_new (g_direct_hash, g_direct_equal);
-	}
-
-	old_count_entry = GPOINTER_TO_INT (g_hash_table_lookup (data->update_buffer.class_counts, class));
-	g_hash_table_insert (data->update_buffer.class_counts, class,
-	                     GINT_TO_POINTER (old_count_entry + count));
-}
-
-static void
 tracker_data_resource_buffer_flush (TrackerData                      *data,
                                     TrackerDataUpdateBufferResource  *resource,
                                     GError                          **error)
@@ -849,10 +826,6 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 				if (actual_error) {
 					g_propagate_error (error, actual_error);
 					return;
-				}
-
-				if (table->class) {
-					add_class_count (data, table->class, -1);
 				}
 
 				/* remove row from class table */
@@ -1090,24 +1063,6 @@ tracker_data_update_buffer_clear (TrackerData *data)
 #if HAVE_TRACKER_FTS
 	data->update_buffer.fts_ever_updated = FALSE;
 #endif
-
-	if (data->update_buffer.class_counts) {
-		/* revert class count changes */
-
-		GHashTableIter iter;
-		TrackerClass *class;
-		gpointer count_ptr;
-
-		g_hash_table_iter_init (&iter, data->update_buffer.class_counts);
-		while (g_hash_table_iter_next (&iter, (gpointer*) &class, &count_ptr)) {
-			gint count;
-
-			count = GPOINTER_TO_INT (count_ptr);
-			tracker_class_set_count (class, tracker_class_get_count (class) - count);
-		}
-
-		g_hash_table_remove_all (data->update_buffer.class_counts);
-	}
 }
 
 static void
@@ -1149,8 +1104,6 @@ cache_create_service_decomposed (TrackerData  *data,
 	g_value_set_int64 (&gvalue, class_id);
 	cache_insert_value (data, "rdfs:Resource_rdf:type", "rdf:type",
 	                    &gvalue, TRUE, FALSE, FALSE);
-
-	add_class_count (data, cl, 1);
 
 	if (data->insert_callbacks) {
 		guint n;
@@ -2084,8 +2037,6 @@ cache_delete_resource_type_full (TrackerData  *data,
 				error = NULL;
 			}
 		}
-
-		add_class_count (data, class, -1);
 	} else {
 		cache_delete_row (data, class);
 	}
@@ -2994,12 +2945,6 @@ tracker_data_commit_transaction (TrackerData  *data,
 	data->resource_time = 0;
 	data->in_transaction = FALSE;
 	data->in_ontology_transaction = FALSE;
-
-	if (data->update_buffer.class_counts) {
-		/* successful transaction, no need to rollback class counts,
-		   so remove them */
-		g_hash_table_remove_all (data->update_buffer.class_counts);
-	}
 
 #if HAVE_TRACKER_FTS
 	if (data->update_buffer.fts_ever_updated) {
