@@ -109,19 +109,6 @@ struct _TrackerDataUpdateBufferTable {
 	GArray *properties;
 };
 
-/* buffer for anonymous blank nodes
- * that are not yet in the database */
-struct _TrackerDataBlankBuffer {
-	GHashTable *table;
-	gchar *subject;
-	/* string */
-	GArray *predicates;
-	/* string */
-	GArray *objects;
-	/* string */
-	GArray *graphs;
-};
-
 struct _TrackerStatementDelegate {
 	TrackerStatementCallback callback;
 	gpointer user_data;
@@ -143,7 +130,6 @@ struct _TrackerData {
 
 	/* current resource */
 	TrackerDataUpdateBufferResource *resource_buffer;
-	TrackerDataBlankBuffer blank_buffer;
 	time_t resource_time;
 	gint transaction_modseq;
 	gboolean has_persistent;
@@ -1121,82 +1107,6 @@ tracker_data_update_buffer_clear (TrackerData *data)
 		}
 
 		g_hash_table_remove_all (data->update_buffer.class_counts);
-	}
-}
-
-static void
-tracker_data_blank_buffer_flush (TrackerData  *data,
-                                 GError      **error)
-{
-	/* end of blank node */
-	gint i;
-	gint id;
-	gchar *subject;
-	gchar *blank_uri;
-	const gchar *sha1;
-	GChecksum *checksum;
-	GError *actual_error = NULL;
-	TrackerDBInterface *iface;
-
-	subject = data->blank_buffer.subject;
-	data->blank_buffer.subject = NULL;
-
-	/* we share anonymous blank nodes with identical properties
-	   to avoid blowing up the database with duplicates */
-
-	checksum = g_checksum_new (G_CHECKSUM_SHA1);
-
-	/* generate hash uri from data to find resource
-	   assumes no collisions due to generally little contents of anonymous nodes */
-	for (i = 0; i < data->blank_buffer.predicates->len; i++) {
-		if (g_array_index (data->blank_buffer.graphs, guchar *, i) != NULL) {
-			g_checksum_update (checksum, g_array_index (data->blank_buffer.graphs, guchar *, i), -1);
-		}
-
-		g_checksum_update (checksum, g_array_index (data->blank_buffer.predicates, guchar *, i), -1);
-		g_checksum_update (checksum, g_array_index (data->blank_buffer.objects, guchar *, i), -1);
-	}
-
-	sha1 = g_checksum_get_string (checksum);
-
-	/* generate name based uuid */
-	blank_uri = g_strdup_printf ("urn:uuid:%.8s-%.4s-%.4s-%.4s-%.12s",
-	                             sha1, sha1 + 8, sha1 + 12, sha1 + 16, sha1 + 20);
-
-	iface = tracker_data_manager_get_writable_db_interface (data->manager);
-	id = tracker_data_query_resource_id (data->manager, iface, blank_uri);
-
-	if (id == 0) {
-		/* uri not found
-		   replay piled up statements to create resource */
-		for (i = 0; i < data->blank_buffer.predicates->len; i++) {
-			tracker_data_insert_statement (data,
-			                               g_array_index (data->blank_buffer.graphs, gchar *, i),
-			                               blank_uri,
-			                               g_array_index (data->blank_buffer.predicates, gchar *, i),
-			                               g_array_index (data->blank_buffer.objects, gchar *, i),
-			                               &actual_error);
-			if (actual_error) {
-				break;
-			}
-		}
-	}
-
-	/* free piled up statements */
-	for (i = 0; i < data->blank_buffer.predicates->len; i++) {
-		g_free (g_array_index (data->blank_buffer.graphs, gchar *, i));
-		g_free (g_array_index (data->blank_buffer.predicates, gchar *, i));
-		g_free (g_array_index (data->blank_buffer.objects, gchar *, i));
-	}
-	g_array_remove_range (data->blank_buffer.graphs, 0, data->blank_buffer.graphs->len);
-	g_array_remove_range (data->blank_buffer.predicates, 0, data->blank_buffer.predicates->len);
-	g_array_remove_range (data->blank_buffer.objects, 0, data->blank_buffer.objects->len);
-
-	g_hash_table_insert (data->blank_buffer.table, subject, blank_uri);
-	g_checksum_free (checksum);
-
-	if (actual_error) {
-		g_propagate_error (error, actual_error);
 	}
 }
 
@@ -2444,57 +2354,6 @@ delete_all_objects (TrackerData  *data,
 	}
 }
 
-static gboolean
-tracker_data_insert_statement_common (TrackerData  *data,
-                                      const gchar  *graph,
-                                      const gchar  *subject,
-                                      const gchar  *predicate,
-                                      const gchar  *object,
-                                      GError      **error)
-{
-	if (g_str_has_prefix (subject, ":")) {
-		/* blank node definition
-		   pile up statements until the end of the blank node */
-		gchar *value;
-		GError *actual_error = NULL;
-
-		if (data->blank_buffer.subject != NULL) {
-			/* active subject in buffer */
-			if (strcmp (data->blank_buffer.subject, subject) != 0) {
-				/* subject changed, need to flush buffer */
-				tracker_data_blank_buffer_flush (data, &actual_error);
-
-				if (actual_error) {
-					g_propagate_error (error, actual_error);
-					return FALSE;
-				}
-			}
-		}
-
-		if (data->blank_buffer.subject == NULL) {
-			data->blank_buffer.subject = g_strdup (subject);
-			if (data->blank_buffer.graphs == NULL) {
-				data->blank_buffer.graphs = g_array_sized_new (FALSE, FALSE, sizeof (char*), 4);
-				data->blank_buffer.predicates = g_array_sized_new (FALSE, FALSE, sizeof (char*), 4);
-				data->blank_buffer.objects = g_array_sized_new (FALSE, FALSE, sizeof (char*), 4);
-			}
-		}
-
-		value = g_strdup (graph);
-		g_array_append_val (data->blank_buffer.graphs, value);
-		value = g_strdup (predicate);
-		g_array_append_val (data->blank_buffer.predicates, value);
-		value = g_strdup (object);
-		g_array_append_val (data->blank_buffer.objects, value);
-
-		return FALSE;
-	}
-
-	resource_buffer_switch (data, graph, subject, 0);
-
-	return TRUE;
-}
-
 void
 tracker_data_insert_statement (TrackerData  *data,
                                const gchar  *graph,
@@ -2523,57 +2382,6 @@ tracker_data_insert_statement (TrackerData  *data,
 	} else {
 		g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_UNKNOWN_PROPERTY,
 		             "Property '%s' not found in the ontology", predicate);
-	}
-}
-
-
-static gboolean
-handle_blank_node (TrackerData  *data,
-                   const gchar  *subject,
-                   const gchar  *predicate,
-                   const gchar  *object,
-                   const gchar  *graph,
-                   gboolean      update,
-                   GError      **error)
-{
-	GError *actual_error = NULL;
-	/* anonymous blank node used as object in a statement */
-	const gchar *blank_uri;
-
-	if (data->blank_buffer.subject != NULL) {
-		if (strcmp (data->blank_buffer.subject, object) == 0) {
-			/* object still in blank buffer, need to flush buffer */
-			tracker_data_blank_buffer_flush (data, &actual_error);
-
-			if (actual_error) {
-				g_propagate_error (error, actual_error);
-				return FALSE;
-			}
-		}
-	}
-
-	blank_uri = g_hash_table_lookup (data->blank_buffer.table, object);
-
-	if (blank_uri != NULL) {
-		/* now insert statement referring to blank node */
-		if (update) {
-			tracker_data_update_statement (data, graph, subject, predicate, blank_uri, &actual_error);
-		} else {
-			tracker_data_insert_statement (data, graph, subject, predicate, blank_uri, &actual_error);
-		}
-
-		g_hash_table_remove (data->blank_buffer.table, object);
-
-		if (actual_error) {
-			g_propagate_error (error, actual_error);
-			return FALSE;
-		}
-
-		return TRUE;
-	} else {
-		g_critical ("Blank node '%s' not found", object);
-
-		return FALSE;
 	}
 }
 
@@ -2618,26 +2426,7 @@ tracker_data_insert_statement_with_uri (TrackerData  *data,
 
 	data->has_persistent = TRUE;
 
-	/* subjects and objects starting with `:' are anonymous blank nodes */
-	if (g_str_has_prefix (object, ":")) {
-		if (handle_blank_node (data, subject, predicate, object, graph, FALSE, &actual_error)) {
-			return;
-		}
-
-		if (actual_error) {
-			g_propagate_error (error, actual_error);
-			return;
-		}
-	}
-
-	if (!tracker_data_insert_statement_common (data, graph, subject, predicate, object, &actual_error)) {
-		if (actual_error) {
-			g_propagate_error (error, actual_error);
-			return;
-		}
-
-		return;
-	}
+	resource_buffer_switch (data, graph, subject, 0);
 
 	if (graph)
 		graph_id = tracker_data_manager_find_graph (data->manager, graph);
@@ -2735,14 +2524,7 @@ tracker_data_insert_statement_with_string (TrackerData  *data,
 
 	data->has_persistent = TRUE;
 
-	if (!tracker_data_insert_statement_common (data, graph, subject, predicate, object, &actual_error)) {
-		if (actual_error) {
-			g_propagate_error (error, actual_error);
-			return;
-		}
-
-		return;
-	}
+	resource_buffer_switch (data, graph, subject, 0);
 
 	if (graph)
 		graph_id = tracker_data_manager_find_graph (data->manager, graph);
@@ -2818,27 +2600,7 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 
 	data->has_persistent = TRUE;
 
-	/* subjects and objects starting with `:' are anonymous blank nodes */
-	if (g_str_has_prefix (object, ":")) {
-		if (handle_blank_node (data, subject, predicate, object, graph, TRUE, &actual_error)) {
-			return;
-		}
-
-		if (actual_error) {
-			g_propagate_error (error, actual_error);
-			return;
-		}
-	}
-
-	/* Update and insert share the exact same code here */
-	if (!tracker_data_insert_statement_common (data, graph, subject, predicate, object, &actual_error)) {
-		if (actual_error) {
-			g_propagate_error (error, actual_error);
-			return;
-		}
-
-		return;
-	}
+	resource_buffer_switch (data, graph, subject, 0);
 
 	if (graph)
 		graph_id = tracker_data_manager_find_graph (data->manager, graph);
@@ -3026,15 +2788,7 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 
 	data->has_persistent = TRUE;
 
-	/* Update and insert share the exact same code here */
-	if (!tracker_data_insert_statement_common (data, graph, subject, predicate, object, &actual_error)) {
-		if (actual_error) {
-			g_propagate_error (error, actual_error);
-			return;
-		}
-
-		return;
-	}
+	resource_buffer_switch (data, graph, subject, 0);
 
 #if HAVE_TRACKER_FTS
 	/* This is unavoidable with FTS */
@@ -3191,9 +2945,6 @@ tracker_data_begin_transaction (TrackerData  *data,
 	}
 
 	data->resource_buffer = NULL;
-	if (data->blank_buffer.table == NULL) {
-		data->blank_buffer.table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-	}
 
 	iface = tracker_data_manager_get_writable_db_interface (data->manager);
 
