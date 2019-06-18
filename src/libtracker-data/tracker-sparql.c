@@ -4526,7 +4526,13 @@ translate_ArgList (TrackerSparql  *sparql,
 			_raise (PARSE, "Recursive ArgList is not allowed", "ArgList");
 
 		if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DISTINCT)) {
-			_unimplemented ("DISTINCT in ArgList");
+			/* This path is only for custom aggregate function, as per
+			 * the SPARQL recommendation, note 15 in grammar section:
+			 * "Only custom aggregate functions use the DISTINCT keyword in a function call."
+			 *
+			 * But we have none, so it's fine to bail out here.
+			 */
+			_raise (PARSE, "DISTINCT is not allowed in non-aggregate function", "ArgList");
 		}
 
 		_call_rule (sparql, NAMED_RULE_Expression, error);
