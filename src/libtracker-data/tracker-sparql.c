@@ -153,6 +153,7 @@ struct _TrackerSparql
 		TrackerPathElement *path;
 
 		GHashTable *blank_node_map;
+		TrackerVariableBinding *as_in_group_by;
 
 		const gchar *expression_list_separator;
 		TrackerPropertyType expression_type;
@@ -188,6 +189,7 @@ tracker_sparql_finalize (GObject *object)
 	tracker_token_unset (&sparql->current_state.subject);
 	tracker_token_unset (&sparql->current_state.predicate);
 	tracker_token_unset (&sparql->current_state.object);
+	g_clear_object (&sparql->current_state.as_in_group_by);
 
 	g_ptr_array_unref (sparql->named_graphs);
 	g_ptr_array_unref (sparql->anon_graphs);
@@ -2414,15 +2416,86 @@ static gboolean
 translate_GroupClause (TrackerSparql  *sparql,
                        GError        **error)
 {
+	GList *conditions = NULL, *expressions = NULL, *l;
+	gboolean variables_projected = FALSE;
+	TrackerStringBuilder *select, *old;
+	gchar *str;
+
 	/* GroupClause ::= 'GROUP' 'BY' GroupCondition+
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_GROUP);
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_BY);
+
+	/* As we still may get variables projected in the GroupCondition
+	 * clauses, we need to preprocess those so we can do a final
+	 * SELECT *, $variables FROM (...) surrounding the resulting
+	 * query.
+	 */
+	while (_check_in_rule (sparql, NAMED_RULE_GroupCondition)) {
+		TrackerParserNode *node;
+
+		node = _skip_rule (sparql, NAMED_RULE_GroupCondition);
+		conditions = g_list_prepend (conditions, node);
+	}
+
+	for (l = conditions; l; l = l->next) {
+		TrackerStringBuilder *expr;
+
+		expr = tracker_string_builder_new ();
+
+		if (!_postprocess_rule (sparql, l->data, expr, error)) {
+			g_object_unref (expr);
+			g_list_free_full (expressions, g_object_unref);
+			g_list_free (conditions);
+			return FALSE;
+		}
+
+		if (sparql->current_state.as_in_group_by) {
+			TrackerVariableBinding *binding = sparql->current_state.as_in_group_by;
+			TrackerVariable *var = tracker_variable_binding_get_variable (binding);
+
+			if (!variables_projected) {
+				select = _prepend_placeholder (sparql);
+				old = tracker_sparql_swap_builder (sparql, select);
+				variables_projected = TRUE;
+				_append_string (sparql, "FROM (SELECT * ");
+			}
+
+			_append_string (sparql, ", ");
+
+			str = tracker_string_builder_to_string (expr);
+			tracker_string_builder_append (select, str, -1);
+			g_free (str);
+
+			_append_string (sparql, "AS ");
+			_append_variable_sql (sparql, var);
+			expressions = g_list_prepend (expressions,
+			                              g_strdup (tracker_variable_get_sql_expression (var)));
+			g_clear_object (&sparql->current_state.as_in_group_by);
+		} else {
+			str = tracker_string_builder_to_string (expr);
+			expressions = g_list_prepend (expressions, str);
+		}
+
+		tracker_string_builder_free (expr);
+	}
+
+	if (variables_projected) {
+		tracker_sparql_swap_builder (sparql, old);
+		_append_string (sparql, ") ");
+	}
+
 	_append_string (sparql, "GROUP BY ");
 
-	while (_check_in_rule (sparql, NAMED_RULE_GroupCondition)) {
-		_call_rule (sparql, NAMED_RULE_GroupCondition, error);
+	for (l = expressions; l; l = l->next) {
+		if (l != expressions)
+			_append_string (sparql, ", ");
+
+		_append_string_printf (sparql, "%s ", l->data);
 	}
+
+	g_list_free_full (expressions, g_free);
+	g_list_free (conditions);
 
 	return TRUE;
 }
@@ -2433,11 +2506,25 @@ translate_GroupCondition (TrackerSparql  *sparql,
 {
 	/* GroupCondition ::= BuiltInCall | FunctionCall | '(' Expression ( 'AS' Var )? ')' | Var
 	 */
+	sparql->current_state.as_in_group_by = NULL;
+
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS)) {
+		TrackerPropertyType expr_type;
 		_call_rule (sparql, NAMED_RULE_Expression, error);
+		expr_type = sparql->current_state.expression_type;
 
 		if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_AS)) {
-			_unimplemented ("AS in GROUP BY");
+			TrackerVariable *var;
+			TrackerBinding *binding;
+
+			_call_rule (sparql, NAMED_RULE_Var, error);
+			var = _last_node_variable (sparql);
+
+			binding = tracker_variable_binding_new (var, NULL, NULL);
+			tracker_binding_set_data_type (binding, expr_type);
+			tracker_variable_set_sample_binding (var, TRACKER_VARIABLE_BINDING (binding));
+
+			sparql->current_state.as_in_group_by = TRACKER_VARIABLE_BINDING (binding);
 		}
 
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
