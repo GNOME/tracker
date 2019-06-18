@@ -2057,13 +2057,15 @@ translate_SelectQuery (TrackerSparql  *sparql,
                        GError        **error)
 {
 	TrackerParserNode *select_clause;
-	TrackerStringBuilder *str;
+	TrackerStringBuilder *select, *str, *old;
 
 	/* SelectQuery ::= SelectClause DatasetClause* WhereClause SolutionModifier
 	 */
 
 	/* Skip select clause here */
+	select = _append_placeholder (sparql);
 	str = _append_placeholder (sparql);
+	old = tracker_sparql_swap_builder (sparql, str);
 	select_clause = _skip_rule (sparql, NAMED_RULE_SelectClause);
 
 	while (_check_in_rule (sparql, NAMED_RULE_DatasetClause)) {
@@ -2075,13 +2077,15 @@ translate_SelectQuery (TrackerSparql  *sparql,
 	if (!_check_undefined_variables (sparql, TRACKER_SELECT_CONTEXT (sparql->context), error))
 		return FALSE;
 
+	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+
+	tracker_sparql_swap_builder (sparql, old);
+
 	/* Now that we have all variable/binding information available,
 	 * process the select clause.
 	 */
-	if (!_postprocess_rule (sparql, select_clause, str, error))
+	if (!_postprocess_rule (sparql, select_clause, select, error))
 		return FALSE;
-
-	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
 
 	return TRUE;
 }
@@ -2091,7 +2095,7 @@ translate_SubSelect (TrackerSparql  *sparql,
                      GError        **error)
 {
 	TrackerContext *context, *prev;
-	TrackerStringBuilder *str;
+	TrackerStringBuilder *select, *str, *old;
 	TrackerParserNode *select_clause;
 
 	/* SubSelect ::= SelectClause WhereClause SolutionModifier ValuesClause
@@ -2102,19 +2106,24 @@ translate_SubSelect (TrackerSparql  *sparql,
 	tracker_sparql_push_context (sparql, context);
 
 	/* Skip select clause here */
+	select = _append_placeholder (sparql);
 	str = _append_placeholder (sparql);
+	old = tracker_sparql_swap_builder (sparql, str);
+
 	select_clause = _skip_rule (sparql, NAMED_RULE_SelectClause);
 
 	_call_rule (sparql, NAMED_RULE_WhereClause, error);
 
+	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+	_call_rule (sparql, NAMED_RULE_ValuesClause, error);
+
+	tracker_sparql_swap_builder (sparql, old);
+
 	/* Now that we have all variable/binding information available,
 	 * process the select clause.
 	 */
-	if (!_postprocess_rule (sparql, select_clause, str, error))
+	if (!_postprocess_rule (sparql, select_clause, select, error))
 		return FALSE;
-
-	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
-	_call_rule (sparql, NAMED_RULE_ValuesClause, error);
 
 	sparql->current_state.expression_type = TRACKER_SELECT_CONTEXT (context)->type;
 	tracker_sparql_pop_context (sparql, FALSE);
@@ -2258,6 +2267,8 @@ static gboolean
 translate_AskQuery (TrackerSparql  *sparql,
                     GError        **error)
 {
+	TrackerStringBuilder *str, *old;
+
 	/* AskQuery ::= 'ASK' DatasetClause* WhereClause SolutionModifier
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_ASK);
@@ -2268,8 +2279,12 @@ translate_AskQuery (TrackerSparql  *sparql,
 		_call_rule (sparql, NAMED_RULE_DatasetClause, error);
 	}
 
+	str = _append_placeholder (sparql);
+	old = tracker_sparql_swap_builder (sparql, str);
 	_call_rule (sparql, NAMED_RULE_WhereClause, error);
 	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+
+	tracker_sparql_swap_builder (sparql, old);
 
 	_append_string (sparql, ") WHEN 1 THEN 'true' WHEN 0 THEN 'false' ELSE NULL END");
 
