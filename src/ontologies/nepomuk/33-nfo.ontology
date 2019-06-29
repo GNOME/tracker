@@ -443,6 +443,13 @@ nfo:hasMediaFileListEntry a rdf:Property ;
 	rdfs:range nfo:MediaFileListEntry ;
 	tracker:writeback true .
 
+nfo:chromaprint a rdf:Property ;
+	rdfs:label "Chromaprint Fingerprint of a song" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	rdfs:domain nfo:FileHash .
+
 # Propose in nepomuk
 nfo:entryCounter a rdf:Property ;
 	rdfs:label "entry Counter" ;
