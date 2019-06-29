@@ -260,6 +260,13 @@ nmm:mbReleaseGroupID a rdf:Property ;
 	tracker:writeback true ;
 	rdfs:domain nmm:MusicAlbum .
 
+nmm:chromaprint a rdf:Property ;
+	rdfs:label "Chromaprint Fingerprint of a song" ;
+	nrl:maxCardinality 1 ;
+	rdfs:range xsd:string ;
+	tracker:writeback true ;
+	rdfs:domain nmm:MusicPiece .
+
 # This property doesn't make sense... it is the other way around
 # From the list ot the item, not from the item to the list
 nmm:videoAlbum a rdf:Property ;
