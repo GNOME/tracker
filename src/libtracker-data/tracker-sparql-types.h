@@ -77,6 +77,7 @@ struct _TrackerDataTable {
 	gchar *sql_db_tablename; /* as in db schema */
 	gchar *sql_query_tablename; /* temp. name, generated */
 	gboolean predicate_variable;
+	gboolean predicate_path;
 };
 
 struct _TrackerBinding {
@@ -239,6 +240,8 @@ struct _TrackerTripleContextClass {
 /* Data table */
 void tracker_data_table_set_predicate_variable (TrackerDataTable *table,
                                                 gboolean          is_variable);
+void tracker_data_table_set_predicate_path     (TrackerDataTable *table,
+                                                gboolean          is_path);
 
 /* Binding */
 GType              tracker_binding_get_type (void) G_GNUC_CONST;

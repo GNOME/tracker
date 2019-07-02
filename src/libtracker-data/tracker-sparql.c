@@ -556,6 +556,7 @@ _prepend_path_element (TrackerSparql      *sparql,
                        TrackerPathElement *path_elem)
 {
 	TrackerStringBuilder *old;
+	gchar *table_name, *graph_column;
 
 	old = tracker_sparql_swap_builder (sparql, sparql->current_state.with_clauses);
 
@@ -567,13 +568,29 @@ _prepend_path_element (TrackerSparql      *sparql,
 	switch (path_elem->op) {
 	case TRACKER_PATH_OPERATOR_NONE:
 		/* A simple property */
+		if (tracker_token_is_empty (&sparql->current_state.graph)) {
+			table_name = g_strdup_printf ("\"unionGraph_%s\"",
+			                              tracker_property_get_table_name (path_elem->data.property));
+			graph_column = g_strdup ("graph");
+		} else {
+			const gchar *graph;
+
+			graph = tracker_token_get_idstring (&sparql->current_state.graph);
+			table_name = g_strdup_printf ("\"%s\".\"%s\"", graph,
+			                              tracker_property_get_table_name (path_elem->data.property));
+			graph_column = g_strdup_printf ("%d",
+							tracker_data_manager_find_graph (sparql->data_manager, graph));
+		}
+
 		_append_string_printf (sparql,
 		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, \"%s\", \"%s:graph\" FROM \"%s\") ",
+		                       "(SELECT ID, \"%s\", %s FROM %s) ",
 		                       path_elem->name,
 		                       tracker_property_get_name (path_elem->data.property),
-		                       tracker_property_get_name (path_elem->data.property),
-		                       tracker_property_get_table_name (path_elem->data.property));
+		                       graph_column);
+		                       table_name);
+		g_free (table_name);
+		g_free (graph_column);
 		break;
 	case TRACKER_PATH_OPERATOR_INVERSE:
 		_append_string_printf (sparql,
@@ -649,9 +666,20 @@ _prepend_path_element (TrackerSparql      *sparql,
 		                       "\"%s\" (ID, value, graph) AS "
 		                       "(SELECT subject AS ID, object AS value, graph "
 		                       "FROM \"tracker_triples\" "
-		                       "WHERE predicate != %d",
+		                       "WHERE predicate != %d ",
 		                       path_elem->name,
 		                       tracker_property_get_id (path_elem->data.property));
+
+		if (!tracker_token_is_empty (&sparql->current_state.graph)) {
+			const gchar *graph;
+
+			graph = tracker_token_get_idstring (&sparql->current_state.graph);
+			_append_string_printf (sparql,
+					       "AND graph = %d",
+					       tracker_data_manager_find_graph (sparql->data_manager, graph));
+		}
+
+		_append_string (sparql, ") ");
 		break;
 	case TRACKER_PATH_OPERATOR_INTERSECTION:
 		_append_string_printf (sparql,
@@ -1215,6 +1243,7 @@ _add_quad (TrackerSparql  *sparql,
 		table = tracker_triple_context_add_table (triple_context,
 		                                          graph_db,
 		                                          tracker_token_get_idstring (predicate));
+		tracker_data_table_set_predicate_path (table, TRUE);
 		new_table = TRUE;
 	} else {
 		/* The parser disallows parameter predicates */
@@ -1605,6 +1634,8 @@ _end_triples_block (TrackerSparql  *sparql,
 			_append_string (sparql,
 			                "(SELECT subject AS ID, predicate, "
 			                "object, graph FROM tracker_triples) ");
+		} else if (table->predicate_path) {
+			_append_string_printf (sparql, "\"%s\"", table->sql_db_tablename);
 		} else {
 			if (table->graph) {
 				_append_string_printf (sparql, "\"%s\".\"%s\"",
