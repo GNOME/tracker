@@ -62,6 +62,13 @@ tracker_data_table_set_predicate_variable (TrackerDataTable *table,
 	table->predicate_variable = is_variable;
 }
 
+void
+tracker_data_table_set_predicate_path (TrackerDataTable *table,
+                                       gboolean          is_path)
+{
+	table->predicate_path = is_path;
+}
+
 static TrackerVariable *
 tracker_variable_new (const gchar *sql_prefix,
 		      const gchar *name)
