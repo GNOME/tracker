@@ -1099,6 +1099,22 @@ reserve_subvariable (TrackerSparql   *sparql,
 	return subvar;
 }
 
+static TrackerVariable *
+lookup_subvariable (TrackerSparql   *sparql,
+                    TrackerVariable *var,
+                    const gchar     *suffix)
+{
+	TrackerVariable *subvar;
+	gchar *name;
+
+	name = g_strdup_printf ("%s:%s", var->name, suffix);
+	subvar = tracker_select_context_lookup_variable (TRACKER_SELECT_CONTEXT (sparql->context),
+	                                                 name);
+	g_free (name);
+
+	return subvar;
+}
+
 static gboolean
 _add_quad (TrackerSparql  *sparql,
            TrackerToken   *graph,
@@ -6565,9 +6581,54 @@ helper_translate_time (TrackerSparql  *sparql,
 }
 
 static gboolean
+helper_datatype (TrackerSparql      *sparql,
+                 TrackerParserNode  *node,
+                 GError            **error)
+{
+	TrackerStringBuilder *dummy;
+	gboolean retval;
+
+	_append_string (sparql, "SparqlDataType (");
+
+	if (g_node_n_nodes ((GNode *) node, G_TRAVERSE_LEAVES) == 1) {
+		TrackerVariable *var, *type_var;
+		TrackerParserNode *arg;
+
+		arg = tracker_sparql_parser_tree_find_next (node, TRUE);
+		var = _extract_node_variable (arg, sparql);
+
+		if (var) {
+			/* This is a simple is*(?u) statement, check if the variable type is known */
+			type_var = lookup_subvariable (sparql, var, "type");
+
+			if (type_var && tracker_variable_has_bindings (type_var)) {
+				/* Exists and is known, use it */
+				_append_variable_sql (sparql, type_var);
+				_append_string (sparql, ") ");
+
+				return TRUE;
+			}
+		}
+	}
+
+	/* Redirect output to a dummy string, we just care of the parsed expression type */
+	dummy = tracker_string_builder_new ();
+	retval = _postprocess_rule (sparql, node, dummy, error);
+	tracker_string_builder_free (dummy);
+
+	if (!retval)
+		return retval;
+
+	_append_string_printf (sparql, "%d) ", sparql->current_state.expression_type);
+
+	return TRUE;
+}
+
+static gboolean
 translate_BuiltInCall (TrackerSparql  *sparql,
                        GError        **error)
 {
+	TrackerParserNode *node;
 	gboolean convert_to_string;
 	const gchar *old_sep;
 
@@ -6599,7 +6660,16 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 		tracker_sparql_swap_builder (sparql, old);
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DATATYPE)) {
-		_unimplemented ("DATATYPE");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		_append_string (sparql, "NULLIF (");
+		if (!helper_datatype (sparql, node, error))
+			return FALSE;
+
+		_append_string (sparql, ", \"" RDFS_NS "Resource\") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_URI) ||
 	           _accept (sparql, RULE_TYPE_LITERAL, LITERAL_IRI)) {
 		sparql->current_state.convert_to_string = TRUE;
@@ -6744,32 +6814,37 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISIRI) ||
 		   _accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISURI)) {
-		TrackerBinding *binding;
-		const gchar *str;
-		GBytes *bytes;
-
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
-
-		_call_rule (sparql, NAMED_RULE_Expression, error);
-
-		str = (sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_RESOURCE) ? "1" : "0";
-
-		bytes = g_bytes_new (str, strlen (str) + 1);
-		binding = tracker_literal_binding_new (bytes, NULL);
-		g_bytes_unref (bytes);
-
-		tracker_select_context_add_literal_binding (TRACKER_SELECT_CONTEXT (sparql->context),
-		                                            TRACKER_LITERAL_BINDING (binding));
-		_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
-
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		if (!helper_datatype (sparql, node, error))
+			return FALSE;
+
+		_append_string (sparql, "== \"" RDFS_NS "Resource\" ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISBLANK)) {
 		_unimplemented ("ISBLANK");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISLITERAL)) {
-		_unimplemented ("ISLITERAL");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		if (!helper_datatype (sparql, node, error))
+			return FALSE;
+
+		_append_string (sparql, "!= \"" RDFS_NS "Resource\" ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISNUMERIC)) {
-		_unimplemented ("ISNUMERIC");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		if (!helper_datatype (sparql, node, error))
+			return FALSE;
+
+		_append_string (sparql, "IN (\"" XSD_NS "integer\", \"" XSD_NS "double\")");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_LANGMATCHES)) {
 		_append_string (sparql, "SparqlLangMatches (");
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
