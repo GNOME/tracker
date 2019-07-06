@@ -577,25 +577,27 @@ _prepend_path_element (TrackerSparql      *sparql,
 		}
 
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, \"%s\", \"%s:graph\" FROM %s) ",
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, \"%s\", \"%s:graph\", %d, %d FROM %s) ",
 		                       path_elem->name,
 		                       tracker_property_get_name (path_elem->data.property),
 		                       tracker_property_get_name (path_elem->data.property),
+		                       TRACKER_PROPERTY_TYPE_RESOURCE,
+		                       tracker_property_get_data_type (path_elem->data.property),
 		                       table_name);
 		g_free (table_name);
 		break;
 	case TRACKER_PATH_OPERATOR_INVERSE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT value, ID, graph FROM \"%s\" WHERE value IS NOT NULL) ",
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT value, ID, graph, value_type, ID_type FROM \"%s\" WHERE value IS NOT NULL) ",
 		                       path_elem->name,
 		                       path_elem->data.composite.child1->name);
 		break;
 	case TRACKER_PATH_OPERATOR_SEQUENCE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT a.ID, b.value, b.graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT a.ID, b.value, b.graph, a.ID_type, b.value_type "
 		                       "FROM \"%s\" AS a, \"%s\" AS b "
 		                       "WHERE a.value = b.ID) ",
 		                       path_elem->name,
@@ -604,11 +606,11 @@ _prepend_path_element (TrackerSparql      *sparql,
 		break;
 	case TRACKER_PATH_OPERATOR_ALTERNATIVE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, value, graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, value, graph, ID_type, value_type "
 		                       "FROM \"%s\" "
 		                       "UNION ALL "
-		                       "SELECT ID, value, graph "
+		                       "SELECT ID, value, graph, ID_type, value_type "
 		                       "FROM \"%s\") ",
 		                       path_elem->name,
 		                       path_elem->data.composite.child1->name,
@@ -616,11 +618,11 @@ _prepend_path_element (TrackerSparql      *sparql,
 		break;
 	case TRACKER_PATH_OPERATOR_ZEROORMORE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, ID, graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, ID, graph, ID_type, ID_type "
 		                       "FROM \"%s\" "
 		                       "UNION "
-		                       "SELECT a.ID, b.value, b.graph "
+		                       "SELECT a.ID, b.value, b.graph, a.ID_type, b.value_type "
 		                       "FROM \"%s\" AS a, \"%s\" AS b "
 		                       "WHERE b.ID = a.value) ",
 		                       path_elem->name,
@@ -630,11 +632,11 @@ _prepend_path_element (TrackerSparql      *sparql,
 		break;
 	case TRACKER_PATH_OPERATOR_ONEORMORE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, value, graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, value, graph, ID_type, value_type "
 				       "FROM \"%s\" "
 				       "UNION "
-				       "SELECT a.ID, b.value, b.graph "
+				       "SELECT a.ID, b.value, b.graph, a.ID_type, b.value_type "
 				       "FROM \"%s\" AS a, \"%s\" AS b "
 				       "WHERE b.ID = a.value) ",
 				       path_elem->name,
@@ -644,11 +646,11 @@ _prepend_path_element (TrackerSparql      *sparql,
 		break;
 	case TRACKER_PATH_OPERATOR_ZEROORONE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, ID, graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, ID, graph, ID_type, ID_type "
 				       "FROM \"%s\" "
 				       "UNION ALL "
-				       "SELECT ID, value, graph "
+				       "SELECT ID, value, graph, ID_type, value_type "
 				       "FROM \"%s\") ",
 				       path_elem->name,
 				       path_elem->data.composite.child1->name,
@@ -656,20 +658,21 @@ _prepend_path_element (TrackerSparql      *sparql,
 		break;
 	case TRACKER_PATH_OPERATOR_NEGATED:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT subject AS ID, object AS value, graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT subject AS ID, object AS value, graph, %d, object_type "
 		                       "FROM \"tracker_triples\" "
 		                       "WHERE predicate != %d",
 		                       path_elem->name,
+		                       TRACKER_PROPERTY_TYPE_RESOURCE,
 		                       tracker_property_get_id (path_elem->data.property));
 		break;
 	case TRACKER_PATH_OPERATOR_INTERSECTION:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, value, graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, value, graph, ID_type, value_type "
 				       "FROM \"%s\" "
 				       "INTERSECT "
-				       "SELECT ID, value, graph "
+				       "SELECT ID, value, graph, ID_type, value_type "
 				       "FROM \"%s\") ",
 				       path_elem->name,
 				       path_elem->data.composite.child1->name,
