@@ -1084,6 +1084,21 @@ introspect_fts_snippet (TrackerSparql         *sparql,
 	return TRUE;
 }
 
+static TrackerVariable *
+reserve_subvariable (TrackerSparql   *sparql,
+                     TrackerVariable *var,
+                     const gchar     *suffix)
+{
+	TrackerVariable *subvar;
+	gchar *name;
+
+	name = g_strdup_printf ("%s:%s", var->name, suffix);
+	subvar = _ensure_variable (sparql, name);
+	g_free (name);
+
+	return subvar;
+}
+
 static gboolean
 _add_quad (TrackerSparql  *sparql,
            TrackerToken   *graph,
@@ -1224,12 +1239,47 @@ _add_quad (TrackerSparql  *sparql,
 		tracker_binding_set_db_column_name (binding, "predicate");
 		_add_binding (sparql, binding);
 		g_object_unref (binding);
+
+		/* If object is variable, add another variable to hold its type */
+		if (tracker_token_get_variable (object)) {
+			TrackerVariable *type_var;
+
+			type_var = reserve_subvariable (sparql, tracker_token_get_variable (object), "type");
+
+			binding = tracker_variable_binding_new (type_var, NULL, table);
+			tracker_binding_set_db_column_name (binding, "object_type");
+			_add_binding (sparql, binding);
+			g_object_unref (binding);
+		}
 	} else if (tracker_token_get_path (predicate)) {
 		table = tracker_triple_context_add_table (triple_context,
 		                                          graph_db,
 		                                          tracker_token_get_idstring (predicate));
 		tracker_data_table_set_predicate_path (table, TRUE);
 		new_table = TRUE;
+
+		/* If subject/object are variable, add variables to hold their type */
+		if (tracker_token_get_variable (subject)) {
+			TrackerVariable *type_var;
+
+			type_var = reserve_subvariable (sparql, tracker_token_get_variable (object), "type");
+
+			binding = tracker_variable_binding_new (type_var, NULL, table);
+			tracker_binding_set_db_column_name (binding, "ID_type");
+			_add_binding (sparql, binding);
+			g_object_unref (binding);
+		}
+
+		if (tracker_token_get_variable (object)) {
+			TrackerVariable *type_var;
+
+			type_var = reserve_subvariable (sparql, tracker_token_get_variable (object), "type");
+
+			binding = tracker_variable_binding_new (type_var, NULL, table);
+			tracker_binding_set_db_column_name (binding, "value_type");
+			_add_binding (sparql, binding);
+			g_object_unref (binding);
+		}
 	} else {
 		/* The parser disallows parameter predicates */
 		g_assert_not_reached ();
@@ -1618,7 +1668,7 @@ _end_triples_block (TrackerSparql  *sparql,
 		if (table->predicate_variable) {
 			_append_string (sparql,
 			                "(SELECT subject AS ID, predicate, "
-			                "object, graph FROM tracker_triples) ");
+			                "object, object_type, graph FROM tracker_triples) ");
 		} else if (table->predicate_path) {
 			_append_string_printf (sparql, "\"%s\"", table->sql_db_tablename);
 		} else {
@@ -1871,6 +1921,10 @@ translate_SelectClause (TrackerSparql  *sparql,
 		g_hash_table_iter_init (&iter, select_context->variables);
 
 		while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &var)) {
+			/* Skip our own internal variables */
+			if (strchr (var->name, ':'))
+				continue;
+
 			if (!first)
 				_append_string (sparql, ", ");
 
