@@ -1533,6 +1533,56 @@ function_sparql_floor (sqlite3_context *context,
 }
 
 static void
+function_sparql_data_type (sqlite3_context *context,
+                           int              argc,
+                           sqlite3_value   *argv[])
+{
+	TrackerPropertyType prop_type;
+	const gchar *type = NULL;
+
+	if (argc != 1) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	prop_type = sqlite3_value_int (argv[0]);
+
+	switch (prop_type) {
+	case TRACKER_PROPERTY_TYPE_UNKNOWN:
+		break;
+	case TRACKER_PROPERTY_TYPE_STRING:
+		type = "http://www.w3.org/2001/XMLSchema#string";
+		break;
+	case TRACKER_PROPERTY_TYPE_BOOLEAN:
+		type = "http://www.w3.org/2001/XMLSchema#boolean";
+		break;
+	case TRACKER_PROPERTY_TYPE_INTEGER:
+		type = "http://www.w3.org/2001/XMLSchema#integer";
+		break;
+	case TRACKER_PROPERTY_TYPE_DOUBLE:
+		type = "http://www.w3.org/2001/XMLSchema#double";
+		break;
+	case TRACKER_PROPERTY_TYPE_DATE:
+		type = "http://www.w3.org/2001/XMLSchema#date";
+		break;
+	case TRACKER_PROPERTY_TYPE_DATETIME:
+		type = "http://www.w3.org/2001/XMLSchema#dateType";
+		break;
+	case TRACKER_PROPERTY_TYPE_RESOURCE:
+		type = "http://www.w3.org/2000/01/rdf-schema#Resource";
+		break;
+	case TRACKER_PROPERTY_TYPE_LANGSTRING:
+		type = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
+		break;
+	}
+
+	if (type)
+		sqlite3_result_text (context, type, -1, NULL);
+	else
+		sqlite3_result_null (context);
+}
+
+static void
 function_sparql_rand (sqlite3_context *context,
                       int              argc,
                       sqlite3_value   *argv[])
@@ -1800,6 +1850,9 @@ initialize_functions (TrackerDBInterface *db_interface)
 		{ "SparqlFloor", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_floor },
 		{ "SparqlRand", 0, SQLITE_ANY, function_sparql_rand },
+		/* Types */
+		{ "SparqlDataType", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		  function_sparql_data_type },
 		/* UUID */
 		{ "SparqlUUID", 0, SQLITE_ANY, function_sparql_uuid },
 		{ "SparqlBNODE", -1, SQLITE_ANY | SQLITE_DETERMINISTIC, function_sparql_uuid },
