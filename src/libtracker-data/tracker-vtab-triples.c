@@ -37,6 +37,7 @@ enum {
 	COL_SUBJECT,
 	COL_PREDICATE,
 	COL_OBJECT,
+	COL_OBJECT_TYPE,
 	N_COLS
 };
 
@@ -140,7 +141,8 @@ triples_connect (sqlite3            *db,
 	                           "    graph INTEGER,"
 	                           "    subject INTEGER, "
 	                           "    predicate INTEGER, "
-	                           "    object INTEGER"
+	                           "    object INTEGER, "
+	                           "    object_type INTEGER"
 	                           ")");
 
 	if (rc == SQLITE_OK) {
@@ -180,7 +182,8 @@ triples_best_index (sqlite3_vtab       *vtab,
 		/* We let object be matched in upper layers, where proper
 		 * translation to strings can be done.
 		 */
-		if (info->aConstraint[i].iColumn == COL_OBJECT)
+		if (info->aConstraint[i].iColumn == COL_OBJECT ||
+		    info->aConstraint[i].iColumn == COL_OBJECT_TYPE)
 			continue;
 
 		if (info->aConstraint[i].iColumn == COL_ROWID)
@@ -365,11 +368,13 @@ init_stmt (TrackerTriplesCursor *cursor)
 		g_string_append_printf (sql,
 		                        "SELECT t.graph, t.ID, "
 		                        "       (SELECT ID From Resource WHERE Uri = \"%s\"), "
-		                        "       %s "
+		                        "       %s, "
+		                        "       %d "
 		                        "FROM \"unionGraph_%s\" AS t "
 		                        "WHERE 1 ",
 		                        tracker_property_get_uri (property),
 		                        string_expr,
+		                        tracker_property_get_data_type (property),
 		                        tracker_property_get_table_name (property));
 
 		if (cursor->match.graph) {
