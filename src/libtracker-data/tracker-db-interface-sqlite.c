@@ -1732,19 +1732,13 @@ stmt_step (sqlite3_stmt *stmt)
 }
 
 static void
-function_sparql_uuid (sqlite3_context *context,
-                      int              argc,
-                      sqlite3_value   *argv[])
+generate_uuid (sqlite3_context *context,
+               const gchar     *uri_prefix)
 {
 	gchar *uuid = NULL;
 	sqlite3_stmt *stmt;
 	sqlite3 *db;
 	gint result;
-
-	if (argc > 1) {
-		sqlite3_result_error (context, "Invalid argument count", -1);
-		return;
-	}
 
 	db = sqlite3_context_db_handle (context);
 
@@ -1757,7 +1751,7 @@ function_sparql_uuid (sqlite3_context *context,
 
 	do {
 		g_clear_pointer (&uuid, g_free);
-		uuid = tracker_generate_uuid ("urn:uuid");
+		uuid = tracker_generate_uuid (uri_prefix);
 
 		sqlite3_reset (stmt);
 		sqlite3_bind_text (stmt, 1, uuid, -1, SQLITE_TRANSIENT);
@@ -1769,10 +1763,35 @@ function_sparql_uuid (sqlite3_context *context,
 	if (result != SQLITE_DONE) {
 		sqlite3_result_error (context, sqlite3_errstr (result), -1);
 		g_free (uuid);
+	} else {
+		sqlite3_result_text (context, uuid, -1, g_free);
+	}
+}
+
+static void
+function_sparql_uuid (sqlite3_context *context,
+                      int              argc,
+                      sqlite3_value   *argv[])
+{
+	if (argc > 0) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
 		return;
 	}
 
-	sqlite3_result_text (context, uuid, -1, g_free);
+	generate_uuid (context, "urn:uuid");
+}
+
+static void
+function_sparql_bnode (sqlite3_context *context,
+                       int              argc,
+                       sqlite3_value   *argv[])
+{
+	if (argc > 1) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	generate_uuid (context, "urn:bnode");
 }
 
 static int
@@ -1860,7 +1879,7 @@ initialize_functions (TrackerDBInterface *db_interface)
 		  function_sparql_data_type },
 		/* UUID */
 		{ "SparqlUUID", 0, SQLITE_ANY, function_sparql_uuid },
-		{ "SparqlBNODE", -1, SQLITE_ANY | SQLITE_DETERMINISTIC, function_sparql_uuid },
+		{ "SparqlBNODE", -1, SQLITE_ANY | SQLITE_DETERMINISTIC, function_sparql_bnode },
 	};
 
 	for (i = 0; i < G_N_ELEMENTS (functions); i++) {
