@@ -140,7 +140,7 @@ tracker_data_query_unused_uuid (TrackerDataManager *manager,
 	gchar *uuid = NULL;
 
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &error,
-	                                              "SELECT SparqlUUID()");
+	                                              "SELECT SparqlBNODE()");
 
 	if (stmt) {
 		cursor = tracker_db_statement_start_cursor (stmt, &error);
