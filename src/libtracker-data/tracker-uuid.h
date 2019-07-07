@@ -23,6 +23,6 @@
 
 #include <glib.h>
 
-gchar * tracker_generate_uuid (void);
+gchar * tracker_generate_uuid (const gchar *uri_prefix);
 
 #endif /* __TRACKER_UUID_H__ */

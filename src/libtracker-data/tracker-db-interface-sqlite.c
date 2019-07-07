@@ -1757,7 +1757,7 @@ function_sparql_uuid (sqlite3_context *context,
 
 	do {
 		g_clear_pointer (&uuid, g_free);
-		uuid = tracker_generate_uuid ();
+		uuid = tracker_generate_uuid ("urn:uuid");
 
 		sqlite3_reset (stmt);
 		sqlite3_bind_text (stmt, 1, uuid, -1, SQLITE_TRANSIENT);
