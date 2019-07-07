@@ -1969,7 +1969,129 @@ static gboolean
 translate_DescribeQuery (TrackerSparql  *sparql,
                          GError        **error)
 {
-	_unimplemented ("DESCRIBE");
+	TrackerStringBuilder *where_str = NULL;
+	TrackerVariable *variable;
+	TrackerBinding *binding;
+	GList *resources = NULL, *l;
+	gboolean glob = FALSE;
+
+	/* DescribeQuery ::= 'DESCRIBE' ( VarOrIri+ | '*' ) DatasetClause* WhereClause? SolutionModifier
+	 */
+	sparql->context = g_object_ref_sink (tracker_select_context_new ());
+	sparql->current_state.select_context = sparql->context;
+	tracker_sparql_push_context (sparql, sparql->context);
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_DESCRIBE);
+	_append_string (sparql,
+	                "SELECT "
+	                "  (SELECT Uri FROM Resource WHERE ID = subject),"
+	                "  (SELECT Uri FROM Resource WHERE ID = predicate),"
+	                "  object "
+	                "FROM tracker_triples "
+	                "WHERE object IS NOT NULL AND subject IN (");
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GLOB)) {
+		glob = TRUE;
+	} else {
+		TrackerContext *context;
+
+		context = tracker_triple_context_new ();
+		tracker_sparql_push_context (sparql, context);
+
+		while (_check_in_rule (sparql, NAMED_RULE_VarOrIri)) {
+			TrackerBinding *binding;
+			TrackerToken resource;
+
+			_call_rule (sparql, NAMED_RULE_VarOrIri, error);
+			_init_token (&resource, sparql->current_state.prev_node, sparql);
+
+			if (tracker_token_get_literal (&resource)) {
+				binding = tracker_literal_binding_new (tracker_token_get_literal (&resource),
+				                                       NULL);
+			} else {
+				TrackerVariable *variable;
+
+				variable = tracker_token_get_variable (&resource);
+				binding = tracker_variable_binding_new (variable, NULL, NULL);
+			}
+
+			tracker_binding_set_data_type (binding, TRACKER_PROPERTY_TYPE_RESOURCE);
+			resources = g_list_prepend (resources, binding);
+			tracker_token_unset (&resource);
+		}
+
+		tracker_sparql_pop_context (sparql, FALSE);
+	}
+
+	while (_check_in_rule (sparql, NAMED_RULE_DatasetClause))
+		_call_rule (sparql, NAMED_RULE_DatasetClause, error);
+
+	if (_check_in_rule (sparql, NAMED_RULE_WhereClause)) {
+		TrackerParserNode *where_clause;
+
+		where_str = tracker_string_builder_new ();
+		where_clause = _skip_rule (sparql, NAMED_RULE_WhereClause);
+
+		if (!_postprocess_rule (sparql, where_clause, where_str, error)) {
+			g_list_free_full (resources, g_object_unref);
+			tracker_string_builder_free (where_str);
+			return FALSE;
+		}
+	}
+
+	if (glob && TRACKER_SELECT_CONTEXT (sparql->context)->variables) {
+		GHashTableIter iter;
+
+		g_hash_table_iter_init (&iter, TRACKER_SELECT_CONTEXT (sparql->context)->variables);
+
+		while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &variable)) {
+			binding = tracker_variable_binding_new (variable, NULL, NULL);
+			resources = g_list_prepend (resources, binding);
+		}
+	}
+
+	if (resources == NULL) {
+		g_clear_pointer (&where_str, tracker_string_builder_free);
+		_raise (PARSE, "Use of unprojected variables", "DescribeQuery");
+	}
+
+	for (l = resources; l; l = l->next) {
+		binding = l->data;
+
+		if (l != resources)
+			_append_string (sparql, "UNION ALL ");
+
+		if (TRACKER_IS_LITERAL_BINDING (binding)) {
+			tracker_select_context_add_literal_binding (TRACKER_SELECT_CONTEXT (sparql->context),
+			                                            TRACKER_LITERAL_BINDING (binding));
+			_append_string (sparql, "SELECT ");
+			_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+		} else if (TRACKER_IS_VARIABLE_BINDING (binding)) {
+			gchar *str;
+
+			variable = TRACKER_VARIABLE_BINDING (binding)->variable;
+
+			if (!where_str) {
+				g_list_free_full (resources, g_object_unref);
+				_raise (PARSE, "Use of unprojected variable in Describe", variable->name);
+			}
+
+			_append_string (sparql, "SELECT ");
+			_append_variable_sql (sparql, variable);
+
+			str = tracker_string_builder_to_string (where_str);
+			_append_string_printf (sparql, "%s", str);
+			g_free (str);
+		}
+	}
+
+	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+	tracker_sparql_pop_context (sparql, FALSE);
+	_append_string (sparql, ") ");
+	g_list_free_full (resources, g_object_unref);
+	g_clear_pointer (&where_str, tracker_string_builder_free);
+
+	return TRUE;
 }
 
 static gboolean
