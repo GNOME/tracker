@@ -36,6 +36,7 @@
 #define XSD_DOUBLE   TRACKER_PREFIX_XSD "double"
 #define XSD_INTEGER  TRACKER_PREFIX_XSD "integer"
 #define XSD_STRING   TRACKER_PREFIX_XSD "string"
+#define RDF_LANGSTRING TRACKER_PREFIX_RDF "langString"
 
 typedef struct _TrackerPropertyPrivate TrackerPropertyPrivate;
 
@@ -108,6 +109,9 @@ tracker_property_type_get_type (void)
 			{ TRACKER_PROPERTY_TYPE_RESOURCE,
 			  "TRACKER_PROPERTY_TYPE_RESOURCE",
 			  "resource" },
+			{ TRACKER_PROPERTY_TYPE_LANGSTRING,
+			  "TRACKER_PROPERTY_TYPE_LANGSTRING",
+			  "langString" },
 			{ 0, NULL, NULL }
 		};
 
@@ -267,6 +271,8 @@ tracker_property_get_data_type (TrackerProperty *property)
 		range_uri = tracker_ontologies_get_property_string_gvdb (priv->ontologies, priv->uri, "range");
 		if (strcmp (range_uri, XSD_STRING) == 0) {
 			priv->data_type = TRACKER_PROPERTY_TYPE_STRING;
+		} else if (strcmp (range_uri, RDF_LANGSTRING) == 0) {
+			priv->data_type = TRACKER_PROPERTY_TYPE_LANGSTRING;
 		} else if (strcmp (range_uri, XSD_BOOLEAN) == 0) {
 			priv->data_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 		} else if (strcmp (range_uri, XSD_INTEGER) == 0) {
@@ -827,6 +833,8 @@ tracker_property_set_range (TrackerProperty *property,
 	range_uri = tracker_class_get_uri (priv->range);
 	if (strcmp (range_uri, XSD_STRING) == 0) {
 		priv->data_type = TRACKER_PROPERTY_TYPE_STRING;
+	} else if (strcmp (range_uri, RDF_LANGSTRING) == 0) {
+		priv->data_type = TRACKER_PROPERTY_TYPE_LANGSTRING;
 	} else if (strcmp (range_uri, XSD_BOOLEAN) == 0) {
 		priv->data_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (strcmp (range_uri, XSD_INTEGER) == 0) {

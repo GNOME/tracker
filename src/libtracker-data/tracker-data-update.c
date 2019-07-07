@@ -741,6 +741,21 @@ statement_bind_gvalue (TrackerDBStatement *stmt,
 			} else {
 				tracker_db_statement_bind_int (stmt, (*idx)++, round (time));
 			}
+		} else if (type == G_TYPE_BYTES) {
+			GBytes *bytes;
+			gconstpointer data;
+			gsize len;
+
+			bytes = g_value_get_boxed (value);
+			data = g_bytes_get_data (bytes, &len);
+
+			if (len == strlen (data) + 1) {
+				/* No ancillary data */
+				tracker_db_statement_bind_text (stmt, (*idx)++, data);
+			} else {
+				/* String with langtag */
+				tracker_db_statement_bind_bytes (stmt, (*idx)++, bytes);
+			}
 		} else {
 			g_warning ("Unknown type for binding: %s\n", G_VALUE_TYPE_NAME (value));
 		}
@@ -1446,6 +1461,10 @@ bytes_to_gvalue (GBytes              *bytes,
 	case TRACKER_PROPERTY_TYPE_STRING:
 		g_value_init (gvalue, G_TYPE_STRING);
 		g_value_set_string (gvalue, value);
+		break;
+	case TRACKER_PROPERTY_TYPE_LANGSTRING:
+		g_value_init (gvalue, G_TYPE_BYTES);
+		g_value_set_boxed (gvalue, bytes);
 		break;
 	case TRACKER_PROPERTY_TYPE_INTEGER:
 		g_value_init (gvalue, G_TYPE_INT64);

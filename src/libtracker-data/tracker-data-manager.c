@@ -2585,6 +2585,7 @@ create_decomposed_metadata_property_table (TrackerDBInterface *iface,
 
 	switch (tracker_property_get_data_type (property)) {
 	case TRACKER_PROPERTY_TYPE_STRING:
+	case TRACKER_PROPERTY_TYPE_LANGSTRING:
 		sql_type = "TEXT";
 		break;
 	case TRACKER_PROPERTY_TYPE_INTEGER:
@@ -3137,7 +3138,8 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 						schedule_copy (copy_schedule, property, field_name, NULL);
 					}
 
-					if (g_ascii_strcasecmp (sql_type_for_single_value, "TEXT") == 0) {
+					if (g_ascii_strcasecmp (sql_type_for_single_value, "TEXT") == 0 ||
+					    g_ascii_strcasecmp (sql_type_for_single_value, "BLOB") == 0) {
 						g_string_append (create_sql, " COLLATE " TRACKER_COLLATION_NAME);
 					}
 
@@ -3164,7 +3166,8 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 					                        field_name,
 					                        sql_type_for_single_value);
 
-					if (g_ascii_strcasecmp (sql_type_for_single_value, "TEXT") == 0) {
+					if (g_ascii_strcasecmp (sql_type_for_single_value, "TEXT") == 0 ||
+					    g_ascii_strcasecmp (sql_type_for_single_value, "BLOB") == 0) {
 						g_string_append (alter_sql, " COLLATE " TRACKER_COLLATION_NAME);
 					}
 

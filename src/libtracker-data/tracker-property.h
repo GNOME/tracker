@@ -44,6 +44,7 @@ typedef enum {
 	TRACKER_PROPERTY_TYPE_DATE,
 	TRACKER_PROPERTY_TYPE_DATETIME,
 	TRACKER_PROPERTY_TYPE_RESOURCE,
+	TRACKER_PROPERTY_TYPE_LANGSTRING,
 } TrackerPropertyType;
 
 GType        tracker_property_type_get_type  (void) G_GNUC_CONST;
