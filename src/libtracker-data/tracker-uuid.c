@@ -21,26 +21,34 @@
 #include "config.h"
 #include "tracker-uuid.h"
 
+#define DEFAULT_PREFIX "urn:uuid"
+
 #if ! GLIB_CHECK_VERSION (2, 52, 0)
 #include <uuid/uuid.h>
 #endif
 
 gchar *
-tracker_generate_uuid (void)
+tracker_generate_uuid (const gchar *uri_prefix)
 {
 	gchar *result;
 #if GLIB_CHECK_VERSION (2, 52, 0)
-	gchar *uuid = g_uuid_string_random ();
-	result = g_strdup_printf ("urn:uuid:%s", uuid);
-	g_free (uuid);
+	result = g_uuid_string_random ();
 #else
 	uuid_t base = { 0, };
 	gchar uuid[37];
 
 	uuid_generate (base);
 	uuid_unparse_lower (base, uuid);
-	result = g_strdup_printf ("urn:uuid:%s", uuid);
+	result = g_strdup_printf (uuid);
 #endif
 
-	return result;
+	if (uri_prefix) {
+		gchar *uri;
+
+		uri = g_strdup_printf ("%s:%s", uri_prefix, result);
+		g_free (result);
+		return uri;
+	} else {
+		return result;
+	}
 }
