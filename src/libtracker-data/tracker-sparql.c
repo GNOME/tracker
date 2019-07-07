@@ -6754,7 +6754,15 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISNUMERIC)) {
 		_unimplemented ("ISNUMERIC");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_LANGMATCHES)) {
-		_unimplemented ("LANGMATCHES");
+		_append_string (sparql, "SparqlLangMatches (");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA);
+		_append_string (sparql, ", ");
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+		_append_string (sparql, ") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_CONTAINS)) {
 		/* contains('A','B') => 'A' GLOB '*B*' */
 		sparql->current_state.convert_to_string = TRUE;
@@ -6826,7 +6834,15 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 		_append_string (sparql, ") ");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRLANG)) {
-		_unimplemented ("STRLANG");
+		_append_string (sparql, "SparqlStrLang (");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA);
+		_append_string (sparql, ", ");
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+		_append_string (sparql, ") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_LANGSTRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRDT)) {
 		TrackerParserNode *expr, *node, *iri_node = NULL;
 		TrackerPropertyType type;
