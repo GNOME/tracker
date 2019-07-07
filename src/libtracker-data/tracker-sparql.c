@@ -508,6 +508,7 @@ _append_literal_sql (TrackerSparql         *sparql,
 			break;
 		case TRACKER_PROPERTY_TYPE_DATETIME:
 		case TRACKER_PROPERTY_TYPE_STRING:
+		case TRACKER_PROPERTY_TYPE_LANGSTRING:
 		case TRACKER_PROPERTY_TYPE_RESOURCE:
 			escaped = _escape_sql_string (binding->literal);
 			_append_string (sparql, escaped);
@@ -535,7 +536,8 @@ _append_literal_sql (TrackerSparql         *sparql,
 
 	if (TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_RESOURCE)
 		_append_string_printf (sparql, "), 0) ");
-	if (TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_STRING)
+	if (TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_STRING ||
+	    TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_LANGSTRING)
 		_append_string (sparql, "COLLATE " TRACKER_COLLATION_NAME " ");
 }
 
@@ -1480,6 +1482,8 @@ rdf_type_to_property_type (const gchar *type)
 		return TRACKER_PROPERTY_TYPE_DATETIME;
 	} else if (g_str_equal (type, XSD_NS "string")) {
 		return TRACKER_PROPERTY_TYPE_STRING;
+	} else if (g_str_equal (type, RDF_NS "langString")) {
+		return TRACKER_PROPERTY_TYPE_LANGSTRING;
 	} else {
 		return TRACKER_PROPERTY_TYPE_UNKNOWN;
 	}
@@ -1516,6 +1520,8 @@ convert_expression_to_string (TrackerSparql       *sparql,
 		/* ISO 8601 format */
 		_prepend_string (sparql, "SparqlFormatTime (");
 		_append_string (sparql, ") ");
+		break;
+	case TRACKER_PROPERTY_TYPE_LANGSTRING:
 	default:
 		/* Let sqlite convert the expression to string */
 		_prepend_string (sparql, "CAST (");
@@ -2533,7 +2539,8 @@ translate_OrderCondition (TrackerSparql  *sparql,
 		g_assert_not_reached ();
 	}
 
-	if (sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_STRING)
+	if (sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_STRING ||
+	    sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_LANGSTRING)
 		_append_string (sparql, "COLLATE " TRACKER_COLLATION_NAME " ");
 	else if (sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_RESOURCE)
 		convert_expression_to_string (sparql, sparql->current_state.expression_type);
@@ -4205,6 +4212,7 @@ static gboolean
 translate_DataBlockValue (TrackerSparql  *sparql,
                           GError        **error)
 {
+	TrackerSelectContext *select_context;
 	TrackerGrammarNamedRule rule;
 	TrackerBinding *binding;
 
@@ -4215,16 +4223,22 @@ translate_DataBlockValue (TrackerSparql  *sparql,
 		return TRUE;
 	}
 
+	select_context = TRACKER_SELECT_CONTEXT (sparql->current_state.select_context);
 	rule = _current_rule (sparql);
 
 	switch (rule) {
-	case NAMED_RULE_iri:
 	case NAMED_RULE_RDFLiteral:
+		_call_rule (sparql, rule, error);
+		binding = g_ptr_array_index (select_context->literal_bindings,
+		                             select_context->literal_bindings->len - 1);
+		_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+		break;
+	case NAMED_RULE_iri:
 	case NAMED_RULE_NumericLiteral:
 	case NAMED_RULE_BooleanLiteral:
 		_call_rule (sparql, rule, error);
 		binding = _convert_terminal (sparql);
-		tracker_select_context_add_literal_binding (TRACKER_SELECT_CONTEXT (sparql->current_state.select_context),
+		tracker_select_context_add_literal_binding (select_context,
 		                                            TRACKER_LITERAL_BINDING (binding));
 		_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
 		g_object_unref (binding);
@@ -5688,8 +5702,10 @@ translate_GraphTerm (TrackerSparql  *sparql,
 	rule = _current_rule (sparql);
 
 	switch (rule) {
-	case NAMED_RULE_iri:
 	case NAMED_RULE_RDFLiteral:
+		_call_rule (sparql, rule, error);
+		break;
+	case NAMED_RULE_iri:
 	case NAMED_RULE_NumericLiteral:
 	case NAMED_RULE_BooleanLiteral:
 		_call_rule (sparql, rule, error);
@@ -6083,6 +6099,11 @@ handle_type_cast (TrackerSparql  *sparql,
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, "AS TEXT) ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
+	} else if (g_str_equal (function, RDF_NS "langString")) {
+		_append_string (sparql, "CAST (");
+		_call_rule (sparql, NAMED_RULE_ArgList, error);
+		_append_string (sparql, "AS BLOB) ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_LANGSTRING;
 	} else if (g_str_equal (function, XSD_NS "integer")) {
 		_append_string (sparql, "CAST (");
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
@@ -6402,7 +6423,8 @@ handle_function_call (TrackerSparql  *sparql,
 	convert_to_string = sparql->current_state.convert_to_string;
 	sparql->current_state.convert_to_string = FALSE;
 
-	if (g_str_has_prefix (function, XSD_NS)) {
+	if (g_str_has_prefix (function, XSD_NS) ||
+	    strcmp (function, RDF_NS "langString") == 0) {
 		handled = handle_type_cast (sparql, function, error);
 	} else if (g_str_has_prefix (function, FN_NS)) {
 		handled = handle_xpath_function (sparql, function, error);
@@ -6830,6 +6852,7 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		switch (type) {
 		case TRACKER_PROPERTY_TYPE_UNKNOWN:
 		case TRACKER_PROPERTY_TYPE_STRING:
+		case TRACKER_PROPERTY_TYPE_LANGSTRING:
 		case TRACKER_PROPERTY_TYPE_RESOURCE:
 			retval = _postprocess_rule (sparql, expr, NULL, error);
 			break;
@@ -7176,34 +7199,93 @@ static gboolean
 translate_RDFLiteral (TrackerSparql  *sparql,
                       GError        **error)
 {
+	TrackerParserNode *node;
 	TrackerBinding *binding;
+	gchar *str, *langtag = NULL, *cast = NULL;
+	gboolean is_parameter;
+	const TrackerGrammarRule *rule;
+	TrackerPropertyType type;
 
 	/* RDFLiteral ::= String ( LANGTAG | ( '^^' iri ) )?
 	 */
 	_call_rule (sparql, NAMED_RULE_String, error);
-	binding = _convert_terminal (sparql);
+	node = sparql->current_state.prev_node;
+	str = _extract_node_string (node, sparql);
+	rule = tracker_parser_node_get_rule (node);
+	is_parameter = tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL,
+	                                          TERMINAL_TYPE_PARAMETERIZED_VAR);
 
 	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_LANGTAG)) {
-		g_object_unref (binding);
-		_unimplemented ("LANGTAG");
+		langtag = _dup_last_string (sparql);
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_LANGSTRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DOUBLE_CIRCUMFLEX)) {
-		TrackerPropertyType type;
-		gchar *cast;
-
 		_call_rule (sparql, NAMED_RULE_iri, error);
 		cast = _dup_last_string (sparql);
-		sparql->current_state.expression_type = rdf_type_to_property_type (cast);
-		g_free (cast);
 	}
 
-	tracker_binding_set_data_type (binding, sparql->current_state.expression_type);
+	if (is_parameter && (langtag || cast)) {
+		g_free (str);
+		g_free (langtag);
+		g_free (cast);
+		_raise (PARSE, "Parameter cannot have LANGTAG/^^ modifiers", "RDFLiteral");
+	}
+
+	if (is_parameter) {
+		binding = tracker_parameter_binding_new (str, NULL);
+	} else {
+		GString *langstr;
+		GBytes *bytes;
+
+		langstr = g_string_new (str);
+
+		if (langtag) {
+			g_string_append_c (langstr, '\0');
+			g_string_append_printf (langstr, "%s", &langtag[1]);
+		}
+
+		bytes = g_bytes_new_take (langstr->str,
+		                          langstr->len + 1);
+		g_string_free (langstr, FALSE);
+
+		binding = tracker_literal_binding_new (bytes, NULL);
+		g_bytes_unref (bytes);
+	}
+
+	if (cast) {
+		type = rdf_type_to_property_type (cast);
+	} else if (langtag) {
+		type = TRACKER_PROPERTY_TYPE_LANGSTRING;
+	} else {
+		type = TRACKER_PROPERTY_TYPE_STRING;
+	}
+
+	sparql->current_state.expression_type = type;
+	tracker_binding_set_data_type (binding, type);
 
 	if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT) {
+		// FIXME binding may be be parameter?
 		tracker_select_context_add_literal_binding (TRACKER_SELECT_CONTEXT (sparql->context),
 		                                            TRACKER_LITERAL_BINDING (binding));
 	}
 
+	if (sparql->current_state.token) {
+		if (is_parameter) {
+			tracker_token_parameter_init (sparql->current_state.token,
+			                              TRACKER_PARAMETER_BINDING (binding)->name);
+		} else {
+			gconstpointer data;
+			gsize len;
+
+			data = g_bytes_get_data (TRACKER_LITERAL_BINDING (binding)->bytes, &len);
+			tracker_token_literal_init (sparql->current_state.token,
+			                            data, len);
+		}
+	}
+
 	g_object_unref (binding);
+	g_free (langtag);
+	g_free (cast);
+	g_free (str);
 
 	return TRUE;
 }
@@ -7761,6 +7843,9 @@ prepare_query (TrackerDBInterface    *iface,
 			tracker_db_statement_bind_double (stmt, i, datetime);
 		} else if (prop_type == TRACKER_PROPERTY_TYPE_INTEGER) {
 			tracker_db_statement_bind_int (stmt, i, atoi (binding->literal));
+		} else if (prop_type == TRACKER_PROPERTY_TYPE_LANGSTRING &&
+			   g_bytes_get_size (binding->bytes) > strlen (binding->literal) + 1) {
+			tracker_db_statement_bind_bytes (stmt, i, binding->bytes);
 		} else {
 			tracker_db_statement_bind_text (stmt, i, binding->literal);
 		}
