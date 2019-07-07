@@ -1588,6 +1588,68 @@ function_sparql_checksum (sqlite3_context *context,
 	sqlite3_result_text (context, result, -1, g_free);
 }
 
+static void
+function_sparql_langmatches (sqlite3_context *context,
+                             int              argc,
+                             sqlite3_value   *argv[])
+{
+	const gchar *str, *langtag;
+	gint type;
+
+	if (argc != 2) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	type = sqlite3_value_type (argv[0]);
+
+	if (type == SQLITE_TEXT) {
+		/* text arguments don't contain any language information */
+		sqlite3_result_int (context, FALSE);
+	} else if (type == SQLITE_BLOB) {
+		gint str_len, len;
+
+		str = sqlite3_value_blob (argv[0]);
+		len = sqlite3_value_bytes (argv[0]);
+		langtag = sqlite3_value_text (argv[1]);
+		str_len = strlen (str) + 1;
+
+		if (str_len + strlen (langtag) != len ||
+		    g_strcmp0 (&str[str_len], langtag) != 0) {
+			sqlite3_result_int (context, FALSE);
+		} else {
+			sqlite3_result_int (context, TRUE);
+		}
+	} else {
+		sqlite3_result_null (context);
+	}
+}
+
+static void
+function_sparql_strlang (sqlite3_context *context,
+                         int              argc,
+                         sqlite3_value   *argv[])
+{
+	const gchar *str, *langtag;
+	GString *langstr;
+
+	if (argc != 2) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	str = sqlite3_value_text (argv[0]);
+	langtag = sqlite3_value_text (argv[1]);
+
+	langstr = g_string_new (str);
+	g_string_append_c (langstr, '\0');
+	g_string_append (langstr, langtag);
+
+	sqlite3_result_blob64 (context, langstr->str,
+	                       langstr->len, g_free);
+	g_string_free (langstr, FALSE);
+}
+
 static inline int
 stmt_step (sqlite3_stmt *stmt)
 {
@@ -1728,6 +1790,10 @@ initialize_functions (TrackerDBInterface *db_interface)
 		  function_sparql_replace },
 		{ "SparqlChecksum", 2, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_checksum },
+		{ "SparqlLangMatches", 2, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		  function_sparql_langmatches },
+		{ "SparqlStrLang", 2, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		  function_sparql_strlang },
 		/* Numbers */
 		{ "SparqlCeil", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_ceil },
