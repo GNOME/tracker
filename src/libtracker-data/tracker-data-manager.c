@@ -3898,6 +3898,121 @@ tracker_data_manager_get_data_location (TrackerDataManager *manager)
 	return manager->data_location ? g_object_ref (manager->data_location) : NULL;
 }
 
+static gboolean
+tracker_data_manager_update_union_views (TrackerDataManager  *manager,
+                                         TrackerDBInterface  *iface,
+                                         GError             **error)
+{
+	TrackerOntologies *ontologies = manager->ontologies;
+	TrackerClass **classes;
+	TrackerProperty **properties;
+	TrackerDBStatement *stmt;
+	guint i, n_classes, n_properties;
+	GError *inner_error = NULL;
+	GHashTableIter iter;
+	GHashTable *graphs;
+	gpointer graph_name, graph_id;
+	GString *str;
+
+	classes = tracker_ontologies_get_classes (ontologies, &n_classes);
+	properties = tracker_ontologies_get_properties (ontologies, &n_properties);
+	graphs = tracker_data_manager_get_graphs (manager, iface, error);
+
+	if (!graphs)
+		return FALSE;
+
+	for (i = 0; !inner_error && i < n_classes; i++) {
+		if (g_str_has_prefix (tracker_class_get_name (classes[i]), "xsd:"))
+			continue;
+
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_%s\"",
+		                                              tracker_class_get_name (classes[i]));
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, NULL);
+		g_object_unref (stmt);
+
+		str = g_string_new (NULL);
+		g_string_append_printf (str,
+		                        "CREATE VIEW temp.\"unionGraph_%s\" AS "
+		                        "SELECT 0 AS graph, * FROM \"main\".\"%s\" ",
+		                        tracker_class_get_name (classes[i]),
+		                        tracker_class_get_name (classes[i]));
+
+		g_hash_table_iter_init (&iter, graphs);
+		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
+			g_string_append_printf (str, "UNION ALL SELECT %d AS graph, * FROM \"%s\".\"%s\" ",
+			                        GPOINTER_TO_INT (graph_id),
+			                        (gchar *) graph_name,
+			                        tracker_class_get_name (classes[i]));
+		}
+
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "%s", str->str);
+		g_string_free (str, TRUE);
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, &inner_error);
+		g_object_unref (stmt);
+	}
+
+	for (i = 0; !inner_error && i < n_properties; i++) {
+		TrackerClass *service;
+
+		if (!tracker_property_get_multiple_values (properties[i]))
+			continue;
+
+		service = tracker_property_get_domain (properties[i]);
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_%s_%s\"",
+		                                              tracker_class_get_name (service),
+		                                              tracker_property_get_name (properties[i]));
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, NULL);
+		g_object_unref (stmt);
+
+		str = g_string_new (NULL);
+		g_string_append_printf (str,
+		                        "CREATE VIEW temp.\"unionGraph_%s_%s\" AS "
+		                        "SELECT 0 AS graph, * FROM \"main\".\"%s_%s\" ",
+		                        tracker_class_get_name (service),
+		                        tracker_property_get_name (properties[i]),
+		                        tracker_class_get_name (service),
+		                        tracker_property_get_name (properties[i]));
+
+		g_hash_table_iter_init (&iter, graphs);
+		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
+			g_string_append_printf (str, "UNION ALL SELECT %d AS graph, * FROM \"%s\".\"%s_%s\" ",
+			                        GPOINTER_TO_INT (graph_id),
+			                        (gchar *) graph_name,
+			                        tracker_class_get_name (service),
+			                        tracker_property_get_name (properties[i]));
+		}
+
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "%s", str->str);
+		g_string_free (str, TRUE);
+
+		if (!stmt)
+			break;
+
+		tracker_db_statement_execute (stmt, &inner_error);
+		g_object_unref (stmt);
+	}
+
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 TrackerDataManager *
 tracker_data_manager_new (TrackerDBManagerFlags   flags,
                           GFile                  *cache_location,
@@ -3984,6 +4099,11 @@ setup_interface_cb (TrackerDBManager   *db_manager,
 				continue;
 			}
 		}
+	}
+
+	if (!tracker_data_manager_update_union_views (data_manager, iface, &error)) {
+		g_critical ("Could not update union views: %s\n", error->message);
+		g_error_free (error);
 	}
 }
 
