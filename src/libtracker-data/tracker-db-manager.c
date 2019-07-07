@@ -197,28 +197,35 @@ tracker_db_manager_get_flags (TrackerDBManager *db_manager,
 }
 
 static void
-db_set_params (TrackerDBInterface   *iface,
-               gint                  cache_size,
-               gint                  page_size,
-               gboolean              readonly,
-               GError              **error)
+iface_set_params (TrackerDBInterface   *iface,
+                  gboolean              readonly,
+                  GError              **error)
 {
-	GError *internal_error = NULL;
-	TrackerDBStatement *stmt;
-
-	tracker_db_interface_execute_query (iface, NULL, "PRAGMA synchronous = NORMAL;");
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA encoding = \"UTF-8\"");
-	tracker_db_interface_execute_query (iface, NULL, "PRAGMA auto_vacuum = 0;");
 
 	if (readonly) {
 		tracker_db_interface_execute_query (iface, NULL, "PRAGMA temp_store = MEMORY;");
 	} else {
 		tracker_db_interface_execute_query (iface, NULL, "PRAGMA temp_store = FILE;");
 	}
+}
+
+static void
+db_set_params (TrackerDBInterface   *iface,
+               const gchar          *database,
+               gint                  cache_size,
+               gint                  page_size,
+               GError              **error)
+{
+	GError *internal_error = NULL;
+	TrackerDBStatement *stmt;
+
+	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".synchronous = NORMAL", database);
+	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".auto_vacuum = 0", database);
 
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
 	                                              &internal_error,
-	                                              "PRAGMA journal_mode = WAL;");
+	                                              "PRAGMA \"%s\".journal_mode = WAL", database);
 
 	if (internal_error) {
 		g_info ("Can't set journal mode to WAL: '%s'",
@@ -244,16 +251,16 @@ db_set_params (TrackerDBInterface   *iface,
 	}
 
 	/* disable autocheckpoint */
-	tracker_db_interface_execute_query (iface, NULL, "PRAGMA wal_autocheckpoint = 0");
+	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".wal_autocheckpoint = 0", database);
 
-	tracker_db_interface_execute_query (iface, NULL, "PRAGMA journal_size_limit = 10240000");
+	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".journal_size_limit = 10240000", database);
 
 	if (page_size != TRACKER_DB_PAGE_SIZE_DONT_SET) {
 		g_info ("  Setting page size to %d", page_size);
-		tracker_db_interface_execute_query (iface, NULL, "PRAGMA page_size = %d", page_size);
+		tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".page_size = %d", database, page_size);
 	}
 
-	tracker_db_interface_execute_query (iface, NULL, "PRAGMA cache_size = %d", cache_size);
+	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".cache_size = %d", database, cache_size);
 	g_info ("  Setting cache size to %d", cache_size);
 }
 
@@ -1009,10 +1016,12 @@ tracker_db_manager_create_db_interface (TrackerDBManager  *db_manager,
 
 	tracker_db_interface_init_vtabs (connection, db_manager->vtab_data);
 
-	db_set_params (connection,
+	iface_set_params (connection,
+	                  readonly,
+	                  &internal_error);
+	db_set_params (connection, "main",
 	               db_manager->db.cache_size,
 	               db_manager->db.page_size,
-	               readonly,
 	               &internal_error);
 
 	if (internal_error) {
@@ -1317,7 +1326,14 @@ tracker_db_manager_attach_database (TrackerDBManager    *db_manager,
 		}
 	}
 
-	return tracker_db_interface_attach_database (iface, file, name, error);
+	if (!tracker_db_interface_attach_database (iface, file, name, error))
+		return FALSE;
+
+	db_set_params (iface, name,
+	               db_manager->db.cache_size,
+	               db_manager->db.page_size,
+	               error);
+	return TRUE;
 }
 
 gboolean
