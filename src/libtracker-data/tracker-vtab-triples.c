@@ -284,6 +284,7 @@ convert_to_string (const gchar         *table_name,
 {
 	switch (type) {
 	case TRACKER_PROPERTY_TYPE_STRING:
+	case TRACKER_PROPERTY_TYPE_LANGSTRING:
 	case TRACKER_PROPERTY_TYPE_INTEGER:
 		return g_strdup_printf ("t.\"%s\"", table_name);
 	case TRACKER_PROPERTY_TYPE_RESOURCE:

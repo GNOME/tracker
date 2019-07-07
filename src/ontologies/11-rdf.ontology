@@ -28,6 +28,16 @@ rdfs:Literal a rdfs:Class ;
 	rdfs:label "Literal" ;
 	rdfs:subClassOf rdfs:Resource .
 
+rdfs:Datatype a rdfs:Class ;
+	rdfs:label "Datatype" ;
+	rdfs:comment "The class of RDF datatypes." ;
+	rdfs:subClassOf rdfs:Class .
+
+rdf:langString a rdfs:Class, rdfs:Datatype ;
+	rdfs:subClassOf rdfs:Literal ;
+	rdfs:label "langString" ;
+	rdfs:comment "The datatype of language-tagged string values" .
+
 rdf:type a rdf:Property ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range rdfs:Class .
