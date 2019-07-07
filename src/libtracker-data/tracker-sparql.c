@@ -84,8 +84,6 @@ static void convert_expression_to_string (TrackerSparql       *sparql,
 	return FALSE; \
 	} G_STMT_END
 
-#define _unimplemented(s) _raise(UNSUPPORTED, "Unsupported syntax", s)
-
 /* Added for control flow simplicity. All processing will be stopped
  * whenever any rule sets an error and returns FALSE.
  */
