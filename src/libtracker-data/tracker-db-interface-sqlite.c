@@ -2971,6 +2971,25 @@ tracker_db_statement_bind_text (TrackerDBStatement *stmt,
 }
 
 void
+tracker_db_statement_bind_bytes (TrackerDBStatement         *stmt,
+                                 int                         index,
+                                 GBytes                     *value)
+{
+	gconstpointer data;
+	gsize len;
+
+	g_return_if_fail (TRACKER_IS_DB_STATEMENT (stmt));
+
+	g_assert (!stmt->stmt_is_used);
+
+	data = g_bytes_get_data (value, &len);
+
+	tracker_db_interface_lock (stmt->db_interface);
+	sqlite3_bind_blob (stmt->stmt, index + 1, data, len - 1, SQLITE_TRANSIENT);
+	tracker_db_interface_unlock (stmt->db_interface);
+}
+
+void
 tracker_db_statement_bind_value (TrackerDBStatement *stmt,
 				 int                 index,
 				 const GValue       *value)
@@ -2996,6 +3015,15 @@ tracker_db_statement_bind_value (TrackerDBStatement *stmt,
 	} else if (type == G_TYPE_STRING) {
 		sqlite3_bind_text (stmt->stmt, index + 1,
 				   g_value_get_string (value), -1, SQLITE_TRANSIENT);
+	} else if (type == G_TYPE_BYTES) {
+		GBytes *bytes;
+		gconstpointer data;
+		gsize len;
+
+		bytes = g_value_get_boxed (value);
+		data = g_bytes_get_data (bytes, &len);
+		sqlite3_bind_text (stmt->stmt, index + 1,
+		                   data, len, SQLITE_TRANSIENT);
 	} else {
 		GValue dest = G_VALUE_INIT;
 
