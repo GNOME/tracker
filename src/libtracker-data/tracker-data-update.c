@@ -686,11 +686,12 @@ ensure_resource_id (TrackerData *data,
 
 		id = tracker_data_update_get_new_service_id (data);
 		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, &error,
-		                                              "INSERT INTO Resource (ID, Uri) VALUES (?, ?)");
+		                                              "INSERT INTO Resource (ID, Uri, BlankNode) VALUES (?, ?, ?)");
 
 		if (stmt) {
 			tracker_db_statement_bind_int (stmt, 0, id);
 			tracker_db_statement_bind_text (stmt, 1, uri);
+			tracker_db_statement_bind_int (stmt, 2, g_str_has_prefix (uri, "urn:bnode:"));
 			tracker_db_statement_execute (stmt, &error);
 			g_object_unref (stmt);
 		}
