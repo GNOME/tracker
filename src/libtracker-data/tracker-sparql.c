@@ -6978,7 +6978,23 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_append_string (sparql, "== \"" RDFS_NS "Resource\" ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISBLANK)) {
-		_unimplemented ("ISBLANK");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		_append_string (sparql, "CASE ");
+
+		if (!helper_datatype (sparql, node, error))
+			return FALSE;
+
+		_append_string (sparql, "== \"" RDFS_NS "Resource\" ");
+		_append_string (sparql, "WHEN 1 THEN (SELECT BlankNode FROM Resource WHERE ID = ");
+
+		if (!_postprocess_rule (sparql, node, NULL, error))
+			return FALSE;
+
+		_append_string (sparql, ") ELSE NULL END ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISLITERAL)) {
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		node = _skip_rule (sparql, NAMED_RULE_Expression);
