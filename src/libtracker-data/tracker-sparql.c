@@ -7369,9 +7369,9 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_BNODE)) {
 		if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL)) {
-			_append_string (sparql, "SparqlUUID() ");
+			_append_string (sparql, "SparqlUUID(\"urn:bnode\") ");
 		} else {
-			_append_string (sparql, "SparqlBNODE( ");
+			_append_string (sparql, "SparqlBNODE(");
 			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 			_call_rule (sparql, NAMED_RULE_Expression, error);
 			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
@@ -7389,11 +7389,11 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DATETIME;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_UUID)) {
 		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL);
-		_append_string (sparql, "SparqlUUID() ");
+		_append_string (sparql, "SparqlUUID(\"urn:uuid\") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRUUID)) {
 		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL);
-		_append_string (sparql, "SUBSTR(SparqlUUID(), 10) ");
+		_append_string (sparql, "SparqlUUID() ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_CONCAT)) {
 		sparql->current_state.convert_to_string = TRUE;
