@@ -3451,7 +3451,7 @@ create_base_tables (TrackerDataManager  *manager,
 
 	tracker_db_interface_execute_query (iface, &internal_error,
 	                                    "CREATE TABLE Resource (ID INTEGER NOT NULL PRIMARY KEY,"
-	                                    " Uri TEXT NOT NULL, Refcount INTEGER DEFAULT 0, UNIQUE (Uri))");
+	                                    " Uri TEXT NOT NULL, Refcount INTEGER DEFAULT 0, BlankNode INTEGER DEFAULT 0, UNIQUE (Uri))");
 
 	if (internal_error) {
 		g_propagate_error (error, internal_error);
