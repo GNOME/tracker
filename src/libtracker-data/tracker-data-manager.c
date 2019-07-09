@@ -3901,7 +3901,7 @@ tracker_data_manager_update_union_views (TrackerDataManager  *manager,
 		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_%s\"",
 		                                              tracker_class_get_name (classes[i]));
 		if (!stmt)
-			break;
+			goto error;
 
 		tracker_db_statement_execute (stmt, NULL);
 		g_object_unref (stmt);
@@ -3925,7 +3925,7 @@ tracker_data_manager_update_union_views (TrackerDataManager  *manager,
 		                                              "%s", str->str);
 		g_string_free (str, TRUE);
 		if (!stmt)
-			break;
+			goto error;
 
 		tracker_db_statement_execute (stmt, &inner_error);
 		g_object_unref (stmt);
@@ -3943,7 +3943,7 @@ tracker_data_manager_update_union_views (TrackerDataManager  *manager,
 		                                              tracker_class_get_name (service),
 		                                              tracker_property_get_name (properties[i]));
 		if (!stmt)
-			break;
+			goto error;
 
 		tracker_db_statement_execute (stmt, NULL);
 		g_object_unref (stmt);
@@ -3971,12 +3971,44 @@ tracker_data_manager_update_union_views (TrackerDataManager  *manager,
 		g_string_free (str, TRUE);
 
 		if (!stmt)
-			break;
+			goto error;
 
 		tracker_db_statement_execute (stmt, &inner_error);
 		g_object_unref (stmt);
 	}
 
+	/* Update FTS5 union view */
+	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+						      "DROP VIEW IF EXISTS temp.\"unionGraph_fts5\"");
+	if (!stmt)
+		goto error;
+
+	tracker_db_statement_execute (stmt, NULL);
+	g_object_unref (stmt);
+
+	str = g_string_new (NULL);
+	g_string_append (str,
+			 "CREATE VIEW temp.\"unionGraph_fts5\" AS "
+			 "SELECT 0 AS graph, ROWID, *, fts5, rank, tracker_offsets(fts5) AS offsets FROM \"main\".\"fts5\" ");
+
+	g_hash_table_iter_init (&iter, graphs);
+	while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
+		g_string_append_printf (str, "UNION ALL SELECT %d AS graph, ROWID, *, fts5, rank, tracker_offsets(fts5) AS offsets FROM \"%s\".\"fts5\" ",
+					GPOINTER_TO_INT (graph_id),
+					(gchar *) graph_name);
+	}
+
+	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+						      "%s", str->str);
+	g_string_free (str, TRUE);
+
+	if (!stmt)
+		goto error;
+
+	tracker_db_statement_execute (stmt, &inner_error);
+	g_object_unref (stmt);
+
+error:
 	if (inner_error) {
 		g_propagate_error (error, inner_error);
 		return FALSE;
