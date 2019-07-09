@@ -134,7 +134,7 @@ test_backup_and_restore_helper (const gchar *db_location,
 	if (g_file_test (data_filename, G_FILE_TEST_IS_REGULAR)) {
 		GFile *file = g_file_new_for_path (data_filename);
 		data_update = tracker_data_manager_get_data (manager);
-		tracker_turtle_reader_load (file, data_update, NULL, &error);
+		tracker_data_load_turtle_file (data_update, file, NULL, &error);
 		g_assert_no_error (error);
 		g_object_unref (file);
 	} else {

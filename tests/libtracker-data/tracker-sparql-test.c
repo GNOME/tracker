@@ -312,7 +312,7 @@ test_sparql_query (TestInfo      *test_info,
 	data_filename = g_strconcat (data_prefix, ".ttl", NULL);
 	if (g_file_test (data_filename, G_FILE_TEST_IS_REGULAR)) {
 		GFile *file = g_file_new_for_path (data_filename);
-		tracker_turtle_reader_load (file, data_update, NULL, &error);
+		tracker_data_load_turtle_file (data_update, file, NULL, &error);
 		g_assert_no_error (error);
 		g_object_unref (file);
 	} else {
