@@ -176,11 +176,12 @@ class Helper:
             # Seems that it didn't even start...
             return
 
-        start = time.time()
-        if self.process.poll() == None:
+        if self.process_watch_timeout != 0:
             GLib.source_remove(self.process_watch_timeout)
             self.process_watch_timeout = 0
 
+        start = time.time()
+        if self.process.poll() == None:
             self.process.terminate()
 
             while self.process.poll() == None:
