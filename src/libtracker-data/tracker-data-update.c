@@ -3099,9 +3099,69 @@ tracker_data_load_turtle_file (TrackerData  *data,
                                const gchar  *graph,
                                GError      **error)
 {
-	g_return_if_fail (G_IS_FILE (file));
+	TrackerTurtleReader *reader = NULL;
+	GError *inner_error = NULL;
+	gboolean in_transaction = FALSE;
 
-	tracker_turtle_reader_load (file, data, graph, error);
+	tracker_data_begin_transaction (data, &inner_error);
+	if (inner_error)
+		goto failed;
+
+	in_transaction = TRUE;
+	reader = tracker_turtle_reader_new (file, &inner_error);
+	if (inner_error)
+		goto failed;
+
+	while (tracker_turtle_reader_next (reader, &inner_error)) {
+		const gchar *object_str;
+		GBytes *object;
+
+		object_str = tracker_turtle_reader_get_object (reader);
+		object = g_bytes_new (object_str, strlen (object_str) + 1);
+
+		if (tracker_turtle_reader_get_object_is_uri (reader)) {
+			tracker_data_insert_statement_with_uri (data, graph,
+								tracker_turtle_reader_get_subject (reader),
+								tracker_turtle_reader_get_predicate (reader),
+								object,
+								&inner_error);
+		} else {
+			tracker_data_insert_statement_with_string (data, graph,
+								   tracker_turtle_reader_get_subject (reader),
+								   tracker_turtle_reader_get_predicate (reader),
+								   object,
+								   &inner_error);
+		}
+
+		g_bytes_unref (object);
+
+		if (inner_error)
+			goto failed;
+
+		tracker_data_update_buffer_might_flush (data, &inner_error);
+
+		if (inner_error)
+			goto failed;
+	}
+
+	if (inner_error)
+		goto failed;
+
+	tracker_data_commit_transaction (data, &inner_error);
+	if (inner_error)
+		goto failed;
+
+	g_clear_object (&reader);
+
+	return;
+
+failed:
+	if (in_transaction)
+		tracker_data_rollback_transaction (data);
+
+	g_clear_object (&reader);
+
+	g_propagate_error (error, inner_error);
 }
 
 gint
