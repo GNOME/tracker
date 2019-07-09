@@ -620,7 +620,7 @@ _prepend_path_element (TrackerSparql      *sparql,
 		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
 		                       "(SELECT ID, value, graph, ID_type, value_type "
 		                       "FROM \"%s\" "
-		                       "UNION ALL "
+		                       "UNION "
 		                       "SELECT ID, value, graph, ID_type, value_type "
 		                       "FROM \"%s\") ",
 		                       path_elem->name,
@@ -660,7 +660,7 @@ _prepend_path_element (TrackerSparql      *sparql,
 		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
 		                       "(SELECT ID, ID, graph, ID_type, ID_type "
 				       "FROM \"%s\" "
-				       "UNION ALL "
+				       "UNION "
 				       "SELECT ID, value, graph, ID_type, value_type "
 				       "FROM \"%s\") ",
 				       path_elem->name,
