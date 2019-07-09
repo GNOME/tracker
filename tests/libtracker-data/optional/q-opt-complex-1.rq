@@ -8,4 +8,5 @@ SELECT ?person ?nick ?page ?img ?name ?firstN
         { ?person foaf:depiction ?img } UNION
         { ?person foaf:firstName ?firstN }
     } FILTER ( bound(?page) || bound(?img) || bound(?firstN) )
-} 
+}
+ORDER BY ?person ?nick ?page ?img ?name ?firstN
