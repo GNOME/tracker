@@ -164,9 +164,13 @@ tracker_fts_delete_table (sqlite3 *db,
 	gchar *query;
 	int rc;
 
-	query = g_strdup_printf ("DROP VIEW fts_view");
-	rc = sqlite3_exec (db, query, NULL, NULL, NULL);
-	g_free (query);
+	rc = sqlite3_exec (db, "DROP VIEW IF EXISTS unionGraph_fts5", NULL, NULL, NULL);
+
+	if (rc == SQLITE_OK) {
+		query = g_strdup_printf ("DROP VIEW fts_view");
+		rc = sqlite3_exec (db, query, NULL, NULL, NULL);
+		g_free (query);
+	}
 
 	if (rc == SQLITE_OK) {
 		query = g_strdup_printf ("DROP TABLE %s", table_name);
