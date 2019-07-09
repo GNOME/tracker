@@ -1164,7 +1164,8 @@ wal_checkpoint_thread (gpointer data)
 	if (!db_manager->db.wal_iface)
 		db_manager->db.wal_iface = init_writable_db_interface (db_manager);
 
-	wal_checkpoint (db_manager->db.wal_iface, FALSE);
+	if (db_manager->db.wal_iface)
+		wal_checkpoint (db_manager->db.wal_iface, FALSE);
 
 	return NULL;
 }
