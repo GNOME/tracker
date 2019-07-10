@@ -2108,6 +2108,10 @@ ensure_graph_buffer (TrackerDataUpdateBuffer *buffer,
 			return graph_buffer;
 	}
 
+	if (name && !tracker_data_manager_find_graph (data->manager, name)) {
+		tracker_data_manager_create_graph (data->manager, name, NULL);
+	}
+
 	graph_buffer = g_slice_new0 (TrackerDataUpdateBufferGraph);
 	graph_buffer->graph = g_strdup (name);
 	if (graph_buffer->graph) {
