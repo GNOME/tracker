@@ -39,13 +39,11 @@ if build_machine.system() == 'openbsd'
   tracker_common_dependencies += libkvm
 endif
 
-libtracker_common = library('tracker-common',
+libtracker_common = static_library('tracker-common',
   tracker_common_sources,
   dependencies: tracker_common_dependencies + [unicode_library],
   c_args: tracker_c_args,
   include_directories: [configinc, srcinc],
-  install: true,
-  install_dir: tracker_internal_libs_dir,
 )
 
 commoninc = include_directories('.')
