@@ -249,14 +249,15 @@ skip_non_alphanumeric (const gchar **str,
 	gboolean found = FALSE, is_alnum;
 	gunichar unichar;
 
-	do {
+	while (remaining < end) {
 		unichar = g_utf8_get_char (remaining);
 		is_alnum = g_unichar_isalnum (unichar);
-		if (!is_alnum) {
-			found = TRUE;
-			remaining = g_utf8_next_char (remaining);
-		}
-	} while (!is_alnum && remaining < end);
+		if (is_alnum)
+			break;
+
+		found = TRUE;
+		remaining = g_utf8_next_char (remaining);
+	}
 
 	/* The string must not be left empty */
 	if (remaining == end)
