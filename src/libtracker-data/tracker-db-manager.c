@@ -60,7 +60,7 @@
 #define TRACKER_DB_PAGE_SIZE_DONT_SET -1
 
 /* Set current database version we are working with */
-#define TRACKER_DB_VERSION_NOW        TRACKER_DB_VERSION_0_15_2
+#define TRACKER_DB_VERSION_NOW        TRACKER_DB_VERSION_2_3
 
 #define TRACKER_VACUUM_CHECK_SIZE     ((goffset) 4 * 1024 * 1024 * 1024) /* 4GB */
 
@@ -95,7 +95,8 @@ typedef enum {
 	TRACKER_DB_VERSION_0_9_24,  /* nmo:PhoneMessage class */
 	TRACKER_DB_VERSION_0_9_34,  /* ontology cache */
 	TRACKER_DB_VERSION_0_9_38,  /* nie:url an inverse functional property */
-	TRACKER_DB_VERSION_0_15_2   /* fts4 */
+	TRACKER_DB_VERSION_0_15_2,  /* fts4 */
+	TRACKER_DB_VERSION_2_3      /* sparql1.1 */
 } TrackerDBVersion;
 
 typedef struct {
