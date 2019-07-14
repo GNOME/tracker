@@ -45,15 +45,14 @@ class TestGraphs (CommonTrackerStoreTest):
                 nco:phoneNumber '+1234567891' .
             <tel:+1234567892> a nco:PhoneNumber ;
                 nco:phoneNumber '+1234567892' .
-            <contact://test/graph/1> a nco:PersonContact .
             GRAPH <graph://test/graph/0> {
-                <contact://test/graph/1> nco:hasPhoneNumber <tel:+1234567890>
+                <contact://test/graph/1> a nco:PersonContact ; nco:hasPhoneNumber <tel:+1234567890>
             }
             GRAPH <graph://test/graph/1> {
-                <contact://test/graph/1> nco:hasPhoneNumber <tel:+1234567891>
+                <contact://test/graph/1> a nco:PersonContact ; nco:hasPhoneNumber <tel:+1234567891>
             }
             GRAPH <graph://test/graph/2> {
-                <contact://test/graph/1> nco:hasPhoneNumber <tel:+1234567892>
+                <contact://test/graph/1> a nco:PersonContact ; nco:hasPhoneNumber <tel:+1234567892>
             }
         }
         """
@@ -61,9 +60,8 @@ class TestGraphs (CommonTrackerStoreTest):
 
         query = """
         SELECT ?contact ?number WHERE {
-            ?contact a nco:PersonContact
             GRAPH <graph://test/graph/1> {
-                ?contact nco:hasPhoneNumber ?number
+                ?contact a nco:PersonContact; nco:hasPhoneNumber ?number
             }
         } ORDER BY DESC (fts:rank(?contact))
         """
@@ -78,7 +76,15 @@ class TestGraphs (CommonTrackerStoreTest):
             <tel:+1234567890> a rdf:Resource .
             <tel:+1234567891> a rdf:Resource .
             <tel:+1234567892> a rdf:Resource .
-            <contact://test/graph/1> a rdf:Resource .
+            GRAPH <graph://test/graph/0> {
+              <contact://test/graph/1> a rdf:Resource .
+            }
+            GRAPH <graph://test/graph/1> {
+              <contact://test/graph/1> a rdf:Resource .
+            }
+            GRAPH <graph://test/graph/2> {
+              <contact://test/graph/1> a rdf:Resource .
+            }
         }
         """
 
@@ -109,21 +115,32 @@ class TestGraphs (CommonTrackerStoreTest):
 
         query = """
         SELECT ?contact ?g WHERE {
-            ?contact a nco:PersonContact
             GRAPH ?g {
-                ?contact nco:hasPhoneNumber <tel:+1234567890>
+                ?contact a nco:PersonContact ; nco:hasPhoneNumber <tel:+1234567890>
             }
-        }
+        } ORDER BY ?g
         """
         results = self.tracker.query(query)
-        self.assertEqual(len(results), 1)
+        self.assertEqual(len(results), 3)
         self.assertEqual(results[0][0], "contact://test/graph/1")
         self.assertEqual(results[0][1], "graph://test/graph/0")
+        self.assertEqual(results[1][0], "contact://test/graph/1")
+        self.assertEqual(results[1][1], "graph://test/graph/1")
+        self.assertEqual(results[2][0], "contact://test/graph/1")
+        self.assertEqual(results[2][1], "graph://test/graph/2")
 
         delete_sparql = """
         DELETE {
             <tel:+1234567890> a rdf:Resource .
-            <contact://test/graph/1> a rdf:Resource .
+            GRAPH <graph://test/graph/0> {
+                <contact://test/graph/1> a rdf:Resource .
+            }
+            GRAPH <graph://test/graph/1> {
+                <contact://test/graph/1> a rdf:Resource .
+            }
+            GRAPH <graph://test/graph/2> {
+                <contact://test/graph/1> a rdf:Resource .
+            }
         }
         """
 
