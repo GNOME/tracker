@@ -4665,11 +4665,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 				}
 
 				if (!ontology_error) {
-					tracker_data_ontology_import_into_db (manager, iface, TRUE,
-					                                      &ontology_error);
-				}
-
-				if (!ontology_error) {
 #if HAVE_TRACKER_FTS
 					if (update_fts) {
 						tracker_data_manager_update_fts (manager, iface);
@@ -4677,6 +4672,14 @@ tracker_data_manager_initable_init (GInitable     *initable,
 						tracker_data_manager_init_fts (iface, FALSE);
 					}
 #endif
+				}
+
+				if (!ontology_error) {
+					tracker_data_ontology_import_into_db (manager, iface, TRUE,
+					                                      &ontology_error);
+				}
+
+				if (!ontology_error) {
 					tracker_data_ontology_process_changes_post_db (manager,
 					                                               seen_classes,
 					                                               seen_properties,
