@@ -1703,6 +1703,37 @@ convert_expression_to_string (TrackerSparql       *sparql,
 	}
 }
 
+static void
+_append_graph_checks (TrackerSparql *sparql,
+                      const gchar   *table_name,
+                      GStrv          graphs,
+                      gint           len)
+{
+	gint i;
+
+	_append_string_printf (sparql,
+	                       "(SELECT * FROM \"unionGraph_%s\" "
+	                       "WHERE (SELECT Uri FROM Resource WHERE ID = graph) ",
+	                       table_name);
+
+	if (len == 1)
+		_append_string (sparql, "= ");
+	else
+		_append_string (sparql, "IN (");
+
+	for (i = 0; i < len; i++) {
+		_append_string_printf (sparql,
+		                       "%c \"%s\" ",
+		                       i == 0 ? ' ' : ',',
+		                       graphs[i]);
+	}
+
+	if (len > 1)
+		_append_string (sparql, ")");
+
+	_append_string (sparql, ") ");
+}
+
 static TrackerContext *
 _begin_triples_block (TrackerSparql *sparql)
 {
@@ -1777,6 +1808,7 @@ _end_triples_block (TrackerSparql  *sparql,
 			                "(SELECT subject AS ID, predicate, "
 			                "object, object_type, graph FROM tracker_triples) ");
 			g_clear_pointer (&sparql->union_views, g_hash_table_unref);
+			// FIXME should also check anon/named graphs here...
 		} else if (table->predicate_path) {
 			_append_string_printf (sparql, "\"%s\"", table->sql_db_tablename);
 		} else {
@@ -1787,11 +1819,18 @@ _end_triples_block (TrackerSparql  *sparql,
 				                       table->sql_db_tablename);
 			} else {
 				if (table->graph) {
-					_append_string_printf (sparql,
-					                       "(SELECT * FROM \"unionGraph_%s\" "
-					                       "WHERE graph = (SELECT ID FROM Resource WHERE Uri = \"%s\")) ",
-					                       table->sql_db_tablename,
-					                       table->graph);
+					_append_graph_checks (sparql, table->sql_db_tablename,
+					                      &table->graph, 1);
+				} else if (sparql->anon_graphs->len > 0 &&
+				           tracker_token_is_empty (&sparql->current_state.graph)) {
+					_append_graph_checks (sparql, table->sql_db_tablename,
+					                      (GStrv) sparql->anon_graphs->pdata,
+					                      sparql->anon_graphs->len);
+				} else if (sparql->named_graphs->len > 0 &&
+				           tracker_token_get_variable (&sparql->current_state.graph)) {
+					_append_graph_checks (sparql, table->sql_db_tablename,
+					                      (GStrv) sparql->named_graphs->pdata,
+					                      sparql->named_graphs->len);
 				} else {
 					_append_string_printf (sparql, "\"unionGraph_%s\" ",
 					                       table->sql_db_tablename);
@@ -2262,6 +2301,21 @@ translate_SelectQuery (TrackerSparql  *sparql,
 
 	while (_check_in_rule (sparql, NAMED_RULE_DatasetClause)) {
 		_call_rule (sparql, NAMED_RULE_DatasetClause, error);
+	}
+
+	/* Optimize single graph case, so it always resorts to querying
+	 * the specific database.
+	 */
+	if (sparql->named_graphs->len + sparql->anon_graphs->len == 1) {
+		const gchar *graph = NULL;
+
+		if (sparql->named_graphs->len > 0)
+			graph = g_ptr_array_index (sparql->named_graphs, 0);
+		else if (sparql->anon_graphs->len > 0)
+			graph = g_ptr_array_index (sparql->anon_graphs, 0);
+
+		if (graph)
+			tracker_token_literal_init (&sparql->current_state.graph, graph, -1);
 	}
 
 	_call_rule (sparql, NAMED_RULE_WhereClause, error);
@@ -3758,6 +3812,7 @@ translate_UsingClause (TrackerSparql  *sparql,
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_USING);
 
+	// FIXME
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_NAMED)) {
 	}
 
@@ -4117,27 +4172,6 @@ translate_GraphGraphPattern (TrackerSparql  *sparql,
 	_init_token (&sparql->current_state.graph,
 	             sparql->current_state.prev_node, sparql);
 	_call_rule (sparql, NAMED_RULE_GroupGraphPattern, error);
-
-	if (sparql->named_graphs->len > 0) {
-		gint i;
-
-		_append_string (sparql, "WHERE graph IN (");
-
-		for (i = 0; i < sparql->named_graphs->len; i++) {
-			const gchar *graph_name;
-			gint graph_id;
-
-			if (i > 0)
-				_append_string (sparql, ", ");
-
-			graph_name = g_ptr_array_index (sparql->named_graphs, i);
-			graph_id = tracker_data_manager_find_graph (sparql->data_manager,
-								    graph_name);
-			_append_string_printf (sparql, "%d", graph_id);
-		}
-
-		_append_string (sparql, ") ");
-	}
 
 	tracker_token_unset (&sparql->current_state.graph);
 	sparql->current_state.graph = old_graph;
