@@ -5,7 +5,9 @@ INSERT {
 	}
 }
 DELETE {
-	example:resource example:p 42
+	GRAPH example:graphA {
+		example:resource example:p 42
+	}
 }
 INSERT {
 	GRAPH example:graphB {
