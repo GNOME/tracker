@@ -128,6 +128,8 @@ sql_by_query (void)
 
 	iface = tracker_data_manager_get_db_interface (data_manager);
 
+	tracker_data_manager_update_union_views (data_manager, iface, NULL, NULL);
+
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &error, "%s", query);
 
 	if (stmt) {
