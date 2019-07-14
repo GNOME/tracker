@@ -42,7 +42,6 @@ class TestMinerInsertBehaviour (CommonTrackerStoreTest):
         resource = 'graph://test/resource/1'
 
         insert_sparql = """
-        DELETE { ?r a rdfs:Resource } WHERE { GRAPH <graph://test/resource/1> { ?r a rdfs:Resource } }
         INSERT INTO <graph://test/resource/1> {
            _:resource a nie:DataObject ;
                       nie:url "%s" .
@@ -54,7 +53,7 @@ class TestMinerInsertBehaviour (CommonTrackerStoreTest):
         """ % resource
 
         delete_sparql = """
-        DELETE { ?r a rdfs:Resource } WHERE { GRAPH <graph://test/resource/1> { ?r a rdfs:Resource } }
+        DELETE { GRAPH <graph://test/resource/1> { ?r a rdfs:Resource } } WHERE { GRAPH <graph://test/resource/1> { ?r a rdfs:Resource } }
         """
 
         ''' First insertion '''
@@ -64,7 +63,7 @@ class TestMinerInsertBehaviour (CommonTrackerStoreTest):
         self.assertEqual(len(results), 1)
 
         ''' Second insertion / update '''
-        self.tracker.update(insert_sparql)
+        self.tracker.update(delete_sparql + ' ' + insert_sparql)
 
         results = self.tracker.query(select_sparql)
         self.assertEqual(len(results), 1)
