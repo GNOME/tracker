@@ -1160,16 +1160,8 @@ _add_quad (TrackerSparql  *sparql,
 	triple_context = TRACKER_TRIPLE_CONTEXT (sparql->current_state.context);
 	ontologies = tracker_data_manager_get_ontologies (sparql->data_manager);
 
-	if (tracker_token_get_literal (graph)) {
+	if (tracker_token_get_literal (graph))
 		graph_db = tracker_token_get_idstring (graph);
-		if (tracker_data_manager_find_graph (sparql->data_manager, graph_db) == 0) {
-			g_set_error (error, TRACKER_SPARQL_ERROR,
-			             TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
-			             "Unknown graph '%s'",
-			             tracker_token_get_idstring (graph));
-			return FALSE;
-		}
-	}
 
 	if (tracker_token_get_literal (predicate)) {
 		gboolean share_table = TRUE;
@@ -1813,13 +1805,22 @@ _end_triples_block (TrackerSparql  *sparql,
 		} else if (table->predicate_path) {
 			_append_string_printf (sparql, "\"%s\"", table->sql_db_tablename);
 		} else {
-			if (table->graph) {
-				_append_string_printf (sparql, "\"%s\".\"%s\"",
+			if (table->graph &&
+			    tracker_data_manager_find_graph (sparql->data_manager, table->graph)) {
+				_append_string_printf (sparql, "\"%s\".\"%s\" ",
 				                       table->graph,
 				                       table->sql_db_tablename);
 			} else {
-				_append_string_printf (sparql, "\"unionGraph_%s\" ",
-				                       table->sql_db_tablename);
+				if (table->graph) {
+					_append_string_printf (sparql,
+					                       "(SELECT * FROM \"unionGraph_%s\" "
+					                       "WHERE graph = (SELECT ID FROM Resource WHERE Uri = \"%s\")) ",
+					                       table->sql_db_tablename,
+					                       table->graph);
+				} else {
+					_append_string_printf (sparql, "\"unionGraph_%s\" ",
+					                       table->sql_db_tablename);
+				}
 			}
 		}
 
