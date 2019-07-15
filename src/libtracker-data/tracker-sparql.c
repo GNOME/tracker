@@ -6493,6 +6493,65 @@ handle_property_function (TrackerSparql    *sparql,
 {
 	TrackerPropertyType type;
 
+	/* As of SQLite 3.26.0, performing an aggregate function (or anything
+	 * that requires scanning all results, like distinct) on a unionGraph
+	 * view results in full table scans on all unioned selects.
+	 *
+	 * This quickly gets far too expensive on property functions, as they
+	 * are normally used in the SelectClause, so they get to run once per
+	 * result. This makes queries like:
+	 *
+	 * SELECT rdf:type(?u) { ?u a rdfs:Resource }
+	 *
+	 * prohibitive. The solution is to perform the union inline, and
+	 * evaluate the ArgList once on each of the unioned selects. This again
+	 * hits table search, and hopefully through an index, so it gets fast
+	 * again.
+	 */
+	if (tracker_property_get_multiple_values (property) &&
+	    tracker_token_is_empty (&sparql->current_state.graph)) {
+		TrackerStringBuilder *str, *old;
+		TrackerParserNode *arg;
+		GHashTable *ht;
+		GHashTableIter iter;
+		gpointer graph;
+
+		arg = _skip_rule (sparql, NAMED_RULE_ArgList);
+
+		_append_string (sparql, "(SELECT GROUP_CONCAT (");
+		str = _append_placeholder (sparql);
+		old = tracker_sparql_swap_builder (sparql, str);
+		_append_string_printf (sparql, "\"%s\"", tracker_property_get_name (property));
+		convert_expression_to_string (sparql, tracker_property_get_data_type (property));
+		tracker_sparql_swap_builder (sparql, old);
+
+		_append_string (sparql, ", ',') ");
+
+		_append_string_printf (sparql, "FROM (SELECT \"%s\" FROM \"main\".\"%s\" WHERE ID = ",
+		                       tracker_property_get_name (property),
+		                       tracker_property_get_table_name (property));
+		if (!_postprocess_rule (sparql, arg, NULL, error))
+			return FALSE;
+
+		ht = tracker_data_manager_get_graphs (sparql->data_manager);
+		g_hash_table_iter_init (&iter, ht);
+
+		while (g_hash_table_iter_next (&iter, (gpointer *) &graph, NULL)) {
+			_append_string_printf (sparql, "UNION ALL SELECT \"%s\" FROM \"%s\".\"%s\" WHERE ID = ",
+			                       tracker_property_get_name (property),
+			                       (gchar *) graph,
+			                       tracker_property_get_table_name (property));
+
+			if (!_postprocess_rule (sparql, arg, NULL, error))
+				return FALSE;
+		}
+
+		_append_string (sparql, ")) ");
+
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
+		return TRUE;
+	}
+
 	if (tracker_property_get_multiple_values (property)) {
 		TrackerStringBuilder *str, *old;
 
