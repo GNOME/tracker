@@ -3550,7 +3550,7 @@ get_solution_for_pattern (TrackerSparql      *sparql,
 	iface = tracker_data_manager_get_writable_db_interface (sparql->data_manager);
 	stmt = prepare_query (sparql, iface, sparql->sql,
 	                      TRACKER_SELECT_CONTEXT (sparql->context)->literal_bindings,
-	                      NULL, FALSE,
+	                      NULL, TRUE,
 	                      error);
 	g_clear_object (&sparql->context);
 
