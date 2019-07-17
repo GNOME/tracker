@@ -78,7 +78,7 @@ test_miner_process_file (TrackerMinerFS *miner,
 		g_free (urn);
 	}
 
-	sparql = tracker_resource_print_sparql_update (resource, NULL, NULL);
+	sparql = tracker_resource_print_sparql_update (resource, NULL, TRACKER_OWN_GRAPH_URN);
 	tracker_miner_fs_notify_finish (miner, task, sparql, NULL);
 	g_object_unref (resource);
 	g_free (sparql);
@@ -94,7 +94,8 @@ test_miner_remove_file (TrackerMinerFS *miner,
 	gchar *sparql, *uri;
 
 	uri = g_file_get_uri (file);
-	sparql = g_strdup_printf ("DELETE {"
+	sparql = g_strdup_printf ("WITH <" TRACKER_OWN_GRAPH_URN "> "
+	                          "DELETE {"
 	                          "  ?u a rdfs:Resource . "
 	                          "} WHERE {"
 	                          "  ?u nie:url ?url ."
@@ -112,7 +113,8 @@ test_miner_remove_children (TrackerMinerFS *miner,
 	gchar *sparql, *uri;
 
 	uri = g_file_get_uri (file);
-	sparql = g_strdup_printf ("DELETE {"
+	sparql = g_strdup_printf ("WITH <" TRACKER_OWN_GRAPH_URN "> "
+	                          "DELETE {"
 	                          "  ?u a rdfs:Resource . "
 	                          "} WHERE {"
 	                          "  ?u nie:url ?url ."
@@ -133,7 +135,8 @@ test_miner_move_file (TrackerMinerFS *miner,
 
 	uri = g_file_get_uri (source);
 	dest_uri = g_file_get_uri (dest);
-	sparql = g_strdup_printf ("DELETE {"
+	sparql = g_strdup_printf ("WITH <" TRACKER_OWN_GRAPH_URN "> "
+	                          "DELETE {"
 	                          "  ?u nie:url ?url . "
 	                          "} INSERT {"
 	                          "  ?u nie:url '%s' . "
