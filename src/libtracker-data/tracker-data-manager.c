@@ -2853,6 +2853,7 @@ schedule_copy (GPtrArray *schedule,
 
 static void
 create_insert_delete_triggers (TrackerDBInterface  *iface,
+                               const gchar         *database,
                                const gchar         *table_name,
                                const gchar * const *properties,
                                gint                 n_properties,
@@ -2864,7 +2865,8 @@ create_insert_delete_triggers (TrackerDBInterface  *iface,
 
 	/* Insert trigger */
 	tracker_db_interface_execute_query (iface, &internal_error,
-	                                    "DROP TRIGGER IF EXISTS \"trigger_insert_%s\" ",
+	                                    "DROP TRIGGER IF EXISTS \"%s\".\"trigger_insert_%s\" ",
+	                                    database,
 	                                    table_name);
 	if (internal_error) {
 		g_propagate_error (error, internal_error);
@@ -2873,15 +2875,18 @@ create_insert_delete_triggers (TrackerDBInterface  *iface,
 
 	trigger_query = g_string_new (NULL);
 	g_string_append_printf (trigger_query,
-	                        "CREATE TRIGGER \"trigger_insert_%s\" "
+	                        "CREATE TRIGGER \"%s\".\"trigger_insert_%s\" "
 	                        "AFTER INSERT ON \"%s\" "
 	                        "FOR EACH ROW BEGIN ",
-	                        table_name, table_name);
+	                        database, table_name,
+	                        table_name);
 	for (i = 0; i < n_properties; i++) {
 		g_string_append_printf (trigger_query,
-		                        "UPDATE Resource "
-		                        "SET Refcount = Refcount + 1 "
-		                        "WHERE Resource.rowid = NEW.\"%s\"; ",
+		                        "INSERT OR IGNORE INTO Refcount (ROWID, Refcount) "
+		                        "SELECT NEW.\"%s\", 0 WHERE NEW.\"%s\" IS NOT NULL; "
+		                        "UPDATE Refcount SET Refcount = Refcount + 1 WHERE Refcount.ROWID = NEW.\"%s\"; ",
+		                        properties[i],
+		                        properties[i],
 		                        properties[i]);
 	}
 
@@ -2897,7 +2902,8 @@ create_insert_delete_triggers (TrackerDBInterface  *iface,
 
 	/* Delete trigger */
 	tracker_db_interface_execute_query (iface, &internal_error,
-	                                    "DROP TRIGGER IF EXISTS \"trigger_delete_%s\" ",
+	                                    "DROP TRIGGER IF EXISTS \"%s\".\"trigger_delete_%s\" ",
+	                                    database,
 	                                    table_name);
 	if (internal_error) {
 		g_propagate_error (error, internal_error);
@@ -2906,16 +2912,16 @@ create_insert_delete_triggers (TrackerDBInterface  *iface,
 
 	trigger_query = g_string_new (NULL);
 	g_string_append_printf (trigger_query,
-	                        "CREATE TRIGGER \"trigger_delete_%s\" "
+	                        "CREATE TRIGGER \"%s\".\"trigger_delete_%s\" "
 	                        "AFTER DELETE ON \"%s\" "
 	                        "FOR EACH ROW BEGIN ",
-	                        table_name, table_name);
+	                        database, table_name,
+	                        table_name);
 	for (i = 0; i < n_properties; i++) {
 		g_string_append_printf (trigger_query,
-		                        "UPDATE Resource "
-		                        "SET Refcount = Refcount - 1 "
-		                        "WHERE Resource.rowid = OLD.\"%s\"; ",
-		                        properties[i]);
+		                        "UPDATE Refcount SET Refcount = Refcount - 1 WHERE Refcount.rowid = OLD.\"%s\"; "
+		                        "DELETE FROM Refcount WHERE Refcount.ROWID = OLD.\"%s\" AND Refcount.Refcount = 0; ",
+		                        properties[i], properties[i]);
 	}
 
 	g_string_append (trigger_query, "END; ");
@@ -2932,6 +2938,7 @@ create_insert_delete_triggers (TrackerDBInterface  *iface,
 static void
 create_table_triggers (TrackerDataManager  *manager,
                        TrackerDBInterface  *iface,
+                       const gchar         *database,
                        TrackerClass        *klass,
                        GError             **error)
 {
@@ -2966,7 +2973,7 @@ create_table_triggers (TrackerDataManager  *manager,
 			                              tracker_class_get_name (klass),
 			                              property_name);
 
-			create_insert_delete_triggers (iface, table_name, properties,
+			create_insert_delete_triggers (iface, database, table_name, properties,
 			                               G_N_ELEMENTS (properties),
 			                               &internal_error);
 			if (internal_error) {
@@ -2992,16 +2999,21 @@ create_table_triggers (TrackerDataManager  *manager,
 		}
 
 		tracker_db_interface_execute_query (iface, &internal_error,
-		                                    "CREATE TRIGGER \"trigger_update_%s_%s\" "
+		                                    "CREATE TRIGGER \"%s\".\"trigger_update_%s_%s\" "
 		                                    "AFTER UPDATE OF \"%s\" ON \"%s\" "
 		                                    "FOR EACH ROW BEGIN "
-		                                    "UPDATE Resource SET Refcount = Refcount + 1 WHERE Resource.rowid = NEW.\"%s\";"
-		                                    "UPDATE Resource SET Refcount = Refcount - 1 WHERE Resource.rowid = OLD.\"%s\";"
+		                                    "INSERT OR IGNORE INTO Refcount (ROWID, Refcount) "
+		                                    "SELECT NEW.\"%s\", 0 WHERE NEW.\"%s\" IS NOT NULL; "
+		                                    "UPDATE Refcount SET Refcount = Refcount + 1 WHERE Refcount.ROWID = NEW.\"%s\"; "
+		                                    "UPDATE Refcount SET Refcount = Refcount - 1 WHERE Refcount.rowid = OLD.\"%s\";"
+		                                    "DELETE FROM Refcount WHERE Refcount.ROWID = OLD.\"%s\" AND Refcount.Refcount = 0; "
 		                                    "END",
+		                                    database,
 		                                    tracker_class_get_name (klass),
 		                                    property_name,
 		                                    property_name, table_name,
-		                                    property_name, property_name);
+		                                    property_name, property_name,
+		                                    property_name, property_name, property_name);
 		g_free (table_name);
 
 		if (internal_error) {
@@ -3011,7 +3023,7 @@ create_table_triggers (TrackerDataManager  *manager,
 		}
 	}
 
-	create_insert_delete_triggers (iface,
+	create_insert_delete_triggers (iface, database,
 	                               tracker_class_get_name (klass),
 	                               (const gchar * const *) trigger_properties->pdata,
 	                               trigger_properties->len,
@@ -3347,7 +3359,7 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 		 * ontology changes. One situation where this is not true are
 		 * removal or properties with rdfs:Resource range.
 		 */
-		create_table_triggers (manager, iface, service, &internal_error);
+		create_table_triggers (manager, iface, database, service, &internal_error);
 
 		if (internal_error) {
 			g_propagate_error (error, internal_error);
@@ -3451,7 +3463,7 @@ create_base_tables (TrackerDataManager  *manager,
 
 	tracker_db_interface_execute_query (iface, &internal_error,
 	                                    "CREATE TABLE Resource (ID INTEGER NOT NULL PRIMARY KEY,"
-	                                    " Uri TEXT NOT NULL, Refcount INTEGER DEFAULT 0, BlankNode INTEGER DEFAULT 0, UNIQUE (Uri))");
+	                                    " Uri TEXT NOT NULL, BlankNode INTEGER DEFAULT 0, UNIQUE (Uri))");
 
 	if (internal_error) {
 		g_propagate_error (error, internal_error);
@@ -3476,16 +3488,25 @@ tracker_data_ontology_setup_db (TrackerDataManager  *manager,
                                 gboolean             in_update,
                                 GError             **error)
 {
-
+	GError *internal_error = NULL;
 	TrackerClass **classes;
 	guint i, n_classes;
+
+	tracker_db_interface_execute_query (iface, &internal_error,
+	                                    "CREATE TABLE IF NOT EXISTS "
+	                                    " \"%s\".Refcount (ID INTEGER NOT NULL PRIMARY KEY,"
+	                                    " Refcount INTEGER DEFAULT 0)",
+	                                    database);
+
+	if (internal_error) {
+		g_propagate_error (error, internal_error);
+		return FALSE;
+	}
 
 	classes = tracker_ontologies_get_classes (manager->ontologies, &n_classes);
 
 	/* create tables */
 	for (i = 0; i < n_classes; i++) {
-		GError *internal_error = NULL;
-
 		/* Also !is_new classes are processed, they might have new properties */
 		create_decomposed_metadata_tables (manager, iface, database, classes[i], in_update,
 		                                   tracker_class_get_db_schema_changed (classes[i]),
@@ -4069,6 +4090,43 @@ tracker_data_manager_update_union_views (TrackerDataManager  *manager,
 			goto error;
 
 		g_hash_table_insert (view_generations, g_strdup ("fts5"), generation);
+	}
+
+	/* Refcounts */
+	if (g_hash_table_lookup (view_generations, "refcount") != generation) {
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_Refcount\"");
+		if (!stmt)
+			goto error;
+
+		tracker_db_statement_execute (stmt, NULL);
+		g_object_unref (stmt);
+
+		str = g_string_new (NULL);
+		g_string_append (str,
+		                 "CREATE VIEW temp.\"unionGraph_Refcount\" AS "
+		                 "SELECT 0 AS graph, * FROM \"main\".\"Refcount\" ");
+
+		g_hash_table_iter_init (&iter, graphs);
+		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
+			g_string_append_printf (str, "UNION ALL SELECT %d AS graph, * FROM \"%s\".\"Refcount\" ",
+			                        GPOINTER_TO_INT (graph_id),
+			                        (gchar *) graph_name);
+		}
+
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
+		                                              "%s", str->str);
+		g_string_free (str, TRUE);
+
+		if (stmt) {
+			tracker_db_statement_execute (stmt, &inner_error);
+			g_object_unref (stmt);
+		}
+
+		if (inner_error)
+			goto error;
+
+		g_hash_table_insert (view_generations, g_strdup ("refcount"), generation);
 	}
 
 error:
@@ -4957,8 +5015,10 @@ data_manager_check_perform_cleanup (TrackerDataManager *manager)
 
 	count = 0;
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, NULL,
-	                                              "SELECT COUNT(*) FROM Resource WHERE Refcount <= 0 "
-	                                              "AND Resource.ID > %d AND Resource.ID NOT IN (SELECT ID FROM Graph)",
+	                                              "SELECT COUNT(*) FROM Resource "
+	                                              "WHERE Resource.ID > %d "
+	                                              "AND Resource.ID NOT IN (SELECT ROWID FROM unionGraph_Refcount) "
+	                                              "AND Resource.ID NOT IN (SELECT ID FROM Graph)",
 	                                              TRACKER_ONTOLOGIES_MAX_ID);
 	if (stmt) {
 		cursor = tracker_db_statement_start_cursor (stmt, NULL);
@@ -4992,8 +5052,10 @@ tracker_data_manager_dispose (GObject *object)
 			iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
 			stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE,
 			                                              &error,
-			                                              "DELETE FROM Resource WHERE Refcount <= 0 "
-			                                              "AND Resource.ID > %d AND Resource.ID NOT IN (SELECT ID FROM Graph)",
+			                                              "DELETE FROM Resource "
+			                                              "WHERE Resource.ID > %d "
+			                                              "AND Resource.ID NOT IN (SELECT ROWID FROM unionGraph_Refcount) "
+			                                              "AND Resource.ID NOT IN (SELECT ID FROM Graph)",
 			                                              TRACKER_ONTOLOGIES_MAX_ID);
 
 			if (stmt) {
