@@ -4959,6 +4959,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 skip_ontology_check:
 	if (!read_only && is_first_time_index) {
 		tracker_db_manager_set_current_locale (manager->db_manager);
+		tracker_db_manager_tokenizer_update (manager->db_manager);
 	} else if (!read_only && tracker_db_manager_locale_changed (manager->db_manager, NULL)) {
 		/* If locale changed, re-create indexes.
 		 * No need to reset the collator in the db interface,

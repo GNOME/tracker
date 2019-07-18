@@ -66,8 +66,6 @@
 
 #define IN_USE_FILENAME               ".meta.isrunning"
 
-#define PARSER_VERSION_FILENAME       "parser-version.txt"
-
 #define TOSTRING1(x) #x
 #define TOSTRING(x) TOSTRING1(x)
 #define TRACKER_PARSER_VERSION_STRING TOSTRING(TRACKER_PARSER_VERSION)
@@ -1224,29 +1222,19 @@ tracker_db_manager_has_enough_space (TrackerDBManager *db_manager)
 	return tracker_file_system_has_enough_space (db_manager->data_dir, TRACKER_DB_MIN_REQUIRED_SPACE, FALSE);
 }
 
-inline static gchar *
-get_parser_version_filename (TrackerDBManager *db_manager)
-{
-	return g_build_filename (db_manager->data_dir,
-	                         PARSER_VERSION_FILENAME,
-	                         NULL);
-}
-
-
 gboolean
 tracker_db_manager_get_tokenizer_changed (TrackerDBManager *db_manager)
 {
-	gchar *filename, *version;
-	gboolean changed = TRUE;
+	GValue value = G_VALUE_INIT;
+	const gchar *version;
+	gboolean changed;
 
-	filename = get_parser_version_filename (db_manager);
+	if (!tracker_db_manager_get_metadata (db_manager, "parser-version", &value))
+		return TRUE;
 
-	if (g_file_get_contents (filename, &version, NULL, NULL)) {
-		changed = strcmp (version, TRACKER_PARSER_VERSION_STRING) != 0;
-		g_free (version);
-	}
-
-	g_free (filename);
+	version = g_value_get_string (&value);
+	changed = strcmp (version, TRACKER_PARSER_VERSION_STRING) != 0;
+	g_value_unset (&value);
 
 	return changed;
 }
@@ -1254,20 +1242,13 @@ tracker_db_manager_get_tokenizer_changed (TrackerDBManager *db_manager)
 void
 tracker_db_manager_tokenizer_update (TrackerDBManager *db_manager)
 {
-	GError *error = NULL;
-	gchar *filename;
+	GValue value = G_VALUE_INIT;
 
-	filename = get_parser_version_filename (db_manager);
+	g_value_init (&value, G_TYPE_STRING);
+	g_value_set_string (&value, TRACKER_PARSER_VERSION_STRING);
 
-	if (!g_file_set_contents (filename, TRACKER_PARSER_VERSION_STRING, -1, &error)) {
-		g_warning ("The file '%s' could not be rewritten by Tracker and "
-		           "should be deleted manually. Not doing so will result "
-		           "in Tracker rebuilding its FTS tokens on every startup. "
-		           "The error received was: '%s'", filename, error->message);
-		g_error_free (error);
-	}
-
-	g_free (filename);
+	tracker_db_manager_set_metadata (db_manager, "parser-version", &value);
+	g_value_unset (&value);
 }
 
 void
