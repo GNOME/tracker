@@ -61,7 +61,6 @@
 
 /* Set current database version we are working with */
 #define TRACKER_DB_VERSION_NOW        TRACKER_DB_VERSION_0_15_2
-#define TRACKER_DB_LOCALE_FILE        "db-locale.txt"
 
 #define TRACKER_VACUUM_CHECK_SIZE     ((goffset) 4 * 1024 * 1024 * 1024) /* 4GB */
 
@@ -163,7 +162,6 @@ static gboolean            db_exec_no_reply                        (TrackerDBInt
 static TrackerDBInterface *tracker_db_manager_create_db_interface   (TrackerDBManager    *db_manager,
                                                                      gboolean             readonly,
                                                                      GError             **error);
-static void                db_remove_locale_file                    (TrackerDBManager    *db_manager);
 
 static TrackerDBInterface * init_writable_db_interface              (TrackerDBManager *db_manager);
 
@@ -281,9 +279,64 @@ tracker_db_manager_remove_all (TrackerDBManager *db_manager)
 	filename = g_strdup_printf ("%s-wal", db_manager->db.abs_filename);
 	g_unlink (filename);
 	g_free (filename);
+}
 
-	/* Remove locale file also */
-	db_remove_locale_file (db_manager);
+static gboolean
+tracker_db_manager_get_metadata (TrackerDBManager   *db_manager,
+                                 const gchar        *key,
+                                 GValue             *value)
+{
+	TrackerDBInterface *iface;
+	TrackerDBStatement *stmt;
+	TrackerDBCursor *cursor;
+
+	iface = tracker_db_manager_get_writable_db_interface (db_manager);
+	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
+	                                              NULL,
+	                                              "SELECT value FROM metadata WHERE key = ?");
+	if (!stmt)
+		return FALSE;
+
+	tracker_db_statement_bind_text (stmt, 0, key);
+	cursor = tracker_db_statement_start_cursor (stmt, NULL);
+	g_object_unref (stmt);
+
+	if (!cursor || !tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
+		g_clear_object (&cursor);
+		return FALSE;
+	}
+
+	tracker_db_cursor_get_value (cursor, 0, value);
+	g_object_unref (cursor);
+
+	return G_VALUE_TYPE (value) != G_TYPE_INVALID;
+}
+
+static void
+tracker_db_manager_set_metadata (TrackerDBManager   *db_manager,
+				 const gchar        *key,
+				 GValue             *value)
+{
+	TrackerDBInterface *iface;
+	TrackerDBStatement *stmt;
+	GError *error = NULL;
+
+	iface = tracker_db_manager_get_writable_db_interface (db_manager);
+	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
+	                                              &error,
+	                                              "INSERT OR REPLACE INTO metadata VALUES (?, ?)");
+	if (stmt) {
+		tracker_db_statement_bind_text (stmt, 0, key);
+		tracker_db_statement_bind_value (stmt, 1, value);
+		tracker_db_statement_execute (stmt, &error);
+
+		g_object_unref (stmt);
+	}
+
+	if (error) {
+		g_critical ("Could not store database metadata: %s\n", error->message);
+		g_error_free (error);
+	}
 }
 
 static TrackerDBVersion
@@ -336,47 +389,17 @@ tracker_db_manager_update_version (TrackerDBManager *db_manager)
 	}
 }
 
-static void
-db_remove_locale_file (TrackerDBManager *db_manager)
-{
-	gchar *filename;
-
-	filename = g_build_filename (db_manager->data_dir, TRACKER_DB_LOCALE_FILE, NULL);
-	g_info ("  Removing db-locale file:'%s'", filename);
-	g_unlink (filename);
-	g_free (filename);
-}
-
 static gchar *
 db_get_locale (TrackerDBManager *db_manager)
 {
+	GValue value = G_VALUE_INIT;
 	gchar *locale = NULL;
-	gchar *filename;
 
-	filename = g_build_filename (db_manager->data_dir, TRACKER_DB_LOCALE_FILE, NULL);
+	if (!tracker_db_manager_get_metadata (db_manager, "locale", &value))
+		return NULL;
 
-	if (G_LIKELY (g_file_test (filename, G_FILE_TEST_EXISTS))) {
-		gchar *contents;
-
-		/* Check locale is correct */
-		if (G_LIKELY (g_file_get_contents (filename, &contents, NULL, NULL))) {
-			if (contents && strlen (contents) == 0) {
-				g_critical ("  Empty locale file found at '%s'", filename);
-				g_free (contents);
-			} else {
-				/* Re-use contents */
-				locale = contents;
-			}
-		} else {
-			g_critical ("  Could not get content of file '%s'", filename);
-		}
-	} else {
-		/* expected when restoring from backup, always recreate indices */
-		g_info ("  Could not find database locale file:'%s'", filename);
-		locale = g_strdup ("unknown");
-	}
-
-	g_free (filename);
+	locale = g_value_dup_string (&value);
+	g_value_unset (&value);
 
 	return locale;
 }
@@ -385,23 +408,13 @@ static void
 db_set_locale (TrackerDBManager *db_manager,
 	       const gchar      *locale)
 {
-	GError *error = NULL;
-	gchar  *filename;
-	gchar  *str;
+	GValue value = G_VALUE_INIT;
 
-	filename = g_build_filename (db_manager->data_dir, TRACKER_DB_LOCALE_FILE, NULL);
-	g_info ("  Creating locale file '%s'", filename);
+	g_value_init (&value, G_TYPE_STRING);
+	g_value_set_string (&value, locale);
 
-	str = g_strdup_printf ("%s", locale ? locale : "");
-
-	if (!g_file_set_contents (filename, str, -1, &error)) {
-		g_info ("  Could not set file contents, %s",
-		        error ? error->message : "no error given");
-		g_clear_error (&error);
-	}
-
-	g_free (str);
-	g_free (filename);
+	tracker_db_manager_set_metadata (db_manager, "locale", &value);
+	g_value_unset (&value);
 }
 
 gboolean
@@ -432,7 +445,8 @@ tracker_db_manager_locale_changed (TrackerDBManager  *db_manager,
 		             TRACKER_DB_INTERFACE_ERROR,
 		             TRACKER_DB_OPEN_ERROR,
 		             "Locale change detected (DB:%s, User/App:%s)",
-		             db_locale, current_locale);
+		             db_locale ? db_locale : "unknown",
+		             current_locale);
 		changed = TRUE;
 	} else {
 		g_info ("Current and DB locales match: '%s'", db_locale);
@@ -480,7 +494,6 @@ static void
 db_recreate_all (TrackerDBManager  *db_manager,
 		 GError           **error)
 {
-	gchar *locale;
 	GError *internal_error = NULL;
 
 	/* We call an internal version of this function here
@@ -502,11 +515,6 @@ db_recreate_all (TrackerDBManager  *db_manager,
 
 	g_clear_object (&db_manager->db.iface);
 	g_clear_object (&db_manager->db.wal_iface);
-
-	locale = tracker_locale_get (TRACKER_LOCALE_COLLATE);
-	/* Initialize locale file */
-	db_set_locale (db_manager, locale);
-	g_free (locale);
 }
 
 void

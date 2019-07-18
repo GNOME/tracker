@@ -3478,6 +3478,14 @@ create_base_tables (TrackerDataManager  *manager,
 		return FALSE;
 	}
 
+	tracker_db_interface_execute_query (iface, &internal_error,
+	                                    "CREATE TABLE metadata (key TEXT NOT NULL PRIMARY KEY, value TEXT)");
+
+	if (internal_error) {
+		g_propagate_error (error, internal_error);
+		return FALSE;
+	}
+
 	return TRUE;
 }
 
@@ -4949,9 +4957,11 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		return FALSE;
 
 skip_ontology_check:
-	/* If locale changed, re-create indexes */
-	if (!read_only && tracker_db_manager_locale_changed (manager->db_manager, NULL)) {
-		/* No need to reset the collator in the db interface,
+	if (!read_only && is_first_time_index) {
+		tracker_db_manager_set_current_locale (manager->db_manager);
+	} else if (!read_only && tracker_db_manager_locale_changed (manager->db_manager, NULL)) {
+		/* If locale changed, re-create indexes.
+		 * No need to reset the collator in the db interface,
 		 * as this is only executed during startup, which should
 		 * already have the proper locale set in the collator */
 		tracker_data_manager_recreate_indexes (manager, &internal_error);
