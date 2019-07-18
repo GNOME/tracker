@@ -71,8 +71,7 @@ void                tracker_db_manager_ensure_locations       (TrackerDBManager 
 							       GFile                 *cache_location,
                                                                GFile                 *data_location);
 gboolean            tracker_db_manager_has_enough_space       (TrackerDBManager      *db_manager);
-void                tracker_db_manager_create_version_file    (TrackerDBManager      *db_manager);
-void                tracker_db_manager_remove_version_file    (TrackerDBManager      *db_manager);
+void                tracker_db_manager_update_version         (TrackerDBManager      *db_manager);
 
 TrackerDBManagerFlags
                     tracker_db_manager_get_flags              (TrackerDBManager      *db_manager,

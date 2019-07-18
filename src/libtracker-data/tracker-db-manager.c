@@ -61,7 +61,6 @@
 
 /* Set current database version we are working with */
 #define TRACKER_DB_VERSION_NOW        TRACKER_DB_VERSION_0_15_2
-#define TRACKER_DB_VERSION_FILE       "db-version.txt"
 #define TRACKER_DB_LOCALE_FILE        "db-locale.txt"
 
 #define TRACKER_VACUUM_CHECK_SIZE     ((goffset) 4 * 1024 * 1024 * 1024) /* 4GB */
@@ -290,73 +289,51 @@ tracker_db_manager_remove_all (TrackerDBManager *db_manager)
 static TrackerDBVersion
 db_get_version (TrackerDBManager *db_manager)
 {
-	TrackerDBVersion  version;
-	gchar            *filename;
+	TrackerDBInterface *iface;
+	TrackerDBStatement *stmt;
+	TrackerDBCursor *cursor;
+	TrackerDBVersion version;
 
-	filename = g_build_filename (db_manager->data_dir, TRACKER_DB_VERSION_FILE, NULL);
+	iface = tracker_db_manager_get_writable_db_interface (db_manager);
+	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
+	                                              NULL, "PRAGMA user_version");
+	if (!stmt)
+		return TRACKER_DB_VERSION_UNKNOWN;
 
-	if (G_LIKELY (g_file_test (filename, G_FILE_TEST_EXISTS))) {
-		gchar *contents;
+	cursor = tracker_db_statement_start_cursor (stmt, NULL);
+	g_object_unref (stmt);
 
-		/* Check version is correct */
-		if (G_LIKELY (g_file_get_contents (filename, &contents, NULL, NULL))) {
-			if (contents && strlen (contents) <= 2) {
-				version = atoi (contents);
-			} else {
-				g_info ("  Version file content size is either 0 or bigger than expected");
-
-				version = TRACKER_DB_VERSION_UNKNOWN;
-			}
-
-			g_free (contents);
-		} else {
-			g_info ("  Could not get content of file '%s'", filename);
-
-			version = TRACKER_DB_VERSION_UNKNOWN;
-		}
-	} else {
-		g_info ("  Could not find database version file:'%s'", filename);
-		g_info ("  Current databases are either old or no databases are set up yet");
-
-		version = TRACKER_DB_VERSION_UNKNOWN;
+	if (!cursor || !tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
+		g_clear_object (&cursor);
+		return TRACKER_DB_VERSION_UNKNOWN;
 	}
 
-	g_free (filename);
+	version = tracker_db_cursor_get_int (cursor, 0);
+	g_object_unref (cursor);
 
 	return version;
 }
 
 void
-tracker_db_manager_create_version_file (TrackerDBManager *db_manager)
+tracker_db_manager_update_version (TrackerDBManager *db_manager)
 {
+	TrackerDBInterface *iface;
+	TrackerDBStatement *stmt;
 	GError *error = NULL;
-	gchar  *filename;
-	gchar  *str;
 
-	filename = g_build_filename (db_manager->data_dir, TRACKER_DB_VERSION_FILE, NULL);
-	g_info ("  Creating version file '%s'", filename);
-
-	str = g_strdup_printf ("%d", TRACKER_DB_VERSION_NOW);
-
-	if (!g_file_set_contents (filename, str, -1, &error)) {
-		g_info ("  Could not set file contents, %s",
-		        error ? error->message : "no error given");
-		g_clear_error (&error);
+	iface = tracker_db_manager_get_writable_db_interface (db_manager);
+	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
+	                                              &error, "PRAGMA user_version = %d",
+						      TRACKER_DB_VERSION_NOW);
+	if (stmt) {
+		tracker_db_statement_execute (stmt, &error);
+		g_object_unref (stmt);
 	}
 
-	g_free (str);
-	g_free (filename);
-}
-
-void
-tracker_db_manager_remove_version_file (TrackerDBManager *db_manager)
-{
-	gchar *filename;
-
-	filename = g_build_filename (db_manager->data_dir, TRACKER_DB_VERSION_FILE, NULL);
-	g_info ("  Removing db-version file:'%s'", filename);
-	g_unlink (filename);
-	g_free (filename);
+	if (error) {
+		g_critical ("Could not set database version: %s\n", error->message);
+		g_error_free (error);
+	}
 }
 
 static void
@@ -651,19 +628,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 
 		g_mkdir_with_parents (db_manager->data_dir, 00755);
 		g_mkdir_with_parents (db_manager->user_data_dir, 00755);
-
-		g_info ("Checking database version");
-
-		version = db_get_version (db_manager);
-
-		if (version < TRACKER_DB_VERSION_NOW) {
-			g_info ("  A reindex will be forced");
-			need_reindex = TRUE;
-		}
-
-		if (need_reindex) {
-			tracker_db_manager_create_version_file (db_manager);
-		}
 	}
 
 	g_info ("Checking whether database files exist");
@@ -674,8 +638,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	 * There's no need to check for files not existing (for
 	 * reindex) if reindexing is already needed.
 	 */
-	if (!need_reindex &&
-	    !g_file_test (db_manager->db.abs_filename, G_FILE_TEST_EXISTS)) {
+	if (!g_file_test (db_manager->db.abs_filename, G_FILE_TEST_EXISTS)) {
 		if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 			g_info ("Could not find database file:'%s', reindex will be forced", db_manager->db.abs_filename);
 			need_reindex = TRUE;
@@ -688,7 +651,17 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 			g_object_unref (db_manager);
 			return NULL;
 		}
+	} else {
+		g_info ("Checking database version");
+
+		version = db_get_version (db_manager);
+
+		if (version < TRACKER_DB_VERSION_NOW) {
+			g_info ("  A reindex will be forced");
+			need_reindex = TRUE;
+		}
 	}
+
 
 	db_manager->locations_initialized = TRUE;
 
@@ -734,6 +707,8 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 			g_object_unref (db_manager);
 			return NULL;
 		}
+
+		tracker_db_manager_update_version (db_manager);
 
 		/* Load databases */
 		g_info ("Loading databases files...");

@@ -259,10 +259,7 @@ tracker_data_backup_restore (TrackerDataManager   *manager,
 
 		tracker_db_manager_ensure_locations (db_manager, cache_location, data_location);
 
-		/* Re-set the DB version file, so that its mtime changes. The mtime of this
-		 * file will change only when the whole DB is recreated (after a hard reset
-		 * or after a backup restoration). */
-		tracker_db_manager_create_version_file (db_manager);
+		tracker_db_manager_update_version (db_manager);
 
 		manager = tracker_data_manager_new (flags, cache_location, data_location, ontology_location,
 		                                    TRUE, select_cache_size, update_cache_size);
