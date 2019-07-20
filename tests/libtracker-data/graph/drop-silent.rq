@@ -1,0 +1,5 @@
+SELECT * {
+  GRAPH example:graphA {
+    ?s ?p ?u
+  }
+}

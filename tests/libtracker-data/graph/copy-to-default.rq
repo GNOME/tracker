@@ -1,0 +1,3 @@
+SELECT DISTINCT ?s WHERE {
+	?s example:p 42
+}

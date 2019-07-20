@@ -1,0 +1,5 @@
+SELECT * {
+  GRAPH <non-existent> {
+    ?s ?p ?u
+  }
+}

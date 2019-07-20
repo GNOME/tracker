@@ -1,0 +1,14 @@
+INSERT {
+	GRAPH example:graphA {
+		example:resource1 a example:A ;
+			example:p 42 .
+	}
+	GRAPH example:graphB {
+		example:resource1 a example:A ;
+			example:p 73 .
+		example:resource2 a example:A ;
+			example:p 113 .
+	}
+}
+
+ADD GRAPH example:graphA TO GRAPH example:graphB

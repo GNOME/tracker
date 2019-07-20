@@ -1,0 +1,6 @@
+SELECT ?g ?s WHERE {
+	GRAPH ?g {
+		?s example:p 42
+	}
+}
+ORDER BY ?g ?s
