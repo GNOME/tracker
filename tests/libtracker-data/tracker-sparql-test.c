@@ -67,6 +67,7 @@ const TestInfo tests[] = {
 	{ "anon/query-4", "anon/data", FALSE },
 	{ "anon/query-5", "anon/data", FALSE },
 	{ "ask/ask-1", "ask/data", FALSE },
+	{ "basic/base-1", "basic/data-1", FALSE },
 	{ "basic/base-prefix-3", "basic/data-1", FALSE },
 	{ "basic/compare-cast", "basic/data-1", FALSE },
 	{ "basic/predicate-variable", "basic/data-1", FALSE },
