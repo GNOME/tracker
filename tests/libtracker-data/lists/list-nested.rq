@@ -1,0 +1,1 @@
+SELECT ?r ?l { ?u example:label ?r ; example:list/rdf:rest*/rdf:first/example:label ?l } order by ?r ?l

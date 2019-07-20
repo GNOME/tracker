@@ -1,0 +1,8 @@
+INSERT {
+	<a> a example:A ;
+	    example:label "root" ;
+	    example:list ( [ a example:A ; example:label "elem1" ]
+	                   [ a example:A ; example:label "elem2" ]
+	                   [ a example:A ; example:label "elem3" ]
+	                   [ a example:A ; example:label "elem4" ] ) .
+}

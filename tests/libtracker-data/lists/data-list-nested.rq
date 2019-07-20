@@ -1,0 +1,17 @@
+INSERT {
+  ([ a example:A ; example:label "elem1" ;
+       example:list ([ a example:A ; example:label "elem1-1" ]) ]
+   [ a example:A ; example:label "elem2" ;
+       example:list ([ a example:A ; example:label "elem2-1" ]
+                     [ a example:A ; example:label "elem2-2" ]) ]
+   [ a example:A ; example:label "elem3" ;
+       example:list ([ a example:A ; example:label "elem3-1" ]
+                     [ a example:A ; example:label "elem3-2" ]
+                     [ a example:A ; example:label "elem3-3" ]) ]
+   [ a example:A ; example:label "elem4" ;
+       example:list ([ a example:A ; example:label "elem4-1" ]
+                     [ a example:A ; example:label "elem4-2" ]
+                     [ a example:A ; example:label "elem4-3" ]
+                     [ a example:A ; example:label "elem4-4" ]) ]
+  ) a example:A ; example:label 'root' .
+}

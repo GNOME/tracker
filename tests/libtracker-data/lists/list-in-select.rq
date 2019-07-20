@@ -1,0 +1,4 @@
+SELECT example:label(?u) { ?u example:list ( [ example:label 'elem1' ]
+                                             [ example:label 'elem2' ]
+                                             [ example:label 'elem3' ]
+                                             [ example:label 'elem4' ] ) }
