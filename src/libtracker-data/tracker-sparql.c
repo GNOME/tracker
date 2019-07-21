@@ -5279,27 +5279,56 @@ static gboolean
 translate_Collection (TrackerSparql  *sparql,
                       GError        **error)
 {
-	TrackerToken old_subject, old_predicate, old_object, *old_token;
-	TrackerVariable *cur, *first = NULL, *rest = NULL;
+	TrackerToken old_subject, old_predicate, old_object, *old_token, *cur;
+	GArray *elems;
+	gint i;
+
+	/* Collection ::= '(' GraphNode+ ')'
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 
 	old_subject = sparql->current_state.subject;
 	old_predicate = sparql->current_state.predicate;
 	old_object = sparql->current_state.object;
 	old_token = sparql->current_state.token;
 
-	/* Collection ::= '(' GraphNode+ ')'
-	 */
-	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+	elems = g_array_new (FALSE, TRUE, sizeof (TrackerToken));
+
 	while (_check_in_rule (sparql, NAMED_RULE_GraphNode)) {
-		if (rest) {
-			cur = rest;
-			rest = NULL;
+		if (elems->len > 0) {
+			cur = &g_array_index (elems, TrackerToken, elems->len - 1);
 		} else {
-			cur = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
-			first = cur;
+			g_array_set_size (elems, elems->len + 1);
+			cur = &g_array_index (elems, TrackerToken, 0);
+
+			if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT) {
+				TrackerVariable *var;
+				var = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+				tracker_token_variable_init (cur, var);
+			} else {
+				TrackerDBInterface *iface;
+				gchar *bnode_id;
+
+				iface = tracker_data_manager_get_writable_db_interface (sparql->data_manager);
+				bnode_id = tracker_data_query_unused_uuid (sparql->data_manager, iface);
+				tracker_token_literal_init (cur, bnode_id, -1);
+				g_free (bnode_id);
+			}
 		}
 
-		tracker_token_variable_init (&sparql->current_state.subject, cur);
+		sparql->current_state.subject = *cur;
+
+		/* Add "_:elem a rdf:List" first */
+		tracker_token_literal_init (&sparql->current_state.predicate,
+		                            RDF_NS "type", -1);
+		tracker_token_literal_init (&sparql->current_state.object,
+		                            RDF_NS "List", -1);
+
+		if (!tracker_sparql_apply_quad (sparql, error)) {
+			tracker_token_unset (&sparql->current_state.predicate);
+			tracker_token_unset (&sparql->current_state.object);
+			goto error;
+		}
 
 		/* rdf:first */
 		tracker_token_literal_init (&sparql->current_state.predicate,
@@ -5315,32 +5344,75 @@ translate_Collection (TrackerSparql  *sparql,
 
 		if (_check_in_rule (sparql, NAMED_RULE_GraphNode)) {
 			/* Generate variable for next element */
-			rest = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
-			tracker_token_variable_init (&sparql->current_state.object, rest);
+			g_array_set_size (elems, elems->len + 1);
+			cur = &g_array_index (elems, TrackerToken, elems->len - 1);
+
+			if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT) {
+				TrackerVariable *var;
+				var = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+				tracker_token_variable_init (cur, var);
+			} else {
+				TrackerDBInterface *iface;
+				gchar *bnode_id;
+
+				iface = tracker_data_manager_get_writable_db_interface (sparql->data_manager);
+				bnode_id = tracker_data_query_unused_uuid (sparql->data_manager, iface);
+				tracker_token_literal_init (cur, bnode_id, -1);
+				g_free (bnode_id);
+			}
+
+			sparql->current_state.object = *cur;
+
+			if (!tracker_sparql_apply_quad (sparql, error)) {
+				tracker_token_unset (&sparql->current_state.predicate);
+				goto error;
+			}
 		} else {
 			/* Make last element point to rdf:nil */
 			tracker_token_literal_init (&sparql->current_state.object,
 			                            RDF_NS "nil", -1);
+
+			if (!tracker_sparql_apply_quad (sparql, error)) {
+				tracker_token_unset (&sparql->current_state.predicate);
+				tracker_token_unset (&sparql->current_state.object);
+				goto error;
+			}
 		}
 
-		if (!tracker_sparql_apply_quad (sparql, error))
-			return FALSE;
-
-		tracker_token_unset (&sparql->current_state.object);
 		tracker_token_unset (&sparql->current_state.predicate);
-
-		tracker_token_unset (&sparql->current_state.subject);
 	}
-
-	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 
 	sparql->current_state.subject = old_subject;
 	sparql->current_state.predicate = old_predicate;
 	sparql->current_state.object = old_object;
 	sparql->current_state.token = old_token;
-	tracker_token_variable_init (sparql->current_state.token, first);
+
+	*sparql->current_state.token = g_array_index (elems, TrackerToken, 0);
+
+	for (i = 1; i < elems->len; i++) {
+		cur = &g_array_index (elems, TrackerToken, i);
+		tracker_token_unset (cur);
+	}
+
+	g_array_unref (elems);
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 
 	return TRUE;
+
+error:
+	sparql->current_state.subject = old_subject;
+	sparql->current_state.predicate = old_predicate;
+	sparql->current_state.object = old_object;
+	sparql->current_state.token = old_token;
+
+	for (i = 0; i < elems->len; i++) {
+		cur = &g_array_index (elems, TrackerToken, i);
+		tracker_token_unset (cur);
+	}
+
+	g_array_unref (elems);
+
+	return FALSE;
 }
 
 static gboolean
