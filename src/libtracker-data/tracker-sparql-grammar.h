@@ -1249,7 +1249,7 @@ static const TrackerGrammarRule rule_GraphRefAll[] = { OR(helper_GraphRefAll_or)
 
 /* GraphOrDefault ::= 'DEFAULT' | 'GRAPH'? iri
  */
-static const TrackerGrammarRule helper_GraphOrDefault_seq[] = { L(NAMED), R(iri), NIL };
+static const TrackerGrammarRule helper_GraphOrDefault_seq[] = { L(GRAPH), R(iri), NIL };
 static const TrackerGrammarRule helper_GraphOrDefault_or[] = { L(DEFAULT), S(helper_GraphOrDefault_seq), NIL };
 static const TrackerGrammarRule rule_GraphOrDefault[] = { OR(helper_GraphOrDefault_or), NIL };
 
