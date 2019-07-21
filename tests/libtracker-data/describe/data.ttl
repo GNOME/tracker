@@ -1,0 +1,31 @@
+@prefix example: <http://example/> .
+
+<a> a example:A ;
+    example:name 'nameA' ;
+    example:date '2000-01-01T00:00:01Z' ;
+    example:number 42 .
+
+<b> a example:A ;
+    example:name 'nameB' ;
+    example:date '2001-01-01T00:00:01Z' ;
+    example:number 73 ;
+    example:relation <z> .
+
+<c> a example:A ;
+    example:name 'nameC' ;
+    example:number 113 ;
+    example:relation <x> .
+
+<d> a example:A ;
+    example:name 'nameD' ;
+    example:date '2002-01-01T00:00:01Z' ;
+    example:relation <z> .
+
+<x> a example:B ;
+    example:title 'titleX' .
+
+<y> a example:B ;
+    example:title 'titleY' .
+
+<z> a example:B ;
+    example:title 'titleZ' .

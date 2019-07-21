@@ -87,6 +87,11 @@ const TestInfo tests[] = {
 	{ "datetime/functions-localtime-1", "datetime/data-1", FALSE },
 	{ "datetime/functions-timezone-1", "datetime/data-2", FALSE },
 	{ "datetime/functions-timezone-2", "datetime/data-2", FALSE },
+	{ "describe/describe-single", "describe/data", FALSE },
+	{ "describe/describe-non-existent", "describe/data", FALSE },
+	{ "describe/describe-pattern", "describe/data", FALSE },
+	{ "describe/describe-limit", "describe/data", FALSE },
+	{ "describe/describe-multiple", "describe/data", FALSE },
 	{ "expr-ops/query-ge-1", "expr-ops/data", FALSE },
 	{ "expr-ops/query-le-1", "expr-ops/data", FALSE },
 	{ "expr-ops/query-minus-1", "expr-ops/data", FALSE },
@@ -263,21 +268,39 @@ check_result (TrackerDBCursor *cursor,
 		gint col;
 
 		while (tracker_db_cursor_iter_next (cursor, NULL, &error)) {
+			GString *row_str = g_string_new (NULL);
+
 			for (col = 0; col < tracker_db_cursor_get_n_columns (cursor); col++) {
 				const gchar *str;
 
 				if (col > 0) {
-					g_string_append (test_results, "\t");
+					g_string_append (row_str, "\t");
 				}
 
 				str = tracker_db_cursor_get_string (cursor, col, NULL);
+
+				/* Hack to avoid misc properties that might tamper with
+				 * test reproduceability in DESCRIBE and other unrestricted
+				 * queries.
+				 */
+				if (g_strcmp0 (str, TRACKER_PREFIX_TRACKER "modified") == 0 ||
+				    g_strcmp0 (str, TRACKER_PREFIX_TRACKER "added") == 0) {
+					g_string_free (row_str, TRUE);
+					row_str = NULL;
+					break;
+				}
+
 				if (str != NULL) {
 					/* bound variable */
-					g_string_append_printf (test_results, "\"%s\"", str);
+					g_string_append_printf (row_str, "\"%s\"", str);
 				}
 			}
 
-			g_string_append (test_results, "\n");
+			if (row_str) {
+				g_string_append (test_results, row_str->str);
+				g_string_free (row_str, TRUE);
+				g_string_append (test_results, "\n");
+			}
 		}
 	} else if (test_info->expect_query_error) {
 		g_assert (error != NULL && error->domain == TRACKER_SPARQL_ERROR);
