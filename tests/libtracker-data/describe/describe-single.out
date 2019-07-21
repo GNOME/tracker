@@ -1,0 +1,5 @@
+"a"	"http://example/number"	"42"
+"a"	"http://example/date"	"2000-01-01T00:00:01Z"
+"a"	"http://example/name"	"nameA"
+"a"	"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"	"http://www.w3.org/2000/01/rdf-schema#Resource"
+"a"	"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"	"http://example/A"
