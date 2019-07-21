@@ -90,6 +90,8 @@ const TestInfo tests[] = {
 	{ "datetime/functions-localtime-1", "datetime/data-1", FALSE },
 	{ "datetime/functions-timezone-1", "datetime/data-2", FALSE },
 	{ "datetime/functions-timezone-2", "datetime/data-2", FALSE },
+	{ "datetime/functions-timezone-3", "datetime/data-2", FALSE },
+	{ "datetime/functions-tz-1", "datetime/data-2", FALSE },
 	{ "describe/describe-single", "describe/data", FALSE },
 	{ "describe/describe-non-existent", "describe/data", FALSE },
 	{ "describe/describe-pattern", "describe/data", FALSE },
