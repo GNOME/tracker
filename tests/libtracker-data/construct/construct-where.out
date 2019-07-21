@@ -1,0 +1,8 @@
+"a"	"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"	"http://example/A"
+"b"	"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"	"http://example/A"
+"c"	"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"	"http://example/A"
+"d"	"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"	"http://example/A"
+"a"	"http://example/name"	"nameA"
+"b"	"http://example/name"	"nameB"
+"c"	"http://example/name"	"nameC"
+"d"	"http://example/name"	"nameD"
