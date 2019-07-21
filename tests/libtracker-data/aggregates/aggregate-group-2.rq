@@ -1,0 +1,9 @@
+PREFIX : <http://example/> 
+
+SELECT ?z COUNT(DISTINCT ?b) SUM(?ib) GROUP_CONCAT(?sb, "|")
+{ ?a a :A ;
+     :b ?b .
+  ?b :ib ?ib .
+  ?b :sb ?sb .
+  FILTER (?ib>2) }
+GROUP BY (?a AS ?z)
