@@ -18,13 +18,17 @@
  *
  * Author: Carlos Garnacho <carlosg@gnome.org>
  */
+[CCode (cname = "PACKAGE_VERSION")]
+extern const string PACKAGE_VERSION;
 
 public class Tracker.Remote.Connection : Tracker.Sparql.Connection {
+
 	internal Soup.Session _session;
 	internal string _base_uri;
 
 	const string XML_TYPE = "application/sparql-results+xml";
 	const string JSON_TYPE = "application/sparql-results+json";
+	const string USER_AGENT = "Tracker/" + PACKAGE_VERSION + " (https://gitlab.gnome.org/GNOME/tracker/issues/; tracker-list@lists.gnome.org) Tracker/" + PACKAGE_VERSION;
 
 	public Connection (string base_uri) {
 		_base_uri = base_uri;
@@ -36,6 +40,7 @@ public class Tracker.Remote.Connection : Tracker.Sparql.Connection {
 		var message = new Soup.Message ("GET", uri);
 		var headers = message.request_headers;
 
+		headers.append ("User-Agent", USER_AGENT);
 		headers.append ("Accept", JSON_TYPE);
 		headers.append ("Accept", XML_TYPE);
 
