@@ -88,8 +88,8 @@ namespace Tracker {
 		public static void enable_client_lookup (bool enable);
 	}
 
-	[CCode (cheader_filename = "libtracker-common/tracker-domain-ontology.h")]
-	public class DomainOntology : GLib.Object, GLib.Initable {
+	[CCode (ref_function = "tracker_domain_ontology_ref", unref_function = "tracker_domain_ontology_unref", cheader_filename = "libtracker-common/tracker-domain-ontology.h")]
+	public class DomainOntology {
 		public DomainOntology (string? name, GLib.Cancellable? cancellable) throws GLib.Error;
 		public GLib.File get_cache ();
 		public GLib.File? get_journal ();

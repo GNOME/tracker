@@ -24,7 +24,8 @@
 #include <string.h>
 #include "tracker-domain-ontology.h"
 
-typedef struct {
+struct _TrackerDomainOntology {
+	gint ref_count;
 	/* DomainOntologies section */
 	GFile *cache_location;
 	GFile *journal_location;
@@ -33,11 +34,6 @@ typedef struct {
 	gchar *domain;
 	gchar *ontology_name;
 	gchar **miners;
-} TrackerDomainOntologyPrivate;
-
-enum {
-	PROP_0,
-	PROP_NAME
 };
 
 struct {
@@ -74,98 +70,29 @@ struct {
 
 #define DEFAULT_RULE "default.rule"
 
-static void tracker_domain_ontology_initable_iface_init (GInitableIface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (TrackerDomainOntology, tracker_domain_ontology, G_TYPE_OBJECT,
-                         G_ADD_PRIVATE (TrackerDomainOntology)
-                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, tracker_domain_ontology_initable_iface_init))
-
-static void
-tracker_domain_ontology_set_property (GObject      *object,
-                                      guint         prop_id,
-                                      const GValue *value,
-                                      GParamSpec   *pspec)
+TrackerDomainOntology *
+tracker_domain_ontology_ref (TrackerDomainOntology *domain_ontology)
 {
-	TrackerDomainOntology *domain_ontology;
-	TrackerDomainOntologyPrivate *priv;
-
-	domain_ontology = TRACKER_DOMAIN_ONTOLOGY (object);
-	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
-
-	switch (prop_id) {
-	case PROP_NAME:
-		priv->name = g_value_dup_string (value);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
+	domain_ontology->ref_count++;
+	return domain_ontology;
 }
 
-static void
-tracker_domain_ontology_get_property (GObject    *object,
-                                      guint       prop_id,
-                                      GValue     *value,
-                                      GParamSpec *pspec)
+void
+tracker_domain_ontology_unref (TrackerDomainOntology *domain_ontology)
 {
-	TrackerDomainOntology *domain_ontology;
-	TrackerDomainOntologyPrivate *priv;
+	domain_ontology->ref_count--;
 
-	domain_ontology = TRACKER_DOMAIN_ONTOLOGY (object);
-	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
+	if (domain_ontology->ref_count != 0)
+		return;
 
-	switch (prop_id) {
-	case PROP_NAME:
-		g_value_set_string (value, priv->name);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
-}
-
-static void
-tracker_domain_ontology_finalize (GObject *object)
-{
-	TrackerDomainOntology *domain_ontology;
-	TrackerDomainOntologyPrivate *priv;
-
-	domain_ontology = TRACKER_DOMAIN_ONTOLOGY (object);
-	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
-
-	g_clear_object (&priv->cache_location);
-	g_clear_object (&priv->journal_location);
-	g_clear_object (&priv->ontology_location);
-	g_free (priv->ontology_name);
-	g_free (priv->name);
-	g_free (priv->domain);
-	g_strfreev (priv->miners);
-
-	G_OBJECT_CLASS (tracker_domain_ontology_parent_class)->finalize (object);
-}
-
-static void
-tracker_domain_ontology_class_init (TrackerDomainOntologyClass *klass)
-{
-	GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-	object_class->set_property = tracker_domain_ontology_set_property;
-	object_class->get_property = tracker_domain_ontology_get_property;
-	object_class->finalize = tracker_domain_ontology_finalize;
-
-	g_object_class_install_property (object_class,
-	                                 PROP_NAME,
-	                                 g_param_spec_string ("name",
-	                                                      "Name",
-	                                                      "Name",
-	                                                      NULL,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY));
-}
-
-static void
-tracker_domain_ontology_init (TrackerDomainOntology *domain_ontology)
-{
+	g_clear_object (&domain_ontology->cache_location);
+	g_clear_object (&domain_ontology->journal_location);
+	g_clear_object (&domain_ontology->ontology_location);
+	g_free (domain_ontology->ontology_name);
+	g_free (domain_ontology->name);
+	g_free (domain_ontology->domain);
+	g_strfreev (domain_ontology->miners);
+	g_free (domain_ontology);
 }
 
 static const gchar *
@@ -289,38 +216,38 @@ find_rule_in_data_dirs (const gchar *name)
 	return NULL;
 }
 
-static gboolean
-tracker_domain_ontology_initable_init (GInitable     *initable,
-                                       GCancellable  *cancellable,
-                                       GError       **error)
+TrackerDomainOntology *
+tracker_domain_ontology_new (const gchar   *domain_name,
+                             GCancellable  *cancellable,
+                             GError       **error)
 {
 	TrackerDomainOntology *domain_ontology;
-	TrackerDomainOntologyPrivate *priv;
 	GError *inner_error = NULL;
 	GKeyFile *key_file = NULL;
 	gchar *path, *path_for_tests;
 
-	domain_ontology = TRACKER_DOMAIN_ONTOLOGY (initable);
-	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
+	domain_ontology = g_new0 (TrackerDomainOntology, 1);
+	domain_ontology->name = g_strdup (domain_name);
+	domain_ontology->ref_count = 1;
 
-	if (priv->name && priv->name[0] == '/') {
-		if (!g_file_test (priv->name, G_FILE_TEST_IS_REGULAR)) {
+	if (domain_name && domain_name[0] == '/') {
+		if (!g_file_test (domain_name, G_FILE_TEST_IS_REGULAR)) {
 			inner_error = g_error_new (G_KEY_FILE_ERROR,
 			                           G_KEY_FILE_ERROR_NOT_FOUND,
 			                           "Could not find rule at '%s'",
-			                           priv->name);
+			                           domain_name);
 			goto end;
 		}
 
-		path = g_strdup (priv->name);
-	} else if (priv->name) {
-		path = find_rule_in_data_dirs (priv->name);
+		path = g_strdup (domain_name);
+	} else if (domain_name) {
+		path = find_rule_in_data_dirs (domain_name);
 
 		if (!path) {
 			inner_error = g_error_new (G_KEY_FILE_ERROR,
 			                           G_KEY_FILE_ERROR_NOT_FOUND,
 			                           "Could not find rule '%s' in data dirs",
-			                           priv->name);
+			                           domain_name);
 			goto end;
 		}
 	} else {
@@ -347,60 +274,60 @@ tracker_domain_ontology_initable_init (GInitable     *initable,
 	if (inner_error)
 		goto end;
 
-	priv->domain = g_key_file_get_string (key_file, DOMAIN_ONTOLOGY_SECTION,
-	                                      DOMAIN_KEY, &inner_error);
+	domain_ontology->domain = g_key_file_get_string (key_file, DOMAIN_ONTOLOGY_SECTION,
+	                                                 DOMAIN_KEY, &inner_error);
 	if (inner_error)
 		goto end;
 
-	priv->cache_location =
+	domain_ontology->cache_location =
 		key_file_get_location (key_file, DOMAIN_ONTOLOGY_SECTION,
 		                       CACHE_KEY, TRUE, FALSE, &inner_error);
 	if (inner_error)
 		goto end;
 
-	priv->journal_location =
+	domain_ontology->journal_location =
 		key_file_get_location (key_file, DOMAIN_ONTOLOGY_SECTION,
 		                       JOURNAL_KEY, FALSE, FALSE, &inner_error);
 	if (inner_error)
 		goto end;
 
-	priv->ontology_location =
+	domain_ontology->ontology_location =
 		key_file_get_location (key_file, DOMAIN_ONTOLOGY_SECTION,
 		                       ONTOLOGY_KEY, FALSE, TRUE, &inner_error);
 	if (inner_error)
 		goto end;
 
-	priv->ontology_name = g_key_file_get_string (key_file, DOMAIN_ONTOLOGY_SECTION,
-	                                             ONTOLOGY_NAME_KEY, NULL);
-	priv->miners = g_key_file_get_string_list (key_file, DOMAIN_ONTOLOGY_SECTION,
-	                                           MINERS_KEY, NULL, NULL);
+	domain_ontology->ontology_name = g_key_file_get_string (key_file, DOMAIN_ONTOLOGY_SECTION,
+	                                                        ONTOLOGY_NAME_KEY, NULL);
+	domain_ontology->miners = g_key_file_get_string_list (key_file, DOMAIN_ONTOLOGY_SECTION,
+	                                                      MINERS_KEY, NULL, NULL);
 
 	/* Consistency check, we need one of OntologyLocation and OntologyName,
 	 * no more, no less.
 	 */
-	if ((priv->ontology_name && priv->ontology_location) ||
-	    (!priv->ontology_name && !priv->ontology_location)) {
+	if ((domain_ontology->ontology_name && domain_ontology->ontology_location) ||
+	    (!domain_ontology->ontology_name && !domain_ontology->ontology_location)) {
 		inner_error = g_error_new (G_KEY_FILE_ERROR,
 		                           G_KEY_FILE_ERROR_INVALID_VALUE,
 		                           "One of OntologyLocation and OntologyName must be provided");
 	}
 
 	/* Build ontology location from name if necessary */
-	if (!priv->ontology_location) {
+	if (!domain_ontology->ontology_location) {
 		gchar *ontology_path;
 
 		if (g_getenv ("TRACKER_DB_ONTOLOGIES_DIR") != NULL) {
 			/* Override for use only by testcases */
-			priv->ontology_location = g_file_new_for_path (g_getenv ("TRACKER_DB_ONTOLOGIES_DIR"));
+			domain_ontology->ontology_location = g_file_new_for_path (g_getenv ("TRACKER_DB_ONTOLOGIES_DIR"));
 		} else {
 			ontology_path = g_build_filename (SHAREDIR, "tracker", "ontologies",
-			                                  priv->ontology_name, NULL);
+			                                  domain_ontology->ontology_name, NULL);
 
 			if (!g_file_test (ontology_path, G_FILE_TEST_IS_DIR)) {
 				g_error ("Unable to find ontologies in the configured location %s", ontology_path);
 			}
 
-			priv->ontology_location = g_file_new_for_path (ontology_path);
+			domain_ontology->ontology_location = g_file_new_for_path (ontology_path);
 
 			g_free (ontology_path);
 		}
@@ -412,85 +339,54 @@ end:
 
 	if (inner_error) {
 		g_propagate_error (error, inner_error);
-		return FALSE;
+		tracker_domain_ontology_unref (domain_ontology);
+		return NULL;
 	}
 
-	return TRUE;
-}
-
-static void
-tracker_domain_ontology_initable_iface_init (GInitableIface *iface)
-{
-	iface->init = tracker_domain_ontology_initable_init;
-}
-
-TrackerDomainOntology *
-tracker_domain_ontology_new (const gchar   *domain_name,
-                             GCancellable  *cancellable,
-                             GError       **error)
-{
-	return g_initable_new (TRACKER_TYPE_DOMAIN_ONTOLOGY,
-	                       cancellable, error,
-	                       "name", domain_name,
-	                       NULL);
+	return domain_ontology;
 }
 
 GFile *
 tracker_domain_ontology_get_cache (TrackerDomainOntology *domain_ontology)
 {
-	TrackerDomainOntologyPrivate *priv;
-
-	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
-	return priv->cache_location;
+	return domain_ontology->cache_location;
 }
 
 GFile *
 tracker_domain_ontology_get_journal (TrackerDomainOntology *domain_ontology)
 {
-	TrackerDomainOntologyPrivate *priv;
-
-	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
-	return priv->journal_location;
+	return domain_ontology->journal_location;
 }
 
 GFile *
 tracker_domain_ontology_get_ontology (TrackerDomainOntology *domain_ontology)
 {
-	TrackerDomainOntologyPrivate *priv;
-
-	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
-	return priv->ontology_location;
+	return domain_ontology->ontology_location;
 }
 
 gchar *
 tracker_domain_ontology_get_domain (TrackerDomainOntology *domain_ontology,
                                     const gchar           *suffix)
 {
-	TrackerDomainOntologyPrivate *priv;
-
-	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
 	if (suffix)
-		return g_strconcat (priv->domain, ".", suffix, NULL);
+		return g_strconcat (domain_ontology->domain, ".", suffix, NULL);
 	else
-		return g_strconcat (priv->domain, NULL);
+		return g_strconcat (domain_ontology->domain, NULL);
 }
 
 gboolean
 tracker_domain_ontology_uses_miner (TrackerDomainOntology *domain_ontology,
                                     const gchar           *suffix)
 {
-	TrackerDomainOntologyPrivate *priv;
 	guint i;
 
 	g_return_val_if_fail (suffix != NULL, FALSE);
 
-	priv = tracker_domain_ontology_get_instance_private (domain_ontology);
-
-	if (!priv->miners)
+	if (!domain_ontology->miners)
 		return FALSE;
 
-	for (i = 0; priv->miners[i] != NULL; i++) {
-		if (strcmp (priv->miners[i], suffix) == 0) {
+	for (i = 0; domain_ontology->miners[i] != NULL; i++) {
+		if (strcmp (domain_ontology->miners[i], suffix) == 0) {
 			return TRUE;
 		}
 	}

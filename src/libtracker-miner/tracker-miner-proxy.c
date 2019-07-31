@@ -779,7 +779,7 @@ tracker_miner_proxy_initable_init (GInitable     *initable,
 	g_signal_connect (priv->miner, "progress",
 	                  G_CALLBACK (miner_progress_cb), proxy);
 
-	g_object_unref (domain_ontology);
+	tracker_domain_ontology_unref (domain_ontology);
 
 	return TRUE;
 }

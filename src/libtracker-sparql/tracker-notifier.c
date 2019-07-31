@@ -729,7 +729,7 @@ tracker_notifier_initable_init (GInitable     *initable,
 		                                    G_DBUS_SIGNAL_FLAGS_NONE,
 		                                    graph_updated_cb,
 		                                    initable, NULL);
-	g_object_unref (domain_ontology);
+	tracker_domain_ontology_unref (domain_ontology);
 	g_free (dbus_name);
 
 	return TRUE;

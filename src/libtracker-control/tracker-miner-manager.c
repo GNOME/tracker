@@ -574,7 +574,7 @@ miner_manager_finalize (GObject *object)
 	g_list_free (priv->miners);
 	g_hash_table_unref (priv->miner_proxies);
 	g_free (priv->domain_ontology_name);
-	g_clear_object (&priv->domain_ontology);
+	g_clear_pointer (&priv->domain_ontology, tracker_domain_ontology_unref);
 
 	G_OBJECT_CLASS (tracker_miner_manager_parent_class)->finalize (object);
 }
