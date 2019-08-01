@@ -20,11 +20,14 @@ functional_tests = [
   '07-graph',
   '08-unique-insertions',
   '09-concurrent-query',
-  '12-transactions',
   '14-signals',
   '15-statistics',
   '16-collation',
   '17-ontology-changes',
+]
+
+functional_tests_slow = [
+  '12-transactions'
 ]
 
 subdir('ttl')
@@ -55,6 +58,14 @@ foreach t: functional_tests + functional_tests_with_test_data
     env: test_env,
     workdir: meson.current_source_dir(),
     timeout: 60)
+endforeach
+
+foreach t: functional_tests_slow
+  test('functional-' + t, test_runner,
+    args: './' + t + '.py',
+    env: test_env,
+    workdir: meson.current_source_dir(),
+    timeout: 120)
 endforeach
 
 subdir('ipc')
