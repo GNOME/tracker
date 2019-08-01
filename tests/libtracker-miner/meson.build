@@ -1,7 +1,6 @@
 libtracker_miner_tests = [
     'crawler',
     'file-enumerator',
-    'file-notifier',
     'file-system',
     'indexing-tree',
     'priority-queue',
@@ -10,6 +9,7 @@ libtracker_miner_tests = [
 ]
 
 libtracker_miner_slow_tests = [
+    'file-notifier',
     'miner-fs',
     'monitor',
 ]

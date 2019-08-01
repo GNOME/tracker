@@ -20,7 +20,6 @@ functional_tests = [
   '07-graph',
   '08-unique-insertions',
   '09-concurrent-query',
-  '12-transactions',
   '14-signals',
   '15-statistics',
   '16-collation',
