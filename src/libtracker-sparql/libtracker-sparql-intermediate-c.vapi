@@ -100,4 +100,14 @@ namespace Tracker {
 			public string get_location ();
 		}
 	}
+
+	[CCode (cheader_filename = "libtracker-sparql/tracker-endpoint.h")]
+	public class Endpoint : GLib.Object {
+		Sparql.Connection get_sparql_connection ();
+	}
+
+	[CCode (cheader_filename = "libtracker-sparql/tracker-endpoint-dbus.h")]
+	public class EndpointDBus : GLib.Object, GLib.Initable {
+		public EndpointDBus (Sparql.Connection sparql_conn, GLib.DBusConnection? dbus_conn, string object_path, GLib.Cancellable? cancellable) throws GLib.Error;
+	}
 }

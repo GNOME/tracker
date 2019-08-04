@@ -55,6 +55,8 @@ tracker_sparql_generated_header = custom_target('tracker-sparql-generated-header
 # Now build the C parts ...
 
 libtracker_sparql_c_sources = files(
+    'tracker-endpoint.c',
+    'tracker-endpoint-dbus.c',
     'tracker-namespace-manager.c',
     'tracker-notifier.c',
     'tracker-resource.c',
@@ -63,6 +65,8 @@ libtracker_sparql_c_sources = files(
 )
 
 libtracker_sparql_c_public_headers = files(
+    'tracker-endpoint.h',
+    'tracker-endpoint-dbus.h',
     'tracker-namespace-manager.h',
     'tracker-notifier.h',
     'tracker-resource.h',

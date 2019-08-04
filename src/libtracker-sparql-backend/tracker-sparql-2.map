@@ -11,6 +11,7 @@ global:
   tracker_namespace_manager_*;
   tracker_resource_*;
   tracker_notifier_*;
+  tracker_endpoint_*;
 local:
   *;
 };
