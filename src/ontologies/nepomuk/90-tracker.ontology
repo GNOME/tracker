@@ -8,7 +8,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 tracker: a tracker:Ontology ;
-	nao:lastModified "2018-09-30T13:00:00Z" .
+	nao:lastModified "2019-07-15T09:41:00Z" .
 
 tracker:isDefaultTag a rdf:Property ;
 	rdfs:domain nao:Tag ;
@@ -60,3 +60,30 @@ tracker:extractor-data-source a nie:DataSource ;
 	rdfs:label "Tracker extractor data source" .
 
 nao:predefined-tag-favorite a nao:Tag .
+
+tracker:ExternalReference a rdfs:Class ;
+        rdfs:label "External reference" ;
+        rdfs:comment "External reference to online services" ;
+        rdfs:subClassOf nie:InformationElement .
+
+tracker:referenceIdentifier a rdf:Property ;
+        rdfs:label "Identifier" ;
+        rdfs:comment "Identifier of the external reference" ;
+        nrl:maxCardinality 1 ;
+        rdfs:subPropertyOf nie:identifier ;
+        rdfs:domain tracker:ExternalReference ;
+        rdfs:range xsd:string .
+
+tracker:referenceSource a rdf:Property ;
+        rdfs:label "Source" ;
+        rdfs:comment "Source of the external reference (eg. 'Musicbrainz')" ;
+        nrl:maxCardinality 1 ;
+        rdfs:subPropertyOf nie:identifier ;
+        rdfs:domain tracker:ExternalReference ;
+        rdfs:range rdfs:Resource .
+
+tracker:hasExternalReference a rdf:Property ;
+        rdfs:label "External reference link" ;
+        rdfs:comment "Links the information element with the external reference" ;
+        rdfs:domain nie:InformationElement ;
+        rdfs:range tracker:ExternalReference .
