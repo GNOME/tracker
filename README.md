@@ -98,34 +98,37 @@ in the top of the tracker source tree and type this to see the --help output:
     ./utils/sandbox/tracker-sandbox.py --help
 
 You should always pass the `--prefix` option, which should be the same as the
---prefix argument you passed to Meson. You also need to use `--index` which
-controls where internal state files like the database are kept. You may also
-want to pass `--debug` to see detailed log output.
+--prefix argument you passed to Meson. You may pass `--index` which to controls
+where Tracker's database is kept. You may also want to pass `--debug` to see
+detailed log output.
 
-Now you can index some files using `--update` mode. Here's how to index files
-in `~/Documents` for example:
+The remaining arguments you pass to `tracker-sandbox` are shell commands which
+get run inside the sandbox. Use the `--` sentinel to ensure that the
+commandline arguments are processed correctly. First, let's see the status of
+the Tracker daemons:
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
-        --update --content ~/Documents
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker -- tracker daemon status
 
-You can then list the files that have been indexed...
+Let's try and index some content...
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
-        --list-files
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker -- tracker index ~/Music
+
+... let's see what files were found ...
+
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker -- tracker sparql --list-files
 
 ... run a full-text search ...
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
-        --search "bananas"
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker -- tracker search "bananas"
 
 ... or run a SPARQL query on the content:
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
-        --sparql "SELECT ?url { ?resource a nfo:FileDataObject ; nie:url ?url . }"
+    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker -- tracker sparql
+        --query "SELECT ?url { ?resource a nfo:FileDataObject ; nie:url ?url . }"
 
-You can also open a shell inside the sandbox environment. From here you can run
-the `tracker` commandline tool, and you can run the Tracker daemons manually
-under a debugger such as GDB.
+If you run `tracker-sandbox` without a command argument, it will open an
+interactive shell inside the sandbox. From here you can use debugging tools
+such as GDB.
 
 For more information about developing Tracker, look at
 https://wiki.gnome.org/Projects/Tracker.
