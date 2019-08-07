@@ -32,9 +32,10 @@ import re
 import tempfile
 import time
 
+import trackertestutils.dconf
+
 from common.utils import configuration as cfg
 from common.utils import helpers
-from common.utils.dconf import DConfClient
 from common.utils.expectedFailure import expectedFailureJournal
 import unittest as ut
 
@@ -104,7 +105,7 @@ class TrackerSystemAbstraction (object):
 
     def _apply_settings(self, settings):
         for schema_name, contents in settings.items():
-            dconf = DConfClient(schema_name)
+            dconf = trackertestutils.dconf.DConfClient(schema_name)
             dconf.reset()
             for key, value in contents.items():
                 dconf.write(key, value)
