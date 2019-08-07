@@ -858,7 +858,7 @@ class TrackerStorePhoneNumberTest (CommonTrackerStoreTest):
                                 nco:hasPhoneNumber <tel+3333333333> .
                 }
                 """
-        self.assertRaises(Exception, self.tracker.update(INSERT_SPARQL))
+        self.tracker.update(INSERT_SPARQL)
 
 
 if __name__ == "__main__":
