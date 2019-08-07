@@ -25,6 +25,7 @@ changes and checking if the data is still there.
 
 from gi.repository import GLib
 
+import logging
 import os
 import shutil
 import re
@@ -48,6 +49,8 @@ TEST_PREFIX = "http://example.org/ns#"
 TEST_ENV_VARS = {"LC_COLLATE": "en_GB.utf8"}
 
 REASONABLE_TIMEOUT = 5
+
+log = logging.getLogger()
 
 
 class UnableToBootException (Exception):
@@ -88,12 +91,11 @@ class TrackerSystemAbstraction (object):
             os.environ[var] = directory
 
         if ontodir:
-            helpers.log("export %s=%s" %
-                        ("TRACKER_DB_ONTOLOGIES_DIR", ontodir))
+            log.debug("export %s=%s", "TRACKER_DB_ONTOLOGIES_DIR", ontodir)
             os.environ["TRACKER_DB_ONTOLOGIES_DIR"] = ontodir
 
         for var, value in TEST_ENV_VARS.items():
-            helpers.log("export %s=%s" % (var, value))
+            log.debug("export %s=%s", var, value)
             os.environ[var] = value
 
         # Previous loop should have set DCONF_PROFILE to the test location

@@ -18,10 +18,14 @@
 # 02110-1301, USA.
 #
 
-"Constants describing Tracker D-Bus services"
 
 import json
+import logging
 import os
+import sys
+
+from . import options
+
 
 if 'TRACKER_FUNCTIONAL_TEST_CONFIG' not in os.environ:
     raise RuntimeError("The TRACKER_FUNCTIONAL_TEST_CONFIG environment "
@@ -96,3 +100,7 @@ def generated_ttl_dir():
         return os.path.join(TOP_BUILDDIR, 'tests', 'functional-tests', 'ttl')
     else:
         return 'ttl'
+
+
+if options.get_environment_boolean('TRACKER_TESTS_VERBOSE'):
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)

@@ -17,13 +17,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 #
+
 from gi.repository import Gio
 from gi.repository import GLib
+
+import logging
 import os
+import re
 import sys
 import subprocess
 import time
-import re
 
 from common.utils import configuration as cfg
 from common.utils import options as options
@@ -34,10 +37,7 @@ class NoMetadataException (Exception):
 
 REASONABLE_TIMEOUT = 30
 
-
-def log(message):
-    if options.is_verbose():
-        print(message)
+log = logging.getLogger(__name__)
 
 
 class Helper:
@@ -94,19 +94,19 @@ class Helper:
             kws['env'] = env
 
         command = [path] + flags
-        log("Starting %s" % ' '.join(command))
+        log.debug("Starting %s", ' '.join(command))
         try:
             return subprocess.Popen([path] + flags, **kws)
         except OSError as e:
             raise RuntimeError("Error starting %s: %s" % (path, e))
 
     def _bus_name_appeared(self, name, owner, data):
-        log("[%s] appeared in the bus as %s" % (self.PROCESS_NAME, owner))
+        log.debug("[%s] appeared in the bus as %s", self.PROCESS_NAME, owner)
         self.available = True
         self.loop.quit()
 
     def _bus_name_vanished(self, name, data):
-        log("[%s] disappeared from the bus" % self.PROCESS_NAME)
+        log.debug("[%s] disappeared from the bus", self.PROCESS_NAME)
         self.available = False
         self.loop.quit()
 
@@ -132,7 +132,7 @@ class Helper:
                                (self.PROCESS_NAME, status, error))
 
     def _timeout_on_idle_cb(self):
-        log("[%s] Timeout waiting... asumming idle." % self.PROCESS_NAME)
+        log.debug("[%s] Timeout waiting... asumming idle.", self.PROCESS_NAME)
         self.loop.quit()
         self.timeout_id = None
         return False
@@ -159,8 +159,8 @@ class Helper:
                                 "already running " % self.PROCESS_NAME)
 
             self.process = self._start_process(env=env)
-            log('[%s] Started process %i' %
-                (self.PROCESS_NAME, self.process.pid))
+            log.debug('[%s] Started process %i',
+                self.PROCESS_NAME, self.process.pid)
             self.process_watch_timeout = GLib.timeout_add(
                 200, self._process_watch_cb)
 
@@ -187,12 +187,12 @@ class Helper:
                 time.sleep(0.1)
 
                 if time.time() > (start + REASONABLE_TIMEOUT):
-                    log("[%s] Failed to terminate, sending kill!" %
+                    log.debug("[%s] Failed to terminate, sending kill!",
                         self.PROCESS_NAME)
                     self.process.kill()
                     self.process.wait()
 
-        log("[%s] stopped." % self.PROCESS_NAME)
+        log.debug("[%s] stopped.", self.PROCESS_NAME)
 
         # Run the loop until the bus name appears, or the process dies.
         self.loop.run()
@@ -202,7 +202,7 @@ class Helper:
 
     def kill(self):
         if options.is_manual_start():
-            log("kill(): ignoring, because process was started manually.")
+            log.debug("kill(): ignoring, because process was started manually.")
             return
 
         if self.process_watch_timeout != 0:
@@ -217,7 +217,7 @@ class Helper:
 
         self.process = None
 
-        log("[%s] killed." % self.PROCESS_NAME)
+        log.debug("[%s] killed.", self.PROCESS_NAME)
 
 
 class StoreHelper (Helper):
@@ -251,9 +251,9 @@ class StoreHelper (Helper):
             self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START, None,
             cfg.TRACKER_BUSNAME, cfg.TRACKER_STATUS_OBJ_PATH, cfg.STATUS_IFACE)
 
-        log("[%s] booting..." % self.PROCESS_NAME)
+        log.debug("[%s] booting...", self.PROCESS_NAME)
         self.status_iface.Wait()
-        log("[%s] ready." % self.PROCESS_NAME)
+        log.debug("[%s] ready.", self.PROCESS_NAME)
 
     def stop(self):
         Helper.stop(self)
