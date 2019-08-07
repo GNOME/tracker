@@ -24,8 +24,6 @@ import logging
 import os
 import sys
 
-from . import options
-
 
 if 'TRACKER_FUNCTIONAL_TEST_CONFIG' not in os.environ:
     raise RuntimeError("The TRACKER_FUNCTIONAL_TEST_CONFIG environment "
@@ -95,5 +93,18 @@ TRACKER_STORE_PATH = os.path.normpath(expandvars(config['TRACKER_STORE_PATH']))
 disableJournal = (len(config['disableJournal']) == 0)
 
 
-if options.get_environment_boolean('TRACKER_TESTS_VERBOSE'):
+def get_environment_boolean(variable):
+    '''Parse a yes/no boolean passed through the environment.'''
+
+    value = os.environ.get(variable, 'no').lower()
+    if value in ['no', '0', 'false']:
+        return False
+    elif value in ['yes', '1', 'true']:
+        return True
+    else:
+        raise RuntimeError('Unexpected value for %s: %s' %
+                           (variable, value))
+
+
+if get_environment_boolean('TRACKER_TESTS_VERBOSE'):
     logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
