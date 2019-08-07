@@ -42,6 +42,9 @@ test_env = environment()
 test_env.set('DCONF_PROFILE', dconf_profile_full_path)
 test_env.set('GSETTINGS_SCHEMA_DIR', tracker_uninstalled_gsettings_schema_dir)
 
+uninstalled_trackertestutils_dir = join_paths(meson.current_source_dir(), '..', '..', 'utils')
+test_env.prepend('PYTHONPATH', uninstalled_trackertestutils_dir)
+
 test_env.set('TRACKER_DB_ONTOLOGIES_DIR', tracker_uninstalled_nepomuk_ontologies_dir)
 test_env.set('TRACKER_FUNCTIONAL_TEST_BUILD_DIR', build_root)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
