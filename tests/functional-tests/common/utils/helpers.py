@@ -42,7 +42,7 @@ log = logging.getLogger(__name__)
 
 class Helper:
     """
-    Abstract helper for Tracker processes. Launches the process manually
+    Abstract helper for Tracker processes. Launches the process
     and waits for it to appear on the session bus.
 
     The helper will fail if the process is already running. Use
@@ -86,10 +86,6 @@ class Helper:
 
         kws = {}
 
-        if not options.is_verbose():
-            FNULL = open('/dev/null', 'w')
-            kws.update({'stdout': FNULL, 'stderr': subprocess.PIPE})
-
         if env:
             kws['env'] = env
 
@@ -124,12 +120,8 @@ class Helper:
             return True    # continue
         else:
             self.process_watch_timeout = 0
-            if options.is_verbose():
-                error = ""
-            else:
-                error = self.process.stderr.read()
-            raise RuntimeError("%s exited with status: %i\n%s" %
-                               (self.PROCESS_NAME, status, error))
+            raise RuntimeError("%s exited with status: %i" %
+                               (self.PROCESS_NAME, status))
 
     def _timeout_on_idle_cb(self):
         log.debug("[%s] Timeout waiting... asumming idle.", self.PROCESS_NAME)
@@ -150,19 +142,16 @@ class Helper:
             self._bus_name_appeared, self._bus_name_vanished)
         self.loop.run()
 
-        if options.is_manual_start():
-            print("Start %s manually" % self.PROCESS_NAME)
-        else:
-            if self.available:
-                # It's running, but we didn't start it...
-                raise Exception("Unable to start test instance of %s: "
-                                "already running " % self.PROCESS_NAME)
+        if self.available:
+            # It's running, but we didn't start it...
+            raise Exception("Unable to start test instance of %s: "
+                            "already running " % self.PROCESS_NAME)
 
-            self.process = self._start_process(env=env)
-            log.debug('[%s] Started process %i',
-                self.PROCESS_NAME, self.process.pid)
-            self.process_watch_timeout = GLib.timeout_add(
-                200, self._process_watch_cb)
+        self.process = self._start_process(env=env)
+        log.debug('[%s] Started process %i',
+            self.PROCESS_NAME, self.process.pid)
+        self.process_watch_timeout = GLib.timeout_add(
+            200, self._process_watch_cb)
 
         self.abort_if_process_exits_with_status_0 = True
 
@@ -201,10 +190,6 @@ class Helper:
         self.process = None
 
     def kill(self):
-        if options.is_manual_start():
-            log.debug("kill(): ignoring, because process was started manually.")
-            return
-
         if self.process_watch_timeout != 0:
             GLib.source_remove(self.process_watch_timeout)
             self.process_watch_timeout = 0
