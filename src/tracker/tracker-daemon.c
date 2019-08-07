@@ -228,10 +228,9 @@ signal_handler (gpointer user_data)
 		/* Fall through */
 	default:
 		if (g_strsignal (signo)) {
-			g_print ("\n");
-			g_print ("Received signal:%d->'%s'\n",
-			         signo,
-			         g_strsignal (signo));
+			g_message ("Received signal:%d->'%s'",
+			           signo,
+			           g_strsignal (signo));
 		}
 		break;
 	}
