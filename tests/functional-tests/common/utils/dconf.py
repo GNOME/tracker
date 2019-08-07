@@ -1,9 +1,10 @@
 from gi.repository import GLib
 from gi.repository import Gio
 
+import logging
 import os
 
-from common.utils.helpers import log
+log = logging.getLogger(__name__)
 
 
 class DConfClient(object):
@@ -75,5 +76,5 @@ class DConfClient(object):
                                 "dconf",
                                 "trackertest")
         if os.path.exists(dconf_db):
-            log("[Conf] Removing dconf database: " + dconf_db)
+            log.debug("[Conf] Removing dconf database: %s", dconf_db)
             os.remove(dconf_db)
