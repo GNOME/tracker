@@ -748,7 +748,9 @@ tracker_indexing_tree_file_matches_filter (TrackerIndexingTree *tree,
 {
 	TrackerIndexingTreePrivate *priv;
 	GList *filters;
-	gchar *basename;
+	gchar *basename, *str, *reverse;
+	gboolean match = FALSE;
+	gint len;
 
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), FALSE);
 	g_return_val_if_fail (G_IS_FILE (file), FALSE);
@@ -756,6 +758,10 @@ tracker_indexing_tree_file_matches_filter (TrackerIndexingTree *tree,
 	priv = tree->priv;
 	filters = priv->filter_patterns;
 	basename = g_file_get_basename (file);
+
+	str = g_utf8_make_valid (basename, -1);
+	len = strlen (str);
+	reverse = g_utf8_strreverse (str, len);
 
 	while (filters) {
 		PatternData *data = filters->data;
@@ -768,18 +774,21 @@ tracker_indexing_tree_file_matches_filter (TrackerIndexingTree *tree,
 		if (data->file &&
 		    (g_file_equal (file, data->file) ||
 		     g_file_has_prefix (file, data->file))) {
-			g_free (basename);
-			return TRUE;
+			match = TRUE;
+			break;
 		}
 
-		if (g_pattern_match_string (data->pattern, basename)) {
-			g_free (basename);
-			return TRUE;
+		if (g_pattern_match (data->pattern, len, str, reverse)) {
+			match = TRUE;
+			break;
 		}
 	}
 
 	g_free (basename);
-	return FALSE;
+	g_free (str);
+	g_free (reverse);
+
+	return match;
 }
 
 static gboolean
