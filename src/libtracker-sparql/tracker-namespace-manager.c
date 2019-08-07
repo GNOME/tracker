@@ -335,7 +335,7 @@ tracker_namespace_manager_print_turtle (TrackerNamespaceManager *self)
 /**
  * tracker_namespace_manager_foreach:
  * @self: a #TrackerNamespaceManager
- * @func: the function to call for each prefix / URI pair
+ * @func: (scope: call): the function to call for each prefix / URI pair
  * @user_data: user data to pass to the function
  *
  * Calls @func for each known prefix / URI pair.
