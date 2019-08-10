@@ -86,4 +86,10 @@ SELECT ?s { ?s a nfo:FileDataObject }
       no provided migration path, use TrackerSparqlConnection directly.
     </para>
   </section>
+  <section>
+    <title>No tracker_sparql_connection_load()/load_async()/load_finish()</title>
+    <para>
+      This is superseded by the "LOAD &lt;url&gt;" SPARQL syntax.
+    </para>
+  </section>
 </chapter>

@@ -130,24 +130,6 @@ class Tracker.Sparql.Backend : Connection {
 		return yield bus.update_blank_async (sparql, priority, cancellable);
 	}
 
-	public override void load (File file, Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
-		var uri = file.get_uri ();
-		debug ("%s(): '%s'", GLib.Log.METHOD, uri);
-		if (bus == null) {
-			throw new Sparql.Error.UNSUPPORTED ("Update support not available for direct-only connection");
-		}
-		bus.load (file, cancellable);
-	}
-
-	public async override void load_async (File file, Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
-		var uri = file.get_uri ();
-		debug ("%s(): '%s'", GLib.Log.METHOD, uri);
-		if (bus == null) {
-			throw new Sparql.Error.UNSUPPORTED ("Update support not available for direct-only connection");
-		}
-		yield bus.load_async (file, cancellable);
-	}
-
 	public override Cursor? statistics (Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
 		debug ("%s()", GLib.Log.METHOD);
 		if (bus == null) {
