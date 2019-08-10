@@ -289,22 +289,6 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		return reply.get_body ().get_child_value (0);
 	}
 
-	public override void load (File file, Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
-		var message = new DBusMessage.method_call (dbus_name, Tracker.DBUS_OBJECT_RESOURCES, Tracker.DBUS_INTERFACE_RESOURCES, "Load");
-		message.set_body (new Variant ("(s)", file.get_uri ()));
-
-		var reply = bus.send_message_with_reply_sync (message, DBusSendMessageFlags.NONE, int.MAX, null, cancellable);
-		handle_error_reply (reply);
-	}
-
-	public async override void load_async (File file, Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
-		var message = new DBusMessage.method_call (dbus_name, Tracker.DBUS_OBJECT_RESOURCES, Tracker.DBUS_INTERFACE_RESOURCES, "Load");
-		message.set_body (new Variant ("(s)", file.get_uri ()));
-
-		var reply = yield bus.send_message_with_reply (message, DBusSendMessageFlags.NONE, int.MAX, null, cancellable);
-		handle_error_reply (reply);
-	}
-
 	public override Sparql.Cursor? statistics (Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
 		var message = new DBusMessage.method_call (dbus_name, Tracker.DBUS_OBJECT_STATISTICS, Tracker.DBUS_INTERFACE_STATISTICS, "Get");
 

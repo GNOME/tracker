@@ -57,27 +57,6 @@ public class Tracker.Resources : Object {
 		Tracker.Store.set_signal_callback (on_emit_signals);
 	}
 
-	public async void load (BusName sender, string uri) throws Error {
-		var request = DBusRequest.begin (sender, "Resources.Load (uri: '%s')", uri);
-		try {
-			var file = File.new_for_uri (uri);
-			var sparql_conn = Tracker.Main.get_sparql_connection ();
-
-			yield Tracker.Store.queue_turtle_import (sparql_conn, file, sender);
-
-			request.end ();
-		} catch (DBInterfaceError.NO_SPACE ie) {
-			throw new Sparql.Error.NO_SPACE (ie.message);
-		} catch (Error e) {
-			request.end (e);
-			if (e is Sparql.Error) {
-				throw e;
-			} else {
-				throw new Sparql.Error.INTERNAL (e.message);
-			}
-		}
-	}
-
 	[DBus (signature = "aas")]
 	public async Variant sparql_query (BusName sender, string query) throws Error {
 		var request = DBusRequest.begin (sender, "Resources.SparqlQuery");

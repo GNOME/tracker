@@ -469,50 +469,6 @@ public abstract class Tracker.Sparql.Connection : Object {
 	}
 
 	/**
-	 * tracker_sparql_connection_load:
-	 * @self: a #TrackerSparqlConnection
-	 * @file: a #GFile
-	 * @cancellable: a #GCancellable used to cancel the operation
-	 * @error: #GError for error reporting.
-	 *
-	 * Loads a Turtle file (TTL) into the store. The API call is completely
-	 * synchronous, so it may block.
-	 *
-	 * Since: 0.10
-	 */
-	public virtual void load (File file, Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
-		warning ("Interface 'load' not implemented");
-	}
-
-	/**
-	 * tracker_sparql_connection_load_async:
-	 * @self: a #TrackerSparqlConnection
-	 * @file: a #GFile
-	 * @cancellable: a #GCancellable used to cancel the operation
-	 * @_callback_: user-defined #GAsyncReadyCallback to be called when
-	 *              asynchronous operation is finished.
-	 * @_user_data_: user-defined data to be passed to @_callback_
-	 *
-	 * Loads, asynchronously, a Turtle file (TTL) into the store.
-	 *
-	 * Since: 0.10
-	 */
-
-	/**
-	 * tracker_sparql_connection_load_finish:
-	 * @self: a #TrackerSparqlConnection
-	 * @_res_: a #GAsyncResult with the result of the operation
-	 * @error: #GError for error reporting.
-	 *
-	 * Finishes the asynchronous load of the Turtle file.
-	 *
-	 * Since: 0.10
-	 */
-	public async virtual void load_async (File file, Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
-		warning ("Interface 'load_async' not implemented");
-	}
-
-	/**
 	 * tracker_sparql_connection_statistics:
 	 * @self: a #TrackerSparqlConnection
 	 * @cancellable: a #GCancellable used to cancel the operation
