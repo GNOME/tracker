@@ -350,8 +350,10 @@ tracker_direct_connection_finalize (GObject *object)
 	if (priv->select_pool)
 		g_thread_pool_free (priv->select_pool, TRUE, FALSE);
 
-	if (priv->data_manager)
+	if (priv->data_manager) {
 		tracker_data_manager_shutdown (priv->data_manager);
+		g_clear_object (&priv->data_manager);
+	}
 
 	g_clear_object (&priv->store);
 	g_clear_object (&priv->journal);
