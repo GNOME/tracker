@@ -469,58 +469,6 @@ public abstract class Tracker.Sparql.Connection : Object {
 	}
 
 	/**
-	 * tracker_sparql_connection_statistics:
-	 * @self: a #TrackerSparqlConnection
-	 * @cancellable: a #GCancellable used to cancel the operation
-	 * @error: #GError for error reporting.
-	 *
-	 * Retrieves the statistics from the Store. The API call is completely
-	 * synchronous, so it may block.
-	 *
-	 * Returns: a #TrackerSparqlCursor to iterate the reply if successful, #NULL
-	 * on error. Call g_object_unref() on the returned cursor when no longer
-	 * needed.
-	 *
-	 * Since: 0.10
-	 */
-	public virtual Cursor? statistics (Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
-		warning ("Interface 'statistics' not implemented");
-		return null;
-	}
-
-	/**
-	 * tracker_sparql_connection_statistics_async:
-	 * @self: a #TrackerSparqlConnection
-	 * @cancellable: a #GCancellable used to cancel the operation
-	 * @_callback_: user-defined #GAsyncReadyCallback to be called when
-	 *              asynchronous operation is finished.
-	 * @_user_data_: user-defined data to be passed to @_callback_
-	 *
-	 * Retrieves, asynchronously, the statistics from the Store.
-	 *
-	 * Since: 0.10
-	 */
-
-	/**
-	 * tracker_sparql_connection_statistics_finish:
-	 * @self: a #TrackerSparqlConnection
-	 * @_res_: a #GAsyncResult with the result of the operation
-	 * @error: #GError for error reporting.
-	 *
-	 * Finishes the asynchronous retrieval of statistics from the Store.
-	 *
-	 * Returns: a #TrackerSparqlCursor to iterate the reply if successful, #NULL
-	 * on error. Call g_object_unref() on the returned cursor when no longer
-	 * needed.
-	 *
-	 * Since: 0.10
-	 */
-	public async virtual Cursor? statistics_async (Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
-		warning ("Interface 'statistics_async' not implemented");
-		return null;
-	}
-
-	/**
 	 * tracker_sparql_connection_get_namespace_manager:
 	 * @self: a #TrackerSparqlConnection
 	 *
