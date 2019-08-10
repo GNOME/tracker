@@ -576,8 +576,11 @@ update_array_async_thread_func (GTask        *task,
 	if (!error) {
 		g_task_return_pointer (task, errors,
 		                       (GDestroyNotify) g_ptr_array_unref);
+		g_object_unref (task);
 		return;
 	}
+
+	g_error_free (error);
 
 	/* Slow path, perform updates one by one */
 	for (i = 0; updates[i]; i++) {
@@ -591,6 +594,7 @@ update_array_async_thread_func (GTask        *task,
 
 	g_task_return_pointer (task, errors,
 	                       (GDestroyNotify) g_ptr_array_unref);
+	g_object_unref (task);
 }
 
 static void
