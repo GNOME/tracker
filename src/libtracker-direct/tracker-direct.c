@@ -61,15 +61,11 @@ typedef enum {
 	TASK_TYPE_QUERY,
 	TASK_TYPE_UPDATE,
 	TASK_TYPE_UPDATE_BLANK,
-	TASK_TYPE_TURTLE
 } TaskType;
 
 typedef struct {
 	TaskType type;
-	union {
-		gchar *query;
-		GFile *turtle_file;
-	} data;
+	gchar *query;
 } TaskData;
 
 static void tracker_direct_connection_initable_iface_init (GInitableIface *iface);
@@ -89,22 +85,9 @@ task_data_query_new (TaskType     type,
 {
 	TaskData *data;
 
-	g_assert (type != TASK_TYPE_TURTLE);
 	data = g_new0 (TaskData, 1);
 	data->type = type;
-	data->data.query = g_strdup (sparql);
-
-	return data;
-}
-
-static TaskData *
-task_data_turtle_new (GFile *file)
-{
-	TaskData *data;
-
-	data = g_new0 (TaskData, 1);
-	data->type = TASK_TYPE_TURTLE;
-	g_set_object (&data->data.turtle_file, file);
+	data->query = g_strdup (sparql);
 
 	return data;
 }
@@ -112,11 +95,7 @@ task_data_turtle_new (GFile *file)
 static void
 task_data_free (TaskData *task)
 {
-	if (task->type == TASK_TYPE_TURTLE)
-		g_object_unref (task->data.turtle_file);
-	else
-		g_free (task->data.query);
-
+	g_free (task->query);
 	g_free (task);
 }
 
@@ -144,14 +123,11 @@ update_thread_func (gpointer data,
 		g_warning ("Queries don't go through this thread");
 		break;
 	case TASK_TYPE_UPDATE:
-		tracker_data_update_sparql (tracker_data, task_data->data.query, &error);
+		tracker_data_update_sparql (tracker_data, task_data->query, &error);
 		break;
 	case TASK_TYPE_UPDATE_BLANK:
-		retval = tracker_data_update_sparql_blank (tracker_data, task_data->data.query, &error);
+		retval = tracker_data_update_sparql_blank (tracker_data, task_data->query, &error);
 		destroy_notify = (GDestroyNotify) g_variant_unref;
-		break;
-	case TASK_TYPE_TURTLE:
-		tracker_data_load_turtle_file (tracker_data, task_data->data.turtle_file, NULL, &error);
 		break;
 	}
 
@@ -177,7 +153,7 @@ query_thread_pool_func (gpointer data,
 
 	g_assert (task_data->type == TASK_TYPE_QUERY);
 	cursor = tracker_sparql_connection_query (TRACKER_SPARQL_CONNECTION (g_task_get_source_object (task)),
-	                                          task_data->data.query,
+	                                          task_data->query,
 	                                          g_task_get_cancellable (task),
 	                                          &error);
 	if (cursor)
@@ -687,55 +663,6 @@ tracker_direct_connection_update_blank_finish (TrackerSparqlConnection  *self,
 	return g_task_propagate_pointer (G_TASK (res), error);
 }
 
-static void
-tracker_direct_connection_load (TrackerSparqlConnection  *self,
-                                GFile                    *file,
-                                GCancellable             *cancellable,
-                                GError                  **error)
-{
-	TrackerDirectConnectionPrivate *priv;
-	TrackerDirectConnection *conn;
-	TrackerData *data;
-
-	conn = TRACKER_DIRECT_CONNECTION (self);
-	priv = tracker_direct_connection_get_instance_private (conn);
-
-	g_mutex_lock (&priv->mutex);
-	data = tracker_data_manager_get_data (priv->data_manager);
-	tracker_data_load_turtle_file (data, file, NULL, error);
-	g_mutex_unlock (&priv->mutex);
-}
-
-static void
-tracker_direct_connection_load_async (TrackerSparqlConnection *self,
-                                      GFile                   *file,
-                                      GCancellable            *cancellable,
-                                      GAsyncReadyCallback      callback,
-                                      gpointer                 user_data)
-{
-	TrackerDirectConnectionPrivate *priv;
-	TrackerDirectConnection *conn;
-	GTask *task;
-
-	conn = TRACKER_DIRECT_CONNECTION (self);
-	priv = tracker_direct_connection_get_instance_private (conn);
-
-	task = g_task_new (self, cancellable, callback, user_data);
-	g_task_set_task_data (task,
-	                      task_data_turtle_new (file),
-	                      (GDestroyNotify) task_data_free);
-
-	g_thread_pool_push (priv->update_thread, task, NULL);
-}
-
-static void
-tracker_direct_connection_load_finish (TrackerSparqlConnection  *self,
-                                       GAsyncResult             *res,
-                                       GError                  **error)
-{
-	g_task_propagate_pointer (G_TASK (res), error);
-}
-
 static TrackerNamespaceManager *
 tracker_direct_connection_get_namespace_manager (TrackerSparqlConnection *self)
 {
@@ -771,9 +698,6 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 	sparql_connection_class->update_blank = tracker_direct_connection_update_blank;
 	sparql_connection_class->update_blank_async = tracker_direct_connection_update_blank_async;
 	sparql_connection_class->update_blank_finish = tracker_direct_connection_update_blank_finish;
-	sparql_connection_class->load = tracker_direct_connection_load;
-	sparql_connection_class->load_async = tracker_direct_connection_load_async;
-	sparql_connection_class->load_finish = tracker_direct_connection_load_finish;
 	sparql_connection_class->get_namespace_manager = tracker_direct_connection_get_namespace_manager;
 
 	props[PROP_FLAGS] =

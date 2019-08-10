@@ -206,15 +206,6 @@ public class Tracker.Store {
 		return nodes;
 	}
 
-	public static async void queue_turtle_import (Tracker.Direct.Connection conn, File file, string client_id) throws Error {
-		if (!active)
-			throw new Sparql.Error.UNSUPPORTED ("Store is not active");
-		pre_update ();
-		var cancellable = create_cancellable (client_id);
-		yield conn.load_async (file, cancellable);
-		post_update ();
-	}
-
 	public static void unreg_batches (string client_id) {
 		Cancellable cancellable = client_cancellables.lookup (client_id);
 
