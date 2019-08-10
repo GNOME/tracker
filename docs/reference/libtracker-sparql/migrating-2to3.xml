@@ -92,4 +92,25 @@ SELECT ?s { ?s a nfo:FileDataObject }
       This is superseded by the "LOAD &lt;url&gt;" SPARQL syntax.
     </para>
   </section>
+  <section>
+    <title>No tracker_sparql_connection_statistics()/statistics_async()/statistics_finish()</title>
+    <para>
+      It is possible to query statistics through SPARQL. This query would
+      provide a similar return value than the statistics API:
+    </para>
+    <programlisting>
+SELECT
+  ?class
+  (COUNT(?resource) AS ?count)
+{
+  ?class a rdfs:Class .
+  ?resource a ?class
+}
+GROUP BY ?class
+ORDER BY DESC ?count
+    </programlisting>
+    <para>
+      But of course, other more detailed statistics may be obtained.
+    </para>
+  </section>
 </chapter>
