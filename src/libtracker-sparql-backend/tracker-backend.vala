@@ -130,22 +130,6 @@ class Tracker.Sparql.Backend : Connection {
 		return yield bus.update_blank_async (sparql, priority, cancellable);
 	}
 
-	public override Cursor? statistics (Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
-		debug ("%s()", GLib.Log.METHOD);
-		if (bus == null) {
-			throw new Sparql.Error.UNSUPPORTED ("Statistics support not available for direct-only connection");
-		}
-		return bus.statistics (cancellable);
-	}
-
-	public async override Cursor? statistics_async (Cancellable? cancellable = null) throws Sparql.Error, IOError, DBusError {
-		debug ("%s()", GLib.Log.METHOD);
-		if (bus == null) {
-			throw new Sparql.Error.UNSUPPORTED ("Statistics support not available for direct-only connection");
-		}
-		return yield bus.statistics_async (cancellable);
-	}
-
 	public override NamespaceManager? get_namespace_manager () {
 		if (direct != null)
 			return direct.get_namespace_manager ();
