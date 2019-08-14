@@ -117,7 +117,7 @@ class TrackerSystemAbstraction (object):
         """
         self.set_up_environment(confdir, ontodir)
 
-        self.store = helpers.StoreHelper()
+        self.store = helpers.StoreHelper(cfg.TRACKER_STORE_PATH)
         self.store.start()
 
     def tracker_store_restart_with_new_ontologies(self, ontodir):

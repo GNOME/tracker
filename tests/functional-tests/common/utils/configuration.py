@@ -33,63 +33,13 @@ if 'TRACKER_FUNCTIONAL_TEST_CONFIG' not in os.environ:
 with open(os.environ['TRACKER_FUNCTIONAL_TEST_CONFIG']) as f:
     config = json.load(f)
 
-TRACKER_BUSNAME = 'org.freedesktop.Tracker1'
-TRACKER_OBJ_PATH = '/org/freedesktop/Tracker1/Resources'
-RESOURCES_IFACE = "org.freedesktop.Tracker1.Resources"
-
-MINERFS_BUSNAME = "org.freedesktop.Tracker1.Miner.Files"
-MINERFS_OBJ_PATH = "/org/freedesktop/Tracker1/Miner/Files"
-MINER_IFACE = "org.freedesktop.Tracker1.Miner"
-MINERFS_INDEX_OBJ_PATH = "/org/freedesktop/Tracker1/Miner/Files/Index"
-MINER_INDEX_IFACE = "org.freedesktop.Tracker1.Miner.Files.Index"
-
-TRACKER_BACKUP_OBJ_PATH = "/org/freedesktop/Tracker1/Backup"
-BACKUP_IFACE = "org.freedesktop.Tracker1.Backup"
-
-TRACKER_STATS_OBJ_PATH = "/org/freedesktop/Tracker1/Statistics"
-STATS_IFACE = "org.freedesktop.Tracker1.Statistics"
-
-TRACKER_STATUS_OBJ_PATH = "/org/freedesktop/Tracker1/Status"
-STATUS_IFACE = "org.freedesktop.Tracker1.Status"
-
-TRACKER_EXTRACT_BUSNAME = "org.freedesktop.Tracker1.Miner.Extract"
-TRACKER_EXTRACT_OBJ_PATH = "/org/freedesktop/Tracker1/Miner/Extract"
-
-WRITEBACK_BUSNAME = "org.freedesktop.Tracker1.Writeback"
-
-
-DCONF_MINER_SCHEMA = "org.freedesktop.Tracker.Miner.Files"
-
-# Autoconf substitutes paths in the configuration.json file without
-# expanding variables, so we need to manually insert these.
-
-
-def expandvars(variable):
-    # Note: the order matters!
-    result = variable
-    for var, value in [("${datarootdir}", RAW_DATAROOT_DIR),
-                       ("${exec_prefix}", RAW_EXEC_PREFIX),
-                       ("${prefix}", PREFIX),
-                       ("@top_srcdir@", TOP_SRCDIR),
-                       ("@top_builddir@", TOP_BUILDDIR)]:
-        result = result.replace(var, value)
-
-    return result
-
-
-PREFIX = config['PREFIX']
-RAW_EXEC_PREFIX = config['RAW_EXEC_PREFIX']
-RAW_DATAROOT_DIR = config['RAW_DATAROOT_DIR']
 
 TOP_SRCDIR = os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 TOP_BUILDDIR = os.environ['TRACKER_FUNCTIONAL_TEST_BUILD_DIR']
 
-TEST_ONTOLOGIES_DIR = os.path.normpath(
-    expandvars(config['TEST_ONTOLOGIES_DIR']))
-
-TRACKER_STORE_PATH = os.path.normpath(expandvars(config['TRACKER_STORE_PATH']))
-
+TEST_ONTOLOGIES_DIR = config['TEST_ONTOLOGIES_DIR']
+TRACKER_STORE_PATH = config['TRACKER_STORE_PATH']
 disableJournal = (len(config['disableJournal']) == 0)
 
 
