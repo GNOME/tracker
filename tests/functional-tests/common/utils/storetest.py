@@ -31,14 +31,16 @@ from common.utils import configuration as cfg
 class CommonTrackerStoreTest (ut.TestCase):
     """
     Common superclass for tests that just require a fresh store running
+
+    Note that the store is started per test-suite, not per test.
     """
+
     @classmethod
     def setUpClass(self):
-        env = os.environ
-        env['LC_COLLATE'] = 'en_GB.utf8'
+        extra_env = {'LC_COLLATE': 'en_GB.utf8'}
 
-        self.tracker = StoreHelper()
-        self.tracker.start(env=env)
+        self.tracker = StoreHelper(cfg.TRACKER_STORE_PATH)
+        self.tracker.start(extra_env=extra_env)
 
     @classmethod
     def tearDownClass(self):
