@@ -28,15 +28,11 @@ import sys
 import subprocess
 import time
 
-from common.utils import configuration as cfg
-
 
 class NoMetadataException (Exception):
     pass
 
 REASONABLE_TIMEOUT = 30
-
-log = logging.getLogger(__name__)
 
 
 class Helper:
@@ -53,10 +49,16 @@ class Helper:
     is entered (or straight away if currently running the main loop).
     """
 
-    BUS_NAME = None
-    PROCESS_NAME = None
+    STARTUP_TIMEOUT = 200   # milliseconds
+    SHUTDOWN_TIMEOUT = 200  #
 
-    def __init__(self):
+    def __init__(self, helper_name, bus_name, process_path):
+        self.name = helper_name
+        self.bus_name = bus_name
+        self.process_path = process_path
+
+        self.log = logging.getLogger(f'{__name__}.{self.name}')
+
         self.process = None
         self.available = False
 
@@ -77,37 +79,33 @@ class Helper:
             sys.exit(1)
         sys.excepthook = new_hook
 
-    def _start_process(self, env=None):
-        path = self.PROCESS_PATH
-        flags = getattr(self,
-                        "FLAGS",
-                        [])
+    def _start_process(self, command_args=None, extra_env=None):
+        command = [self.process_path] + (command_args or [])
+        self.log.debug("Starting %s.", ' '.join(command))
 
-        kws = {}
+        env = os.environ
+        if extra_env:
+            self.log.debug("  starting with extra environment: %s", extra_env)
+            env.update(extra_env)
 
-        if env:
-            kws['env'] = env
-
-        command = [path] + flags
-        log.debug("Starting %s", ' '.join(command))
         try:
-            return subprocess.Popen([path] + flags, **kws)
+            return subprocess.Popen(command, env=env)
         except OSError as e:
             raise RuntimeError("Error starting %s: %s" % (path, e))
 
-    def _bus_name_appeared(self, name, owner, data):
-        log.debug("[%s] appeared in the bus as %s", self.PROCESS_NAME, owner)
+    def _bus_name_appeared(self, connection, name, owner):
+        self.log.debug("%s appeared on the message bus, owned by %s", name, owner)
         self.available = True
         self.loop.quit()
 
-    def _bus_name_vanished(self, name, data):
-        log.debug("[%s] disappeared from the bus", self.PROCESS_NAME)
+    def _bus_name_vanished(self, connection, name):
+        self.log.debug("%s vanished from the message bus", name)
         self.available = False
         self.loop.quit()
 
     def _process_watch_cb(self):
         if self.process_watch_timeout == 0:
-            # The GLib seems to call the timeout after we've removed it
+            # GLib seems to call the timeout after we've removed it
             # sometimes, which causes errors unless we detect it.
             return False
 
@@ -119,38 +117,40 @@ class Helper:
             return True    # continue
         else:
             self.process_watch_timeout = 0
-            raise RuntimeError("%s exited with status: %i" %
-                               (self.PROCESS_NAME, status))
+            raise RuntimeError(f"{self.name} exited with status: {self.status}")
 
-    def _timeout_on_idle_cb(self):
-        log.debug("[%s] Timeout waiting... asumming idle.", self.PROCESS_NAME)
+    def _process_startup_timeout_cb(self):
+        self.log.debug(f"Process timeout of {self.STARTUP_TIMEOUT}ms was called")
         self.loop.quit()
         self.timeout_id = None
         return False
 
-    def start(self, env=None):
+    def start(self, command_args=None, extra_env=None):
         """
         Start an instance of process and wait for it to appear on the bus.
         """
         if self.process is not None:
-            raise RuntimeError(
-                "%s process already started" % self.PROCESS_NAME)
+            raise RuntimeError("%s: already started" % self.name)
 
         self._bus_name_watch_id = Gio.bus_watch_name_on_connection(
-            self.bus, self.BUS_NAME, Gio.BusNameWatcherFlags.NONE,
+            self.bus, self.bus_name, Gio.BusNameWatcherFlags.NONE,
             self._bus_name_appeared, self._bus_name_vanished)
+
+        # We expect the _bus_name_vanished callback to be called here,
+        # causing the loop to exit again.
         self.loop.run()
 
         if self.available:
             # It's running, but we didn't start it...
-            raise Exception("Unable to start test instance of %s: "
-                            "already running " % self.PROCESS_NAME)
+            raise RuntimeError("Unable to start test instance of %s: "
+                               "already running" % self.name)
 
-        self.process = self._start_process(env=env)
-        log.debug('[%s] Started process %i',
-            self.PROCESS_NAME, self.process.pid)
-        self.process_watch_timeout = GLib.timeout_add(
-            200, self._process_watch_cb)
+        self.process = self._start_process(command_args=command_args,
+                                           extra_env=extra_env)
+        self.log.debug('Started with PID %i', self.process.pid)
+
+        self.process_startup_timeout = GLib.timeout_add(
+            self.STARTUP_TIMEOUT, self._process_startup_timeout_cb)
 
         self.abort_if_process_exits_with_status_0 = True
 
@@ -166,23 +166,21 @@ class Helper:
 
         start = time.time()
         if self.process.poll() == None:
-            GLib.source_remove(self.process_watch_timeout)
-            self.process_watch_timeout = 0
+            GLib.source_remove(self.process_startup_timeout)
+            self.process_startup_timeout = 0
 
             self.process.terminate()
+            returncode = self.process.wait(timeout=self.SHUTDOWN_TIMEOUT * 1000)
+            if returncode is None:
+                self.log.debug("Process failed to terminate in time, sending kill!")
+                self.process.kill()
+                self.process.wait()
+            elif returncode > 0:
+                self.log.warn("Process returned error code %s", returncode)
 
-            while self.process.poll() == None:
-                time.sleep(0.1)
+        self.log.debug("Process stopped.")
 
-                if time.time() > (start + REASONABLE_TIMEOUT):
-                    log.debug("[%s] Failed to terminate, sending kill!",
-                        self.PROCESS_NAME)
-                    self.process.kill()
-                    self.process.wait()
-
-        log.debug("[%s] stopped.", self.PROCESS_NAME)
-
-        # Run the loop until the bus name appears, or the process dies.
+        # Run the loop to handle the expected name_vanished signal.
         self.loop.run()
         Gio.bus_unwatch_name(self._bus_name_watch_id)
 
@@ -201,46 +199,59 @@ class Helper:
 
         self.process = None
 
-        log.debug("[%s] killed.", self.PROCESS_NAME)
+        self.log.debug("Process killed.")
 
 
 class StoreHelper (Helper):
     """
-    Wrapper for the Store API
-
-    Every method tries to reconnect once if there is a dbus exception
-    (some tests kill the daemon and make the connection useless)
+    Helper for starting and testing the tracker-store daemon.
     """
 
-    PROCESS_NAME = "tracker-store"
-    PROCESS_PATH = cfg.TRACKER_STORE_PATH
-    BUS_NAME = cfg.TRACKER_BUSNAME
+    TRACKER_BUSNAME = 'org.freedesktop.Tracker1'
+    TRACKER_OBJ_PATH = '/org/freedesktop/Tracker1/Resources'
+    RESOURCES_IFACE = "org.freedesktop.Tracker1.Resources"
 
-    def start(self, env=None):
-        Helper.start(self, env=env)
+    TRACKER_BACKUP_OBJ_PATH = "/org/freedesktop/Tracker1/Backup"
+    BACKUP_IFACE = "org.freedesktop.Tracker1.Backup"
+
+    TRACKER_STATS_OBJ_PATH = "/org/freedesktop/Tracker1/Statistics"
+    STATS_IFACE = "org.freedesktop.Tracker1.Statistics"
+
+    TRACKER_STATUS_OBJ_PATH = "/org/freedesktop/Tracker1/Status"
+    STATUS_IFACE = "org.freedesktop.Tracker1.Status"
+
+    def __init__(self, process_path):
+        Helper.__init__(self, "tracker-store", self.TRACKER_BUSNAME, process_path)
+
+    def start(self, command_args=None, extra_env=None):
+        Helper.start(self, command_args, extra_env)
 
         self.resources = Gio.DBusProxy.new_sync(
             self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START, None,
-            cfg.TRACKER_BUSNAME, cfg.TRACKER_OBJ_PATH, cfg.RESOURCES_IFACE)
+            self.TRACKER_BUSNAME, self.TRACKER_OBJ_PATH, self.RESOURCES_IFACE)
 
         self.backup_iface = Gio.DBusProxy.new_sync(
             self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START, None,
-            cfg.TRACKER_BUSNAME, cfg.TRACKER_BACKUP_OBJ_PATH, cfg.BACKUP_IFACE)
+            self.TRACKER_BUSNAME, self.TRACKER_BACKUP_OBJ_PATH, self.BACKUP_IFACE)
 
         self.stats_iface = Gio.DBusProxy.new_sync(
             self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START, None,
-            cfg.TRACKER_BUSNAME, cfg.TRACKER_STATS_OBJ_PATH, cfg.STATS_IFACE)
+            self.TRACKER_BUSNAME, self.TRACKER_STATS_OBJ_PATH, self.STATS_IFACE)
 
         self.status_iface = Gio.DBusProxy.new_sync(
             self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START, None,
-            cfg.TRACKER_BUSNAME, cfg.TRACKER_STATUS_OBJ_PATH, cfg.STATUS_IFACE)
+            self.TRACKER_BUSNAME, self.TRACKER_STATUS_OBJ_PATH, self.STATUS_IFACE)
 
-        log.debug("[%s] booting...", self.PROCESS_NAME)
+        self.log.debug("Calling %s.Wait() method", self.STATUS_IFACE)
         self.status_iface.Wait()
-        log.debug("[%s] ready.", self.PROCESS_NAME)
+        self.log.debug("Ready")
 
     def stop(self):
         Helper.stop(self)
+
+    # Note: The methods below call the tracker-store D-Bus API directly. This
+    # is useful for testing this API surface, but we recommand that all regular
+    # applications use libtracker-sparql library to talk to the database.
 
     def query(self, query, timeout=5000, **kwargs):
         return self.resources.SparqlQuery('(s)', query, timeout=timeout, **kwargs)

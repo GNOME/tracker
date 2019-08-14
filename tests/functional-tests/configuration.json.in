@@ -1,7 +1,4 @@
 {
-    "PREFIX": "@prefix@",
-    "RAW_EXEC_PREFIX": "@exec_prefix@",
-    "RAW_DATAROOT_DIR": "@datarootdir@",
     "TEST_ONTOLOGIES_DIR": "@FUNCTIONAL_TESTS_ONTOLOGIES_DIR@",
     "TRACKER_STORE_PATH": "@FUNCTIONAL_TESTS_TRACKER_STORE_PATH@",
     "disableJournal": "@DISABLE_JOURNAL_TRUE@"
