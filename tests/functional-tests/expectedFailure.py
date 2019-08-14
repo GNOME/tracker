@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 # Code taken and modified from unittest2 framework (case.py)
 
 # Copyright (c) 1999-2003 Steve Purcell
