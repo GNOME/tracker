@@ -28,7 +28,7 @@ import random
 import datetime
 
 import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 
 class TrackerStoreInsertionTests (CommonTrackerStoreTest):

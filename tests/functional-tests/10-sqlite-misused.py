@@ -24,9 +24,9 @@ some SQLITE_MISUSED errors before.
 import os
 from gi.repository import GLib
 
-from common.utils import configuration as cfg
+import configuration as cfg
 import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 
 class TestSqliteMisused (CommonTrackerStoreTest):

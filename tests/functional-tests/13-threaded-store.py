@@ -25,9 +25,9 @@ import os
 from gi.repository import GLib
 import time
 
-from common.utils import configuration as cfg
+import configuration as cfg
 import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 MAX_TEST_TIME = 60  # seconds to finish the tests (to avoid infinite waitings)
 

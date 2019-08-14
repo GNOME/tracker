@@ -25,7 +25,7 @@ are updated when different operations are executed on the store
 import time
 
 import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 RDFS_RESOURCE = "rdfs:Resource"
 NIE_IE = "nie:InformationElement"

@@ -21,7 +21,7 @@
 Test tracker:coalesce function in Sparql. Only uses the Store
 """
 import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 
 class TestCoalesce (CommonTrackerStoreTest):

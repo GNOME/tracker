@@ -24,7 +24,7 @@ Peculiar Sparql behavour reported in bugs
 from gi.repository import GLib
 
 import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 
 class TrackerStoreSparqlBugsTests (CommonTrackerStoreTest):
