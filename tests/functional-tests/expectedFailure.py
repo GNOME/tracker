@@ -25,9 +25,11 @@
 Write values in tracker and check the actual values are written
 on the files. Note that these tests are highly platform dependant.
 """
-import sys
+
 from functools import wraps
-import common.utils.configuration as cfg
+import sys
+
+import configuration as cfg
 
 
 def expectedFailureJournal():

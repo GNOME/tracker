@@ -27,7 +27,7 @@ import random
 import locale
 
 import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 
 class TrackerStoreCollationTests (CommonTrackerStoreTest):

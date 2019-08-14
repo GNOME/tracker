@@ -31,13 +31,13 @@ import shutil
 import re
 import tempfile
 import time
+import unittest as ut
 
 import trackertestutils.dconf
 import trackertestutils.helpers
 
-from common.utils import configuration as cfg
-from common.utils.expectedFailure import expectedFailureJournal
-import unittest as ut
+import configuration as cfg
+from expectedFailure import expectedFailureJournal
 
 
 RDFS_RANGE = "http://www.w3.org/2000/01/rdf-schema#range"

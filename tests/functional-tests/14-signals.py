@@ -29,7 +29,7 @@ from gi.repository import GLib
 import time
 import unittest as ut
 
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 
 GRAPH_UPDATED_SIGNAL = "GraphUpdated"
