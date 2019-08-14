@@ -5,6 +5,7 @@
 # Copyright (c) 1999-2003 Steve Purcell
 # Copyright (c) 2003-2010 Python Software Foundation
 # Copyright (c) 2010, Nokia (ivan.frade@nokia.com)
+# Copyright (C) 2019, Sam Thursfield <sam@afuera.me.uk>
 
 # This module is free software, and you may redistribute it and/or modify
 # it under the same terms as Python itself, so long as this copyright message
