@@ -21,7 +21,7 @@
 Replicate the behaviour of the miner inserting information in the store.
 """
 import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 
 class TestMinerInsertBehaviour (CommonTrackerStoreTest):

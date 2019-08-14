@@ -21,7 +21,7 @@
 Tests graphs in Sparql. Only requires the store.
 """
 import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 
 class TestGraphs (CommonTrackerStoreTest):

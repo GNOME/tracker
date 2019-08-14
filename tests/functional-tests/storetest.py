@@ -24,7 +24,7 @@ import time
 import unittest as ut
 
 import trackertestutils.helpers
-from common.utils import configuration as cfg
+import configuration as cfg
 
 
 class CommonTrackerStoreTest (ut.TestCase):
