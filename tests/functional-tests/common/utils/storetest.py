@@ -19,12 +19,11 @@
 # 02110-1301, USA.
 #
 
-import unittest as ut
-
 import os
 import time
+import unittest as ut
 
-from common.utils.helpers import StoreHelper
+import trackertestutils.helpers
 from common.utils import configuration as cfg
 
 
@@ -39,7 +38,7 @@ class CommonTrackerStoreTest (ut.TestCase):
     def setUpClass(self):
         extra_env = {'LC_COLLATE': 'en_GB.utf8'}
 
-        self.tracker = StoreHelper(cfg.TRACKER_STORE_PATH)
+        self.tracker = trackertestutils.helpers.StoreHelper(cfg.TRACKER_STORE_PATH)
         self.tracker.start(extra_env=extra_env)
 
     @classmethod
