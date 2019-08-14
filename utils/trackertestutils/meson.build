@@ -1,6 +1,7 @@
 sources = [
   '__init__.py',
   'dconf.py',
+  'helpers.py',
 ]
 
 install_data(sources,

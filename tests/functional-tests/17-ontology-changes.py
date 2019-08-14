@@ -33,9 +33,9 @@ import tempfile
 import time
 
 import trackertestutils.dconf
+import trackertestutils.helpers
 
 from common.utils import configuration as cfg
-from common.utils import helpers
 from common.utils.expectedFailure import expectedFailureJournal
 import unittest as ut
 
@@ -117,7 +117,7 @@ class TrackerSystemAbstraction (object):
         """
         self.set_up_environment(confdir, ontodir)
 
-        self.store = helpers.StoreHelper(cfg.TRACKER_STORE_PATH)
+        self.store = trackertestutils.helpers.StoreHelper(cfg.TRACKER_STORE_PATH)
         self.store.start()
 
     def tracker_store_restart_with_new_ontologies(self, ontodir):
