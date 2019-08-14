@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Copyright (C) 2010, Nokia <ivan.frade@nokia.com>
-# Copyright (C) 2018, Sam Thursfield <sam@afuera.me.uk>
+# Copyright (C) 2018, 2019, Sam Thursfield <sam@afuera.me.uk>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
