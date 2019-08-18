@@ -33,7 +33,6 @@ struct _TrackerDirectConnectionPrivate
 {
 	TrackerSparqlConnectionFlags flags;
 	GFile *store;
-	GFile *journal;
 	GFile *ontology;
 
 	TrackerNamespaceManager *namespace_manager;
@@ -50,7 +49,6 @@ enum {
 	PROP_0,
 	PROP_FLAGS,
 	PROP_STORE_LOCATION,
-	PROP_JOURNAL_LOCATION,
 	PROP_ONTOLOGY_LOCATION,
 	N_PROPS
 };
@@ -223,9 +221,6 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 	if (priv->flags & TRACKER_SPARQL_CONNECTION_FLAGS_READONLY)
 		db_flags |= TRACKER_DB_MANAGER_READONLY;
 
-	if (!priv->journal)
-		priv->journal = g_object_ref (priv->store);
-
 	if (!priv->ontology) {
 		gchar *filename;
 
@@ -332,7 +327,6 @@ tracker_direct_connection_finalize (GObject *object)
 	}
 
 	g_clear_object (&priv->store);
-	g_clear_object (&priv->journal);
 	g_clear_object (&priv->ontology);
 	g_clear_object (&priv->namespace_manager);
 
@@ -357,9 +351,6 @@ tracker_direct_connection_set_property (GObject      *object,
 		break;
 	case PROP_STORE_LOCATION:
 		priv->store = g_value_dup_object (value);
-		break;
-	case PROP_JOURNAL_LOCATION:
-		priv->journal = g_value_dup_object (value);
 		break;
 	case PROP_ONTOLOGY_LOCATION:
 		priv->ontology = g_value_dup_object (value);
@@ -388,9 +379,6 @@ tracker_direct_connection_get_property (GObject    *object,
 		break;
 	case PROP_STORE_LOCATION:
 		g_value_set_object (value, priv->store);
-		break;
-	case PROP_JOURNAL_LOCATION:
-		g_value_set_object (value, priv->journal);
 		break;
 	case PROP_ONTOLOGY_LOCATION:
 		g_value_set_object (value, priv->ontology);
@@ -715,13 +703,6 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 		                     G_TYPE_FILE,
 		                     G_PARAM_READWRITE |
 		                     G_PARAM_CONSTRUCT_ONLY);
-	props[PROP_JOURNAL_LOCATION] =
-		g_param_spec_object ("journal-location",
-		                     "Journal location",
-		                     "Journal location",
-		                     G_TYPE_FILE,
-		                     G_PARAM_READWRITE |
-		                     G_PARAM_CONSTRUCT_ONLY);
 	props[PROP_ONTOLOGY_LOCATION] =
 		g_param_spec_object ("ontology-location",
 		                     "Ontology location",
@@ -736,19 +717,16 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 TrackerDirectConnection *
 tracker_direct_connection_new (TrackerSparqlConnectionFlags   flags,
 			       GFile                         *store,
-			       GFile                         *journal,
                                GFile                         *ontology,
                                GError                       **error)
 {
 	g_return_val_if_fail (G_IS_FILE (store), NULL);
-	g_return_val_if_fail (!journal || G_IS_FILE (journal), NULL);
 	g_return_val_if_fail (!ontology || G_IS_FILE (ontology), NULL);
 	g_return_val_if_fail (!error || !*error, NULL);
 
 	return g_object_new (TRACKER_TYPE_DIRECT_CONNECTION,
 	                     "flags", flags,
 	                     "store-location", store,
-	                     "journal-location", journal,
 	                     "ontology-location", ontology,
 	                     NULL);
 }
