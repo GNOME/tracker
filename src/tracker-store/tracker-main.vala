@@ -304,7 +304,6 @@ License which can be viewed at:
 		try {
 			connection = new Tracker.Direct.Connection (Sparql.ConnectionFlags.NONE,
 			                                            cache_location,
-			                                            data_location,
 			                                            ontology_location);
 			connection.init (null);
 		} catch (GLib.Error e) {

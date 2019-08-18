@@ -147,9 +147,7 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * All backends will call the D-Bus tracker-store API Wait() to make sure
 	 * the store and databases are in the right state before any user based
 	 * requests can proceed. There may be a small delay during this call if the
-	 * databases weren't shutdown cleanly and need to be checked on start up. If
-	 * the journal needs to be replayed in such an event, the delay may be
-	 * substantial while data is restored as best as possible.
+	 * databases weren't shutdown cleanly and need to be checked on start up.
 	 *
 	 * Returns: a new #TrackerSparqlConnection. Call g_object_unref() on the
 	 * object when no longer used.
@@ -173,21 +171,17 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * tracker_sparql_connection_local_new:
 	 * @flags: Flags to define connection behavior
 	 * @store: Location for the database
-	 * @journal: Location for the operation journal, or %NULL
 	 * @ontology: Location of the ontology used for this connection, or %NULL
 	 * @cancellable: A #GCancellable
 	 * @error: The error which occurred or %NULL
 	 *
 	 * Returns: a new local #TrackerSparqlConnection using the specified
-	 * @cache/@journal locations, and the ontology specified in the @ontology
+	 * @cache location, and the ontology specified in the @ontology
 	 * directory. Call g_object_unref() on the object when no longer used.
 	 *
 	 * This database connection is considered entirely private to the calling
-	 * process, if multiple processes use the same journal/cache locations,
+	 * process, if multiple processes use the same cache location,
 	 * the results are unpredictable.
-	 *
-	 * The @journal is used to rebuild the database in case of data corruption,
-	 * if %NULL is provided, the same location than @store will be assumed.
 	 *
 	 * The caller is entirely free to define an ontology or reuse Nepomuk for
 	 * its purposes. For the former see the "Defining ontologies" section in
@@ -197,18 +191,17 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * must be provided, all children .ontology and .description files will
 	 * be read.
 	 *
-	 * The @store and @journal arguments expect directories, and those are
+	 * The @store argument expects a directory, and it is
 	 * assumed to be entirely private to Tracker.
 	 *
 	 * Since: 2.0
 	 */
-	public extern static new Connection local_new (Tracker.Sparql.ConnectionFlags flags, File store, File? journal, File? ontology, Cancellable? cancellable = null) throws Sparql.Error, IOError;
+	public extern static new Connection local_new (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws Sparql.Error, IOError;
 
 	/**
 	 * tracker_sparql_connection_local_new_async:
 	 * @flags: Flags to define connection behavior
 	 * @store: Location for the database
-	 * @journal: Location for the operation journal, or %NULL
 	 * @ontology: Location of the ontology used for this connection, or %NULL
 	 * @cancellable: A #GCancellable
 	 * @_callback_: user-defined #GAsyncReadyCallback to be called when
@@ -216,7 +209,7 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * @_user_data_: user-defined data to be passed to @_callback_
 	 *
 	 * Returns: a new local #TrackerSparqlConnection using the specified
-	 * @cache/@journal locations, and the ontology specified in the @ontology
+	 * @cache location, and the ontology specified in the @ontology
 	 * directory. Call g_object_unref() on the object when no longer used.
 	 *
 	 * See tracker_sparql_connection_local_new() for more details.
@@ -237,7 +230,7 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 *
 	 * Since: 2.0
 	 */
-	public extern async static new Connection local_new_async (Tracker.Sparql.ConnectionFlags flags, File store, File? journal, File? ontology, Cancellable? cancellable = null) throws Sparql.Error, IOError;
+	public extern async static new Connection local_new_async (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws Sparql.Error, IOError;
 
 	public extern static new Connection bus_new (string service_name, DBusConnection? dbus_connection = null) throws Sparql.Error, IOError, DBusError, GLib.Error;
 
