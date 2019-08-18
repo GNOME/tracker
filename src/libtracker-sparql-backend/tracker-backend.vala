@@ -140,7 +140,6 @@ class Tracker.Sparql.Backend : Connection {
 	private Connection create_readonly_direct () throws GLib.Error, Sparql.Error, IOError, DBusError {
 		var conn = new Tracker.Direct.Connection (Tracker.Sparql.ConnectionFlags.READONLY,
 		                                          domain_ontology.get_cache (),
-		                                          domain_ontology.get_journal (),
 		                                          domain_ontology.get_ontology ());
 		conn.init ();
 		return conn;
@@ -328,14 +327,14 @@ public static Tracker.Sparql.Connection tracker_sparql_connection_bus_new (strin
 	return new Tracker.Bus.Connection (service, conn, true);
 }
 
-public static Tracker.Sparql.Connection tracker_sparql_connection_local_new (Tracker.Sparql.ConnectionFlags flags, File store, File? journal, File? ontology, Cancellable? cancellable = null) throws GLib.Error, Tracker.Sparql.Error, IOError {
-	var conn = new Tracker.Direct.Connection (flags, store, journal, ontology);
+public static Tracker.Sparql.Connection tracker_sparql_connection_local_new (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws GLib.Error, Tracker.Sparql.Error, IOError {
+	var conn = new Tracker.Direct.Connection (flags, store, ontology);
 	conn.init (cancellable);
 	return conn;
 }
 
-public static async Tracker.Sparql.Connection tracker_sparql_connection_local_new_async (Tracker.Sparql.ConnectionFlags flags, File store, File? journal, File? ontology, Cancellable? cancellable = null) throws GLib.Error, Tracker.Sparql.Error, IOError {
-	var conn = new Tracker.Direct.Connection (flags, store, journal, ontology);
+public static async Tracker.Sparql.Connection tracker_sparql_connection_local_new_async (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws GLib.Error, Tracker.Sparql.Error, IOError {
+	var conn = new Tracker.Direct.Connection (flags, store, ontology);
 	conn.init_async.begin (Priority.DEFAULT, cancellable);
 	yield;
 	return conn;
