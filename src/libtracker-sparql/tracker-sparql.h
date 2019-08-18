@@ -22,13 +22,17 @@
 
 #define __LIBTRACKER_SPARQL_INSIDE__
 
+#include <libtracker-sparql/tracker-connection.h>
+#include <libtracker-sparql/tracker-cursor.h>
 #include <libtracker-sparql/tracker-endpoint.h>
 #include <libtracker-sparql/tracker-endpoint-dbus.h>
 #include <libtracker-sparql/tracker-version.h>
 #include <libtracker-sparql/tracker-ontologies.h>
 #include <libtracker-sparql/tracker-resource.h>
+#include <libtracker-sparql/tracker-statement.h>
 #include <libtracker-sparql/tracker-notifier.h>
-#include <libtracker-sparql/tracker-generated.h>
+#include <libtracker-sparql/tracker-sparql-enum-types.h>
+#include <libtracker-sparql/tracker-utils.h>
 
 #undef __LIBTRACKER_SPARQL_INSIDE__
 
