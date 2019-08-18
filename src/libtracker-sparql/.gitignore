@@ -1,12 +1,8 @@
 tracker-namespace.c
-tracker-builder.c
-tracker-connection.c
-tracker-cursor.c
 tracker-backend.c
 tracker-plugin-loader.c
 tracker-query.c
 tracker-sparql-*.deps
 tracker-sparql*.vapi
 tracker-generated*.h
-tracker-utils.c
 *.pc

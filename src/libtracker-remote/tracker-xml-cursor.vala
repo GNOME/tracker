@@ -82,6 +82,7 @@ public class Tracker.Remote.XmlCursor : Tracker.Sparql.Cursor {
 	}
 
 	public XmlCursor (string document, long length) throws Sparql.Error {
+		Object ();
 		Xml.Parser.init ();
 		var doc = Xml.Parser.parse_memory (document, (int) length);
 
