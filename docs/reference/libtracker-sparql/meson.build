@@ -23,7 +23,7 @@ example_files = [
     'examples/ontologies/defining-properties-3.txt', 'examples/ontologies/defining-properties-4.rq',
     'examples/ontologies/defining-uniqueness-1.txt', 'examples/ontologies/defining-uniqueness-2.rq',
     'examples/ontologies/example.description', 'examples/ontologies/predefined-elements-1.txt',
-    'examples/ontologies/predefined-elements-2.rq', 'examples/builder-example.c',
+    'examples/ontologies/predefined-elements-2.rq',
     'examples/readonly-example.c', 'examples/writeonly-example.c',
     'examples/writeonly-with-blank-nodes-example.c',
 ]

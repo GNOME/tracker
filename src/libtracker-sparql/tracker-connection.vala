@@ -244,7 +244,7 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * Executes a SPARQL query on. The API call is completely synchronous, so
 	 * it may block.
 	 *
-	 * The @sparql query should be built with #TrackerSparqlBuilder, or
+	 * The @sparql query should be built with #TrackerResource, or
 	 * its parts correctly escaped using tracker_sparql_escape_string(),
 	 * otherwise SPARQL injection is possible.
 	 *
@@ -297,7 +297,7 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * Executes a SPARQL update. The API call is completely
 	 * synchronous, so it may block.
 	 *
-	 * The @sparql query should be built with #TrackerSparqlBuilder, or
+	 * The @sparql query should be built with #TrackerResource, or
 	 * its parts correctly escaped using tracker_sparql_escape_string(),
 	 * otherwise SPARQL injection is possible.
 	 *
@@ -413,7 +413,7 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * Executes a SPARQL update and returns the URNs of the generated nodes,
 	 * if any. The API call is completely synchronous, so it may block.
 	 *
-	 * The @sparql query should be built with #TrackerSparqlBuilder, or
+	 * The @sparql query should be built with #TrackerResource, or
 	 * its parts correctly escaped using tracker_sparql_escape_string(),
 	 * otherwise SPARQL injection is possible.
 	 *
