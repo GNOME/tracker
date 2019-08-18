@@ -32,8 +32,6 @@ public class Tracker.DBus {
 	static uint steroids_id;
 	static Tracker.Status notifier;
 	static uint notifier_id;
-	static Tracker.Backup backup;
-	static uint backup_id;
 	static uint domain_watch_id;
 	static MainLoop watch_main_loop;
 
@@ -157,12 +155,6 @@ public class Tracker.DBus {
 	public static void shutdown () {
 		set_available (false);
 
-		if (backup != null) {
-			connection.unregister_object (backup_id);
-			backup = null;
-			backup_id = 0;
-		}
-
 		if (notifier != null) {
 			connection.unregister_object (notifier_id);
 			notifier = null;
@@ -237,18 +229,6 @@ public class Tracker.DBus {
 
 		steroids_id = register_object (connection, steroids, Tracker.Steroids.PATH);
 
-		if (backup == null) {
-			/* Add org.freedesktop.Tracker1.Backup */
-			backup = new Tracker.Backup ();
-			if (backup == null) {
-				critical ("Could not create TrackerBackup object to register");
-				return false;
-			}
-
-
-			backup_id = register_object (connection, backup, Tracker.Backup.PATH);
-		}
-
 		return true;
 	}
 
@@ -274,10 +254,6 @@ public class Tracker.DBus {
 
 		if (type == typeof (Status)) {
 			return notifier;
-		}
-
-		if (type == typeof (Backup)) {
-			return backup;
 		}
 
 		return null;

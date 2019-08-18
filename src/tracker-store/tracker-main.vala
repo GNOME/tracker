@@ -283,9 +283,6 @@ License which can be viewed at:
 		DBManagerFlags flags = 0;
 
 		if (force_reindex) {
-			/* TODO port backup support
-			   backup_user_metadata (config, language); */
-
 			flags |= DBManagerFlags.FORCE_REINDEX;
 		}
 
