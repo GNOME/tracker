@@ -1,5 +1,4 @@
 tracker_store_sources = [
-    'tracker-backup.vala',
     'tracker-config.c',
     'tracker-dbus.vala',
     'tracker-events.c',
@@ -34,7 +33,6 @@ tracker_store = executable('tracker-store',
     install_rpath: tracker_install_rpath)
 
 install_data(
-    'tracker-backup.xml',
     'tracker-resources.xml',
     'tracker-statistics.xml',
     'tracker-status.xml',
