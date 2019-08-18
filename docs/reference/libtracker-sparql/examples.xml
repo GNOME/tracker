@@ -12,35 +12,6 @@
     </para>
   </partintro>
 
-
-  <chapter id="tracker-examples-builder">
-    <title>SPARQL query builder</title>
-
-    <para>
-      The Tracker SPARQL library provides an easy and secure way of creating
-      SPARQL queries with the proper syntax. This is achieved using the
-      <type><link linkend="TrackerSparqlBuilder-struct">TrackerSparqlBuilder</link></type>
-      object.
-    </para>
-
-    <para>
-    <informalexample>
-      <programlisting language="C">
-        <xi:include href="builder-example.c" parse="text"/>
-      </programlisting>
-    </informalexample>
-
-      The previous code will generate the following SPARQL query:
-<programlisting>
-DROP GRAPH &lt;urn:example:0001&gt;
-INSERT INTO &lt;urn:example:0001&gt; {
-  &lt;urn:example:0001&gt; a nie:DataObject , nfo:FileDataObject ;
-                     nfo:fileLastModified "2010-08-04T13:09:26Z" .
-}
-</programlisting>
-    </para>
-  </chapter>
-
   <chapter id="tracker-examples-readonly">
     <title>Querying the Store</title>
 
