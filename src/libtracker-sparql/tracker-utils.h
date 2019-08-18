@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015 Collabora Ltd.
+ * Copyright (C) 2010, Nokia <ivan.frade@nokia.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,14 +16,18 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA  02110-1301, USA.
  */
+#ifndef __TRACKER_UTILS_H__
+#define __TRACKER_UTILS_H__
 
-/*
- * This file serves as the representation for the Tracker namespace, mostly
- * so that we can set its namespace and version attributes for GIR.
- */
+#include <glib.h>
 
-[CCode (cprefix = "Tracker", gir_namespace = "Tracker",
-        gir_version = "2.0", lower_case_cprefix = "tracker_")]
-namespace Tracker
-{
-}
+gchar * tracker_sparql_escape_uri_vprintf (const gchar *format,
+                                           va_list      args);
+gchar * tracker_sparql_escape_uri_printf  (const gchar* format,
+                                           ...);
+gchar * tracker_sparql_escape_uri         (const gchar *uri);
+
+gchar* tracker_sparql_escape_string (const gchar* literal);
+gchar* tracker_sparql_get_uuid_urn (void);
+
+#endif /* __TRACKER_UTILS_H__ */

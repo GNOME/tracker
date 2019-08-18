@@ -30,6 +30,7 @@ public class Tracker.Remote.JsonCursor : Tracker.Sparql.Cursor {
 	const string XSD_NS = "http://www.w3.org/2001/XMLSchema#";
 
 	public JsonCursor (string document, long length) throws GLib.Error {
+		Object ();
 		var parser = new Json.Parser ();
 		parser.load_from_data (document, length);
 

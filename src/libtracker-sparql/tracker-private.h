@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2019, Red Hat, Inc
+ * Copyright (C) 2010, Nokia <ivan.frade@nokia.com>
+ * Copyright (C) 2019, Red Hat Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,27 +16,13 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA  02110-1301, USA.
- *
- * Author: Carlos Garnacho <carlosg@gnome.org>
  */
+#ifndef __TRACKER_PRIVATE_H__
+#define __TRACKER_PRIVATE_H__
 
-#ifndef __TRACKER_ENDPOINT_H__
-#define __TRACKER_ENDPOINT_H__
+#include "tracker-cursor.h"
 
-#if !defined (__LIBTRACKER_SPARQL_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-sparql/tracker-sparql.h> must be included directly."
-#endif
+void tracker_sparql_cursor_set_connection (TrackerSparqlCursor     *cursor,
+                                           TrackerSparqlConnection *connection);
 
-#include <glib-object.h>
-#include <libtracker-sparql/tracker-connection.h>
-
-#define TRACKER_TYPE_ENDPOINT tracker_endpoint_get_type()
-G_DECLARE_DERIVABLE_TYPE (TrackerEndpoint, tracker_endpoint, TRACKER, ENDPOINT, GObject)
-
-struct _TrackerEndpointClass {
-	GObjectClass parent_class;
-};
-
-TrackerSparqlConnection * tracker_endpoint_get_sparql_connection (TrackerEndpoint *endpoint);
-
-#endif /* __TRACKER_ENDPOINT_H__ */
+#endif /* __TRACKER_PRIVATE_H__ */

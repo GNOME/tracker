@@ -22,6 +22,7 @@
 #include "config.h"
 
 #include "tracker-endpoint-dbus.h"
+#include "tracker-notifier.h"
 
 #include <gio/gio.h>
 #include <gio/gunixinputstream.h>
@@ -642,7 +643,7 @@ tracker_endpoint_dbus_new (TrackerSparqlConnection  *sparql_connection,
                            GCancellable             *cancellable,
                            GError                  **error)
 {
-	g_return_val_if_fail (TRACKER_SPARQL_IS_CONNECTION (sparql_connection), NULL);
+	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (sparql_connection), NULL);
 	g_return_val_if_fail (G_IS_DBUS_CONNECTION (dbus_connection), NULL);
 	g_return_val_if_fail (!cancellable || G_IS_CANCELLABLE (cancellable), NULL);
 	g_return_val_if_fail (!error || !*error, NULL);
