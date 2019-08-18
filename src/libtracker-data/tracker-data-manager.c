@@ -70,7 +70,6 @@ struct _TrackerDataManager {
 
 	GFile *ontology_location;
 	GFile *cache_location;
-	GFile *data_location;
 	guint initialized      : 1;
 	guint restoring_backup : 1;
 	guint first_time_index : 1;
@@ -3910,16 +3909,9 @@ tracker_data_manager_get_cache_location (TrackerDataManager *manager)
 	return manager->cache_location ? g_object_ref (manager->cache_location) : NULL;
 }
 
-GFile *
-tracker_data_manager_get_data_location (TrackerDataManager *manager)
-{
-	return manager->data_location ? g_object_ref (manager->data_location) : NULL;
-}
-
 TrackerDataManager *
 tracker_data_manager_new (TrackerDBManagerFlags   flags,
                           GFile                  *cache_location,
-                          GFile                  *data_location,
                           GFile                  *ontology_location,
                           gboolean                restoring_backup,
                           guint                   select_cache_size,
@@ -3927,7 +3919,7 @@ tracker_data_manager_new (TrackerDBManagerFlags   flags,
 {
 	TrackerDataManager *manager;
 
-	if (!cache_location || !data_location || !ontology_location) {
+	if (!cache_location || !ontology_location) {
 		g_warning ("All data storage and ontology locations must be provided");
 		return NULL;
 	}
@@ -3937,7 +3929,6 @@ tracker_data_manager_new (TrackerDBManagerFlags   flags,
 	/* TODO: Make these properties */
 	g_set_object (&manager->cache_location, cache_location);
 	g_set_object (&manager->ontology_location, ontology_location);
-	g_set_object (&manager->data_location, data_location);
 	manager->flags = flags;
 	manager->restoring_backup = restoring_backup;
 	manager->select_cache_size = select_cache_size;
@@ -4173,8 +4164,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		return TRUE;
 	}
 
-	if (!g_file_is_native (manager->cache_location) ||
-	    !g_file_is_native (manager->data_location)) {
+	if (!g_file_is_native (manager->cache_location)) {
 		g_set_error (error,
 		             TRACKER_DATA_ONTOLOGY_ERROR,
 		             TRACKER_DATA_UNSUPPORTED_LOCATION,
@@ -4190,7 +4180,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 	manager->db_manager = tracker_db_manager_new (manager->flags,
 	                                              manager->cache_location,
-	                                              manager->data_location,
 	                                              &is_first_time_index,
 	                                              manager->restoring_backup,
 	                                              FALSE,
