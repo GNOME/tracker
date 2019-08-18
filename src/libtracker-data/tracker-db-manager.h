@@ -49,7 +49,6 @@ typedef struct _TrackerDBManager TrackerDBManager;
 
 TrackerDBManager   *tracker_db_manager_new                    (TrackerDBManagerFlags   flags,
                                                                GFile                  *cache_location,
-                                                               GFile                  *data_location,
                                                                gboolean               *first_time,
                                                                gboolean                restoring_backup,
                                                                gboolean                shared_cache,
@@ -67,9 +66,8 @@ const gchar *       tracker_db_manager_get_file               (TrackerDBManager 
 TrackerDBInterface *tracker_db_manager_get_db_interface       (TrackerDBManager      *db_manager);
 TrackerDBInterface *tracker_db_manager_get_writable_db_interface (TrackerDBManager   *db_manager);
 
-void                tracker_db_manager_ensure_locations       (TrackerDBManager      *db_manager,
-							       GFile                 *cache_location,
-                                                               GFile                 *data_location);
+void                tracker_db_manager_ensure_location        (TrackerDBManager      *db_manager,
+							       GFile                 *cache_location);
 gboolean            tracker_db_manager_has_enough_space       (TrackerDBManager      *db_manager);
 void                tracker_db_manager_update_version         (TrackerDBManager      *db_manager);
 
