@@ -27,7 +27,6 @@
 #define __LIBTRACKER_DATA_INSIDE__
 
 #include "tracker-class.h"
-#include "tracker-data-backup.h"
 #include "tracker-data-manager.h"
 #include "tracker-data-query.h"
 #include "tracker-data-update.h"
