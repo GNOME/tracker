@@ -132,7 +132,6 @@ struct _TrackerDBManager {
 	gchar *user_data_dir;
 	gchar *in_use_filename;
 	GFile *cache_location;
-	GFile *data_location;
 	TrackerDBManagerFlags flags;
 	guint s_cache_size;
 	guint u_cache_size;
@@ -427,7 +426,7 @@ tracker_db_manager_locale_changed (TrackerDBManager  *db_manager,
 	 * tracker_data_manager_init() has been called, so it can be used
 	 * to check for locale mismatches for initializing the database.
 	 */
-	tracker_db_manager_ensure_locations (db_manager, db_manager->cache_location, db_manager->data_location);
+	tracker_db_manager_ensure_location (db_manager, db_manager->cache_location);
 
 	/* Get current collation locale */
 	current_locale = tracker_locale_get (TRACKER_LOCALE_COLLATE);
@@ -516,9 +515,8 @@ db_recreate_all (TrackerDBManager  *db_manager,
 }
 
 void
-tracker_db_manager_ensure_locations (TrackerDBManager *db_manager,
-                                     GFile            *cache_location,
-                                     GFile            *data_location)
+tracker_db_manager_ensure_location (TrackerDBManager *db_manager,
+				    GFile            *cache_location)
 {
 	gchar *dir;
 
@@ -528,8 +526,6 @@ tracker_db_manager_ensure_locations (TrackerDBManager *db_manager,
 
 	db_manager->locations_initialized = TRUE;
 	db_manager->data_dir = g_file_get_path (cache_location);
-
-	db_manager->user_data_dir = g_file_get_path (data_location);
 
 	db_manager->db = db_base;
 
@@ -570,7 +566,6 @@ perform_recreate (TrackerDBManager  *db_manager,
 TrackerDBManager *
 tracker_db_manager_new (TrackerDBManagerFlags   flags,
 			GFile                  *cache_location,
-			GFile                  *data_location,
 			gboolean               *first_time,
 			gboolean                restoring_backup,
 			gboolean                shared_cache,
@@ -591,7 +586,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	TrackerDBInterface *resources_iface;
 	GError *internal_error = NULL;
 
-	if (!cache_location || !data_location) {
+	if (!cache_location) {
 		g_set_error (error,
 		             TRACKER_DATA_ONTOLOGY_ERROR,
 		             TRACKER_DATA_UNSUPPORTED_LOCATION,
@@ -618,10 +613,9 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	db_manager->interfaces = g_async_queue_new_full (g_object_unref);
 
 	g_set_object (&db_manager->cache_location, cache_location);
-	g_set_object (&db_manager->data_location, data_location);
 	g_weak_ref_init (&db_manager->iface_data, iface_data);
 
-	tracker_db_manager_ensure_locations (db_manager, cache_location, data_location);
+	tracker_db_manager_ensure_location (db_manager, cache_location);
 	db_manager->in_use_filename = g_build_filename (db_manager->user_data_dir,
 							IN_USE_FILENAME,
 							NULL);

@@ -377,7 +377,7 @@ test_sparql_query (TestInfo      *test_info,
 	data_location = g_file_new_for_path (test_info->data_location);
 
 	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
-	                                    data_location, data_location, test_schemas, /* loc, domain and ontology_name */
+	                                    data_location, test_schemas, /* loc, domain and ontology_name */
 	                                    FALSE, 100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
