@@ -25,6 +25,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 	private const string ENDPOINT_IFACE = "org.freedesktop.Tracker1.Endpoint";
 
 	public Connection (string dbus_name, string object_path, DBusConnection? dbus_connection) throws Sparql.Error, IOError, DBusError, GLib.Error {
+		Object ();
 		this.dbus_name = dbus_name;
 		this.bus = dbus_connection;
 		this.object_path = object_path;

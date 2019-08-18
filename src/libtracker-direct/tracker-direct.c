@@ -22,6 +22,7 @@
 
 #include "tracker-direct.h"
 #include "tracker-direct-statement.h"
+#include "libtracker-sparql/tracker-private.h"
 #include <libtracker-data/tracker-data.h>
 #include <libtracker-data/tracker-sparql.h>
 #include <libtracker-sparql/tracker-notifier-private.h>
@@ -73,7 +74,7 @@ static void tracker_direct_connection_async_initable_iface_init (GAsyncInitableI
 G_DEFINE_QUARK (TrackerDirectNotifier, tracker_direct_notifier)
 
 G_DEFINE_TYPE_WITH_CODE (TrackerDirectConnection, tracker_direct_connection,
-                         TRACKER_SPARQL_TYPE_CONNECTION,
+                         TRACKER_TYPE_SPARQL_CONNECTION,
                          G_ADD_PRIVATE (TrackerDirectConnection)
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 tracker_direct_connection_initable_iface_init)
@@ -942,7 +943,7 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 		g_param_spec_enum ("flags",
 		                   "Flags",
 		                   "Flags",
-		                   TRACKER_SPARQL_TYPE_CONNECTION_FLAGS,
+		                   TRACKER_TYPE_SPARQL_CONNECTION_FLAGS,
 		                   TRACKER_SPARQL_CONNECTION_FLAGS_NONE,
 		                   G_PARAM_READWRITE |
 		                   G_PARAM_CONSTRUCT_ONLY);

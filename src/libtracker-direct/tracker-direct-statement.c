@@ -31,7 +31,7 @@ struct _TrackerDirectStatementPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE (TrackerDirectStatement,
                             tracker_direct_statement,
-                            TRACKER_SPARQL_TYPE_STATEMENT)
+                            TRACKER_TYPE_SPARQL_STATEMENT)
 
 static void
 tracker_direct_statement_finalize (GObject *object)

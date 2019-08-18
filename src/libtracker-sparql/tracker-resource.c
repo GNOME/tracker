@@ -29,7 +29,7 @@
 #include <tracker-ontologies.h>
 
 /* For tracker_sparql_escape_string */
-#include "tracker-generated-no-checks.h"
+#include "tracker-utils.h"
 
 typedef struct {
 	char *identifier;
