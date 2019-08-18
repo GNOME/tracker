@@ -13,7 +13,6 @@ libtracker_sparql_c_vapi_dep = meson.get_compiler('vala').find_library('libtrack
 
 libtracker_sparql_intermediate_vala = static_library('tracker-sparql-intermediate-vala',
     'tracker-namespace.vala',
-    'tracker-builder.vala',
     'tracker-connection.vala',
     'tracker-cursor.vala',
     'tracker-statement.vala',

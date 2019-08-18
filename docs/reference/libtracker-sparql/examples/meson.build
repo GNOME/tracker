@@ -1,11 +1,4 @@
 executable(
-  'builder-example',
-  'builder-example.c',
-  dependencies: tracker_sparql_dep,
-  build_by_default: true
-)
-
-executable(
   'readonly-example',
   'readonly-example.c',
   dependencies: tracker_sparql_dep,
