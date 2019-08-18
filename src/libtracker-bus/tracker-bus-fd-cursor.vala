@@ -30,6 +30,7 @@ class Tracker.Bus.FDCursor : Tracker.Sparql.Cursor {
 	internal bool cursor_finished;
 
 	public FDCursor (char* buffer, ulong buffer_size, string[] variable_names) {
+		Object ();
 		this.buffer = buffer;
 		this.buffer_size = buffer_size;
 		this.variable_names = variable_names;

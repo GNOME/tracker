@@ -65,10 +65,10 @@
 
 #include "config.h"
 
+#include "tracker-connection.h"
 #include "tracker-notifier.h"
 #include "tracker-notifier-private.h"
 #include "tracker-sparql-enum-types.h"
-#include "tracker-generated-no-checks.h"
 #include <libtracker-common/tracker-common.h>
 
 typedef struct _TrackerNotifierPrivate TrackerNotifierPrivate;
@@ -509,6 +509,8 @@ tracker_notifier_class_init (TrackerNotifierClass *klass)
 	/**
 	 * TrackerNotifier::events:
 	 * @self: The #TrackerNotifier
+	 * @service: The SPARQL service that originated the events, %NULL for the local store
+	 * @graph: The graph where the events happened on, %NULL for the default anonymous graph
 	 * @events: (element-type TrackerNotifierEvent): A #GPtrArray of #TrackerNotifierEvent
 	 *
 	 * Notifies of changes in the Tracker database.
