@@ -95,7 +95,7 @@ sql_by_query (void)
 	TrackerDBCursor *cursor = NULL;
 	GError *error = NULL;
 	gint n_rows = 0;
-	GFile *cache_location, *data_location, *ontology_location;
+	GFile *cache_location, *ontology_location;
 	TrackerDataManager *data_manager;
 	gchar *dir;
 
@@ -103,16 +103,12 @@ sql_by_query (void)
 	cache_location = g_file_new_for_path (dir);
 	g_free (dir);
 
-	dir = g_build_filename (g_get_user_data_dir (), "tracker", "data", NULL);
-	data_location = g_file_new_for_path (dir);
-	g_free (dir);
-
 	dir = g_build_filename (SHAREDIR, "tracker", "ontologies", "nepomuk", NULL);
 	ontology_location = g_file_new_for_path (dir);
 	g_free (dir);
 
 	data_manager = tracker_data_manager_new (0, cache_location,
-	                                         data_location, ontology_location,
+	                                         ontology_location,
 	                                         FALSE, 100, 100);
 
 	if (!g_initable_init (G_INITABLE (data_manager), NULL, &error)) {
