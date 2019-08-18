@@ -31,6 +31,7 @@ public class Tracker.Remote.Connection : Tracker.Sparql.Connection {
 	const string USER_AGENT = "Tracker/" + PACKAGE_VERSION + " (https://gitlab.gnome.org/GNOME/tracker/issues/; tracker-list@lists.gnome.org) Tracker/" + PACKAGE_VERSION;
 
 	public Connection (string base_uri) {
+		Object ();
 		_base_uri = base_uri;
 		_session = new Soup.Session ();
 	}
