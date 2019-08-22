@@ -235,7 +235,8 @@ test_file_get_mime_type (void)
 
         f = g_file_new_for_path (TEST_FILENAME);
         result = tracker_file_get_mime_type (f);
-        g_assert_cmpstr (result, ==, "text/plain");
+        g_assert_true (g_strcmp0 (result, "text/plain") == 0 ||
+                       g_strcmp0 (result, "application/x-zerosize") == 0);
 
         g_object_unref (f);
         g_free (result);
