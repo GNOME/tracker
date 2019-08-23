@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 #
 # Copyright (C) 2010, Nokia <ivan.frade@nokia.com>
-# Copyright (C) 2018, Sam Thursfield <sam@afuera.me.uk>
+# Copyright (C) 2018, 2019, Sam Thursfield <sam@afuera.me.uk>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,26 +18,27 @@
 # 02110-1301, USA.
 #
 
-import unittest as ut
-
 import os
 import time
+import unittest as ut
 
-from common.utils.helpers import StoreHelper
-from common.utils import configuration as cfg
+import trackertestutils.helpers
+import configuration as cfg
 
 
 class CommonTrackerStoreTest (ut.TestCase):
     """
     Common superclass for tests that just require a fresh store running
+
+    Note that the store is started per test-suite, not per test.
     """
+
     @classmethod
     def setUpClass(self):
-        env = os.environ
-        env['LC_COLLATE'] = 'en_GB.utf8'
+        extra_env = {'LC_COLLATE': 'en_GB.utf8'}
 
-        self.tracker = StoreHelper()
-        self.tracker.start(env=env)
+        self.tracker = trackertestutils.helpers.StoreHelper(cfg.TRACKER_STORE_PATH)
+        self.tracker.start(extra_env=extra_env)
 
     @classmethod
     def tearDownClass(self):

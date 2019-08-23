@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 #
 # Copyright (C) 2010, Nokia <ivan.frade@nokia.com>
+# Copyright (C) 2019, Sam Thursfield <sam@afuera.me.uk>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -25,17 +26,19 @@ changes and checking if the data is still there.
 
 from gi.repository import GLib
 
+import logging
 import os
 import shutil
 import re
 import tempfile
 import time
-
-from common.utils import configuration as cfg
-from common.utils import helpers
-from common.utils.dconf import DConfClient
-from common.utils.expectedFailure import expectedFailureJournal
 import unittest as ut
+
+import trackertestutils.dconf
+import trackertestutils.helpers
+
+import configuration as cfg
+from expectedFailure import expectedFailureJournal
 
 
 RDFS_RANGE = "http://www.w3.org/2000/01/rdf-schema#range"
@@ -48,6 +51,8 @@ TEST_PREFIX = "http://example.org/ns#"
 TEST_ENV_VARS = {"LC_COLLATE": "en_GB.utf8"}
 
 REASONABLE_TIMEOUT = 5
+
+log = logging.getLogger()
 
 
 class UnableToBootException (Exception):
@@ -88,12 +93,11 @@ class TrackerSystemAbstraction (object):
             os.environ[var] = directory
 
         if ontodir:
-            helpers.log("export %s=%s" %
-                        ("TRACKER_DB_ONTOLOGIES_DIR", ontodir))
+            log.debug("export %s=%s", "TRACKER_DB_ONTOLOGIES_DIR", ontodir)
             os.environ["TRACKER_DB_ONTOLOGIES_DIR"] = ontodir
 
         for var, value in TEST_ENV_VARS.items():
-            helpers.log("export %s=%s" % (var, value))
+            log.debug("export %s=%s", var, value)
             os.environ[var] = value
 
         # Previous loop should have set DCONF_PROFILE to the test location
@@ -102,7 +106,7 @@ class TrackerSystemAbstraction (object):
 
     def _apply_settings(self, settings):
         for schema_name, contents in settings.items():
-            dconf = DConfClient(schema_name)
+            dconf = trackertestutils.dconf.DConfClient(schema_name)
             dconf.reset()
             for key, value in contents.items():
                 dconf.write(key, value)
@@ -114,7 +118,7 @@ class TrackerSystemAbstraction (object):
         """
         self.set_up_environment(confdir, ontodir)
 
-        self.store = helpers.StoreHelper()
+        self.store = trackertestutils.helpers.StoreHelper(cfg.TRACKER_STORE_PATH)
         self.store.start()
 
     def tracker_store_restart_with_new_ontologies(self, ontodir):

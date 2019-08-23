@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 #
 # Copyright (C) 2010, Nokia <ivan.frade@nokia.com>
+# Copyright (C) 2019, Sam Thursfield <sam@afuera.me.uk>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -21,7 +22,7 @@
 Test the distance-calculation functions in Sparql. Only requires the Store
 """
 import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
 
 POINT_COORDS = [
     (0, 0), (1, 1), (2, 2), (3, 3), (4, 4)

@@ -1,10 +1,9 @@
-#!/usr/bin/python3
-
 # Code taken and modified from unittest2 framework (case.py)
 
 # Copyright (c) 1999-2003 Steve Purcell
 # Copyright (c) 2003-2010 Python Software Foundation
 # Copyright (c) 2010, Nokia (ivan.frade@nokia.com)
+# Copyright (C) 2019, Sam Thursfield <sam@afuera.me.uk>
 
 # This module is free software, and you may redistribute it and/or modify
 # it under the same terms as Python itself, so long as this copyright message
@@ -25,9 +24,11 @@
 Write values in tracker and check the actual values are written
 on the files. Note that these tests are highly platform dependant.
 """
-import sys
+
 from functools import wraps
-import common.utils.configuration as cfg
+import sys
+
+import configuration as cfg
 
 
 def expectedFailureJournal():

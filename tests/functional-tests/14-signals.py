@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 #
 # Copyright (C) 2010, Nokia <ivan.frade@nokia.com>
+# Copyright (C) 2019, Sam Thursfield <sam@afuera.me.uk>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -23,18 +24,16 @@ are emitted. Theses tests are not extensive (only few selected signals
 are tested)
 """
 
-import unittest as ut
-from common.utils.storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
-from common.utils import configuration as cfg
-
 from gi.repository import Gio
 from gi.repository import GLib
+
 import time
+import unittest as ut
+
+from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+
 
 GRAPH_UPDATED_SIGNAL = "GraphUpdated"
-
-SIGNALS_PATH = "/org/freedesktop/Tracker1/Resources"
-SIGNALS_IFACE = "org.freedesktop.Tracker1.Resources"
 
 CONTACT_CLASS_URI = "http://www.semanticdesktop.org/ontologies/2007/03/22/nco#PersonContact"
 
@@ -70,10 +69,10 @@ class TrackerStoreSignalsTests (CommonTrackerStoreTest):
         After connecting to the signal, call self.__wait_for_signal.
         """
         self.cb_id = self.bus.signal_subscribe(
-            sender=cfg.TRACKER_BUSNAME,
-            interface_name=SIGNALS_IFACE,
+            sender=self.tracker.TRACKER_BUSNAME,
+            interface_name=self.tracker.RESOURCES_IFACE,
             member=GRAPH_UPDATED_SIGNAL,
-            object_path=SIGNALS_PATH,
+            object_path=self.tracker.TRACKER_OBJ_PATH,
             arg0=CONTACT_CLASS_URI,
             flags=Gio.DBusSignalFlags.NONE,
             callback=self.__signal_received_cb)
