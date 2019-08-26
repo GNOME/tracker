@@ -285,19 +285,6 @@ conf.set('tracker_store', join_paths ('${libexecdir}', 'tracker-store'))
 conf.set('ontologies_dir', join_paths ('${datadir}', 'tracker', 'ontologies'))
 conf.set('domain_ontologies_dir', join_paths('${datadir}', 'tracker', 'domain-ontologies'))
 
-# Configure functional tests to run completely from source tree.
-conf.set('FUNCTIONAL_TESTS_ONTOLOGIES_DIR', join_paths(meson.current_source_dir(), 'tests', 'functional-tests', 'test-ontologies'))
-conf.set('FUNCTIONAL_TESTS_TRACKER_STORE_PATH', join_paths(meson.current_build_dir(), 'src', 'tracker-store', 'tracker-store'))
-
-# This is set in an awkward way for compatibility with Autoconf. Switch it
-# to a normal boolean once we get rid of the Autotools build system. It's
-# only used in tests/functional-tests/common/utils/configuration.py.in.
-if get_option('journal')
-    conf.set('DISABLE_JOURNAL_TRUE', 'true')
-else
-    conf.set('DISABLE_JOURNAL_TRUE', '')
-endif
-
 configure_file(input: 'config.h.meson.in',
                output: 'config.h',
                configuration: conf)

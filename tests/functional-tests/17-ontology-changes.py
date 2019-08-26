@@ -26,8 +26,8 @@ changes and checking if the data is still there.
 
 from gi.repository import GLib
 
-import logging
 import os
+import pathlib
 import shutil
 import re
 import tempfile
@@ -48,101 +48,6 @@ XSD_INTEGER = "http://www.w3.org/2001/XMLSchema#integer"
 
 TEST_PREFIX = "http://example.org/ns#"
 
-TEST_ENV_VARS = {"LC_COLLATE": "en_GB.utf8"}
-
-REASONABLE_TIMEOUT = 5
-
-log = logging.getLogger()
-
-
-class UnableToBootException (Exception):
-    pass
-
-
-class TrackerSystemAbstraction (object):
-
-    def __init__(self, settings=None):
-        self.store = None
-        self._dirs = {}
-
-    def xdg_data_home(self):
-        return os.path.join(self._basedir, 'data')
-
-    def xdg_cache_home(self):
-        return os.path.join(self._basedir, 'cache')
-
-    def set_up_environment(self, settings=None, ontodir=None):
-        """
-        Sets up the XDG_*_HOME variables and make sure the directories exist
-
-        Settings should be a dict mapping schema names to dicts that hold the
-        settings that should be changed in those schemas. The contents dicts
-        should map key->value, where key is a key name and value is a suitable
-        GLib.Variant instance.
-        """
-        self._basedir = tempfile.mkdtemp()
-
-        self._dirs = {
-            "XDG_DATA_HOME": self.xdg_data_home(),
-            "XDG_CACHE_HOME": self.xdg_cache_home()
-        }
-
-        for var, directory in list(self._dirs.items()):
-            os.makedirs(directory)
-            os.makedirs(os.path.join(directory, 'tracker'))
-            os.environ[var] = directory
-
-        if ontodir:
-            log.debug("export %s=%s", "TRACKER_DB_ONTOLOGIES_DIR", ontodir)
-            os.environ["TRACKER_DB_ONTOLOGIES_DIR"] = ontodir
-
-        for var, value in TEST_ENV_VARS.items():
-            log.debug("export %s=%s", var, value)
-            os.environ[var] = value
-
-        # Previous loop should have set DCONF_PROFILE to the test location
-        if settings is not None:
-            self._apply_settings(settings)
-
-    def _apply_settings(self, settings):
-        for schema_name, contents in settings.items():
-            dconf = trackertestutils.dconf.DConfClient(schema_name)
-            dconf.reset()
-            for key, value in contents.items():
-                dconf.write(key, value)
-
-    def tracker_store_testing_start(self, confdir=None, ontodir=None):
-        """
-        Stops any previous instance of the store, calls set_up_environment,
-        and starts a new instances of the store
-        """
-        self.set_up_environment(confdir, ontodir)
-
-        self.store = trackertestutils.helpers.StoreHelper(cfg.TRACKER_STORE_PATH)
-        self.store.start()
-
-    def tracker_store_restart_with_new_ontologies(self, ontodir):
-        self.store.stop()
-        if ontodir:
-            os.environ["TRACKER_DB_ONTOLOGIES_DIR"] = ontodir
-        try:
-            self.store.start()
-        except GLib.Error:
-            raise UnableToBootException(
-                "Unable to boot the store \n(" + str(e) + ")")
-
-    def finish(self):
-        """
-        Stop all running processes and remove all test data.
-        """
-
-        if self.store:
-            self.store.stop()
-
-        for path in list(self._dirs.values()):
-            shutil.rmtree(path)
-        os.rmdir(self._basedir)
-
 
 class OntologyChangeTestTemplate (ut.TestCase):
     """
@@ -158,35 +63,43 @@ class OntologyChangeTestTemplate (ut.TestCase):
     Check doc in those methods for the specific details.
     """
 
-    def get_ontology_dir(self, param):
-        return os.path.join(cfg.TEST_ONTOLOGIES_DIR, param)
-
     def setUp(self):
-        self.system = TrackerSystemAbstraction()
+        self.tmpdir = tempfile.mkdtemp(prefix='tracker-test-')
 
     def tearDown(self):
-        self.system.finish()
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def get_ontology_dir(self, param):
+        return str(pathlib.Path(__file__).parent.joinpath('test-ontologies', param))
 
     def template_test_ontology_change(self):
-
         self.set_ontology_dirs()
 
-        basic_ontologies = self.get_ontology_dir(self.FIRST_ONTOLOGY_DIR)
-        modified_ontologies = self.get_ontology_dir(self.SECOND_ONTOLOGY_DIR)
+        self.__assert_ontology_dates(self.FIRST_ONTOLOGY_DIR, self.SECOND_ONTOLOGY_DIR)
 
-        self.__assert_ontology_dates(basic_ontologies, modified_ontologies)
+        extra_env = cfg.test_environment(self.tmpdir)
+        extra_env['LC_COLLATE'] = 'en_GB.utf8'
+        extra_env['TRACKER_DB_ONTOLOGIES_DIR'] = self.get_ontology_dir(self.FIRST_ONTOLOGY_DIR)
 
-        self.system.tracker_store_testing_start(ontodir=basic_ontologies)
-        self.tracker = self.system.store
+        sandbox1 = trackertestutils.helpers.TrackerDBusSandbox(
+            cfg.TEST_DBUS_DAEMON_CONFIG_FILE, extra_env=extra_env)
+        sandbox1.start()
+
+        self.tracker = trackertestutils.helpers.StoreHelper(sandbox1.get_connection())
+        self.tracker.start_and_wait_for_ready()
 
         self.insert_data()
 
-        try:
-            # Boot the second set of ontologies
-            self.system.tracker_store_restart_with_new_ontologies(
-                modified_ontologies)
-        except UnableToBootException as e:
-            self.fail(str(self.__class__) + " " + str(e))
+        sandbox1.stop()
+
+        # Boot the second set of ontologies
+        extra_env['TRACKER_DB_ONTOLOGIES_DIR'] = self.get_ontology_dir(self.SECOND_ONTOLOGY_DIR)
+        sandbox2 = trackertestutils.helpers.TrackerDBusSandbox(
+            cfg.TEST_DBUS_DAEMON_CONFIG_FILE, extra_env=extra_env)
+        sandbox2.start()
+
+        self.tracker = trackertestutils.helpers.StoreHelper(sandbox2.get_connection())
+        self.tracker.start_and_wait_for_ready()
 
         self.validate_status()
 
@@ -233,7 +146,7 @@ class OntologyChangeTestTemplate (ut.TestCase):
                           (member, dbus_result))
         return
 
-    def __assert_ontology_dates(self, first_dir, second_dir):
+    def __assert_ontology_dates(self, first, second):
         """
         Asserts that 91-test.ontology in second_dir has a more recent
         modification time than in first_dir
@@ -241,23 +154,24 @@ class OntologyChangeTestTemplate (ut.TestCase):
         ISO9601_REGEX = "(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)"
 
         def get_ontology_date(ontology):
-            for line in open(ontology, 'r'):
-                if "nao:lastModified" in line:
-                    getmodtime = re.compile(
-                        'nao:lastModified\ \"' + ISO9601_REGEX + '\"')
-                    modtime_match = getmodtime.search(line)
+            with open(ontology, 'r') as f:
+                for line in f:
+                    if "nao:lastModified" in line:
+                        getmodtime = re.compile(
+                            'nao:lastModified\ \"' + ISO9601_REGEX + '\"')
+                        modtime_match = getmodtime.search(line)
 
-                    if (modtime_match):
-                        nao_date = modtime_match.group(1)
-                        return time.strptime(nao_date, "%Y-%m-%dT%H:%M:%SZ")
-                    else:
-                        print("something funky in", line)
-                    break
+                        if (modtime_match):
+                            nao_date = modtime_match.group(1)
+                            return time.strptime(nao_date, "%Y-%m-%dT%H:%M:%SZ")
+                        else:
+                            print("something funky in", line)
+                        break
 
         first_date = get_ontology_date(
-            os.path.join(first_dir, "91-test.ontology"))
+            os.path.join(self.get_ontology_dir(first), "91-test.ontology"))
         second_date = get_ontology_date(
-            os.path.join(second_dir, "91-test.ontology"))
+            os.path.join(self.get_ontology_dir(second), "91-test.ontology"))
         if first_date >= second_date:
             self.fail("nao:modifiedTime in '%s' is not more recent in the second ontology" % (
                 "91-test.ontology"))

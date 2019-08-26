@@ -52,7 +52,7 @@ class TrackerStoreSignalsTests (CommonTrackerStoreTest):
         self.loop = GLib.MainLoop()
         self.timeout_id = 0
 
-        self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+        self.bus = self.sandbox.get_connection()
 
         self.results_classname = None
         self.results_deletes = None
@@ -125,7 +125,6 @@ class TrackerStoreSignalsTests (CommonTrackerStoreTest):
         """
         self.__connect_signal()
         self.tracker.update(CONTACT)
-        time.sleep(1)
         self.__wait_for_signal()
 
         # validate results
