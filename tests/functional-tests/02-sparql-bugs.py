@@ -111,21 +111,18 @@ class TrackerStoreSparqlBugsTests (CommonTrackerStoreTest):
                 """
 
         results1 = self.tracker.query(query1)
-        print("1", results1)
         self.assertEqual(len(results1), 1)
         self.assertEqual(len(results1[0]), 2)
         self.assertEqual(results1[0][0], "contact:test")
         self.assertEqual(results1[0][1], "98653")
 
         results2 = self.tracker.query(query2)
-        print("2", results2)
         self.assertEqual(len(results2), 1)
         self.assertEqual(len(results2[0]), 2)
         self.assertEqual(results2[0][0], "contact:test")
         self.assertEqual(results2[0][1], "98653")
 
         results3 = self.tracker.query(query3)
-        print("3", results3)
         self.assertEqual(len(results3), 1)
         self.assertEqual(len(results3[0]), 2)
         self.assertEqual(results3[0][0], "contact:test")

@@ -18,10 +18,10 @@
 # 02110-1301, USA.
 #
 
-
 import json
 import logging
 import os
+import pathlib
 import sys
 
 
@@ -34,13 +34,23 @@ with open(os.environ['TRACKER_FUNCTIONAL_TEST_CONFIG']) as f:
     config = json.load(f)
 
 
-TOP_SRCDIR = os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
-TOP_BUILDDIR = os.environ['TRACKER_FUNCTIONAL_TEST_BUILD_DIR']
+TEST_DBUS_DAEMON_CONFIG_FILE = config['TEST_DBUS_DAEMON_CONFIG_FILE']
 
-TEST_ONTOLOGIES_DIR = config['TEST_ONTOLOGIES_DIR']
-TRACKER_STORE_PATH = config['TRACKER_STORE_PATH']
-disableJournal = (len(config['disableJournal']) == 0)
+disableJournal = bool(config['disableJournal'])
+
+
+def test_environment(tmpdir):
+    return {
+        'DCONF_PROFILE': config['TEST_DCONF_PROFILE'],
+        'GSETTINGS_SCHEMA_DIR': config['TEST_GSETTINGS_SCHEMA_DIR'],
+        'TRACKER_DB_ONTOLOGIES_DIR': config['TEST_ONTOLOGIES_DIR'],
+        'TRACKER_LANGUAGE_STOP_WORDS_DIR': config['TEST_LANGUAGE_STOP_WORDS_DIR'],
+        'TRACKER_TEST_DOMAIN_ONTOLOGY_RULE': config['TEST_DOMAIN_ONTOLOGY_RULE'],
+        'XDG_CACHE_HOME': os.path.join(tmpdir, 'cache'),
+        'XDG_CONFIG_HOME': os.path.join(tmpdir, 'config'),
+        'XDG_DATA_HOME': os.path.join(tmpdir, 'data'),
+        'XDG_RUNTIME_DIR': os.path.join(tmpdir, 'run'),
+    }
 
 
 def get_environment_boolean(variable):
@@ -56,5 +66,24 @@ def get_environment_boolean(variable):
                            (variable, value))
 
 
+def get_environment_int(variable, default=0):
+    try:
+        return int(os.environ.get(variable))
+    except (TypeError, ValueError):
+        return default
+
+
 if get_environment_boolean('TRACKER_TESTS_VERBOSE'):
+    # Output all logs to stderr
     logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+else:
+    # Output some messages from D-Bus daemon to stderr by default. In practice,
+    # only errors and warnings should be output here unless the environment
+    # contains G_MESSAGES_DEBUG= and/or TRACKER_VERBOSITY=1 or more.
+    handler_stderr = logging.StreamHandler(stream=sys.stderr)
+    handler_stderr.addFilter(logging.Filter('trackertestutils.dbusdaemon.stderr'))
+    handler_stdout = logging.StreamHandler(stream=sys.stderr)
+    handler_stdout.addFilter(logging.Filter('trackertestutils.dbusdaemon.stdout'))
+    logging.basicConfig(level=logging.INFO,
+                        handlers=[handler_stderr, handler_stdout],
+                        format='%(message)s')
