@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-#
 # Copyright (C) 2010, Nokia <ivan.frade@nokia.com>
 # Copyright (C) 2019, Sam Thursfield <sam@afuera.me.uk>
 #
