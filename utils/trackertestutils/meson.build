@@ -2,6 +2,7 @@ sources = [
   '__init__.py',
   'dconf.py',
   'helpers.py',
+  'mainloop.py'
 ]
 
 install_data(sources,
