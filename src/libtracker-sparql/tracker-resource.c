@@ -117,8 +117,6 @@ tracker_resource_class_init (TrackerResourceClass *klass)
 static void
 free_value (GValue *value)
 {
-	if (G_VALUE_TYPE (value) == TRACKER_TYPE_RESOURCE)
-		g_object_run_dispose (g_value_get_object (value));
 	g_value_unset (value);
 	g_slice_free (GValue, value);
 }
