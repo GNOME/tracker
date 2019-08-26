@@ -10,7 +10,7 @@
 
 nie: a tracker:Namespace, tracker:Ontology ;
 	tracker:prefix "nie" ;
-	nao:lastModified "2018-08-25T11:00:00Z" .
+	nao:lastModified "2019-02-12T13:55:00Z" .
 
 nie:DataObject a rdfs:Class ;
 	rdfs:label "Data Object" ;
@@ -164,7 +164,8 @@ nie:comment a rdf:Property ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:string ;
 	tracker:fulltextIndexed true ;
-	tracker:weight 2 .
+	tracker:weight 2 ;
+	tracker:writeback true .
 
 nie:interpretedAs a rdf:Property ;
 	nrl:maxCardinality 1 ;

@@ -13,7 +13,7 @@
 
 nmm: a tracker:Namespace, tracker:Ontology ;
 	tracker:prefix "nmm" ;
-	nao:lastModified "2014-09-19T11:05:00Z" .
+	nao:lastModified "2019-02-12T13:54:00Z" .
 
 nmm:MusicPiece a rdfs:Class ;
 	rdfs:label "Music" ;
@@ -90,7 +90,8 @@ nmm:musicAlbumDisc a rdf:Property ;
 	rdfs:subPropertyOf nie:isLogicalPartOf ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicPiece ;
-	rdfs:range nmm:MusicAlbumDisc .
+	rdfs:range nmm:MusicAlbumDisc ;
+	tracker:writeback true .
 
 # Cardinality could be > 1 if we create one for album collections
 nmm:albumArtist a rdf:Property ;
@@ -126,7 +127,8 @@ nmm:composer a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicPiece ;
 	rdfs:range nmm:Artist ;
-	tracker:weight 4 .
+	tracker:weight 4 ;
+	tracker:writeback true .
 
 nmm:lyricist a rdf:Property ;
 	rdfs:label "Lyricist" ;
@@ -140,14 +142,16 @@ nmm:lyricist a rdf:Property ;
 nmm:lyrics a rdf:Property ;
 	rdfs:label "File with the lyrics for the music piece" ;
 	rdfs:domain nmm:MusicPiece ;
-	rdfs:range nmm:SynchronizedText .
+	rdfs:range nmm:SynchronizedText ;
+	tracker:writeback true .
 
 nmm:trackNumber a rdf:Property ;
 	rdfs:label "Track number" ;
 	rdfs:comment "Track number of the music in its album" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicPiece ;
-	rdfs:range xsd:integer .
+	rdfs:range xsd:integer ;
+	tracker:writeback true .
 
 nmm:isForHearingImpaired a rdf:Property ;
 	rdfs:label "Is for hearing-impaired" ;
@@ -170,7 +174,8 @@ nmm:internationalStandardRecordingCode a rdf:Property ;
 	rdfs:subPropertyOf nie:identifier ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicPiece ;
-	rdfs:range xsd:string .
+	rdfs:range xsd:string ;
+	tracker:writeback true .
 
 nmm:albumTrackCount a rdf:Property ;
 	rdfs:label "Track count" ;
@@ -184,7 +189,8 @@ nmm:artwork a rdf:Property ;
 	rdfs:comment "Associated Artwork" ;
 	rdfs:domain nfo:Media ;
 	rdfs:range nfo:Image ;
-	rdfs:subPropertyOf nfo:depiction .
+	rdfs:subPropertyOf nfo:depiction ;
+	tracker:writeback true .
 
 nmm:albumTitle a rdf:Property ;
 	rdfs:label "Title" ;
@@ -283,7 +289,8 @@ nmm:genre a rdf:Property ;
 	rdfs:domain nfo:Media ;
 	rdfs:range xsd:string ;
 	tracker:fulltextIndexed true ;
-	tracker:weight 4 .
+	tracker:weight 4 ;
+	tracker:writeback true .
 
 nmm:director a rdf:Property ;
 	rdfs:label "Director" ;
