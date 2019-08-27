@@ -638,6 +638,10 @@ public abstract class Tracker.Sparql.Connection : Object {
 
 	/**
 	 * tracker_sparql_connection_query_statement:
+	 * @self: a #TrackerSparqlConnection
+	 * @sparql: the SPARQL query
+	 * @cancellable: a #GCancellable used to cancel the operation, or %NULL
+	 * @error: a #TrackerSparqlError or %NULL if no error occured
 	 *
 	 * Prepares the given @sparql as a #TrackerSparqlStatement.
 	 *

@@ -87,6 +87,7 @@ public abstract class Tracker.Sparql.Statement : Object {
 
 	/**
 	 * tracker_sparql_statement_execute:
+	 * @self: a #TrackerSparqlStatement
 	 * @cancellable: a #GCancellable used to cancel the operation
 	 * @error: #GError for error reporting.
 	 *
