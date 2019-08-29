@@ -131,4 +131,4 @@ interactive shell inside the sandbox. From here you can use debugging tools
 such as GDB.
 
 For more information about developing Tracker, look at
-https://wiki.gnome.org/Projects/Tracker.
+https://wiki.gnome.org/Projects/Tracker and HACKING.md.
