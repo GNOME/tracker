@@ -9,6 +9,12 @@
   <servicedir>@abs_top_builddir@/tests/services/</servicedir>
   <standard_session_servicedirs/>
 
+  <!-- This timeout is annoying when the service is being debugged. We rely on
+       the test harness to stop the test and kill the daemon if it does
+       get stuck.
+  -->
+  <limit name="service_start_timeout">1000000</limit>
+
   <policy context="default">
     <!-- Allow everything to be sent -->
     <allow send_destination="*"/>
@@ -17,5 +23,4 @@
     <!-- Allow anyone to own anything -->
     <allow own="*"/>
   </policy>
-
 </busconfig>
