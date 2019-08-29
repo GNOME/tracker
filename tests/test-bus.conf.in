@@ -7,6 +7,7 @@
   <listen>unix:tmpdir=./</listen>
 
   <servicedir>@abs_top_builddir@/tests/services/</servicedir>
+  <standard_session_servicedirs/>
 
   <!-- This timeout is annoying when the service is being debugged. We rely on
        the test harness to stop the test and kill the daemon if it does
