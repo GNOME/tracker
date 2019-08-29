@@ -381,12 +381,12 @@ tracker_dbus_request_end (TrackerDBusRequest *request,
 			 request->cd ? request->cd->binary : "",
 			 request->cd ? request->cd->pid : 0);
 	} else {
-		g_message ("---> [%d%s%s|%lu] Failed, %s",
-			   request->request_id,
-			   request->cd ? "|" : "",
-			   request->cd ? request->cd->binary : "",
-			   request->cd ? request->cd->pid : 0,
-			   error->message);
+		g_info ("---> [%d%s%s|%lu] Failed, %s",
+			    request->request_id,
+			    request->cd ? "|" : "",
+			    request->cd ? request->cd->binary : "",
+			    request->cd ? request->cd->pid : 0,
+			    error->message);
 	}
 
 	if (request->cd) {
