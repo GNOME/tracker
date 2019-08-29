@@ -1,13 +1,22 @@
-test_runner = configure_file(
-    input: 'test-runner.sh.in',
-    output: 'test-runner.sh',
-    configuration: conf)
-test_runner = find_program(test_runner)
+# Configure functional tests to run completely from source tree.
+testconf = configuration_data()
+
+config_json_full_path = join_paths(meson.current_build_dir(), 'configuration.json')
+dconf_profile_full_path = join_paths(meson.current_source_dir(), 'trackertest')
+
+testconf.set10('DISABLE_JOURNAL', not get_option('journal'))
+testconf.set('TEST_ONTOLOGIES_DIR', join_paths(meson.current_source_dir(), 'tests', 'functional-tests', 'test-ontologies'))
+testconf.set('TEST_DBUS_DAEMON_CONFIG_FILE', join_paths(build_root, 'tests', 'test-bus.conf'))
+testconf.set('TEST_DCONF_PROFILE', dconf_profile_full_path)
+testconf.set('TEST_DOMAIN_ONTOLOGY_RULE', tracker_uninstalled_domain_rule)
+testconf.set('TEST_GSETTINGS_SCHEMA_DIR', tracker_uninstalled_gsettings_schema_dir)
+testconf.set('TEST_ONTOLOGIES_DIR', tracker_uninstalled_nepomuk_ontologies_dir)
+testconf.set('TEST_LANGUAGE_STOP_WORDS_DIR', tracker_uninstalled_stop_words_dir)
 
 config_json = configure_file(
   input: 'configuration.json.in',
   output: 'configuration.json',
-  configuration: conf
+  configuration: testconf
 )
 
 functional_tests = [
@@ -26,28 +35,20 @@ functional_tests = [
   '17-ontology-changes',
 ]
 
-config_json_full_path = join_paths(meson.current_build_dir(), 'configuration.json')
-dconf_profile_full_path = join_paths(meson.current_source_dir(), 'trackertest')
-
 test_env = environment()
-test_env.set('DCONF_PROFILE', dconf_profile_full_path)
-test_env.set('GSETTINGS_SCHEMA_DIR', tracker_uninstalled_gsettings_schema_dir)
 
 tracker_uninstalled_testutils_dir = join_paths(meson.current_source_dir(), '..', '..', 'utils')
 test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
 
-test_env.set('TRACKER_DB_ONTOLOGIES_DIR', tracker_uninstalled_nepomuk_ontologies_dir)
-test_env.set('TRACKER_FUNCTIONAL_TEST_BUILD_DIR', build_root)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
-test_env.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', tracker_uninstalled_stop_words_dir)
-test_env.set('TRACKER_TEST_DOMAIN_ONTOLOGY_RULE', tracker_uninstalled_domain_rule)
 
 foreach t: functional_tests
-  test('functional-' + t, test_runner,
-    args: './' + t + '.py',
+  file = '@0@.py'.format(t)
+  test('functional-' + t, find_program(file),
     env: test_env,
     workdir: meson.current_source_dir(),
     timeout: 60)
 endforeach
 
-subdir('ipc')
+# FIXME
+#subdir('ipc')

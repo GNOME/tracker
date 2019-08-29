@@ -35,11 +35,19 @@ class CommonTrackerStoreTest (ut.TestCase):
 
     @classmethod
     def setUpClass(self):
-        extra_env = {'LC_COLLATE': 'en_GB.utf8'}
+        extra_env = cfg.test_environment()
+        extra_env['LC_COLLATE'] = 'en_GB.utf8'
 
-        self.tracker = trackertestutils.helpers.StoreHelper(cfg.TRACKER_STORE_PATH)
-        self.tracker.start(extra_env=extra_env)
+        self.sandbox = trackertestutils.helpers.TrackerDBusSandbox(
+            dbus_daemon_config_file=cfg.TEST_DBUS_DAEMON_CONFIG_FILE, extra_env=extra_env)
+        self.sandbox.start()
+
+        self.tracker = trackertestutils.helpers.StoreHelper(
+            self.sandbox.get_connection())
+        self.tracker.wait_for_ready()
+        self.tracker.start_watching_updates()
 
     @classmethod
     def tearDownClass(self):
-        self.tracker.stop()
+        self.tracker.stop_watching_updates()
+        self.sandbox.stop()

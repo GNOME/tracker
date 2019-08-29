@@ -18,10 +18,10 @@
 # 02110-1301, USA.
 #
 
-
 import json
 import logging
 import os
+import pathlib
 import sys
 
 
@@ -34,13 +34,19 @@ with open(os.environ['TRACKER_FUNCTIONAL_TEST_CONFIG']) as f:
     config = json.load(f)
 
 
-TOP_SRCDIR = os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
-TOP_BUILDDIR = os.environ['TRACKER_FUNCTIONAL_TEST_BUILD_DIR']
+TEST_DBUS_DAEMON_CONFIG_FILE = config['TEST_DBUS_DAEMON_CONFIG_FILE']
+TEST_ONTOLOGIES_DIR = str(pathlib.Path(__file__).parent.joinpath('test-ontologies'))
+disableJournal = bool(config['disableJournal'])
 
-TEST_ONTOLOGIES_DIR = config['TEST_ONTOLOGIES_DIR']
-TRACKER_STORE_PATH = config['TRACKER_STORE_PATH']
-disableJournal = (len(config['disableJournal']) == 0)
+
+def test_environment():
+    return {
+        'DCONF_PROFILE': config['TEST_DCONF_PROFILE'],
+        'GSETTINGS_SCHEMA_DIR': config['TEST_GSETTINGS_SCHEMA_DIR'],
+        'TRACKER_DB_ONTOLOGIES_DIR': config['TEST_ONTOLOGIES_DIR'],
+        'TRACKER_LANGUAGE_STOP_WORDS_DIR': config['TEST_LANGUAGE_STOP_WORDS_DIR'],
+        'TRACKER_TEST_DOMAIN_ONTOLOGY_RULE': config['TEST_DOMAIN_ONTOLOGY_RULE'],
+    }
 
 
 def get_environment_boolean(variable):
