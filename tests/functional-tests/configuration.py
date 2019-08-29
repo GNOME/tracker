@@ -39,13 +39,17 @@ TEST_ONTOLOGIES_DIR = str(pathlib.Path(__file__).parent.joinpath('test-ontologie
 disableJournal = bool(config['disableJournal'])
 
 
-def test_environment():
+def test_environment(tmpdir):
     return {
         'DCONF_PROFILE': config['TEST_DCONF_PROFILE'],
         'GSETTINGS_SCHEMA_DIR': config['TEST_GSETTINGS_SCHEMA_DIR'],
         'TRACKER_DB_ONTOLOGIES_DIR': config['TEST_ONTOLOGIES_DIR'],
         'TRACKER_LANGUAGE_STOP_WORDS_DIR': config['TEST_LANGUAGE_STOP_WORDS_DIR'],
         'TRACKER_TEST_DOMAIN_ONTOLOGY_RULE': config['TEST_DOMAIN_ONTOLOGY_RULE'],
+        'XDG_CACHE_HOME': os.path.join(tmpdir, 'cache'),
+        'XDG_CONFIG_HOME': os.path.join(tmpdir, 'config'),
+        'XDG_DATA_HOME': os.path.join(tmpdir, 'data'),
+        'XDG_RUNTIME_DIR': os.path.join(tmpdir, 'run'),
     }
 
 

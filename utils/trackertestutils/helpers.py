@@ -77,24 +77,28 @@ class StoreHelper():
         self.bus = dbus_connection
 
         self.resources = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.NONE, None,
+            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
             self.TRACKER_BUSNAME, self.TRACKER_OBJ_PATH, self.RESOURCES_IFACE)
 
         self.backup_iface = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.NONE, None,
+            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
             self.TRACKER_BUSNAME, self.TRACKER_BACKUP_OBJ_PATH, self.BACKUP_IFACE)
 
         self.stats_iface = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.NONE, None,
+            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
             self.TRACKER_BUSNAME, self.TRACKER_STATS_OBJ_PATH, self.STATS_IFACE)
 
         self.status_iface = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.NONE, None,
+            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
             self.TRACKER_BUSNAME, self.TRACKER_STATUS_OBJ_PATH, self.STATUS_IFACE)
 
-    def wait_for_ready(self):
+    def start_and_wait_for_ready(self):
+        # The daemon is autostarted as soon as a method is called.
+        #
+        # We set a big timeout to avoid interfering when a daemon is being
+        # interactively debugged.
         self.log.debug("Calling %s.Wait() method", self.STATUS_IFACE)
-        self.status_iface.Wait()
+        self.status_iface.call_sync('Wait', None, Gio.DBusCallFlags.NONE, 1000000, None)
         self.log.debug("Ready")
 
     def start_watching_updates(self):

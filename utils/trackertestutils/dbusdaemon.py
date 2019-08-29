@@ -107,6 +107,7 @@ class DBusDaemon:
                 dbus_command += ['--config-file=' + config_file]
             else:
                 dbus_command += ['--session']
+            log.debug("Running: %s", dbus_command)
             self.process = subprocess.Popen(
                 dbus_command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
