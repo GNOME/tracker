@@ -25,7 +25,8 @@ import subprocess
 import threading
 
 log = logging.getLogger(__name__)
-dbuslog = logging.getLogger(__name__ + '.dbus')
+dbus_stderr_log = logging.getLogger(__name__ + '.stderr')
+dbus_stdout_log = logging.getLogger(__name__ + '.stdout')
 
 
 class DaemonNotStartedError(Exception):
@@ -130,8 +131,8 @@ class DBusDaemon:
 
             # We must read from the pipes continuously, otherwise the daemon
             # process will block.
-            self._threads=[threading.Thread(target=self.pipe_to_log, args=(self.process.stdout, 'stdout'), daemon=True),
-                           threading.Thread(target=self.pipe_to_log, args=(self.process.stderr, 'stderr'), daemon=True)]
+            self._threads=[threading.Thread(target=self.pipe_to_log, args=(self.process.stdout, dbus_stdout_log), daemon=True),
+                           threading.Thread(target=self.pipe_to_log, args=(self.process.stderr, dbus_stdout_log), daemon=True)]
             self._threads[0].start()
             self._threads[1].start()
 
@@ -152,7 +153,7 @@ class DBusDaemon:
             signal.signal(signal.SIGTERM, self._previous_sigterm_handler)
             self._previous_sigterm_handler = None
 
-    def pipe_to_log(self, pipe, source):
+    def pipe_to_log(self, pipe, dbuslog):
         """This function processes the output from our dbus-daemon instance."""
         while True:
             line_raw = pipe.readline()

@@ -65,6 +65,22 @@ def get_environment_boolean(variable):
         raise RuntimeError('Unexpected value for %s: %s' %
                            (variable, value))
 
+def get_environment_int(variable, default=0):
+    try:
+        return int(os.environ.get(variable))
+    except (TypeError, ValueError):
+        return default
+
 
 if get_environment_boolean('TRACKER_TESTS_VERBOSE'):
+    # Output all logs to stderr
     logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+else:
+    # Output some messages from D-Bus daemon to stderr by default. In practice,
+    # nothing should be output here unless the environment contains
+    # G_MESSAGES_DEBUG= and/or TRACKER_VERBOSITY=1 or more.
+    handler = logging.StreamHandler(stream=sys.stderr)
+    handler.addFilter(logging.Filter('trackertestutils.dbusdaemon.stderr'))
+    handler.addFilter(logging.Filter('trackertestutils.dbusdaemon.stdout'))
+    logging.basicConfig(level=logging.INFO, handlers=[handler],
+                        format='%(message)s')

@@ -437,6 +437,7 @@ class TrackerDBusSandbox:
     def start(self):
         env = os.environ
         env.update(self.extra_env)
+        env['G_MESSAGES_PREFIXED'] = 'all'
 
         logging.info("Starting D-Bus daemon for sandbox.")
         logging.debug("Added environment variables: %s", self.extra_env)
