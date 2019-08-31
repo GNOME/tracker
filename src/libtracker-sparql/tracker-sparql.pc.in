@@ -6,6 +6,7 @@ libexecdir=@libexecdir@
 datadir=@datadir@
 tracker_store=@tracker_store@
 ontologies_dir=@ontologies_dir@
+dbus_services_dir=@dbus_services_dir@
 domain_ontologies_dir=@domain_ontologies_dir@
 
 Name: tracker-sparql
