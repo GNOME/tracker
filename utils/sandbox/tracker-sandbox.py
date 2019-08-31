@@ -158,6 +158,9 @@ def environment_set(index_location, prefix, verbosity=0, dbus_config=None):
     # Important, other subprocesses must use our new bus
     os.environ['DBUS_SESSION_BUS_ADDRESS'] = dbus.get_address()
 
+    # So tests can detect if they are run under sandbox or not.
+    os.environ['TRACKER_SANDBOX'] = '1'
+
     return dbus
 
 
