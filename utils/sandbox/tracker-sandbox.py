@@ -117,7 +117,7 @@ def environment_set_and_add_path(env, prefix, suffix):
     os.environ[env] = full
 
 
-def environment_set(index_location, prefix, verbosity=0):
+def environment_set(index_location, prefix, verbosity=0, dbus_config=None):
     # Environment
     index_location = os.path.abspath(index_location)
     prefix = os.path.abspath(os.path.expanduser(prefix))
@@ -152,7 +152,7 @@ def environment_set(index_location, prefix, verbosity=0):
         os.environ['XDG_RUNTIME_DIR'], 'dbus-session')
 
     dbus = trackertestutils.dbusdaemon.DBusDaemon(dbus_session_file)
-    dbus.start_if_needed()
+    dbus.start_if_needed(config_file=dbus_config)
 
     # Important, other subprocesses must use our new bus
     os.environ['DBUS_SESSION_BUS_ADDRESS'] = dbus.get_address()
@@ -235,6 +235,8 @@ def argument_parser():
                              "only show messages logged by Tracker daemons.")
     parser.add_argument('--debug-sandbox', action='store_true',
                         help="show debugging info from tracker-sandbox")
+    parser.add_argument('--dbus-config', metavar='FILE',
+                        help="use a custom config file for the private D-Bus daemon")
     parser.add_argument('-v', '--verbosity', default='0',
                         choices=['0', '1', '2', '3', 'errors', 'minimal', 'detailed', 'debug'],
                         help="show debugging info from Tracker processes")
@@ -294,7 +296,7 @@ if __name__ == "__main__":
     verbosity = verbosity_as_int(args.verbosity)
 
     # Set up environment variables and foo needed to get started.
-    dbus = environment_set(args.index_location, args.prefix, verbosity)
+    dbus = environment_set(args.index_location, args.prefix, verbosity, dbus_config=args.dbus_config)
     config_set()
 
     link_to_mime_data()
