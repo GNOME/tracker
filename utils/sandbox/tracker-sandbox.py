@@ -29,10 +29,11 @@ import locale
 import logging
 import os
 import shlex
+import shutil
 import signal
 import subprocess
 import sys
-import threading
+import tempfile
 
 from gi.repository import GLib
 
@@ -245,6 +246,9 @@ def argument_parser():
     parser.add_argument('-i', '--index', metavar='DIR', type=str,
                         default=default_index_location, dest='index_location',
                         help=f"directory to the index (default={default_index_location})")
+    parser.add_argument('--index-tmpdir', action='store_true',
+                        help="create index in a temporary directory and "
+                             "delete it on exit (useful for automated testing)")
     parser.add_argument('command', type=str, nargs='*', help="Command to run inside the shell")
 
     return parser
@@ -295,8 +299,18 @@ if __name__ == "__main__":
 
     verbosity = verbosity_as_int(args.verbosity)
 
+    index_location = None
+    index_tmpdir = None
+
+    if args.index_location != default_index_location and args.index_tmpdir:
+        raise RuntimeError("The --index-tmpdir flag is enabled, but --index= was also passed.")
+    if args.index_tmpdir:
+        index_location = index_tmpdir = tempfile.mkdtemp(prefix='tracker-sandbox')
+    else:
+        index_location = args.index_location
+
     # Set up environment variables and foo needed to get started.
-    dbus = environment_set(args.index_location, args.prefix, verbosity, dbus_config=args.dbus_config)
+    dbus = environment_set(index_location, args.prefix, verbosity, dbus_config=args.dbus_config)
     config_set()
 
     link_to_mime_data()
@@ -313,3 +327,5 @@ if __name__ == "__main__":
             os.system(shell)
     finally:
         environment_unset(dbus)
+        if index_tmpdir:
+            shutil.rmtree(index_tmpdir, ignore_errors=True)
