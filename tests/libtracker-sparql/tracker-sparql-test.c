@@ -32,6 +32,7 @@ typedef struct {
 
 ESCAPE_TEST_DATA test_data []  = {
 	{ "SELECT \"a\"", "SELECT \\\"a\\\"" },
+	{ "SELECT \'a\'", "SELECT \\\'a\\\'" },
 	{ "SELECT ?u \t \n \r \b \f", "SELECT ?u \\t \\n \\r \\b \\f" },
 	{ NULL, NULL }
 };

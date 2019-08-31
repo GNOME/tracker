@@ -56,7 +56,7 @@ namespace Tracker.Sparql {
 		char *p = (char*) literal;
 
 		while (*p != '\0') {
-			size_t len = Posix.strcspn ((string) p, "\t\n\r\b\f\"\\");
+			size_t len = Posix.strcspn ((string) p, "\t\n\r\b\f\'\"\\");
 			str.append_len ((string) p, (long) len);
 			p += len;
 
@@ -75,6 +75,9 @@ namespace Tracker.Sparql {
 				break;
 			case '\f':
 				str.append ("\\f");
+				break;
+			case '\'':
+				str.append ("\\'");
 				break;
 			case '"':
 				str.append ("\\\"");
