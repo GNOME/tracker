@@ -78,7 +78,6 @@ tracker:referenceSource a rdf:Property ;
         rdfs:label "Source" ;
         rdfs:comment "Source of the external reference (eg. 'Musicbrainz')" ;
         nrl:maxCardinality 1 ;
-        rdfs:subPropertyOf nie:identifier ;
         rdfs:domain tracker:ExternalReference ;
         rdfs:range rdfs:Resource .
 
