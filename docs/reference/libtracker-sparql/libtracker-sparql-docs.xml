@@ -53,6 +53,7 @@
   <xi:include href="private-store.xml"/>
   <xi:include href="examples.xml"/>
   <xi:include href="migrating-1to2.xml"/>
+  <xi:include href="migrating-2to3.xml"/>
 
   <index id="api-index-full">
     <title>Index</title>

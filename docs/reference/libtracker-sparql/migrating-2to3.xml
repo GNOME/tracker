@@ -1,0 +1,71 @@
+<?xml version='1.0'?>
+
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'">
+]>
+<chapter id="tracker-migrating-2-to-3">
+  <title>Migrating from libtracker-sparql 2.x to 3.0</title>
+
+  <para>
+    Tracker 3.0 is a new major version, containing some large
+    syntax and conceptual changes.
+  </para>
+
+  <section>
+    <title>Graph semantics</title>
+    <para>
+      One of the big features in 3.0 is full SPARQL 1.1 syntax
+      support. Besides the missing syntax additions, one conceptually
+      big change is the handling of graphs in the database.
+    </para>
+    <para>
+      In 2.x, there was a minimum concept of graphs, but it didn't
+      represent what is defined in the standard. You could attribute
+      a graph to a data triple, but a given triple could only reside
+      in one graph at a time. In other words, this yields the wrong
+      result:
+    </para>
+    <programlisting>
+INSERT { GRAPH &lt;A&gt; { &lt;foo&gt; nie:title 'Hello' } }
+INSERT { GRAPH &lt;B&gt; { &lt;foo&gt; nie:title 'Hola' } }
+
+# We expect 2 rows, 2.x returns 1.
+SELECT ?g ?t { GRAPH ?g { &lt;foo&gt; nie:title ?t } }
+    </programlisting>
+    <para>
+      3.0 implements the graph semantics as defined in the SPARQL 1.1
+      documents. So the SELECT query would return both graphs.
+    </para>
+    <para>
+      3.0 also honors properly the concept of «Unnamed graph». This
+      graph is always used whenever no graph is specified, and always
+      skipped if a GRAPH is requested or defined, e.g.:
+    </para>
+    <programlisting>
+# Inserts element into the unnamed graph
+INSERT { &lt;foo&gt; a nfo:FileDataObject }
+
+# Inserts element into named graph A
+INSERT { GRAPH &lt;A&gt; { &lt;bar&gt; a nfo:FileDataObject } }
+
+# Queries from all named graphs, A in this case
+SELECT ?g ?s { GRAPH ?g { ?s a nfo:FileDataObject } }
+
+# Queries the default graph, which includes the unnamed graph
+SELECT ?s { ?s a nfo:FileDataObject }
+    </programlisting>
+    <para>
+      3.0 defines the default graph to be the union of the unnamed
+      graph plus all known named graphs. So the last query in the
+      example above would return results from both the unnamed graph
+      and graph A. This behavior can be influenced with FROM/FROM NAMED
+      syntax (also newly handled in 3.0)
+    </para>
+    <para>
+      In contrast, 2.x does not distinguish between named and unnamed
+      graphs. The first SELECT query would return a row for the unnamed
+      graph, with ?g being NULL.
+    </para>
+  </section>
+</chapter>
