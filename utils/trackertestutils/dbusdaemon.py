@@ -35,17 +35,9 @@ class DaemonNotStartedError(Exception):
 
 
 class DBusDaemon:
-    """The private D-Bus instance that provides the sandbox's session bus.
+    """The private D-Bus instance that provides the sandbox's session bus."""
 
-    We support reading and writing the session information to a file. This
-    means that if the user runs two sandbox instances on the same data
-    directory at the same time, they will share the same message bus.
-
-    """
-
-    def __init__(self, session_file=None):
-        self.session_file = session_file
-        self.existing_session = False
+    def __init__(self):
         self.process = None
 
         self.address = None
@@ -55,19 +47,6 @@ class DBusDaemon:
         self._previous_sigterm_handler = None
 
         self._threads = []
-
-        if session_file:
-            try:
-                self.address, self.pid = self.read_session_file(session_file)
-                self.existing_session = True
-            except FileNotFoundError:
-                log.debug("No existing D-Bus session file was found.")
-
-    def get_session_file(self):
-        """Returns the path to the session file if we created it, or None."""
-        if self.existing_session:
-            return None
-        return self.session_file
 
     def get_address(self):
         if self.address is None:
@@ -79,65 +58,35 @@ class DBusDaemon:
             raise DaemonNotStartedError()
         return self._gdbus_connection
 
-    @staticmethod
-    def read_session_file(session_file):
-        with open(session_file, 'r') as f:
-            content = f.read()
+    def start(self, config_file=None, env=None):
+        dbus_command = ['dbus-daemon', '--print-address=1', '--print-pid=1']
+        if config_file:
+            dbus_command += ['--config-file=' + config_file]
+        else:
+            dbus_command += ['--session']
+        log.debug("Running: %s", dbus_command)
+        self.process = subprocess.Popen(
+            dbus_command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        self._previous_sigterm_handler = signal.signal(
+            signal.SIGTERM, self._sigterm_handler)
 
         try:
-            address = content.splitlines()[0]
-            pid = int(content.splitlines()[1])
+            self.address = self.process.stdout.readline().strip().decode('ascii')
+            self.pid = int(self.process.stdout.readline().strip().decode('ascii'))
         except ValueError:
-            raise RuntimeError(f"D-Bus session file {session_file} is not valid. "
-                                "Remove this file to start a new session.")
+            error = self.process.stderr.read().strip().decode('unicode-escape')
+            raise RuntimeError(f"Failed to start D-Bus daemon.\n{error}")
 
-        return address, pid
+        log.debug("Using new D-Bus session with address '%s' with PID %d",
+                    self.address, self.pid)
 
-    @staticmethod
-    def write_session_file(session_file, address, pid):
-        os.makedirs(os.path.dirname(session_file), exist_ok=True)
-
-        content = '%s\n%s' % (address, pid)
-        with open(session_file, 'w') as f:
-            f.write(content)
-
-    def start_if_needed(self, config_file=None, env=None):
-        if self.existing_session:
-            log.debug('Using existing D-Bus session from file "%s" with address "%s"'
-                      ' with PID %d' % (self.session_file, self.address, self.pid))
-        else:
-            dbus_command = ['dbus-daemon', '--print-address=1', '--print-pid=1']
-            if config_file:
-                dbus_command += ['--config-file=' + config_file]
-            else:
-                dbus_command += ['--session']
-            log.debug("Running: %s", dbus_command)
-            self.process = subprocess.Popen(
-                dbus_command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-            self._previous_sigterm_handler = signal.signal(
-                signal.SIGTERM, self._sigterm_handler)
-
-            try:
-                self.address = self.process.stdout.readline().strip().decode('ascii')
-                self.pid = int(self.process.stdout.readline().strip().decode('ascii'))
-            except ValueError:
-                error = self.process.stderr.read().strip().decode('unicode-escape')
-                raise RuntimeError(f"Failed to start D-Bus daemon.\n{error}")
-
-            log.debug("Using new D-Bus session with address '%s' with PID %d",
-                      self.address, self.pid)
-
-            if self.session_file:
-                self.write_session_file(self.session_file, self.address, self.pid)
-                log.debug("Wrote D-Bus session file at %s", self.session_file)
-
-            # We must read from the pipes continuously, otherwise the daemon
-            # process will block.
-            self._threads=[threading.Thread(target=self.pipe_to_log, args=(self.process.stdout, dbus_stdout_log), daemon=True),
-                           threading.Thread(target=self.pipe_to_log, args=(self.process.stderr, dbus_stdout_log), daemon=True)]
-            self._threads[0].start()
-            self._threads[1].start()
+        # We must read from the pipes continuously, otherwise the daemon
+        # process will block.
+        self._threads=[threading.Thread(target=self.pipe_to_log, args=(self.process.stdout, dbus_stdout_log), daemon=True),
+                        threading.Thread(target=self.pipe_to_log, args=(self.process.stderr, dbus_stdout_log), daemon=True)]
+        self._threads[0].start()
+        self._threads[1].start()
 
         self._gdbus_connection = Gio.DBusConnection.new_for_address_sync(
             self.address,
