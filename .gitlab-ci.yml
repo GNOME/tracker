@@ -7,7 +7,7 @@ test-fedora-latest:
 
   script:
     - su tracker -c 'mkdir build'
-    - su tracker -c 'cd build; meson .. -Db_lto=true'
+    - su tracker -c 'cd build; meson .. -Db_lto=true -Db_coverage=true'
     - su tracker -c 'cd build; ninja'
     - |
       # Remove the many "CI_" variables from the environment. Meson dumps the
