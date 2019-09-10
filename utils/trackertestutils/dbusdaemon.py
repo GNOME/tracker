@@ -17,6 +17,7 @@
 
 
 from gi.repository import Gio
+from gi.repository import GLib
 
 import logging
 import os
@@ -192,6 +193,29 @@ class DBusDaemon:
         self.stop()
 
     def ping_sync(self):
+        """Call the daemon Ping() method to check that it is alive."""
         self._gdbus_connection.call_sync(
             'org.freedesktop.DBus', '/', 'org.freedesktop.DBus', 'GetId',
             None, None, Gio.DBusCallFlags.NONE, 10000, None)
+
+    def list_names_sync(self):
+        """Get the name of every client connected to the bus."""
+        conn = self.get_connection()
+        result = conn.call_sync('org.freedesktop.DBus',
+                                '/org/freedesktop/DBus',
+                                'org.freedesktop.DBus', 'ListNames', None,
+                                GLib.VariantType('(as)'),
+                                Gio.DBusCallFlags.NONE, -1, None)
+        return result[0]
+
+    def get_connection_unix_process_id_sync(self, name):
+        """Get the process ID for one of the names connected to the bus."""
+        conn = self.get_connection()
+        result = conn.call_sync('org.freedesktop.DBus',
+                                '/org/freedesktop/DBus',
+                                'org.freedesktop.DBus',
+                                'GetConnectionUnixProcessID',
+                                GLib.Variant('(s)', [name]),
+                                GLib.VariantType('(u)'),
+                                Gio.DBusCallFlags.NONE, -1, None)
+        return result[0]
