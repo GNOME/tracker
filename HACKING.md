@@ -25,6 +25,11 @@ Tracker processes. Anything written directly to stdout, for example by
 `g_print()` or by the dbus-daemon itself, will not be displayed unless
 `TRACKER_TESTS_VERBOSE` is set.
 
+When working with GitLab CI, you can use the
+[Run Pipeline dialog](https://gitlab.gnome.org/GNOME/tracker/pipelines/new)
+to set the values of these variables and increase the verbosity of the tests in
+CI.
+
 # Attaching a debugger to Tracker daemons
 
 Tracker daemons are not started directly. Instead they are started by the D-Bus
