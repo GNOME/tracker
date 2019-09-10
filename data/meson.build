@@ -6,7 +6,7 @@ tracker_gsettings_schemas = files([
 ])
 
 foreach schema : tracker_gsettings_schemas
-  schemas = configure_file(
+  configure_file(
     input: schema,
     output: '@PLAINNAME@',
     copy: true,
@@ -35,6 +35,7 @@ custom_target('compile-schemas',
   output: 'gschemas.compiled',
   command: [glib_compile_schemas, meson.current_build_dir()],
   build_by_default: true,
-  depends: tracker_store_settings_enums)
+  depends: tracker_store_settings_enums,
+  depend_files: tracker_gsettings_schemas)
 
 tracker_uninstalled_gsettings_schema_dir = meson.current_build_dir()
