@@ -1,9 +1,29 @@
+variables:
+  # These can be used to see verbose log output from the functional-tests.
+  # See HACKING.md for more information.
+  TRACKER_VERBOSITY: "0"
+  TRACKER_TESTS_VERBOSE: "no"
+
+  # This can be used when debugging test failures that only occur within GitLab CI.
+  MESON_TEST_EXTRA_ARGS: ""
+
 stages:
   - test
 
 test-fedora-latest:
   stage: test
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
+
+  before_script:
+    - |
+      echo "Test suite settings:"
+      echo
+      echo "  TRACKER_VERBOSITY: ${TRACKER_VERBOSITY}"
+      echo "  TRACKER_TESTS_VERBOSE: ${TRACKER_TESTS_VERBOSE}"
+      echo "  MESON_TEST_EXTRA_ARGS: ${MESON_TEST_EXTRA_ARGS}"
+      echo
+      echo "These values can be set at https://gitlab.gnome.org/GNOME/tracker/pipelines/new"
+      echo
 
   script:
     - su tracker -c 'mkdir build'
@@ -15,7 +35,7 @@ test-fedora-latest:
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
 
-      su tracker -c 'cd build; meson test --print-errorlogs'
+      su tracker -c 'cd build; meson test --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
 
   artifacts:
     when: always
