@@ -175,10 +175,11 @@ class Helper:
             # Seems that it didn't even start...
             return
 
-        if self.process.poll() == None:
+        if self.process_startup_timeout != 0:
             GLib.source_remove(self.process_startup_timeout)
             self.process_startup_timeout = 0
 
+        if self.process.poll() == None:
             self.process.terminate()
             returncode = self.process.wait(timeout=self.SHUTDOWN_TIMEOUT * 1000)
             if returncode is None:

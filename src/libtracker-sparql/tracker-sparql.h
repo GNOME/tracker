@@ -22,6 +22,8 @@
 
 #define __LIBTRACKER_SPARQL_INSIDE__
 
+#include <libtracker-sparql/tracker-endpoint.h>
+#include <libtracker-sparql/tracker-endpoint-dbus.h>
 #include <libtracker-sparql/tracker-version.h>
 #include <libtracker-sparql/tracker-ontologies.h>
 #include <libtracker-sparql/tracker-resource.h>

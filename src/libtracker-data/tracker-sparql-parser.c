@@ -598,6 +598,7 @@ tracker_parser_state_iterate (TrackerParserState   *state,
 		child = tracker_parser_state_lookup_child (state);
 
 		if (child) {
+			tracker_parser_state_skip_whitespace (state, parser);
 			tracker_parser_state_push (state, child);
 			return TRUE;
 		}
@@ -611,6 +612,7 @@ tracker_parser_state_iterate (TrackerParserState   *state,
 
 		if (tracker_parser_state_next_child (state, TRUE)) {
 			child = tracker_parser_state_lookup_child (state);
+			tracker_parser_state_skip_whitespace (state, parser);
 			tracker_parser_state_push (state, child);
 			return TRUE;
 		}
@@ -640,6 +642,7 @@ tracker_parser_state_rollback (TrackerParserState   *state,
 			if (tracker_parser_state_next_child (state, FALSE)) {
 				tracker_node_tree_reset (state->node_tree, discard);
 				child = tracker_parser_state_lookup_child (state);
+				tracker_parser_state_skip_whitespace (state, parser);
 				tracker_parser_state_push (state, child);
 				return TRUE;
 			}
@@ -678,11 +681,9 @@ static gboolean
 tracker_grammar_parser_read (TrackerGrammarParser *parser,
                              TrackerParserState   *state)
 {
-
 	while (state->rule_states.len > 0) {
 		const TrackerGrammarRule *rule;
 
-		tracker_parser_state_skip_whitespace (state, parser);
 		rule = tracker_parser_state_peek_current_rule (state);
 
 		if (tracker_grammar_parser_apply_rule (parser, state, rule)) {

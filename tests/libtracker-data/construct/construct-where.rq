@@ -1,0 +1,1 @@
+CONSTRUCT WHERE { ?u a example:A ; example:name ?l }

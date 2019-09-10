@@ -1,0 +1,5 @@
+SELECT ?g ?s WHERE {
+	GRAPH ?g {
+		?s a example:A
+	}
+}

@@ -72,6 +72,8 @@ tracker_sparql_buffer_finalize (GObject *object)
 
 	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (object));
 
+	g_object_unref (priv->connection);
+
 	if (priv->flush_timeout_id != 0) {
 		g_source_remove (priv->flush_timeout_id);
 	}

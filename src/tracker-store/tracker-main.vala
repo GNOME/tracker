@@ -306,18 +306,6 @@ License which can be viewed at:
 			return 1;
 		}
 
-		int chunk_size_mb = db_config.journal_chunk_size;
-		size_t chunk_size = (size_t) ((size_t) chunk_size_mb * (size_t) 1024 * (size_t) 1024);
-		string rotate_to = db_config.journal_rotate_destination;
-
-		if (rotate_to == "") {
-			rotate_to = null;
-		}
-
-		bool do_rotating = (chunk_size_mb != -1);
-
-		Tracker.DBJournal.set_rotating (do_rotating, chunk_size, rotate_to);
-
 		try {
 			connection = new Tracker.Direct.Connection (Sparql.ConnectionFlags.NONE,
 			                                            cache_location,
@@ -379,9 +367,6 @@ License which can be viewed at:
 
 		config.disconnect (config_verbosity_id);
 		config = null;
-
-		/* This will free rotate_to up in the journal code */
-		Tracker.DBJournal.set_rotating ((chunk_size_mb != -1), chunk_size, null);
 
 		print ("\nOK\n\n");
 

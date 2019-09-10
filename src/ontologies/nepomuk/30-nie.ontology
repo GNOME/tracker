@@ -97,8 +97,7 @@ nie:plainTextContent a rdf:Property ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:string ;
 	tracker:fulltextIndexed true ;
-	tracker:weight 2 ;
-	tracker:forceJournal false .
+	tracker:weight 2 .
 
 nie:legal a rdf:Property ;
 	rdfs:comment "A common superproperty for all properties that point at legal information about an Information Element";

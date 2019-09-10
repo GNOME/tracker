@@ -151,7 +151,7 @@ update_thread_func (gpointer data,
 		destroy_notify = (GDestroyNotify) g_variant_unref;
 		break;
 	case TASK_TYPE_TURTLE:
-		tracker_data_load_turtle_file (tracker_data, task_data->data.turtle_file, &error);
+		tracker_data_load_turtle_file (tracker_data, task_data->data.turtle_file, NULL, &error);
 		break;
 	}
 
@@ -261,7 +261,7 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 
 	priv->data_manager = tracker_data_manager_new (db_flags | default_flags, priv->store,
 	                                               priv->journal, priv->ontology,
-	                                               FALSE, FALSE, 100, 100);
+	                                               FALSE, 100, 100);
 	if (!g_initable_init (G_INITABLE (priv->data_manager), cancellable, error)) {
 		g_clear_object (&priv->data_manager);
 		return FALSE;
@@ -350,8 +350,10 @@ tracker_direct_connection_finalize (GObject *object)
 	if (priv->select_pool)
 		g_thread_pool_free (priv->select_pool, TRUE, FALSE);
 
-	if (priv->data_manager)
+	if (priv->data_manager) {
 		tracker_data_manager_shutdown (priv->data_manager);
+		g_clear_object (&priv->data_manager);
+	}
 
 	g_clear_object (&priv->store);
 	g_clear_object (&priv->journal);
@@ -574,8 +576,11 @@ update_array_async_thread_func (GTask        *task,
 	if (!error) {
 		g_task_return_pointer (task, errors,
 		                       (GDestroyNotify) g_ptr_array_unref);
+		g_object_unref (task);
 		return;
 	}
+
+	g_error_free (error);
 
 	/* Slow path, perform updates one by one */
 	for (i = 0; updates[i]; i++) {
@@ -589,6 +594,7 @@ update_array_async_thread_func (GTask        *task,
 
 	g_task_return_pointer (task, errors,
 	                       (GDestroyNotify) g_ptr_array_unref);
+	g_object_unref (task);
 }
 
 static void
@@ -696,7 +702,7 @@ tracker_direct_connection_load (TrackerSparqlConnection  *self,
 
 	g_mutex_lock (&priv->mutex);
 	data = tracker_data_manager_get_data (priv->data_manager);
-	tracker_data_load_turtle_file (data, file, error);
+	tracker_data_load_turtle_file (data, file, NULL, error);
 	g_mutex_unlock (&priv->mutex);
 }
 

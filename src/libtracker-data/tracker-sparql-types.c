@@ -33,13 +33,13 @@ enum {
 /* Helper structs */
 static TrackerDataTable *
 tracker_data_table_new (const gchar *tablename,
-			const gchar *subject,
+                        const gchar *graph,
                         gint         idx)
 {
 	TrackerDataTable *table;
 
 	table = g_new0 (TrackerDataTable, 1);
-	table->subject = g_strdup (subject);
+	table->graph = g_strdup (graph);
 	table->sql_db_tablename = g_strdup (tablename);
 	table->sql_query_tablename = g_strdup_printf ("%s%d", tablename, idx);
 
@@ -49,7 +49,7 @@ tracker_data_table_new (const gchar *tablename,
 static void
 tracker_data_table_free (TrackerDataTable *table)
 {
-	g_free (table->subject);
+	g_free (table->graph);
 	g_free (table->sql_db_tablename);
 	g_free (table->sql_query_tablename);
 	g_free (table);
@@ -60,6 +60,13 @@ tracker_data_table_set_predicate_variable (TrackerDataTable *table,
                                            gboolean          is_variable)
 {
 	table->predicate_variable = is_variable;
+}
+
+void
+tracker_data_table_set_predicate_path (TrackerDataTable *table,
+                                       gboolean          is_path)
+{
+	table->predicate_path = is_path;
 }
 
 static TrackerVariable *
@@ -141,10 +148,13 @@ tracker_variable_equal (gconstpointer data1,
 
 void
 tracker_token_literal_init (TrackerToken *token,
-                            const gchar  *literal)
+                            const gchar  *literal,
+                            gssize        len)
 {
+	if (len < 0)
+		len = strlen (literal) + 1;
 	token->type = TOKEN_TYPE_LITERAL;
-	token->content.literal = g_strdup (literal);
+	token->content.literal = g_bytes_new (literal, len);
 }
 
 void
@@ -175,7 +185,7 @@ void
 tracker_token_unset (TrackerToken *token)
 {
 	if (token->type == TOKEN_TYPE_LITERAL)
-		g_clear_pointer (&token->content.literal, g_free);
+		g_clear_pointer (&token->content.literal, g_bytes_unref);
 	else if (token->type == TOKEN_TYPE_PARAMETER)
 		g_clear_pointer (&token->content.parameter, g_free);
 	token->type = TOKEN_TYPE_NONE;
@@ -187,7 +197,7 @@ tracker_token_is_empty (TrackerToken *token)
 	return token->type == TOKEN_TYPE_NONE;
 }
 
-const gchar *
+GBytes *
 tracker_token_get_literal (TrackerToken *token)
 {
 	if (token->type == TOKEN_TYPE_LITERAL)
@@ -223,7 +233,7 @@ const gchar *
 tracker_token_get_idstring (TrackerToken *token)
 {
 	if (token->type == TOKEN_TYPE_LITERAL)
-		return token->content.literal;
+		return g_bytes_get_data (token->content.literal, NULL);
 	else if (token->type == TOKEN_TYPE_VARIABLE)
 		return token->content.var->sql_expression;
 	else if (token->type == TOKEN_TYPE_PATH)
@@ -391,7 +401,7 @@ tracker_literal_binding_finalize (GObject *object)
 {
 	TrackerLiteralBinding *binding = TRACKER_LITERAL_BINDING (object);
 
-	g_free (binding->literal);
+	g_bytes_unref (binding->bytes);
 
 	G_OBJECT_CLASS (tracker_literal_binding_parent_class)->finalize (object);
 }
@@ -410,14 +420,15 @@ tracker_literal_binding_init (TrackerLiteralBinding *binding)
 }
 
 TrackerBinding *
-tracker_literal_binding_new (const gchar      *literal,
+tracker_literal_binding_new (GBytes           *bytes,
 			     TrackerDataTable *table)
 {
 	TrackerBinding *binding;
 
 	binding = g_object_new (TRACKER_TYPE_LITERAL_BINDING, NULL);
 	binding->table = table;
-	TRACKER_LITERAL_BINDING (binding)->literal = g_strdup (literal);
+	TRACKER_LITERAL_BINDING (binding)->bytes = g_bytes_ref (bytes);
+	TRACKER_LITERAL_BINDING (binding)->literal = g_bytes_get_data (bytes, NULL);
 
 	return binding;
 }
@@ -523,14 +534,17 @@ tracker_path_element_free (TrackerPathElement *elem)
 }
 
 TrackerPathElement *
-tracker_path_element_property_new (TrackerProperty *prop)
+tracker_path_element_property_new (TrackerPathOperator  op,
+                                   TrackerProperty     *prop)
 {
 	TrackerPathElement *elem;
 
 	g_return_val_if_fail (TRACKER_IS_PROPERTY (prop), NULL);
+	g_return_val_if_fail (op == TRACKER_PATH_OPERATOR_NONE ||
+	                      op == TRACKER_PATH_OPERATOR_NEGATED, NULL);
 
 	elem = g_new0 (TrackerPathElement, 1);
-	elem->op = TRACKER_PATH_OPERATOR_NONE;
+	elem->op = op;
 	elem->type = tracker_property_get_data_type (prop);
 	elem->data.property = prop;
 
@@ -544,11 +558,13 @@ tracker_path_element_operator_new (TrackerPathOperator  op,
 {
 	TrackerPathElement *elem;
 
-	g_return_val_if_fail (op != TRACKER_PATH_OPERATOR_NONE, NULL);
+	g_return_val_if_fail (op != TRACKER_PATH_OPERATOR_NONE &&
+	                      op != TRACKER_PATH_OPERATOR_NEGATED, NULL);
 	g_return_val_if_fail (child1 != NULL, NULL);
 	g_return_val_if_fail (child2 == NULL ||
 	                      op == TRACKER_PATH_OPERATOR_SEQUENCE ||
-	                      op == TRACKER_PATH_OPERATOR_ALTERNATIVE, NULL);
+	                      op == TRACKER_PATH_OPERATOR_ALTERNATIVE ||
+	                      op == TRACKER_PATH_OPERATOR_INTERSECTION, NULL);
 
 	elem = g_new0 (TrackerPathElement, 1);
 	elem->op = op;
@@ -586,6 +602,12 @@ tracker_path_element_set_unique_name (TrackerPathElement *elem,
 		break;
 	case TRACKER_PATH_OPERATOR_ONEORMORE:
 		name = "oneormore";
+		break;
+	case TRACKER_PATH_OPERATOR_NEGATED:
+		name = "neg";
+		break;
+	case TRACKER_PATH_OPERATOR_INTERSECTION:
+		name = "intersect";
 		break;
 	default:
 		g_assert_not_reached ();
@@ -775,11 +797,18 @@ void
 tracker_select_context_add_literal_binding (TrackerSelectContext  *context,
                                             TrackerLiteralBinding *binding)
 {
+	gint i;
+
 	/* Literal bindings are reserved to the root context */
 	g_assert (TRACKER_CONTEXT (context)->parent == NULL);
 
 	if (!context->literal_bindings)
 		context->literal_bindings = g_ptr_array_new_with_free_func (g_object_unref);
+
+	for (i = 0; i < context->literal_bindings->len; i++) {
+		if (binding == g_ptr_array_index (context->literal_bindings, i))
+			return;
+	}
 
 	g_ptr_array_add (context->literal_bindings, g_object_ref (binding));
 }
@@ -877,7 +906,7 @@ tracker_triple_context_new (void)
 
 TrackerDataTable *
 tracker_triple_context_lookup_table (TrackerTripleContext *context,
-                                     const gchar          *subject,
+                                     const gchar          *graph,
                                      const gchar          *tablename)
 {
 	TrackerDataTable *table = NULL;
@@ -888,7 +917,7 @@ tracker_triple_context_lookup_table (TrackerTripleContext *context,
 
 		table = g_ptr_array_index (context->sql_tables, i);
 
-		if (g_strcmp0 (table->subject, subject) == 0 &&
+		if (g_strcmp0 (table->graph, graph) == 0 &&
 		    g_strcmp0 (table->sql_db_tablename, tablename) == 0)
 			return table;
 	}
@@ -898,12 +927,12 @@ tracker_triple_context_lookup_table (TrackerTripleContext *context,
 
 TrackerDataTable *
 tracker_triple_context_add_table (TrackerTripleContext *context,
-                                  const gchar          *subject,
+                                  const gchar          *graph,
                                   const gchar          *tablename)
 {
 	TrackerDataTable *table;
 
-	table = tracker_data_table_new (tablename, subject, ++context->table_counter);
+	table = tracker_data_table_new (tablename, graph, ++context->table_counter);
 	g_ptr_array_add (context->sql_tables, table);
 
 	return table;

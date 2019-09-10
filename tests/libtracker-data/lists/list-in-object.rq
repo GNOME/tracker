@@ -1,0 +1,2 @@
+SELECT example:label(?e) { ?u example:label 'root' ; example:list ?l .
+                           ?l rdf:rest*/rdf:first ?e }

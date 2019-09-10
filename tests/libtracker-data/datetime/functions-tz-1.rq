@@ -1,0 +1,6 @@
+SELECT TZ (?v) ?comment
+WHERE {
+	example:y a example:A ;
+	   example:p ?v
+        OPTIONAL { example:y rdfs:comment ?comment }
+}

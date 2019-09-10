@@ -29,6 +29,8 @@
 #include "tracker-sparql-grammar.h"
 #include "tracker-collation.h"
 #include "tracker-db-interface-sqlite.h"
+#include "tracker-sparql-query.h"
+#include "tracker-utils.h"
 
 #define TRACKER_NS "http://www.tracker-project.org/ontologies/tracker#"
 #define RDF_NS "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -46,6 +48,12 @@ enum {
 	TIME_FORMAT_HOURS
 };
 
+enum {
+	GRAPH_OP_DEFAULT,
+	GRAPH_OP_NAMED,
+	GRAPH_OP_ALL
+};
+
 static inline gboolean _call_rule_func (TrackerSparql            *sparql,
                                         TrackerGrammarNamedRule   rule,
                                         GError                  **error);
@@ -57,7 +65,8 @@ static gboolean helper_translate_date (TrackerSparql  *sparql,
 static gboolean helper_translate_time (TrackerSparql  *sparql,
                                        guint           format,
                                        GError        **error);
-static TrackerDBStatement * prepare_query (TrackerDBInterface    *iface,
+static TrackerDBStatement * prepare_query (TrackerSparql         *sparql,
+                                           TrackerDBInterface    *iface,
                                            TrackerStringBuilder  *str,
                                            GPtrArray             *literals,
                                            GHashTable            *parameters,
@@ -65,6 +74,8 @@ static TrackerDBStatement * prepare_query (TrackerDBInterface    *iface,
                                            GError               **error);
 static inline TrackerVariable * _ensure_variable (TrackerSparql *sparql,
                                                   const gchar   *name);
+static void convert_expression_to_string (TrackerSparql       *sparql,
+                                          TrackerPropertyType  type);
 
 #define _raise(v,s,sub)   \
 	G_STMT_START { \
@@ -73,8 +84,6 @@ static inline TrackerVariable * _ensure_variable (TrackerSparql *sparql,
 	             s " '%s'", sub); \
 	return FALSE; \
 	} G_STMT_END
-
-#define _unimplemented(s) _raise(UNSUPPORTED, "Unsupported syntax", s)
 
 /* Added for control flow simplicity. All processing will be stopped
  * whenever any rule sets an error and returns FALSE.
@@ -94,6 +103,7 @@ enum
 	TRACKER_SPARQL_TYPE_DELETE,
 	TRACKER_SPARQL_TYPE_INSERT,
 	TRACKER_SPARQL_TYPE_UPDATE,
+	TRACKER_SPARQL_TYPE_CONSTRUCT,
 };
 
 struct _TrackerSparql
@@ -113,6 +123,7 @@ struct _TrackerSparql
 
 	GPtrArray *var_names;
 	GArray *var_types;
+	GHashTable *cached_bindings;
 
 	GVariantBuilder *blank_nodes;
 	GHashTable *solution_var_map;
@@ -121,12 +132,18 @@ struct _TrackerSparql
 	gboolean cacheable;
 
 	GHashTable *parameters;
+	GHashTable *union_views;
+
+	GPtrArray *anon_graphs;
+	GPtrArray *named_graphs;
+	gchar *base;
 
 	struct {
 		TrackerContext *context;
 		TrackerContext *select_context;
 		TrackerStringBuilder *sql;
 		TrackerStringBuilder *with_clauses;
+		TrackerStringBuilder *construct_query;
 		TrackerParserNode *node;
 		TrackerParserNode *prev_node;
 
@@ -140,10 +157,13 @@ struct _TrackerSparql
 		TrackerPathElement *path;
 
 		GHashTable *blank_node_map;
+		TrackerVariableBinding *as_in_group_by;
 
 		const gchar *expression_list_separator;
 		TrackerPropertyType expression_type;
 		guint type;
+		guint graph_op;
+		gint values_idx;
 
 		gboolean convert_to_string;
 	} current_state;
@@ -159,6 +179,8 @@ tracker_sparql_finalize (GObject *object)
 	g_object_unref (sparql->data_manager);
 	g_hash_table_destroy (sparql->prefix_map);
 	g_hash_table_destroy (sparql->parameters);
+	g_hash_table_destroy (sparql->cached_bindings);
+	g_clear_pointer (&sparql->union_views, g_hash_table_unref);
 
 	if (sparql->sql)
 		tracker_string_builder_free (sparql->sql);
@@ -172,9 +194,15 @@ tracker_sparql_finalize (GObject *object)
 	tracker_token_unset (&sparql->current_state.subject);
 	tracker_token_unset (&sparql->current_state.predicate);
 	tracker_token_unset (&sparql->current_state.object);
+	g_clear_pointer (&sparql->current_state.construct_query,
+	                 tracker_string_builder_free);
+	g_clear_object (&sparql->current_state.as_in_group_by);
 
+	g_ptr_array_unref (sparql->named_graphs);
+	g_ptr_array_unref (sparql->anon_graphs);
 	g_ptr_array_unref (sparql->var_names);
 	g_array_unref (sparql->var_types);
+	g_free (sparql->base);
 
 	if (sparql->blank_nodes)
 		g_variant_builder_unref (sparql->blank_nodes);
@@ -231,6 +259,16 @@ tracker_sparql_swap_current_expression_list_separator (TrackerSparql *sparql,
 	sparql->current_state.expression_list_separator = sep;
 
 	return old;
+}
+
+static inline gchar *
+tracker_sparql_expand_base (TrackerSparql *sparql,
+                            const gchar   *term)
+{
+	if (sparql->base)
+		return tracker_resolve_relative_uri (sparql->base, term);
+	else
+		return g_strdup (term);
 }
 
 static inline gchar *
@@ -479,6 +517,7 @@ _append_literal_sql (TrackerSparql         *sparql,
 			break;
 		case TRACKER_PROPERTY_TYPE_DATETIME:
 		case TRACKER_PROPERTY_TYPE_STRING:
+		case TRACKER_PROPERTY_TYPE_LANGSTRING:
 		case TRACKER_PROPERTY_TYPE_RESOURCE:
 			escaped = _escape_sql_string (binding->literal);
 			_append_string (sparql, escaped);
@@ -506,7 +545,8 @@ _append_literal_sql (TrackerSparql         *sparql,
 
 	if (TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_RESOURCE)
 		_append_string_printf (sparql, "), 0) ");
-	if (TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_STRING)
+	if (TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_STRING ||
+	    TRACKER_BINDING (binding)->data_type == TRACKER_PROPERTY_TYPE_LANGSTRING)
 		_append_string (sparql, "COLLATE " TRACKER_COLLATION_NAME " ");
 }
 
@@ -514,25 +554,8 @@ static void
 _append_variable_sql (TrackerSparql   *sparql,
                       TrackerVariable *variable)
 {
-	TrackerBinding *binding;
-
-	binding = TRACKER_BINDING (tracker_variable_get_sample_binding (variable));
-
-	if (binding &&
-	    binding->data_type == TRACKER_PROPERTY_TYPE_DATETIME) {
-		TrackerVariable *local_time;
-		gchar *name;
-
-		name = g_strdup_printf ("%s:local", variable->name);
-		local_time = _ensure_variable (sparql, name);
-		g_free (name);
-
-		_append_string_printf (sparql, "%s ",
-				       tracker_variable_get_sql_expression (local_time));
-	} else {
-		_append_string_printf (sparql, "%s ",
-				       tracker_variable_get_sql_expression (variable));
-	}
+	_append_string_printf (sparql, "%s ",
+	                       tracker_variable_get_sql_expression (variable));
 }
 
 static void
@@ -540,6 +563,7 @@ _prepend_path_element (TrackerSparql      *sparql,
                        TrackerPathElement *path_elem)
 {
 	TrackerStringBuilder *old;
+	gchar *table_name, *graph_column;
 
 	old = tracker_sparql_swap_builder (sparql, sparql->current_state.with_clauses);
 
@@ -551,25 +575,48 @@ _prepend_path_element (TrackerSparql      *sparql,
 	switch (path_elem->op) {
 	case TRACKER_PATH_OPERATOR_NONE:
 		/* A simple property */
+		if (tracker_token_is_empty (&sparql->current_state.graph)) {
+			table_name = g_strdup_printf ("\"unionGraph_%s\"",
+			                              tracker_property_get_table_name (path_elem->data.property));
+			graph_column = g_strdup ("graph");
+
+			if (sparql->union_views) {
+				g_hash_table_add (sparql->union_views,
+				                  g_strdup (tracker_property_get_table_name (path_elem->data.property)));
+			}
+		} else {
+			const gchar *graph;
+
+			graph = tracker_token_get_idstring (&sparql->current_state.graph);
+			table_name = g_strdup_printf ("\"%s\".\"%s\"", graph,
+			                              tracker_property_get_table_name (path_elem->data.property));
+			graph_column = g_strdup_printf ("%d",
+							tracker_data_manager_find_graph (sparql->data_manager, graph));
+		}
+
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, \"%s\", \"%s:graph\" FROM \"%s\") ",
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, \"%s\", %s, %d, %d FROM %s) ",
 		                       path_elem->name,
 		                       tracker_property_get_name (path_elem->data.property),
-		                       tracker_property_get_name (path_elem->data.property),
-		                       tracker_property_get_table_name (path_elem->data.property));
+		                       graph_column,
+		                       TRACKER_PROPERTY_TYPE_RESOURCE,
+		                       tracker_property_get_data_type (path_elem->data.property),
+		                       table_name);
+		g_free (table_name);
+		g_free (graph_column);
 		break;
 	case TRACKER_PATH_OPERATOR_INVERSE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT value, ID, graph FROM \"%s\" WHERE value IS NOT NULL) ",
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT value, ID, graph, value_type, ID_type FROM \"%s\" WHERE value IS NOT NULL) ",
 		                       path_elem->name,
 		                       path_elem->data.composite.child1->name);
 		break;
 	case TRACKER_PATH_OPERATOR_SEQUENCE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT a.ID, b.value, b.graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT a.ID, b.value, b.graph, a.ID_type, b.value_type "
 		                       "FROM \"%s\" AS a, \"%s\" AS b "
 		                       "WHERE a.value = b.ID) ",
 		                       path_elem->name,
@@ -578,11 +625,11 @@ _prepend_path_element (TrackerSparql      *sparql,
 		break;
 	case TRACKER_PATH_OPERATOR_ALTERNATIVE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, value, graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, value, graph, ID_type, value_type "
 		                       "FROM \"%s\" "
-		                       "UNION ALL "
-		                       "SELECT ID, value, graph "
+		                       "UNION "
+		                       "SELECT ID, value, graph, ID_type, value_type "
 		                       "FROM \"%s\") ",
 		                       path_elem->name,
 		                       path_elem->data.composite.child1->name,
@@ -590,11 +637,11 @@ _prepend_path_element (TrackerSparql      *sparql,
 		break;
 	case TRACKER_PATH_OPERATOR_ZEROORMORE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, ID, graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, ID, graph, ID_type, ID_type "
 		                       "FROM \"%s\" "
 		                       "UNION "
-		                       "SELECT a.ID, b.value, b.graph "
+		                       "SELECT a.ID, b.value, b.graph, a.ID_type, b.value_type "
 		                       "FROM \"%s\" AS a, \"%s\" AS b "
 		                       "WHERE b.ID = a.value) ",
 		                       path_elem->name,
@@ -604,11 +651,11 @@ _prepend_path_element (TrackerSparql      *sparql,
 		break;
 	case TRACKER_PATH_OPERATOR_ONEORMORE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, value, graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, value, graph, ID_type, value_type "
 				       "FROM \"%s\" "
 				       "UNION "
-				       "SELECT a.ID, b.value, b.graph "
+				       "SELECT a.ID, b.value, b.graph, a.ID_type, b.value_type "
 				       "FROM \"%s\" AS a, \"%s\" AS b "
 				       "WHERE b.ID = a.value) ",
 				       path_elem->name,
@@ -618,15 +665,49 @@ _prepend_path_element (TrackerSparql      *sparql,
 		break;
 	case TRACKER_PATH_OPERATOR_ZEROORONE:
 		_append_string_printf (sparql,
-		                       "\"%s\" (ID, value, graph) AS "
-		                       "(SELECT ID, ID, graph "
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, ID, graph, ID_type, ID_type "
 				       "FROM \"%s\" "
-				       "UNION ALL "
-				       "SELECT ID, value, graph "
+				       "UNION "
+				       "SELECT ID, value, graph, ID_type, value_type "
 				       "FROM \"%s\") ",
 				       path_elem->name,
 				       path_elem->data.composite.child1->name,
 				       path_elem->data.composite.child1->name);
+		break;
+	case TRACKER_PATH_OPERATOR_NEGATED:
+		_append_string_printf (sparql,
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT subject AS ID, object AS value, graph, %d, object_type "
+		                       "FROM \"tracker_triples\" "
+		                       "WHERE predicate != %d ",
+		                       path_elem->name,
+		                       TRACKER_PROPERTY_TYPE_RESOURCE,
+		                       tracker_property_get_id (path_elem->data.property));
+
+		if (!tracker_token_is_empty (&sparql->current_state.graph)) {
+			const gchar *graph;
+
+			graph = tracker_token_get_idstring (&sparql->current_state.graph);
+			_append_string_printf (sparql,
+					       "AND graph = %d",
+					       tracker_data_manager_find_graph (sparql->data_manager, graph));
+		}
+
+		_append_string (sparql, ") ");
+		g_clear_pointer (&sparql->union_views, g_hash_table_unref);
+		break;
+	case TRACKER_PATH_OPERATOR_INTERSECTION:
+		_append_string_printf (sparql,
+		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, value, graph, ID_type, value_type "
+				       "FROM \"%s\" "
+				       "INTERSECT "
+				       "SELECT ID, value, graph, ID_type, value_type "
+				       "FROM \"%s\") ",
+				       path_elem->name,
+				       path_elem->data.composite.child1->name,
+				       path_elem->data.composite.child2->name);
 		break;
 	}
 
@@ -680,9 +761,17 @@ _extract_node_string (TrackerParserNode *node,
 			add_start = subtract_end = 3;
 			compress = TRUE;
 			break;
-		case TERMINAL_TYPE_IRIREF:
+		case TERMINAL_TYPE_IRIREF: {
+			gchar *unexpanded;
+
 			add_start = subtract_end = 1;
+			unexpanded = g_strndup (terminal_start + add_start,
+			                        terminal_end - terminal_start -
+			                        add_start - subtract_end);
+			str = tracker_sparql_expand_base (sparql, unexpanded);
+			g_free (unexpanded);
 			break;
+		}
 		case TERMINAL_TYPE_BLANK_NODE_LABEL:
 			add_start = 2;
 			break;
@@ -733,21 +822,34 @@ _convert_terminal (TrackerSparql *sparql)
 {
 	const TrackerGrammarRule *rule;
 	TrackerBinding *binding;
+	gboolean is_parameter;
+	GHashTable *ht;
 	gchar *str;
 
 	str = _dup_last_string (sparql);
 	g_assert (str != NULL);
 
 	rule = tracker_parser_node_get_rule (sparql->current_state.prev_node);
+	is_parameter = tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL,
+	                                          TERMINAL_TYPE_PARAMETERIZED_VAR);
+	ht = is_parameter ? sparql->parameters : sparql->cached_bindings;
 
-	if (tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR)) {
+	binding = g_hash_table_lookup (ht, str);
+	if (binding)
+		return g_object_ref (binding);
+
+	if (is_parameter) {
 		binding = tracker_parameter_binding_new (str, NULL);
 	} else {
-		binding = tracker_literal_binding_new (str, NULL);
+		GBytes *bytes;
+
+		bytes = g_bytes_new (str, strlen (str) + 1);
+		binding = tracker_literal_binding_new (bytes, NULL);
 		tracker_binding_set_data_type (binding, sparql->current_state.expression_type);
+		g_bytes_unref (bytes);
 	}
 
-	g_free (str);
+	g_hash_table_insert (ht, str, g_object_ref (binding));
 
 	return binding;
 }
@@ -834,7 +936,8 @@ _init_token (TrackerToken      *token,
 
 	if (tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL, TERMINAL_TYPE_VAR1) ||
 	    tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL, TERMINAL_TYPE_VAR2)) {
-		if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT) {
+		if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT ||
+		    sparql->current_state.type == TRACKER_SPARQL_TYPE_CONSTRUCT) {
 			var = _ensure_variable (sparql, str);
 			tracker_token_variable_init (token, var);
 		} else {
@@ -842,12 +945,12 @@ _init_token (TrackerToken      *token,
 
 			value = g_hash_table_lookup (sparql->solution_var_map, str);
 			if (value)
-				tracker_token_literal_init (token, value);
+				tracker_token_literal_init (token, value, -1);
 		}
 	} else if (tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR)) {
 		tracker_token_parameter_init (token, str);
 	} else {
-		tracker_token_literal_init (token, str);
+		tracker_token_literal_init (token, str, -1);
 	}
 
 	g_free (str);
@@ -1013,6 +1116,37 @@ introspect_fts_snippet (TrackerSparql         *sparql,
 	return TRUE;
 }
 
+static TrackerVariable *
+reserve_subvariable (TrackerSparql   *sparql,
+                     TrackerVariable *var,
+                     const gchar     *suffix)
+{
+	TrackerVariable *subvar;
+	gchar *name;
+
+	name = g_strdup_printf ("%s:%s", var->name, suffix);
+	subvar = _ensure_variable (sparql, name);
+	g_free (name);
+
+	return subvar;
+}
+
+static TrackerVariable *
+lookup_subvariable (TrackerSparql   *sparql,
+                    TrackerVariable *var,
+                    const gchar     *suffix)
+{
+	TrackerVariable *subvar;
+	gchar *name;
+
+	name = g_strdup_printf ("%s:%s", var->name, suffix);
+	subvar = tracker_select_context_lookup_variable (TRACKER_SELECT_CONTEXT (sparql->context),
+	                                                 name);
+	g_free (name);
+
+	return subvar;
+}
+
 static gboolean
 _add_quad (TrackerSparql  *sparql,
            TrackerToken   *graph,
@@ -1029,34 +1163,38 @@ _add_quad (TrackerSparql  *sparql,
 	TrackerProperty *property = NULL;
 	TrackerClass *subject_type = NULL;
 	gboolean new_table = FALSE, is_fts = FALSE, is_rdf_type = FALSE;
+	const gchar *graph_db = NULL;
 
 	triple_context = TRACKER_TRIPLE_CONTEXT (sparql->current_state.context);
 	ontologies = tracker_data_manager_get_ontologies (sparql->data_manager);
+
+	if (tracker_token_get_literal (graph))
+		graph_db = tracker_token_get_idstring (graph);
 
 	if (tracker_token_get_literal (predicate)) {
 		gboolean share_table = TRUE;
 		const gchar *db_table;
 
 		property = tracker_ontologies_get_property_by_uri (ontologies,
-		                                                   tracker_token_get_literal (predicate));
+		                                                   tracker_token_get_idstring(predicate));
 
-		if (tracker_token_is_empty (graph) &&
-		    !tracker_token_get_variable (object) &&
-		    g_strcmp0 (tracker_token_get_literal (predicate), RDF_NS "type") == 0) {
+		if (tracker_token_get_literal (object) &&
+		    g_strcmp0 (tracker_token_get_idstring (predicate), RDF_NS "type") == 0) {
 			/* rdf:type query */
 			subject_type = tracker_ontologies_get_class_by_uri (ontologies,
-			                                                    tracker_token_get_literal (object));
+			                                                    tracker_token_get_idstring (object));
 			if (!subject_type) {
 				g_set_error (error, TRACKER_SPARQL_ERROR,
 					     TRACKER_SPARQL_ERROR_UNKNOWN_CLASS,
 					     "Unknown class '%s'",
-				             tracker_token_get_literal (object));
+				             tracker_token_get_idstring (object));
 				return FALSE;
 			}
 
 			is_rdf_type = TRUE;
 			db_table = tracker_class_get_name (subject_type);
-		} else if (g_strcmp0 (tracker_token_get_literal (predicate), FTS_NS "match") == 0) {
+			share_table = !tracker_token_is_empty (graph);
+		} else if (g_strcmp0 (tracker_token_get_idstring (predicate), FTS_NS "match") == 0) {
 			db_table = "fts5";
 			share_table = FALSE;
 			is_fts = TRUE;
@@ -1099,27 +1237,30 @@ _add_quad (TrackerSparql  *sparql,
 
 			/* We can never share the table with multiple triples for
 			 * multi value properties as a property may consist of multiple rows.
+			 * We can't either do that for graph unrestricted queries
+			 * since we need the self-joins to query across all graphs.
 			 */
-			share_table = !tracker_property_get_multiple_values (property);
+			share_table = (!tracker_property_get_multiple_values (property) &&
+			               !tracker_token_is_empty (graph));
 
 			subject_type = tracker_property_get_domain (property);
 		} else if (property == NULL) {
 			g_set_error (error, TRACKER_SPARQL_ERROR,
 				     TRACKER_SPARQL_ERROR_UNKNOWN_PROPERTY,
 				     "Unknown property '%s'",
-			             tracker_token_get_literal (predicate));
+			             tracker_token_get_idstring (predicate));
 			return FALSE;
 		}
 
 		if (share_table) {
 			table = tracker_triple_context_lookup_table (triple_context,
-								     tracker_token_get_idstring (subject),
+			                                             graph_db,
 								     db_table);
 		}
 
 		if (!table) {
 			table = tracker_triple_context_add_table (triple_context,
-								  tracker_token_get_idstring (subject),
+			                                          graph_db,
 								  db_table);
 			new_table = TRUE;
 		}
@@ -1127,7 +1268,8 @@ _add_quad (TrackerSparql  *sparql,
 		/* Variable in predicate */
 		variable = tracker_token_get_variable (predicate);
 		table = tracker_triple_context_add_table (triple_context,
-		                                          variable->name, variable->name);
+		                                          graph_db,
+		                                          variable->name);
 		tracker_data_table_set_predicate_variable (table, TRUE);
 		new_table = TRUE;
 
@@ -1137,11 +1279,47 @@ _add_quad (TrackerSparql  *sparql,
 		tracker_binding_set_db_column_name (binding, "predicate");
 		_add_binding (sparql, binding);
 		g_object_unref (binding);
+
+		/* If object is variable, add another variable to hold its type */
+		if (tracker_token_get_variable (object)) {
+			TrackerVariable *type_var;
+
+			type_var = reserve_subvariable (sparql, tracker_token_get_variable (object), "type");
+
+			binding = tracker_variable_binding_new (type_var, NULL, table);
+			tracker_binding_set_db_column_name (binding, "object_type");
+			_add_binding (sparql, binding);
+			g_object_unref (binding);
+		}
 	} else if (tracker_token_get_path (predicate)) {
 		table = tracker_triple_context_add_table (triple_context,
-		                                          "value",
+		                                          graph_db,
 		                                          tracker_token_get_idstring (predicate));
+		tracker_data_table_set_predicate_path (table, TRUE);
 		new_table = TRUE;
+
+		/* If subject/object are variable, add variables to hold their type */
+		if (tracker_token_get_variable (subject)) {
+			TrackerVariable *type_var;
+
+			type_var = reserve_subvariable (sparql, tracker_token_get_variable (subject), "type");
+
+			binding = tracker_variable_binding_new (type_var, NULL, table);
+			tracker_binding_set_db_column_name (binding, "ID_type");
+			_add_binding (sparql, binding);
+			g_object_unref (binding);
+		}
+
+		if (tracker_token_get_variable (object)) {
+			TrackerVariable *type_var;
+
+			type_var = reserve_subvariable (sparql, tracker_token_get_variable (object), "type");
+
+			binding = tracker_variable_binding_new (type_var, NULL, table);
+			tracker_binding_set_db_column_name (binding, "value_type");
+			_add_binding (sparql, binding);
+			g_object_unref (binding);
+		}
 	} else {
 		/* The parser disallows parameter predicates */
 		g_assert_not_reached ();
@@ -1167,6 +1345,15 @@ _add_quad (TrackerSparql  *sparql,
 		g_object_unref (binding);
 	}
 
+	if (tracker_token_get_variable (graph)) {
+		variable = tracker_token_get_variable (graph);
+		binding = tracker_variable_binding_new (variable, NULL, table);
+		tracker_binding_set_data_type (binding, TRACKER_PROPERTY_TYPE_RESOURCE);
+		tracker_binding_set_db_column_name (binding, "graph");
+		_add_binding (sparql, binding);
+		g_object_unref (binding);
+	}
+
 	if (is_rdf_type) {
 		/* The type binding is already implicit in the data table */
 		return TRUE;
@@ -1177,9 +1364,10 @@ _add_quad (TrackerSparql  *sparql,
 		binding = tracker_variable_binding_new (variable,
 							property ? tracker_property_get_range (property) : NULL,
 							table);
+		if (!tracker_variable_has_bindings (variable))
+			tracker_variable_set_sample_binding (variable, TRACKER_VARIABLE_BINDING (binding));
 
 		if (tracker_token_get_variable (predicate)) {
-			tracker_binding_set_data_type (binding, TRACKER_PROPERTY_TYPE_STRING);
 			tracker_binding_set_db_column_name (binding, "object");
 			tracker_variable_binding_set_nullable (TRACKER_VARIABLE_BINDING (binding), TRUE);
 		} else if (tracker_token_get_path (predicate)) {
@@ -1199,31 +1387,6 @@ _add_quad (TrackerSparql  *sparql,
 				 * in any column except the ID column
 				 */
 				tracker_variable_binding_set_nullable (TRACKER_VARIABLE_BINDING (binding), TRUE);
-			}
-
-			if (tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME) {
-				gchar *date_var, *sql_expression, *local_date, *local_time;
-				TrackerBinding *local_time_binding;
-
-				/* Merge localDate/localTime into $var:local */
-				date_var = g_strdup_printf ("%s:local", variable->name);
-				variable = _ensure_variable (sparql, date_var);
-
-				local_date = tracker_binding_get_extra_sql_expression (binding, "localDate");
-				local_time = tracker_binding_get_extra_sql_expression (binding, "localTime");
-				sql_expression = g_strdup_printf ("((%s * 24 * 3600) + %s)",
-								  local_date, local_time);
-
-				local_time_binding = tracker_variable_binding_new (variable, NULL, NULL);
-				tracker_binding_set_sql_expression (local_time_binding,
-				                                    sql_expression);
-				_add_binding (sparql, local_time_binding);
-				g_object_unref (local_time_binding);
-
-				g_free (sql_expression);
-				g_free (local_date);
-				g_free (local_time);
-				g_free (date_var);
 			}
 		}
 
@@ -1304,38 +1467,175 @@ _add_quad (TrackerSparql  *sparql,
 		g_object_unref (binding);
 	}
 
-	if (!tracker_token_is_empty (graph)) {
-		if (tracker_token_get_variable (graph)) {
-			variable = tracker_token_get_variable (graph);
-			binding = tracker_variable_binding_new (variable, NULL, table);
-			tracker_variable_binding_set_nullable (TRACKER_VARIABLE_BINDING (binding), TRUE);
-		} else if (tracker_token_get_literal (graph)) {
-			binding = tracker_literal_binding_new (tracker_token_get_literal (graph), table);
-		} else if (tracker_token_get_parameter (graph)) {
-			binding = tracker_parameter_binding_new (tracker_token_get_parameter (graph), table);
-		} else {
-			g_assert_not_reached ();
+	return TRUE;
+}
+
+static void
+add_construct_variable (TrackerSparql   *sparql,
+                        TrackerVariable *var)
+{
+	TrackerPropertyType prop_type;
+	TrackerStringBuilder *str, *old;
+
+	str = _append_placeholder (sparql);
+	old = tracker_sparql_swap_builder (sparql, str);
+
+	_append_variable_sql (sparql, var);
+
+	prop_type = TRACKER_BINDING (tracker_variable_get_sample_binding (var))->data_type;
+	convert_expression_to_string (sparql, prop_type);
+
+	tracker_sparql_swap_builder (sparql, old);
+}
+
+static gboolean
+_construct_clause (TrackerSparql  *sparql,
+                   TrackerToken   *graph,
+                   TrackerToken   *subject,
+                   TrackerToken   *predicate,
+                   TrackerToken   *object,
+                   GError        **error)
+{
+	gchar *construct_query;
+
+	if (!tracker_string_builder_is_empty (sparql->current_state.sql))
+		_append_string (sparql, "UNION ALL ");
+
+	_append_string (sparql, "SELECT ");
+
+	if (tracker_token_get_variable (subject) &&
+	    tracker_variable_get_sample_binding (tracker_token_get_variable (subject)))
+		add_construct_variable (sparql, tracker_token_get_variable (subject));
+	else
+		_append_string_printf (sparql, "\"%s\" ", tracker_token_get_idstring (subject));
+
+	_append_string (sparql, "AS subject, ");
+
+	if (tracker_token_get_variable (predicate) &&
+	    tracker_variable_get_sample_binding (tracker_token_get_variable (predicate)))
+		add_construct_variable (sparql, tracker_token_get_variable (predicate));
+	else
+		_append_string_printf (sparql, "\"%s\" ", tracker_token_get_idstring (predicate));
+
+	_append_string (sparql, "AS predicate, ");
+
+	if (tracker_token_get_variable (object) &&
+	    tracker_variable_get_sample_binding (tracker_token_get_variable (object)))
+		add_construct_variable (sparql, tracker_token_get_variable (object));
+	else
+		_append_string_printf (sparql, "\"%s\" ", tracker_token_get_idstring (object));
+
+	_append_string (sparql, "AS object ");
+
+	if (tracker_token_get_variable (subject) ||
+	    tracker_token_get_variable (predicate) ||
+	    tracker_token_get_variable (object)) {
+		gboolean first = TRUE;
+		_append_string (sparql, "FROM (SELECT DISTINCT ");
+
+		if (tracker_token_get_variable (subject)) {
+			_append_variable_sql (sparql, tracker_token_get_variable (subject));
+			first = FALSE;
 		}
 
-		tracker_binding_set_data_type (binding, TRACKER_PROPERTY_TYPE_RESOURCE);
-
-		if (tracker_token_get_variable (predicate) ||
-		    tracker_token_get_path (predicate)) {
-			tracker_binding_set_db_column_name (binding, "graph");
-		} else {
-			gchar *column_name;
-
-			g_assert (property != NULL);
-			column_name = g_strdup_printf ("%s:graph", tracker_property_get_name (property));
-			tracker_binding_set_db_column_name (binding, column_name);
-			g_free (column_name);
+		if (tracker_token_get_variable (predicate)) {
+			if (!first)
+				_append_string (sparql, ", ");
+			_append_variable_sql (sparql, tracker_token_get_variable (predicate));
+			first = FALSE;
 		}
 
-		_add_binding (sparql, binding);
-		g_object_unref (binding);
+		if (tracker_token_get_variable (object)) {
+			if (!first)
+				_append_string (sparql, ", ");
+			_append_variable_sql (sparql, tracker_token_get_variable (object));
+		}
+
+		_append_string (sparql, " FROM (");
+
+		construct_query = tracker_string_builder_to_string (sparql->current_state.construct_query);
+		_append_string_printf (sparql, "%s", construct_query);
+		g_free (construct_query);
+
+		_append_string (sparql, ")) ");
 	}
 
 	return TRUE;
+}
+
+static gboolean
+tracker_sparql_apply_quad (TrackerSparql  *sparql,
+                           GError        **error)
+{
+	GError *inner_error = NULL;
+
+	switch (sparql->current_state.type) {
+	case TRACKER_SPARQL_TYPE_SELECT:
+		_add_quad (sparql,
+		           &sparql->current_state.graph,
+		           &sparql->current_state.subject,
+		           &sparql->current_state.predicate,
+		           &sparql->current_state.object,
+		           &inner_error);
+		break;
+	case TRACKER_SPARQL_TYPE_CONSTRUCT:
+		_construct_clause (sparql,
+		                   &sparql->current_state.graph,
+		                   &sparql->current_state.subject,
+		                   &sparql->current_state.predicate,
+		                   &sparql->current_state.object,
+		                   &inner_error);
+		break;
+	case TRACKER_SPARQL_TYPE_INSERT:
+		tracker_data_insert_statement (tracker_data_manager_get_data (sparql->data_manager),
+		                               tracker_token_get_idstring (&sparql->current_state.graph),
+		                               tracker_token_get_idstring (&sparql->current_state.subject),
+		                               tracker_token_get_idstring (&sparql->current_state.predicate),
+		                               tracker_token_get_literal (&sparql->current_state.object),
+		                               &inner_error);
+		break;
+	case TRACKER_SPARQL_TYPE_DELETE:
+		tracker_data_delete_statement (tracker_data_manager_get_data (sparql->data_manager),
+		                               tracker_token_get_idstring (&sparql->current_state.graph),
+		                               tracker_token_get_idstring (&sparql->current_state.subject),
+		                               tracker_token_get_idstring (&sparql->current_state.predicate),
+		                               tracker_token_get_literal (&sparql->current_state.object),
+		                               &inner_error);
+		break;
+	case TRACKER_SPARQL_TYPE_UPDATE:
+		tracker_data_update_statement (tracker_data_manager_get_data (sparql->data_manager),
+		                               tracker_token_get_idstring (&sparql->current_state.graph),
+		                               tracker_token_get_idstring (&sparql->current_state.subject),
+		                               tracker_token_get_idstring (&sparql->current_state.predicate),
+		                               tracker_token_get_literal (&sparql->current_state.object),
+		                               &inner_error);
+		break;
+	default:
+		g_assert_not_reached ();
+	}
+
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static void
+tracker_sparql_init_string_builder (TrackerSparql *sparql)
+{
+	TrackerStringBuilder *str;
+
+	g_clear_pointer (&sparql->sql, tracker_string_builder_free);
+	sparql->sql = sparql->current_state.sql = tracker_string_builder_new ();
+	sparql->current_state.with_clauses = _prepend_placeholder (sparql);
+
+	/* Ensure the select clause goes to a different substring than the
+	 * WITH clauses, so _prepend_string() works as expected.
+	 */
+	str = _append_placeholder (sparql);
+	tracker_sparql_swap_builder (sparql, str);
 }
 
 static TrackerParserNode *
@@ -1362,6 +1662,40 @@ _skip_rule (TrackerSparql *sparql,
 	return current;
 }
 
+static TrackerPropertyType
+rdf_type_to_property_type (const gchar *type)
+{
+	if (g_str_equal (type, XSD_NS "boolean")) {
+		return TRACKER_PROPERTY_TYPE_BOOLEAN;
+	} else if (g_str_equal (type, XSD_NS "integer") ||
+	           g_str_equal (type, XSD_NS "nonPositiveInteger") ||
+	           g_str_equal (type, XSD_NS "negativeInteger") ||
+	           g_str_equal (type, XSD_NS "long") ||
+	           g_str_equal (type, XSD_NS "int") ||
+	           g_str_equal (type, XSD_NS "short") ||
+	           g_str_equal (type, XSD_NS "byte") ||
+	           g_str_equal (type, XSD_NS "nonNegativeInteger") ||
+	           g_str_equal (type, XSD_NS "unsignedLong") ||
+	           g_str_equal (type, XSD_NS "unsignedInt") ||
+	           g_str_equal (type, XSD_NS "unsignedShort") ||
+	           g_str_equal (type, XSD_NS "unsignedByte") ||
+	           g_str_equal (type, XSD_NS "positiveInteger")) {
+		return TRACKER_PROPERTY_TYPE_INTEGER;
+	} else if (g_str_equal (type, XSD_NS "double")) {
+		return TRACKER_PROPERTY_TYPE_DOUBLE;
+	} else if (g_str_equal (type, XSD_NS "date")) {
+		return TRACKER_PROPERTY_TYPE_DATE;
+	} else if (g_str_equal (type, XSD_NS "dateTime")) {
+		return TRACKER_PROPERTY_TYPE_DATETIME;
+	} else if (g_str_equal (type, XSD_NS "string")) {
+		return TRACKER_PROPERTY_TYPE_STRING;
+	} else if (g_str_equal (type, RDF_NS "langString")) {
+		return TRACKER_PROPERTY_TYPE_LANGSTRING;
+	} else {
+		return TRACKER_PROPERTY_TYPE_UNKNOWN;
+	}
+}
+
 static void
 convert_expression_to_string (TrackerSparql       *sparql,
                               TrackerPropertyType  type)
@@ -1386,19 +1720,49 @@ convert_expression_to_string (TrackerSparql       *sparql,
 		break;
 	case TRACKER_PROPERTY_TYPE_DATE:
 		/* ISO 8601 format */
-		_prepend_string (sparql, "strftime (\"%Y-%m-%d\", ");
-		_append_string (sparql, ", \"unixepoch\") ");
+		_prepend_string (sparql, "strftime (\"%Y-%m-%d\", SparqlTimestamp (");
+		_append_string (sparql, "), \"unixepoch\") ");
 		break;
 	case TRACKER_PROPERTY_TYPE_DATETIME:
 		/* ISO 8601 format */
 		_prepend_string (sparql, "SparqlFormatTime (");
 		_append_string (sparql, ") ");
+		break;
+	case TRACKER_PROPERTY_TYPE_LANGSTRING:
 	default:
 		/* Let sqlite convert the expression to string */
 		_prepend_string (sparql, "CAST (");
 		_append_string (sparql, " AS TEXT) ");
 		break;
 	}
+}
+
+static void
+_append_graph_checks (TrackerSparql *sparql,
+                      const gchar   *column_name,
+                      GStrv          graphs,
+                      gint           len)
+{
+	gint i;
+
+	_append_string_printf (sparql,
+	                       "WHERE (SELECT Uri FROM Resource WHERE ID = %s) ",
+	                       column_name);
+
+	if (len == 1)
+		_append_string (sparql, "= ");
+	else
+		_append_string (sparql, "IN (");
+
+	for (i = 0; i < len; i++) {
+		_append_string_printf (sparql,
+		                       "%c \"%s\" ",
+		                       i == 0 ? ' ' : ',',
+		                       graphs[i]);
+	}
+
+	if (len > 1)
+		_append_string (sparql, ")");
 }
 
 static TrackerContext *
@@ -1473,9 +1837,64 @@ _end_triples_block (TrackerSparql  *sparql,
 		if (table->predicate_variable) {
 			_append_string (sparql,
 			                "(SELECT subject AS ID, predicate, "
-			                "object, graph FROM tracker_triples) ");
+			                "object, object_type, graph FROM tracker_triples ");
+			g_clear_pointer (&sparql->union_views, g_hash_table_unref);
+
+			if (table->graph) {
+				_append_graph_checks (sparql, "graph",
+						      &table->graph, 1);
+			} else if (sparql->anon_graphs->len > 0 &&
+				   tracker_token_is_empty (&sparql->current_state.graph)) {
+				_append_graph_checks (sparql, "graph",
+						      (GStrv) sparql->anon_graphs->pdata,
+						      sparql->anon_graphs->len);
+			} else if (tracker_token_get_variable (&sparql->current_state.graph)) {
+				if (sparql->named_graphs->len > 0) {
+					_append_graph_checks (sparql, "graph",
+					                      (GStrv) sparql->named_graphs->pdata,
+					                      sparql->named_graphs->len);
+				} else {
+					_append_string (sparql, "WHERE \"graph\" != 0 ");
+				}
+			}
+
+			_append_string (sparql, ") ");
+		} else if (table->predicate_path) {
+			_append_string_printf (sparql, "\"%s\"", table->sql_db_tablename);
 		} else {
-			_append_string_printf (sparql, "\"%s\" ", table->sql_db_tablename);
+			if (table->graph &&
+			    tracker_data_manager_find_graph (sparql->data_manager, table->graph)) {
+				_append_string_printf (sparql, "\"%s\".\"%s\" ",
+				                       table->graph,
+				                       table->sql_db_tablename);
+			} else {
+				_append_string_printf (sparql,
+						       "(SELECT * FROM \"unionGraph_%s\" ",
+						       table->sql_db_tablename);
+
+				if (table->graph) {
+					_append_graph_checks (sparql, "graph",
+					                      &table->graph, 1);
+				} else if (sparql->anon_graphs->len > 0 &&
+				           tracker_token_is_empty (&sparql->current_state.graph)) {
+					_append_graph_checks (sparql, "graph",
+					                      (GStrv) sparql->anon_graphs->pdata,
+					                      sparql->anon_graphs->len);
+				} else if (tracker_token_get_variable (&sparql->current_state.graph)) {
+					if (sparql->named_graphs->len > 0) {
+						_append_graph_checks (sparql, "graph",
+						                      (GStrv) sparql->named_graphs->pdata,
+						                      sparql->named_graphs->len);
+					} else {
+						_append_string (sparql, "WHERE \"graph\" != 0 ");
+					}
+				}
+
+				_append_string (sparql, ") ");
+
+				if (sparql->union_views)
+					g_hash_table_add (sparql->union_views, g_strdup (table->sql_db_tablename));
+			}
 		}
 
 		_append_string_printf (sparql, "AS \"%s\" ", table->sql_query_tablename);
@@ -1562,8 +1981,14 @@ _end_triples_block (TrackerSparql  *sparql,
 
 		first = FALSE;
 		binding = g_ptr_array_index (triple_context->literal_bindings, i);
-		_append_string_printf (sparql, "%s = ", tracker_binding_get_sql_expression (binding));
-		_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+		if (binding->data_type == TRACKER_PROPERTY_TYPE_DATETIME) {
+			_append_string_printf (sparql, "SparqlTimeSort (%s) = SparqlTimeSort (", tracker_binding_get_sql_expression (binding));
+			_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+			_append_string (sparql, ") ");
+		} else {
+			_append_string_printf (sparql, "%s = ", tracker_binding_get_sql_expression (binding));
+			_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+		}
 	}
 
 	/* If we had any where clauses, prepend the 'WHERE' literal */
@@ -1580,6 +2005,10 @@ translate_Query (TrackerSparql  *sparql,
                  GError        **error)
 {
 	TrackerGrammarNamedRule rule;
+
+	sparql->context = g_object_ref_sink (tracker_select_context_new ());
+	sparql->current_state.select_context = sparql->context;
+	tracker_sparql_push_context (sparql, sparql->context);
 
 	/* Query ::= Prologue
 	 *           ( SelectQuery | ConstructQuery | DescribeQuery | AskQuery )
@@ -1601,6 +2030,8 @@ translate_Query (TrackerSparql  *sparql,
 	}
 
 	_call_rule (sparql, NAMED_RULE_ValuesClause, error);
+
+	tracker_sparql_pop_context (sparql, FALSE);
 
 	return TRUE;
 }
@@ -1695,9 +2126,20 @@ translate_SelectClause (TrackerSparql  *sparql,
 		TrackerVariable *var;
 		GHashTableIter iter;
 
+		if (!select_context->variables) {
+			g_set_error (error, TRACKER_SPARQL_ERROR,
+			             TRACKER_SPARQL_ERROR_TYPE,
+			             "Glob used but no variables defined");
+			return FALSE;
+		}
+
 		g_hash_table_iter_init (&iter, select_context->variables);
 
 		while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &var)) {
+			/* Skip our own internal variables */
+			if (strchr (var->name, ':'))
+				continue;
+
 			if (!first)
 				_append_string (sparql, ", ");
 
@@ -1816,10 +2258,14 @@ translate_BaseDecl (TrackerSparql  *sparql,
 	/* BaseDecl ::= 'BASE' IRIREF
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_BASE);
-
-	/* FIXME: BASE is unimplemented, and we never raised an error */
-
 	_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_IRIREF);
+
+	/* Sparql syntax allows for multiple BaseDecl, but it only makes
+	 * sense to keep one. Given that the sparql1.1-query recommendation
+	 * does not define the behavior, just pick the first one.
+	 */
+	if (!sparql->base)
+		sparql->base = _dup_last_string (sparql);
 
 	return TRUE;
 }
@@ -1898,20 +2344,34 @@ translate_SelectQuery (TrackerSparql  *sparql,
                        GError        **error)
 {
 	TrackerParserNode *select_clause;
-	TrackerStringBuilder *str;
+	TrackerStringBuilder *select, *str, *old;
 
 	/* SelectQuery ::= SelectClause DatasetClause* WhereClause SolutionModifier
 	 */
-	sparql->context = g_object_ref_sink (tracker_select_context_new ());
-	sparql->current_state.select_context = sparql->context;
-	tracker_sparql_push_context (sparql, sparql->context);
 
 	/* Skip select clause here */
+	select = _append_placeholder (sparql);
 	str = _append_placeholder (sparql);
+	old = tracker_sparql_swap_builder (sparql, str);
 	select_clause = _skip_rule (sparql, NAMED_RULE_SelectClause);
 
 	while (_check_in_rule (sparql, NAMED_RULE_DatasetClause)) {
 		_call_rule (sparql, NAMED_RULE_DatasetClause, error);
+	}
+
+	/* Optimize single graph case, so it always resorts to querying
+	 * the specific database.
+	 */
+	if (sparql->named_graphs->len + sparql->anon_graphs->len == 1) {
+		const gchar *graph = NULL;
+
+		if (sparql->named_graphs->len > 0)
+			graph = g_ptr_array_index (sparql->named_graphs, 0);
+		else if (sparql->anon_graphs->len > 0)
+			graph = g_ptr_array_index (sparql->anon_graphs, 0);
+
+		if (graph)
+			tracker_token_literal_init (&sparql->current_state.graph, graph, -1);
 	}
 
 	_call_rule (sparql, NAMED_RULE_WhereClause, error);
@@ -1919,15 +2379,15 @@ translate_SelectQuery (TrackerSparql  *sparql,
 	if (!_check_undefined_variables (sparql, TRACKER_SELECT_CONTEXT (sparql->context), error))
 		return FALSE;
 
+	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+
+	tracker_sparql_swap_builder (sparql, old);
+
 	/* Now that we have all variable/binding information available,
 	 * process the select clause.
 	 */
-	if (!_postprocess_rule (sparql, select_clause, str, error))
+	if (!_postprocess_rule (sparql, select_clause, select, error))
 		return FALSE;
-
-	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
-
-	tracker_sparql_pop_context (sparql, FALSE);
 
 	return TRUE;
 }
@@ -1937,7 +2397,7 @@ translate_SubSelect (TrackerSparql  *sparql,
                      GError        **error)
 {
 	TrackerContext *context, *prev;
-	TrackerStringBuilder *str;
+	TrackerStringBuilder *select, *str, *old;
 	TrackerParserNode *select_clause;
 
 	/* SubSelect ::= SelectClause WhereClause SolutionModifier ValuesClause
@@ -1948,19 +2408,24 @@ translate_SubSelect (TrackerSparql  *sparql,
 	tracker_sparql_push_context (sparql, context);
 
 	/* Skip select clause here */
+	select = _append_placeholder (sparql);
 	str = _append_placeholder (sparql);
+	old = tracker_sparql_swap_builder (sparql, str);
+
 	select_clause = _skip_rule (sparql, NAMED_RULE_SelectClause);
 
 	_call_rule (sparql, NAMED_RULE_WhereClause, error);
 
+	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+	_call_rule (sparql, NAMED_RULE_ValuesClause, error);
+
+	tracker_sparql_swap_builder (sparql, old);
+
 	/* Now that we have all variable/binding information available,
 	 * process the select clause.
 	 */
-	if (!_postprocess_rule (sparql, select_clause, str, error))
+	if (!_postprocess_rule (sparql, select_clause, select, error))
 		return FALSE;
-
-	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
-	_call_rule (sparql, NAMED_RULE_ValuesClause, error);
 
 	sparql->current_state.expression_type = TRACKER_SELECT_CONTEXT (context)->type;
 	tracker_sparql_pop_context (sparql, FALSE);
@@ -1973,27 +2438,203 @@ static gboolean
 translate_ConstructQuery (TrackerSparql  *sparql,
                           GError        **error)
 {
-	_unimplemented ("CONSTRUCT");
+	TrackerParserNode *node = NULL;
+	TrackerStringBuilder *old;
+
+	/* ConstructQuery ::= 'CONSTRUCT' ( ConstructTemplate DatasetClause* WhereClause SolutionModifier |
+	 *                                  DatasetClause* 'WHERE' '{' TriplesTemplate? '}' SolutionModifier )
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CONSTRUCT);
+	sparql->current_state.construct_query = tracker_string_builder_new ();
+
+	if (_current_rule (sparql) == NAMED_RULE_ConstructTemplate) {
+		node = _skip_rule (sparql, NAMED_RULE_ConstructTemplate);
+
+		old = tracker_sparql_swap_builder (sparql, sparql->current_state.construct_query);
+
+		_append_string (sparql, "SELECT * ");
+
+		while (_current_rule (sparql) == NAMED_RULE_DatasetClause)
+			_call_rule (sparql, NAMED_RULE_DatasetClause, error);
+
+		_call_rule (sparql, NAMED_RULE_WhereClause, error);
+		_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+		tracker_sparql_swap_builder (sparql, old);
+
+		sparql->current_state.type = TRACKER_SPARQL_TYPE_CONSTRUCT;
+		if (!_postprocess_rule (sparql, node, NULL, error))
+			return FALSE;
+	} else {
+		while (_current_rule (sparql) == NAMED_RULE_DatasetClause)
+			_call_rule (sparql, NAMED_RULE_DatasetClause, error);
+
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_WHERE);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_BRACE);
+
+		if (_current_rule (sparql) == NAMED_RULE_TriplesTemplate) {
+			node = _skip_rule (sparql, NAMED_RULE_TriplesTemplate);
+
+			old = tracker_sparql_swap_builder (sparql, sparql->current_state.construct_query);
+
+			_begin_triples_block (sparql);
+			if (!_postprocess_rule (sparql, node, NULL, error))
+				return FALSE;
+			if (!_end_triples_block (sparql, error))
+				return FALSE;
+
+			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_BRACE);
+			_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+			tracker_sparql_swap_builder (sparql, old);
+
+			/* Switch to construct mode, and rerun again the triples template */
+			sparql->current_state.type = TRACKER_SPARQL_TYPE_CONSTRUCT;
+			if (!_postprocess_rule (sparql, node, NULL, error))
+				return FALSE;
+		} else {
+			_append_string (sparql, "SELECT NULL ");
+			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_BRACE);
+			_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+		}
+	}
+
+	return TRUE;
 }
 
 static gboolean
 translate_DescribeQuery (TrackerSparql  *sparql,
                          GError        **error)
 {
-	_unimplemented ("DESCRIBE");
+	TrackerStringBuilder *where_str = NULL;
+	TrackerVariable *variable;
+	TrackerBinding *binding;
+	GList *resources = NULL, *l;
+	gboolean glob = FALSE;
+
+	/* DescribeQuery ::= 'DESCRIBE' ( VarOrIri+ | '*' ) DatasetClause* WhereClause? SolutionModifier
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_DESCRIBE);
+	_append_string (sparql,
+	                "SELECT "
+	                "  (SELECT Uri FROM Resource WHERE ID = subject),"
+	                "  (SELECT Uri FROM Resource WHERE ID = predicate),"
+	                "  object "
+	                "FROM tracker_triples "
+	                "WHERE object IS NOT NULL AND subject IN (");
+
+	g_clear_pointer (&sparql->union_views, g_hash_table_unref);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GLOB)) {
+		glob = TRUE;
+	} else {
+		TrackerContext *context;
+
+		context = tracker_triple_context_new ();
+		tracker_sparql_push_context (sparql, context);
+
+		while (_check_in_rule (sparql, NAMED_RULE_VarOrIri)) {
+			TrackerBinding *binding;
+			TrackerToken resource;
+
+			_call_rule (sparql, NAMED_RULE_VarOrIri, error);
+			_init_token (&resource, sparql->current_state.prev_node, sparql);
+
+			if (tracker_token_get_literal (&resource)) {
+				binding = tracker_literal_binding_new (tracker_token_get_literal (&resource),
+				                                       NULL);
+			} else {
+				TrackerVariable *variable;
+
+				variable = tracker_token_get_variable (&resource);
+				binding = tracker_variable_binding_new (variable, NULL, NULL);
+			}
+
+			tracker_binding_set_data_type (binding, TRACKER_PROPERTY_TYPE_RESOURCE);
+			resources = g_list_prepend (resources, binding);
+			tracker_token_unset (&resource);
+		}
+
+		tracker_sparql_pop_context (sparql, FALSE);
+	}
+
+	while (_check_in_rule (sparql, NAMED_RULE_DatasetClause))
+		_call_rule (sparql, NAMED_RULE_DatasetClause, error);
+
+	if (_check_in_rule (sparql, NAMED_RULE_WhereClause)) {
+		TrackerParserNode *where_clause;
+
+		where_str = tracker_string_builder_new ();
+		where_clause = _skip_rule (sparql, NAMED_RULE_WhereClause);
+
+		if (!_postprocess_rule (sparql, where_clause, where_str, error)) {
+			g_list_free_full (resources, g_object_unref);
+			tracker_string_builder_free (where_str);
+			return FALSE;
+		}
+	}
+
+	if (glob && TRACKER_SELECT_CONTEXT (sparql->context)->variables) {
+		GHashTableIter iter;
+
+		g_hash_table_iter_init (&iter, TRACKER_SELECT_CONTEXT (sparql->context)->variables);
+
+		while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &variable)) {
+			binding = tracker_variable_binding_new (variable, NULL, NULL);
+			resources = g_list_prepend (resources, binding);
+		}
+	}
+
+	if (resources == NULL) {
+		g_clear_pointer (&where_str, tracker_string_builder_free);
+		_raise (PARSE, "Use of unprojected variables", "DescribeQuery");
+	}
+
+	for (l = resources; l; l = l->next) {
+		binding = l->data;
+
+		if (l != resources)
+			_append_string (sparql, "UNION ALL ");
+
+		if (TRACKER_IS_LITERAL_BINDING (binding)) {
+			tracker_select_context_add_literal_binding (TRACKER_SELECT_CONTEXT (sparql->context),
+			                                            TRACKER_LITERAL_BINDING (binding));
+			_append_string (sparql, "SELECT ");
+			_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+		} else if (TRACKER_IS_VARIABLE_BINDING (binding)) {
+			gchar *str;
+
+			variable = TRACKER_VARIABLE_BINDING (binding)->variable;
+
+			if (!where_str) {
+				g_list_free_full (resources, g_object_unref);
+				_raise (PARSE, "Use of unprojected variable in Describe", variable->name);
+			}
+
+			_append_string (sparql, "SELECT ");
+			_append_variable_sql (sparql, variable);
+
+			str = tracker_string_builder_to_string (where_str);
+			_append_string_printf (sparql, "%s", str);
+			g_free (str);
+		}
+	}
+
+	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
+	_append_string (sparql, ") ");
+	g_list_free_full (resources, g_object_unref);
+	g_clear_pointer (&where_str, tracker_string_builder_free);
+
+	return TRUE;
 }
 
 static gboolean
 translate_AskQuery (TrackerSparql  *sparql,
                     GError        **error)
 {
+	TrackerStringBuilder *str, *old;
+
 	/* AskQuery ::= 'ASK' DatasetClause* WhereClause SolutionModifier
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_ASK);
-
-	sparql->context = g_object_ref_sink (tracker_select_context_new ());
-	sparql->current_state.select_context = sparql->context;
-	tracker_sparql_push_context (sparql, sparql->context);
 
 	_append_string (sparql, "SELECT CASE EXISTS (SELECT 1 ");
 
@@ -2001,10 +2642,12 @@ translate_AskQuery (TrackerSparql  *sparql,
 		_call_rule (sparql, NAMED_RULE_DatasetClause, error);
 	}
 
+	str = _append_placeholder (sparql);
+	old = tracker_sparql_swap_builder (sparql, str);
 	_call_rule (sparql, NAMED_RULE_WhereClause, error);
 	_call_rule (sparql, NAMED_RULE_SolutionModifier, error);
 
-	tracker_sparql_pop_context (sparql, FALSE);
+	tracker_sparql_swap_builder (sparql, old);
 
 	_append_string (sparql, ") WHEN 1 THEN 'true' WHEN 0 THEN 'false' ELSE NULL END");
 
@@ -2039,11 +2682,15 @@ static gboolean
 translate_DefaultGraphClause (TrackerSparql  *sparql,
                               GError        **error)
 {
+	gchar *graph;
+
 	/* DefaultGraphClause ::= SourceSelector
 	 */
 	_call_rule (sparql, NAMED_RULE_SourceSelector, error);
 
-	/* FIXME: FROM <graph> is unimplemented, and we never raised an error */
+	graph = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+	g_ptr_array_add (sparql->anon_graphs, graph);
+	tracker_token_unset (&sparql->current_state.graph);
 
 	return TRUE;
 }
@@ -2052,12 +2699,16 @@ static gboolean
 translate_NamedGraphClause (TrackerSparql  *sparql,
                             GError        **error)
 {
+	gchar *graph;
+
 	/* NamedGraphClause ::= 'NAMED' SourceSelector
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_NAMED);
 	_call_rule (sparql, NAMED_RULE_SourceSelector, error);
 
-	/* FIXME: FROM NAMED <graph> is unimplemented, and we never raised an error */
+	graph = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+	g_ptr_array_add (sparql->named_graphs, graph);
+	tracker_token_unset (&sparql->current_state.graph);
 
 	return TRUE;
 }
@@ -2069,6 +2720,8 @@ translate_SourceSelector (TrackerSparql  *sparql,
 	/* SourceSelector ::= iri
 	 */
 	_call_rule (sparql, NAMED_RULE_iri, error);
+	_init_token (&sparql->current_state.graph,
+	             sparql->current_state.prev_node, sparql);
 	return TRUE;
 }
 
@@ -2124,15 +2777,86 @@ static gboolean
 translate_GroupClause (TrackerSparql  *sparql,
                        GError        **error)
 {
+	GList *conditions = NULL, *expressions = NULL, *l;
+	gboolean variables_projected = FALSE;
+	TrackerStringBuilder *select, *old;
+	gchar *str;
+
 	/* GroupClause ::= 'GROUP' 'BY' GroupCondition+
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_GROUP);
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_BY);
+
+	/* As we still may get variables projected in the GroupCondition
+	 * clauses, we need to preprocess those so we can do a final
+	 * SELECT *, $variables FROM (...) surrounding the resulting
+	 * query.
+	 */
+	while (_check_in_rule (sparql, NAMED_RULE_GroupCondition)) {
+		TrackerParserNode *node;
+
+		node = _skip_rule (sparql, NAMED_RULE_GroupCondition);
+		conditions = g_list_prepend (conditions, node);
+	}
+
+	for (l = conditions; l; l = l->next) {
+		TrackerStringBuilder *expr;
+
+		expr = tracker_string_builder_new ();
+
+		if (!_postprocess_rule (sparql, l->data, expr, error)) {
+			g_object_unref (expr);
+			g_list_free_full (expressions, g_object_unref);
+			g_list_free (conditions);
+			return FALSE;
+		}
+
+		if (sparql->current_state.as_in_group_by) {
+			TrackerVariableBinding *binding = sparql->current_state.as_in_group_by;
+			TrackerVariable *var = tracker_variable_binding_get_variable (binding);
+
+			if (!variables_projected) {
+				select = _prepend_placeholder (sparql);
+				old = tracker_sparql_swap_builder (sparql, select);
+				variables_projected = TRUE;
+				_append_string (sparql, "FROM (SELECT * ");
+			}
+
+			_append_string (sparql, ", ");
+
+			str = tracker_string_builder_to_string (expr);
+			tracker_string_builder_append (select, str, -1);
+			g_free (str);
+
+			_append_string (sparql, "AS ");
+			_append_variable_sql (sparql, var);
+			expressions = g_list_prepend (expressions,
+			                              g_strdup (tracker_variable_get_sql_expression (var)));
+			g_clear_object (&sparql->current_state.as_in_group_by);
+		} else {
+			str = tracker_string_builder_to_string (expr);
+			expressions = g_list_prepend (expressions, str);
+		}
+
+		tracker_string_builder_free (expr);
+	}
+
+	if (variables_projected) {
+		tracker_sparql_swap_builder (sparql, old);
+		_append_string (sparql, ") ");
+	}
+
 	_append_string (sparql, "GROUP BY ");
 
-	while (_check_in_rule (sparql, NAMED_RULE_GroupCondition)) {
-		_call_rule (sparql, NAMED_RULE_GroupCondition, error);
+	for (l = expressions; l; l = l->next) {
+		if (l != expressions)
+			_append_string (sparql, ", ");
+
+		_append_string_printf (sparql, "%s ", l->data);
 	}
+
+	g_list_free_full (expressions, g_free);
+	g_list_free (conditions);
 
 	return TRUE;
 }
@@ -2143,11 +2867,25 @@ translate_GroupCondition (TrackerSparql  *sparql,
 {
 	/* GroupCondition ::= BuiltInCall | FunctionCall | '(' Expression ( 'AS' Var )? ')' | Var
 	 */
+	sparql->current_state.as_in_group_by = NULL;
+
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS)) {
+		TrackerPropertyType expr_type;
 		_call_rule (sparql, NAMED_RULE_Expression, error);
+		expr_type = sparql->current_state.expression_type;
 
 		if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_AS)) {
-			_unimplemented ("AS in GROUP BY");
+			TrackerVariable *var;
+			TrackerBinding *binding;
+
+			_call_rule (sparql, NAMED_RULE_Var, error);
+			var = _last_node_variable (sparql);
+
+			binding = tracker_variable_binding_new (var, NULL, NULL);
+			tracker_binding_set_data_type (binding, expr_type);
+			tracker_variable_set_sample_binding (var, TRACKER_VARIABLE_BINDING (binding));
+
+			sparql->current_state.as_in_group_by = TRACKER_VARIABLE_BINDING (binding);
 		}
 
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
@@ -2264,7 +3002,8 @@ translate_OrderCondition (TrackerSparql  *sparql,
 		g_assert_not_reached ();
 	}
 
-	if (sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_STRING)
+	if (sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_STRING ||
+	    sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_LANGSTRING)
 		_append_string (sparql, "COLLATE " TRACKER_COLLATION_NAME " ");
 	else if (sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_RESOURCE)
 		convert_expression_to_string (sparql, sparql->current_state.expression_type);
@@ -2357,7 +3096,10 @@ translate_ValuesClause (TrackerSparql  *sparql,
 	/* ValuesClause ::= ( 'VALUES' DataBlock )?
 	 */
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_VALUES)) {
-		_unimplemented ("VALUES");
+		_prepend_string (sparql, "SELECT * FROM (");
+		_append_string (sparql, ") NATURAL INNER JOIN (");
+		_call_rule (sparql, NAMED_RULE_DataBlock, error);
+		_append_string (sparql, ") ");
 	}
 
 	return TRUE;
@@ -2406,49 +3148,405 @@ static gboolean
 translate_Load (TrackerSparql  *sparql,
                 GError        **error)
 {
-	_unimplemented ("LOAD");
+	TrackerToken resource;
+	gboolean silent = FALSE;
+	GError *inner_error = NULL;
+	const gchar *graph = NULL;
+	GFile *file;
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_LOAD);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_iri, error);
+	_init_token (&resource, sparql->current_state.prev_node, sparql);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_INTO)) {
+		_call_rule (sparql, NAMED_RULE_GraphRefAll, error);
+
+		if (!tracker_token_is_empty (&sparql->current_state.graph))
+			graph = tracker_token_get_idstring (&sparql->current_state.graph);
+	}
+
+	file = g_file_new_for_uri (tracker_token_get_idstring (&resource));
+	tracker_token_unset (&resource);
+
+	tracker_data_load_turtle_file (tracker_data_manager_get_data (sparql->data_manager),
+	                               file, graph, &inner_error);
+
+	if (inner_error) {
+		g_clear_object (&file);
+
+		if (!silent) {
+			g_propagate_error (error, inner_error);
+			return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+static gboolean
+handle_silent (gboolean   silent,
+               GError    *error_in,
+               GError   **error)
+{
+	if (!error_in) {
+		return TRUE;
+	} else if (silent) {
+		g_error_free (error_in);
+		return TRUE;
+	} else {
+		g_propagate_error (error, error_in);
+		return FALSE;
+	}
 }
 
 static gboolean
 translate_Clear (TrackerSparql  *sparql,
                  GError        **error)
 {
-	_unimplemented ("CLEAR");
+	gboolean silent = FALSE;
+	GError *inner_error = NULL;
+	GList *graphs = NULL, *l;
+	const gchar *graph;
+
+	/* Clear ::= 'CLEAR' 'SILENT'? GraphRefAll
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLEAR);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_GraphRefAll, error);
+
+	if (tracker_token_is_empty (&sparql->current_state.graph)) {
+		if (sparql->current_state.graph_op == GRAPH_OP_DEFAULT ||
+		    sparql->current_state.graph_op == GRAPH_OP_ALL) {
+			graphs = g_list_prepend (graphs, "main");
+		}
+
+		if (sparql->current_state.graph_op == GRAPH_OP_ALL ||
+		    sparql->current_state.graph_op == GRAPH_OP_NAMED) {
+			GHashTable *ht;
+			GHashTableIter iter;
+
+			ht = tracker_data_manager_get_graphs (sparql->data_manager);
+			g_hash_table_iter_init (&iter, ht);
+
+			while (g_hash_table_iter_next (&iter, (gpointer *) &graph, NULL))
+				graphs = g_list_prepend (graphs, (gpointer) graph);
+		}
+	} else {
+		graph = tracker_token_get_idstring (&sparql->current_state.graph);
+
+		if (tracker_data_manager_find_graph (sparql->data_manager, graph) == 0)
+			_raise (UNKNOWN_GRAPH, "Unknown graph", graph);
+
+		graphs = g_list_prepend (graphs, (gpointer) graph);
+	}
+
+	for (l = graphs; l; l = l->next) {
+		if (!tracker_data_manager_clear_graph (sparql->data_manager,
+		                                       l->data, &inner_error))
+			break;
+	}
+
+	g_list_free (graphs);
+
+	return handle_silent (silent, inner_error, error);
 }
 
 static gboolean
 translate_Drop (TrackerSparql  *sparql,
                 GError        **error)
 {
-	_unimplemented ("DROP");
+	gboolean silent = FALSE;
+	GError *inner_error = NULL;
+	GList *graphs = NULL, *l;
+	const gchar *graph;
+
+	/* Drop ::= 'DROP' 'SILENT'? GraphRefAll
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_DROP);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_GraphRefAll, error);
+
+	if (tracker_token_is_empty (&sparql->current_state.graph)) {
+		if (sparql->current_state.graph_op == GRAPH_OP_DEFAULT ||
+		    sparql->current_state.graph_op == GRAPH_OP_ALL) {
+			graphs = g_list_prepend (graphs, NULL);
+		}
+
+		if (sparql->current_state.graph_op == GRAPH_OP_ALL ||
+		    sparql->current_state.graph_op == GRAPH_OP_NAMED) {
+			GHashTable *ht;
+			GHashTableIter iter;
+
+			ht = tracker_data_manager_get_graphs (sparql->data_manager);
+			g_hash_table_iter_init (&iter, ht);
+
+			while (g_hash_table_iter_next (&iter, (gpointer *) &graph, NULL))
+				graphs = g_list_prepend (graphs, (gpointer) graph);
+		}
+	} else {
+		graph = tracker_token_get_idstring (&sparql->current_state.graph);
+		graphs = g_list_prepend (graphs, (gpointer) graph);
+	}
+
+	for (l = graphs; l; l = l->next) {
+		if (!tracker_data_manager_drop_graph (sparql->data_manager,
+		                                      l->data, &inner_error))
+			break;
+	}
+
+	g_list_free (graphs);
+
+	return handle_silent (silent, inner_error, error);
 }
 
 static gboolean
 translate_Create (TrackerSparql  *sparql,
                   GError        **error)
 {
-	_unimplemented ("CREATE");
+	gboolean silent = FALSE;
+	GError *inner_error = NULL;
+	const gchar *graph_name;
+
+	/* Create ::= 'CREATE' 'SILENT'? GraphRef
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CREATE);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_GraphRef, error);
+	g_assert (!tracker_token_is_empty (&sparql->current_state.graph));
+
+	graph_name = tracker_token_get_idstring (&sparql->current_state.graph);
+
+	if (tracker_data_manager_find_graph (sparql->data_manager, graph_name) != 0) {
+		inner_error = g_error_new (TRACKER_SPARQL_ERROR,
+		                           TRACKER_SPARQL_ERROR_CONSTRAINT,
+		                           "Graph '%s' already exists",
+		                           graph_name);
+		goto error;
+	}
+
+	if (!tracker_data_manager_create_graph (sparql->data_manager,
+	                                        graph_name,
+	                                        &inner_error))
+		goto error;
+
+	return TRUE;
+
+error:
+	return handle_silent (silent, inner_error, error);
 }
 
 static gboolean
 translate_Add (TrackerSparql  *sparql,
                GError        **error)
 {
-	_unimplemented ("ADD");
+	gboolean silent = FALSE;
+	gchar *source, *destination;
+	GError *inner_error = NULL;
+
+	/* Add ::= 'ADD' 'SILENT'? GraphOrDefault 'TO' GraphOrDefault
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_ADD);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	source = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_TO);
+
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	destination = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	if (g_strcmp0 (source, destination) == 0) {
+		g_free (source);
+		g_free (destination);
+		return TRUE;
+	}
+
+	if (source &&
+	    !tracker_data_manager_find_graph (sparql->data_manager, source)) {
+		g_set_error (&inner_error, TRACKER_SPARQL_ERROR,
+			     TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
+			     "Unknown graph '%s'", source);
+		goto error;
+	}
+
+	if (destination &&
+	    !tracker_data_manager_find_graph (sparql->data_manager, destination)) {
+		if (!tracker_data_manager_create_graph (sparql->data_manager,
+							destination, &inner_error))
+			goto error;
+	}
+
+	if (!tracker_data_manager_copy_graph (sparql->data_manager,
+					      source, destination,
+					      &inner_error))
+		goto error;
+
+	g_free (source);
+	g_free (destination);
+
+	return TRUE;
+
+error:
+
+	g_free (source);
+	g_free (destination);
+
+	return handle_silent (silent, inner_error, error);
 }
 
 static gboolean
 translate_Move (TrackerSparql  *sparql,
                 GError        **error)
 {
-	_unimplemented ("MOVE");
+	gboolean silent = FALSE;
+	gchar *source, *destination;
+	GError *inner_error = NULL;
+
+	/* Move ::= 'MOVE' 'SILENT'? GraphOrDefault 'TO' GraphOrDefault
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_MOVE);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	source = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_TO);
+
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	destination = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	if (g_strcmp0 (source, destination) == 0) {
+		g_free (source);
+		g_free (destination);
+		return TRUE;
+	}
+
+	if (source &&
+	    !tracker_data_manager_find_graph (sparql->data_manager, source)) {
+		g_set_error (&inner_error, TRACKER_SPARQL_ERROR,
+			     TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
+			     "Unknown graph '%s'", source);
+		goto error;
+	}
+
+	if (destination &&
+	    !tracker_data_manager_find_graph (sparql->data_manager, destination)) {
+		if (!tracker_data_manager_create_graph (sparql->data_manager,
+							destination, &inner_error))
+			goto error;
+	} else {
+		if (!tracker_data_manager_clear_graph (sparql->data_manager,
+						       destination, &inner_error))
+			goto error;
+	}
+
+	if (!tracker_data_manager_copy_graph (sparql->data_manager,
+	                                      source, destination,
+	                                      &inner_error))
+		goto error;
+
+	if (!tracker_data_manager_drop_graph (sparql->data_manager,
+	                                      source,
+	                                      &inner_error))
+		goto error;
+
+	g_free (source);
+	g_free (destination);
+
+	return TRUE;
+
+error:
+	g_free (source);
+	g_free (destination);
+
+	return handle_silent (silent, inner_error, error);
 }
 
 static gboolean
 translate_Copy (TrackerSparql  *sparql,
                 GError        **error)
 {
-	_unimplemented ("COPY");
+	gboolean silent = FALSE;
+	gchar *source, *destination;
+	GError *inner_error = NULL;
+
+	/* Copy ::= 'COPY' 'SILENT'? GraphOrDefault 'TO' GraphOrDefault
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_COPY);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	g_assert (!tracker_token_is_empty (&sparql->current_state.graph) ||
+		  sparql->current_state.graph_op == GRAPH_OP_DEFAULT);
+	source = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_TO);
+
+	_call_rule (sparql, NAMED_RULE_GraphOrDefault, error);
+	g_assert (!tracker_token_is_empty (&sparql->current_state.graph) ||
+		  sparql->current_state.graph_op == GRAPH_OP_DEFAULT);
+	destination = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	if (g_strcmp0 (source, destination) == 0) {
+		g_free (source);
+		g_free (destination);
+		return TRUE;
+	}
+
+	if (source &&
+	    !tracker_data_manager_find_graph (sparql->data_manager, source)) {
+		g_set_error (&inner_error, TRACKER_SPARQL_ERROR,
+			     TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
+			     "Unknown graph '%s'", source);
+		goto error;
+	}
+
+	if (destination &&
+	    !tracker_data_manager_find_graph (sparql->data_manager, destination)) {
+		if (!tracker_data_manager_create_graph (sparql->data_manager,
+							destination, &inner_error))
+			goto error;
+	} else {
+		if (!tracker_data_manager_clear_graph (sparql->data_manager,
+						       destination, &inner_error))
+			goto error;
+	}
+
+	if (!tracker_data_manager_copy_graph (sparql->data_manager,
+	                                      source, destination,
+	                                      &inner_error))
+		goto error;
+
+	g_free (source);
+	g_free (destination);
+
+	return TRUE;
+
+error:
+	g_free (source);
+	g_free (destination);
+
+	return handle_silent (silent, inner_error, error);
 }
 
 static gboolean
@@ -2571,10 +3669,7 @@ get_solution_for_pattern (TrackerSparql      *sparql,
 	sparql->current_state.select_context = sparql->context;
 	tracker_sparql_push_context (sparql, sparql->context);
 
-	g_clear_pointer (&sparql->sql, tracker_string_builder_free);
-	sparql->sql = tracker_string_builder_new ();
-	tracker_sparql_swap_builder (sparql, sparql->sql);
-	sparql->current_state.with_clauses = _prepend_placeholder (sparql);
+	tracker_sparql_init_string_builder (sparql);
 
 	retval = prepare_solution_select (sparql, pattern, error);
 	tracker_sparql_pop_context (sparql, FALSE);
@@ -2585,9 +3680,9 @@ get_solution_for_pattern (TrackerSparql      *sparql,
 	}
 
 	iface = tracker_data_manager_get_writable_db_interface (sparql->data_manager);
-	stmt = prepare_query (iface, sparql->sql,
+	stmt = prepare_query (sparql, iface, sparql->sql,
 	                      TRACKER_SELECT_CONTEXT (sparql->context)->literal_bindings,
-	                      NULL, FALSE,
+	                      NULL, TRUE,
 	                      error);
 	g_clear_object (&sparql->context);
 
@@ -2792,6 +3887,7 @@ translate_InsertClause (TrackerSparql  *sparql,
                         GError        **error)
 {
 	TrackerToken old_graph;
+	gboolean into = FALSE;
 
 	/* InsertClause ::= 'INSERT' QuadPattern
 	 *
@@ -2806,8 +3902,6 @@ translate_InsertClause (TrackerSparql  *sparql,
 	sparql->current_state.blank_node_map =
 		g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	old_graph = sparql->current_state.graph;
-
 	sparql->current_state.type = TRACKER_SPARQL_TYPE_INSERT;
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_INSERT);
 
@@ -2821,15 +3915,19 @@ translate_InsertClause (TrackerSparql  *sparql,
 	sparql->silent = _accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT);
 
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_INTO)) {
+		old_graph = sparql->current_state.graph;
 		_call_rule (sparql, NAMED_RULE_iri, error);
 		_init_token (&sparql->current_state.graph,
 		             sparql->current_state.prev_node, sparql);
+		into = TRUE;
 	}
 
 	_call_rule (sparql, NAMED_RULE_QuadPattern, error);
 
-	tracker_token_unset (&sparql->current_state.graph);
-	sparql->current_state.graph = old_graph;
+	if (into) {
+		tracker_token_unset (&sparql->current_state.graph);
+		sparql->current_state.graph = old_graph;
+	}
 
 	if (sparql->blank_nodes) {
 		g_variant_builder_close (sparql->blank_nodes);
@@ -2845,14 +3943,28 @@ static gboolean
 translate_UsingClause (TrackerSparql  *sparql,
                        GError        **error)
 {
+	gboolean named = FALSE;
+	gchar *graph;
+
 	/* UsingClause ::= 'USING' ( iri | 'NAMED' iri )
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_USING);
 
-	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_NAMED)) {
-	}
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_NAMED))
+		named = TRUE;
 
 	_call_rule (sparql, NAMED_RULE_iri, error);
+	_init_token (&sparql->current_state.graph,
+		     sparql->current_state.prev_node, sparql);
+	graph = g_strdup (tracker_token_get_idstring (&sparql->current_state.graph));
+
+	if (named)
+		g_ptr_array_add (sparql->named_graphs, graph);
+	else
+		g_ptr_array_add (sparql->anon_graphs, graph);
+
+	tracker_token_unset (&sparql->current_state.graph);
+	g_free (graph);
 
 	return TRUE;
 }
@@ -2864,10 +3976,13 @@ translate_GraphOrDefault (TrackerSparql  *sparql,
 	/* GraphOrDefault ::= 'DEFAULT' | 'GRAPH'? iri
 	 */
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DEFAULT)) {
-
+		tracker_token_unset (&sparql->current_state.graph);
+		sparql->current_state.graph_op = GRAPH_OP_DEFAULT;
 	} else {
 		_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GRAPH);
 		_call_rule (sparql, NAMED_RULE_iri, error);
+		_init_token (&sparql->current_state.graph,
+		             sparql->current_state.prev_node, sparql);
 	}
 
 	return TRUE;
@@ -2879,9 +3994,12 @@ translate_GraphRefAll (TrackerSparql  *sparql,
 {
 	/* GraphRefAll ::= GraphRef | 'DEFAULT' | 'NAMED' | 'ALL'
 	 */
-	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DEFAULT) ||
-	    _accept (sparql, RULE_TYPE_LITERAL, LITERAL_NAMED) ||
-	    _accept (sparql, RULE_TYPE_LITERAL, LITERAL_ALL)) {
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DEFAULT)) {
+		sparql->current_state.graph_op = GRAPH_OP_DEFAULT;
+	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_NAMED)) {
+		sparql->current_state.graph_op = GRAPH_OP_NAMED;
+	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ALL)) {
+		sparql->current_state.graph_op = GRAPH_OP_ALL;
 	} else {
 		_call_rule (sparql, NAMED_RULE_GraphRef, error);
 	}
@@ -2897,6 +4015,8 @@ translate_GraphRef (TrackerSparql  *sparql,
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_GRAPH);
 	_call_rule (sparql, NAMED_RULE_iri, error);
+	_init_token (&sparql->current_state.graph,
+	             sparql->current_state.prev_node, sparql);
 
 	return TRUE;
 }
@@ -3214,9 +4334,95 @@ static gboolean
 translate_ServiceGraphPattern (TrackerSparql  *sparql,
                                GError        **error)
 {
+	gssize pattern_start, pattern_end;
+	TrackerParserNode *pattern, *node;
+	gchar *pattern_str, *escaped_str, *var_str;
+	TrackerContext *context;
+	GList *variables = NULL;
+	TrackerToken service;
+	GString *service_sparql;
+	gboolean silent = FALSE, do_join;
+	gint i = 0;
+
 	/* ServiceGraphPattern ::= 'SERVICE' 'SILENT'? VarOrIri GroupGraphPattern
 	 */
-	_unimplemented ("SERVICE");
+	do_join = !tracker_string_builder_is_empty (sparql->current_state.sql);
+
+	if (do_join) {
+		_prepend_string (sparql, "SELECT * FROM (");
+		_append_string (sparql, ") NATURAL INNER JOIN (");
+	}
+
+	context = tracker_triple_context_new ();
+	tracker_sparql_push_context (sparql, context);
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_SERVICE);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SILENT))
+		silent = TRUE;
+
+	_call_rule (sparql, NAMED_RULE_VarOrIri, error);
+	_init_token (&service, sparql->current_state.prev_node, sparql);
+
+	pattern = _skip_rule (sparql, NAMED_RULE_GroupGraphPattern);
+	_append_string (sparql, "SELECT ");
+	service_sparql = g_string_new ("SELECT ");
+
+	for (node = tracker_sparql_parser_tree_find_first (pattern, TRUE);
+	     node;
+	     node = tracker_sparql_parser_tree_find_next (node, TRUE)) {
+		const TrackerGrammarRule *rule;
+		TrackerBinding *binding;
+		TrackerVariable *var;
+
+		if (!g_node_is_ancestor ((GNode *) pattern, (GNode *) node))
+			break;
+
+		rule = tracker_parser_node_get_rule (node);
+
+		if (!tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL,
+		                                TERMINAL_TYPE_VAR1) &&
+		    !tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL,
+						TERMINAL_TYPE_VAR2))
+			continue;
+
+		if (i > 0)
+			_append_string (sparql, ", ");
+
+		var_str = _extract_node_string (node, sparql);
+		var = _extract_node_variable (node, sparql);
+		variables = g_list_prepend (variables, var);
+		binding = tracker_variable_binding_new (var, NULL, NULL);
+		_add_binding (sparql, binding);
+
+
+		_append_string_printf (sparql, "col%d AS %s ",
+				       i, tracker_variable_get_sql_expression (var));
+		g_string_append_printf (service_sparql, "?%s ", var_str);
+		g_free (var_str);
+		i++;
+	}
+
+	tracker_parser_node_get_extents (pattern, &pattern_start, &pattern_end);
+	pattern_str = g_strndup (&sparql->sparql[pattern_start], pattern_end - pattern_start);
+	escaped_str = _escape_sql_string (pattern_str);
+	g_string_append (service_sparql, escaped_str);
+	g_free (pattern_str);
+	g_free (escaped_str);
+
+	_append_string_printf (sparql, "FROM tracker_service WHERE service=\"%s\" AND query=\"%s\" AND silent=%d ",
+			       tracker_token_get_idstring (&service),
+			       service_sparql->str,
+			       silent);
+
+	tracker_token_unset (&service);
+	tracker_sparql_pop_context (sparql, TRUE);
+	g_string_free (service_sparql, TRUE);
+
+	if (do_join)
+		_append_string (sparql, ") ");
+
+	return TRUE;
 }
 
 static gboolean
@@ -3279,9 +4485,24 @@ static gboolean
 translate_InlineData (TrackerSparql  *sparql,
                       GError        **error)
 {
+	gboolean do_join;
+
 	/* InlineData ::= 'VALUES' DataBlock
 	 */
-	_unimplemented ("VALUES");
+	do_join = !tracker_string_builder_is_empty (sparql->current_state.sql);
+
+	if (do_join) {
+		_prepend_string (sparql, "SELECT * FROM (");
+		_append_string (sparql, ") NATURAL INNER JOIN (");
+	}
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_VALUES);
+	_call_rule (sparql, NAMED_RULE_DataBlock, error);
+
+	if (do_join)
+		_append_string (sparql, ")");
+
+	return TRUE;
 }
 
 static gboolean
@@ -3289,9 +4510,20 @@ translate_DataBlock (TrackerSparql  *sparql,
                      GError        **error)
 {
 	TrackerGrammarNamedRule rule;
+	TrackerStringBuilder *old;
 
 	/* DataBlock ::= InlineDataOneVar | InlineDataFull
 	 */
+	old = tracker_sparql_swap_builder (sparql, sparql->current_state.with_clauses);
+
+	if (tracker_string_builder_is_empty (sparql->current_state.with_clauses))
+		_append_string (sparql, "WITH ");
+	else
+		_append_string (sparql, ", ");
+
+	sparql->current_state.values_idx++;
+	_append_string_printf (sparql, "\"dataBlock%d\"",
+	                       sparql->current_state.values_idx);
 	rule = _current_rule (sparql);
 
 	switch (rule) {
@@ -3303,6 +4535,11 @@ translate_DataBlock (TrackerSparql  *sparql,
 		g_assert_not_reached ();
 	}
 
+	tracker_sparql_swap_builder (sparql, old);
+
+	_append_string_printf (sparql, "SELECT * FROM \"dataBlock%d\"",
+	                       sparql->current_state.values_idx);
+
 	return TRUE;
 }
 
@@ -3310,17 +4547,41 @@ static gboolean
 translate_InlineDataOneVar (TrackerSparql  *sparql,
                             GError        **error)
 {
+	TrackerVariable *var;
+	TrackerBinding *binding;
+	gint n_values = 0;
+
 	/* InlineDataOneVar ::= Var '{' DataBlockValue* '}'
 	 */
 	_call_rule (sparql, NAMED_RULE_Var, error);
 
+	var = _last_node_variable (sparql);
+	binding = tracker_variable_binding_new (var, NULL, NULL);
+	tracker_variable_set_sample_binding (var, TRACKER_VARIABLE_BINDING (binding));
+
+	_append_string (sparql, "(");
+	_append_variable_sql (sparql, var);
+	_append_string (sparql, ") AS ( ");
+
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_BRACE);
 
 	while (_check_in_rule (sparql, NAMED_RULE_DataBlockValue)) {
+		if (n_values == 0)
+			_append_string (sparql, "VALUES ");
+		else
+			_append_string (sparql, ", ");
+
+		_append_string (sparql, "(");
 		_call_rule (sparql, NAMED_RULE_DataBlockValue, error);
+		_append_string (sparql, ") ");
+		n_values++;
 	}
 
+	if (n_values == 0)
+		_append_string (sparql, "SELECT NULL WHERE FALSE");
+
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_BRACE);
+	_append_string (sparql, ") ");
 
 	return TRUE;
 }
@@ -3329,13 +4590,30 @@ static gboolean
 translate_InlineDataFull (TrackerSparql  *sparql,
                           GError        **error)
 {
+	TrackerVariable *var;
+	TrackerBinding *binding;
+	gint n_params, n_args = 0, n_values = 0;
+
 	/* InlineDataFull ::= ( NIL | '(' Var* ')' ) '{' ( '(' DataBlockValue* ')' | NIL )* '}'
 	 */
-	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL)) {
+	_append_string (sparql, "(");
 
+	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL)) {
+		_append_string (sparql, "NONE");
+		n_args = 0;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS)) {
 		while (_check_in_rule (sparql, NAMED_RULE_Var)) {
+			if (n_args != 0)
+				_append_string (sparql, ", ");
+
 			_call_rule (sparql, NAMED_RULE_Var, error);
+
+			var = _last_node_variable (sparql);
+			binding = tracker_variable_binding_new (var, NULL, NULL);
+			tracker_variable_set_sample_binding (var, TRACKER_VARIABLE_BINDING (binding));
+			n_args++;
+
+			_append_variable_sql (sparql, var);
 		}
 
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
@@ -3343,20 +4621,57 @@ translate_InlineDataFull (TrackerSparql  *sparql,
 		g_assert_not_reached ();
 	}
 
+	_append_string (sparql, ") AS ( ");
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_BRACE);
 
 	do {
-		if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL)) {
-		} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS)) {
+		gboolean is_nil = FALSE;
+
+		if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL))
+			is_nil = TRUE;
+		else if (!_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS))
+			break;
+
+		if (n_values == 0)
+			_append_string (sparql, "VALUES ");
+		else
+			_append_string (sparql, ", ");
+
+		if (is_nil) {
+			_append_string (sparql, "(NULL)");
+			n_params = 0;
+		} else {
+			n_params = 0;
+
+			_append_string (sparql, "(");
+
 			while (_check_in_rule (sparql, NAMED_RULE_DataBlockValue)) {
+				if (n_params != 0)
+					_append_string (sparql, ", ");
+
 				_call_rule (sparql, NAMED_RULE_DataBlockValue, error);
+				n_params++;
 			}
 
 			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
-		} else {
-			break;
+			_append_string (sparql, ") ");
 		}
+
+		if (n_params != n_args) {
+			g_set_error (error, TRACKER_SPARQL_ERROR,
+			             TRACKER_SPARQL_ERROR_PARSE,
+			             "VALUES defined %d arguments but set has %d parameters",
+			             n_args, n_params);
+			return FALSE;
+		}
+
+		n_values++;
 	} while (TRUE);
+
+	if (n_values == 0)
+		_append_string (sparql, "SELECT NULL WHERE FALSE");
+
+	_append_string (sparql, ") ");
 
 	return TRUE;
 }
@@ -3365,22 +4680,36 @@ static gboolean
 translate_DataBlockValue (TrackerSparql  *sparql,
                           GError        **error)
 {
+	TrackerSelectContext *select_context;
 	TrackerGrammarNamedRule rule;
+	TrackerBinding *binding;
 
 	/* DataBlockValue ::= iri | RDFLiteral | NumericLiteral | BooleanLiteral | 'UNDEF'
 	 */
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_UNDEF)) {
+		_append_string (sparql, "NULL ");
 		return TRUE;
 	}
 
+	select_context = TRACKER_SELECT_CONTEXT (sparql->current_state.select_context);
 	rule = _current_rule (sparql);
 
 	switch (rule) {
-	case NAMED_RULE_iri:
 	case NAMED_RULE_RDFLiteral:
+		_call_rule (sparql, rule, error);
+		binding = g_ptr_array_index (select_context->literal_bindings,
+		                             select_context->literal_bindings->len - 1);
+		_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+		break;
+	case NAMED_RULE_iri:
 	case NAMED_RULE_NumericLiteral:
 	case NAMED_RULE_BooleanLiteral:
 		_call_rule (sparql, rule, error);
+		binding = _convert_terminal (sparql);
+		tracker_select_context_add_literal_binding (select_context,
+		                                            TRACKER_LITERAL_BINDING (binding));
+		_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
+		g_object_unref (binding);
 		break;
 	default:
 		g_assert_not_reached ();
@@ -3563,7 +4892,13 @@ translate_ArgList (TrackerSparql  *sparql,
 			_raise (PARSE, "Recursive ArgList is not allowed", "ArgList");
 
 		if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DISTINCT)) {
-			_unimplemented ("DISTINCT in ArgList");
+			/* This path is only for custom aggregate function, as per
+			 * the SPARQL recommendation, note 15 in grammar section:
+			 * "Only custom aggregate functions use the DISTINCT keyword in a function call."
+			 *
+			 * But we have none, so it's fine to bail out here.
+			 */
+			_raise (PARSE, "DISTINCT is not allowed in non-aggregate function", "ArgList");
 		}
 
 		_call_rule (sparql, NAMED_RULE_Expression, error);
@@ -3902,7 +5237,7 @@ translate_VerbPath (TrackerSparql  *sparql,
 
 		prop = tracker_sparql_parser_tree_find_first (sparql->current_state.node, TRUE);
 		str = _extract_node_string (prop, sparql);
-		tracker_token_literal_init (&sparql->current_state.predicate, str);
+		tracker_token_literal_init (&sparql->current_state.predicate, str, -1);
 		g_free (str);
 
 		_skip_rule (sparql, NAMED_RULE_Path);
@@ -4172,7 +5507,7 @@ translate_PathPrimary (TrackerSparql  *sparql,
 			                                                         prop);
 
 		if (!path_elem) {
-			path_elem = tracker_path_element_property_new (prop);
+			path_elem = tracker_path_element_property_new (TRACKER_PATH_OPERATOR_NONE, prop);
 			tracker_select_context_add_path_element (TRACKER_SELECT_CONTEXT (sparql->context),
 			                                         path_elem);
 			_prepend_path_element (sparql, path_elem);
@@ -4191,19 +5526,118 @@ static gboolean
 translate_PathNegatedPropertySet (TrackerSparql  *sparql,
                                   GError        **error)
 {
+	TrackerPathElement *path_elem;
+
 	/* PathNegatedPropertySet ::= PathOneInPropertySet | '(' ( PathOneInPropertySet ( '|' PathOneInPropertySet )* )? ')'
 	 */
-	_unimplemented ("Negated property set in property paths");
-	return FALSE;
+	if (_check_in_rule (sparql, NAMED_RULE_PathOneInPropertySet))
+		_call_rule (sparql, NAMED_RULE_PathOneInPropertySet, error);
+	else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS)) {
+		GPtrArray *path_elems;
+
+		path_elems = g_ptr_array_new ();
+
+		_call_rule (sparql, NAMED_RULE_PathEltOrInverse, error);
+		g_ptr_array_add (path_elems, sparql->current_state.path);
+
+		while (_check_in_rule (sparql, NAMED_RULE_PathOneInPropertySet)) {
+			_call_rule (sparql, NAMED_RULE_PathOneInPropertySet, error);
+			g_ptr_array_add (path_elems, sparql->current_state.path);
+		}
+
+		if (path_elems->len > 1) {
+			gint i;
+
+			path_elem = tracker_path_element_operator_new (TRACKER_PATH_OPERATOR_INTERSECTION,
+			                                               g_ptr_array_index (path_elems, 0),
+			                                               g_ptr_array_index (path_elems, 1));
+			tracker_select_context_add_path_element (TRACKER_SELECT_CONTEXT (sparql->context),
+			                                         path_elem);
+			_prepend_path_element (sparql, path_elem);
+
+			for (i = 2; i < path_elems->len; i++) {
+				TrackerPathElement *child;
+
+				child = g_ptr_array_index (path_elems, i);
+				path_elem = tracker_path_element_operator_new (TRACKER_PATH_OPERATOR_INTERSECTION,
+				                                               child, path_elem);
+				tracker_select_context_add_path_element (TRACKER_SELECT_CONTEXT (sparql->context),
+				                                         path_elem);
+				_prepend_path_element (sparql, path_elem);
+			}
+
+			sparql->current_state.path = path_elem;
+		}
+
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+	} else {
+		g_assert_not_reached ();
+	}
+
+	return TRUE;
 }
 
 static gboolean
 translate_PathOneInPropertySet (TrackerSparql  *sparql,
                                 GError        **error)
 {
+	TrackerPathElement *path_elem;
+	gboolean inverse = FALSE;
+
 	/* PathOneInPropertySet ::= iri | 'a' | '^' ( iri | 'a' )
 	 */
-	return FALSE;
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_PATH_INVERSE))
+		inverse = TRUE;
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_A) ||
+	    _check_in_rule (sparql, NAMED_RULE_iri)) {
+		TrackerOntologies *ontologies;
+		TrackerProperty *prop;
+		gchar *str;
+
+		if (_check_in_rule (sparql, NAMED_RULE_iri))
+			_call_rule (sparql, NAMED_RULE_iri, error);
+
+		str = _dup_last_string (sparql);
+		ontologies = tracker_data_manager_get_ontologies (sparql->data_manager);
+		prop = tracker_ontologies_get_property_by_uri (ontologies, str);
+
+		if (!prop) {
+			g_set_error (error, TRACKER_SPARQL_ERROR,
+			             TRACKER_SPARQL_ERROR_UNKNOWN_PROPERTY,
+			             "Unknown property '%s'", str);
+			g_free (str);
+			return FALSE;
+		}
+
+		path_elem =
+			tracker_select_context_lookup_path_element_for_property (TRACKER_SELECT_CONTEXT (sparql->context),
+			                                                         prop);
+
+		if (!path_elem) {
+			path_elem = tracker_path_element_property_new (TRACKER_PATH_OPERATOR_NEGATED, prop);
+			tracker_select_context_add_path_element (TRACKER_SELECT_CONTEXT (sparql->context),
+			                                         path_elem);
+			_prepend_path_element (sparql, path_elem);
+		}
+
+		sparql->current_state.path = path_elem;
+		g_free (str);
+	} else {
+		g_assert_not_reached ();
+	}
+
+	if (inverse) {
+		path_elem = tracker_path_element_operator_new (TRACKER_PATH_OPERATOR_INVERSE,
+		                                               sparql->current_state.path,
+		                                               NULL);
+		tracker_select_context_add_path_element (TRACKER_SELECT_CONTEXT (sparql->context),
+		                                         path_elem);
+		_prepend_path_element (sparql, path_elem);
+		sparql->current_state.path = path_elem;
+	}
+
+	return TRUE;
 }
 
 static gboolean
@@ -4260,7 +5694,7 @@ translate_BlankNodePropertyList (TrackerSparql  *sparql,
 
 		iface = tracker_data_manager_get_writable_db_interface (sparql->data_manager);
 		bnode_id = tracker_data_query_unused_uuid (sparql->data_manager, iface);
-		tracker_token_literal_init (&sparql->current_state.subject, bnode_id);
+		tracker_token_literal_init (&sparql->current_state.subject, bnode_id, -1);
 		g_free (bnode_id);
 	}
 
@@ -4333,18 +5767,213 @@ static gboolean
 translate_Collection (TrackerSparql  *sparql,
                       GError        **error)
 {
+	TrackerToken old_subject, old_predicate, old_object, *old_token, *cur;
+	GArray *elems;
+	gint i;
+
 	/* Collection ::= '(' GraphNode+ ')'
 	 */
-	_unimplemented ("Collections are not supported");
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+
+	old_subject = sparql->current_state.subject;
+	old_predicate = sparql->current_state.predicate;
+	old_object = sparql->current_state.object;
+	old_token = sparql->current_state.token;
+
+	elems = g_array_new (FALSE, TRUE, sizeof (TrackerToken));
+
+	while (_check_in_rule (sparql, NAMED_RULE_GraphNode)) {
+		if (elems->len > 0) {
+			cur = &g_array_index (elems, TrackerToken, elems->len - 1);
+		} else {
+			g_array_set_size (elems, elems->len + 1);
+			cur = &g_array_index (elems, TrackerToken, 0);
+
+			if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT) {
+				TrackerVariable *var;
+				var = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+				tracker_token_variable_init (cur, var);
+			} else {
+				TrackerDBInterface *iface;
+				gchar *bnode_id;
+
+				iface = tracker_data_manager_get_writable_db_interface (sparql->data_manager);
+				bnode_id = tracker_data_query_unused_uuid (sparql->data_manager, iface);
+				tracker_token_literal_init (cur, bnode_id, -1);
+				g_free (bnode_id);
+			}
+		}
+
+		sparql->current_state.subject = *cur;
+
+		/* Add "_:elem a rdf:List" first */
+		tracker_token_literal_init (&sparql->current_state.predicate,
+		                            RDF_NS "type", -1);
+		tracker_token_literal_init (&sparql->current_state.object,
+		                            RDF_NS "List", -1);
+
+		if (!tracker_sparql_apply_quad (sparql, error)) {
+			tracker_token_unset (&sparql->current_state.predicate);
+			tracker_token_unset (&sparql->current_state.object);
+			goto error;
+		}
+
+		/* rdf:first */
+		tracker_token_literal_init (&sparql->current_state.predicate,
+		                            RDF_NS "first", -1);
+		sparql->current_state.token = &sparql->current_state.object;
+		_call_rule (sparql, NAMED_RULE_GraphNode, error);
+		sparql->current_state.token = NULL;
+		tracker_token_unset (&sparql->current_state.predicate);
+
+		/* rdf:rest */
+		tracker_token_literal_init (&sparql->current_state.predicate,
+		                            RDF_NS "rest", -1);
+
+		if (_check_in_rule (sparql, NAMED_RULE_GraphNode)) {
+			/* Generate variable for next element */
+			g_array_set_size (elems, elems->len + 1);
+			cur = &g_array_index (elems, TrackerToken, elems->len - 1);
+
+			if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT) {
+				TrackerVariable *var;
+				var = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+				tracker_token_variable_init (cur, var);
+			} else {
+				TrackerDBInterface *iface;
+				gchar *bnode_id;
+
+				iface = tracker_data_manager_get_writable_db_interface (sparql->data_manager);
+				bnode_id = tracker_data_query_unused_uuid (sparql->data_manager, iface);
+				tracker_token_literal_init (cur, bnode_id, -1);
+				g_free (bnode_id);
+			}
+
+			sparql->current_state.object = *cur;
+
+			if (!tracker_sparql_apply_quad (sparql, error)) {
+				tracker_token_unset (&sparql->current_state.predicate);
+				goto error;
+			}
+		} else {
+			/* Make last element point to rdf:nil */
+			tracker_token_literal_init (&sparql->current_state.object,
+			                            RDF_NS "nil", -1);
+
+			if (!tracker_sparql_apply_quad (sparql, error)) {
+				tracker_token_unset (&sparql->current_state.predicate);
+				tracker_token_unset (&sparql->current_state.object);
+				goto error;
+			}
+		}
+
+		tracker_token_unset (&sparql->current_state.predicate);
+	}
+
+	sparql->current_state.subject = old_subject;
+	sparql->current_state.predicate = old_predicate;
+	sparql->current_state.object = old_object;
+	sparql->current_state.token = old_token;
+
+	*sparql->current_state.token = g_array_index (elems, TrackerToken, 0);
+
+	for (i = 1; i < elems->len; i++) {
+		cur = &g_array_index (elems, TrackerToken, i);
+		tracker_token_unset (cur);
+	}
+
+	g_array_unref (elems);
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+	return TRUE;
+
+error:
+	sparql->current_state.subject = old_subject;
+	sparql->current_state.predicate = old_predicate;
+	sparql->current_state.object = old_object;
+	sparql->current_state.token = old_token;
+
+	for (i = 0; i < elems->len; i++) {
+		cur = &g_array_index (elems, TrackerToken, i);
+		tracker_token_unset (cur);
+	}
+
+	g_array_unref (elems);
+
+	return FALSE;
 }
 
 static gboolean
 translate_CollectionPath (TrackerSparql  *sparql,
                           GError        **error)
 {
+	TrackerToken old_subject, old_predicate, old_object, *old_token;
+	TrackerVariable *cur, *first = NULL, *rest = NULL;
+
+	old_subject = sparql->current_state.subject;
+	old_predicate = sparql->current_state.predicate;
+	old_object = sparql->current_state.object;
+	old_token = sparql->current_state.token;
+
 	/* CollectionPath ::= '(' GraphNodePath+ ')'
 	 */
-	_unimplemented ("Collections are not supported");
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+	while (_check_in_rule (sparql, NAMED_RULE_GraphNodePath)) {
+		if (rest) {
+			cur = rest;
+			rest = NULL;
+		} else {
+			cur = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+			first = cur;
+		}
+
+		tracker_token_variable_init (&sparql->current_state.subject, cur);
+
+		/* rdf:first */
+		tracker_token_literal_init (&sparql->current_state.predicate,
+		                            RDF_NS "first", -1);
+		sparql->current_state.token = &sparql->current_state.object;
+		_call_rule (sparql, NAMED_RULE_GraphNodePath, error);
+		sparql->current_state.token = NULL;
+		tracker_token_unset (&sparql->current_state.predicate);
+
+		/* rdf:rest */
+		tracker_token_literal_init (&sparql->current_state.predicate,
+		                            RDF_NS "rest", -1);
+
+		if (_check_in_rule (sparql, NAMED_RULE_GraphNodePath)) {
+			/* Generate variable for next element */
+			rest = tracker_select_context_add_generated_variable (TRACKER_SELECT_CONTEXT (sparql->context));
+			tracker_token_variable_init (&sparql->current_state.object, rest);
+		} else {
+			/* Make last element point to rdf:nil */
+			tracker_token_literal_init (&sparql->current_state.object,
+			                            RDF_NS "nil", -1);
+		}
+
+		if (!_add_quad (sparql,
+		                &sparql->current_state.graph,
+		                &sparql->current_state.subject,
+		                &sparql->current_state.predicate,
+		                &sparql->current_state.object,
+		                error))
+			return FALSE;
+
+		tracker_token_unset (&sparql->current_state.object);
+		tracker_token_unset (&sparql->current_state.predicate);
+
+		tracker_token_unset (&sparql->current_state.subject);
+	}
+
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+	sparql->current_state.subject = old_subject;
+	sparql->current_state.predicate = old_predicate;
+	sparql->current_state.object = old_object;
+	sparql->current_state.token = old_token;
+	tracker_token_variable_init (sparql->current_state.token, first);
+
+	return TRUE;
 }
 
 static gboolean
@@ -4386,42 +6015,8 @@ translate_GraphNode (TrackerSparql  *sparql,
 	     sparql->current_state.type != TRACKER_SPARQL_TYPE_UPDATE))
 		return TRUE;
 
-	switch (sparql->current_state.type) {
-	case TRACKER_SPARQL_TYPE_SELECT:
-		_add_quad (sparql,
-		           &sparql->current_state.graph,
-		           &sparql->current_state.subject,
-		           &sparql->current_state.predicate,
-		           &sparql->current_state.object,
-		           &inner_error);
-		break;
-	case TRACKER_SPARQL_TYPE_INSERT:
-		tracker_data_insert_statement (tracker_data_manager_get_data (sparql->data_manager),
-		                               tracker_token_get_idstring (&sparql->current_state.graph),
-		                               tracker_token_get_idstring (&sparql->current_state.subject),
-		                               tracker_token_get_idstring (&sparql->current_state.predicate),
-		                               tracker_token_get_idstring (&sparql->current_state.object),
-		                               &inner_error);
-		break;
-	case TRACKER_SPARQL_TYPE_DELETE:
-		tracker_data_delete_statement (tracker_data_manager_get_data (sparql->data_manager),
-		                               tracker_token_get_idstring (&sparql->current_state.graph),
-		                               tracker_token_get_idstring (&sparql->current_state.subject),
-		                               tracker_token_get_idstring (&sparql->current_state.predicate),
-		                               tracker_token_get_idstring (&sparql->current_state.object),
-		                               &inner_error);
-		break;
-	case TRACKER_SPARQL_TYPE_UPDATE:
-		tracker_data_update_statement (tracker_data_manager_get_data (sparql->data_manager),
-		                               tracker_token_get_idstring (&sparql->current_state.graph),
-		                               tracker_token_get_idstring (&sparql->current_state.subject),
-		                               tracker_token_get_idstring (&sparql->current_state.predicate),
-		                               tracker_token_get_idstring (&sparql->current_state.object),
-		                               &inner_error);
-		break;
-	default:
-		g_assert_not_reached ();
-	}
+	if (!tracker_sparql_apply_quad (sparql, error))
+		return FALSE;
 
 	tracker_token_unset (&sparql->current_state.object);
 
@@ -4476,6 +6071,7 @@ translate_VarOrTerm (TrackerSparql  *sparql,
 	switch (rule) {
 	case NAMED_RULE_Var:
 		if (sparql->current_state.type != TRACKER_SPARQL_TYPE_SELECT &&
+		    sparql->current_state.type != TRACKER_SPARQL_TYPE_CONSTRUCT &&
 		    !sparql->solution_var_map) {
 			TrackerParserNode *node = sparql->current_state.node;
 			const gchar *str = "Unknown";
@@ -4546,7 +6142,8 @@ translate_Var (TrackerSparql  *sparql,
 
 	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_VAR1) ||
 	    _accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_VAR2)) {
-		if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT) {
+		if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT ||
+		    sparql->current_state.type == TRACKER_SPARQL_TYPE_CONSTRUCT) {
 			TrackerVariableBinding *binding;
 			TrackerVariable *var;
 
@@ -4581,8 +6178,10 @@ translate_GraphTerm (TrackerSparql  *sparql,
 	rule = _current_rule (sparql);
 
 	switch (rule) {
-	case NAMED_RULE_iri:
 	case NAMED_RULE_RDFLiteral:
+		_call_rule (sparql, rule, error);
+		break;
+	case NAMED_RULE_iri:
 	case NAMED_RULE_NumericLiteral:
 	case NAMED_RULE_BooleanLiteral:
 		_call_rule (sparql, rule, error);
@@ -4923,6 +6522,67 @@ handle_property_function (TrackerSparql    *sparql,
 			  TrackerProperty  *property,
 			  GError          **error)
 {
+	TrackerPropertyType type;
+
+	/* As of SQLite 3.26.0, performing an aggregate function (or anything
+	 * that requires scanning all results, like distinct) on a unionGraph
+	 * view results in full table scans on all unioned selects.
+	 *
+	 * This quickly gets far too expensive on property functions, as they
+	 * are normally used in the SelectClause, so they get to run once per
+	 * result. This makes queries like:
+	 *
+	 * SELECT rdf:type(?u) { ?u a rdfs:Resource }
+	 *
+	 * prohibitive. The solution is to perform the union inline, and
+	 * evaluate the ArgList once on each of the unioned selects. This again
+	 * hits table search, and hopefully through an index, so it gets fast
+	 * again.
+	 */
+	if (tracker_property_get_multiple_values (property) &&
+	    tracker_token_is_empty (&sparql->current_state.graph)) {
+		TrackerStringBuilder *str, *old;
+		TrackerParserNode *arg;
+		GHashTable *ht;
+		GHashTableIter iter;
+		gpointer graph;
+
+		arg = _skip_rule (sparql, NAMED_RULE_ArgList);
+
+		_append_string (sparql, "(SELECT GROUP_CONCAT (");
+		str = _append_placeholder (sparql);
+		old = tracker_sparql_swap_builder (sparql, str);
+		_append_string_printf (sparql, "\"%s\"", tracker_property_get_name (property));
+		convert_expression_to_string (sparql, tracker_property_get_data_type (property));
+		tracker_sparql_swap_builder (sparql, old);
+
+		_append_string (sparql, ", ',') ");
+
+		_append_string_printf (sparql, "FROM (SELECT \"%s\" FROM \"main\".\"%s\" WHERE ID = ",
+		                       tracker_property_get_name (property),
+		                       tracker_property_get_table_name (property));
+		if (!_postprocess_rule (sparql, arg, NULL, error))
+			return FALSE;
+
+		ht = tracker_data_manager_get_graphs (sparql->data_manager);
+		g_hash_table_iter_init (&iter, ht);
+
+		while (g_hash_table_iter_next (&iter, (gpointer *) &graph, NULL)) {
+			_append_string_printf (sparql, "UNION ALL SELECT \"%s\" FROM \"%s\".\"%s\" WHERE ID = ",
+			                       tracker_property_get_name (property),
+			                       (gchar *) graph,
+			                       tracker_property_get_table_name (property));
+
+			if (!_postprocess_rule (sparql, arg, NULL, error))
+				return FALSE;
+		}
+
+		_append_string (sparql, ")) ");
+
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
+		return TRUE;
+	}
+
 	if (tracker_property_get_multiple_values (property)) {
 		TrackerStringBuilder *str, *old;
 
@@ -4933,22 +6593,35 @@ handle_property_function (TrackerSparql    *sparql,
 		convert_expression_to_string (sparql, tracker_property_get_data_type (property));
 		tracker_sparql_swap_builder (sparql, old);
 
-		_append_string_printf (sparql, ", ',') FROM \"%s\" WHERE ID = ",
-				       tracker_property_get_table_name (property));
+		_append_string (sparql, ", ',') ");
 
-		_call_rule (sparql, NAMED_RULE_ArgList, error);
-		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
+		type = TRACKER_PROPERTY_TYPE_STRING;
 	} else {
 		_append_string_printf (sparql,
-				       "(SELECT \"%s\" FROM \"%s\" WHERE ID = ",
-				       tracker_property_get_name (property),
-				       tracker_property_get_table_name (property));
+				       "(SELECT \"%s\" ",
+				       tracker_property_get_name (property));
 
-		_call_rule (sparql, NAMED_RULE_ArgList, error);
-		sparql->current_state.expression_type = tracker_property_get_data_type (property);
+		type = tracker_property_get_data_type (property);
 	}
 
+	if (tracker_token_is_empty (&sparql->current_state.graph)) {
+		_append_string_printf (sparql, "FROM \"unionGraph_%s\" ",
+		                       tracker_property_get_table_name (property));
+		if (sparql->union_views) {
+			g_hash_table_add (sparql->union_views,
+			                  g_strdup (tracker_property_get_table_name (property)));
+		}
+	} else {
+		_append_string_printf (sparql, "FROM \"%s\".\"%s\" ",
+		                       tracker_token_get_idstring (&sparql->current_state.graph),
+		                       tracker_property_get_table_name (property));
+	}
+
+	_append_string (sparql, "WHERE ID = ");
+	_call_rule (sparql, NAMED_RULE_ArgList, error);
 	_append_string (sparql, ") ");
+
+	sparql->current_state.expression_type = type;
 
 	return TRUE;
 }
@@ -4965,6 +6638,11 @@ handle_type_cast (TrackerSparql  *sparql,
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
 		_append_string (sparql, "AS TEXT) ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
+	} else if (g_str_equal (function, RDF_NS "langString")) {
+		_append_string (sparql, "CAST (");
+		_call_rule (sparql, NAMED_RULE_ArgList, error);
+		_append_string (sparql, "AS BLOB) ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_LANGSTRING;
 	} else if (g_str_equal (function, XSD_NS "integer")) {
 		_append_string (sparql, "CAST (");
 		_call_rule (sparql, NAMED_RULE_ArgList, error);
@@ -5121,21 +6799,11 @@ handle_xpath_function (TrackerSparql  *sparql,
 			return FALSE;
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 	} else if (g_str_equal (function, FN_NS "timezone-from-dateTime")) {
-		TrackerVariable *variable;
-
 		_step (sparql);
-		_append_string (sparql, "( ");
+		_append_string (sparql, "SparqlTimezoneDuration( ");
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 
 		_call_rule (sparql, NAMED_RULE_Expression, error);
-		variable = _last_node_variable (sparql);
-
-		if (!variable) {
-			_raise (PARSE, "Expected variable", "fn:timezone-from-dateTime");
-		} else {
-			_append_string_printf (sparql, " - %s ",
-					       tracker_variable_get_sql_expression (variable));
-		}
 
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 		_append_string (sparql, ") ");
@@ -5294,7 +6962,8 @@ handle_function_call (TrackerSparql  *sparql,
 	convert_to_string = sparql->current_state.convert_to_string;
 	sparql->current_state.convert_to_string = FALSE;
 
-	if (g_str_has_prefix (function, XSD_NS)) {
+	if (g_str_has_prefix (function, XSD_NS) ||
+	    strcmp (function, RDF_NS "langString") == 0) {
 		handled = handle_type_cast (sparql, function, error);
 	} else if (g_str_has_prefix (function, FN_NS)) {
 		handled = handle_xpath_function (sparql, function, error);
@@ -5380,12 +7049,12 @@ helper_translate_date (TrackerSparql  *sparql,
                        GError        **error)
 {
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
-	_append_string_printf (sparql, "strftime (\"%s\", ", format);
+	_append_string_printf (sparql, "strftime (\"%s\", SparqlTimestamp (", format);
 
 	_call_rule (sparql, NAMED_RULE_Expression, error);
 
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
-	_append_string (sparql, ", \"unixepoch\") ");
+	_append_string (sparql, "), \"unixepoch\") ");
 
 	return TRUE;
 }
@@ -5395,20 +7064,20 @@ helper_translate_time (TrackerSparql  *sparql,
                        guint           format,
                        GError        **error)
 {
+	_append_string (sparql, "CAST (SparqlTimestamp (");
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 	_call_rule (sparql, NAMED_RULE_Expression, error);
-
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 
 	switch (format) {
 	case TIME_FORMAT_SECONDS:
-		_append_string (sparql, " % 60 ");
+		_append_string (sparql, ") AS INTEGER) % 60 ");
 		break;
 	case TIME_FORMAT_MINUTES:
-		_append_string (sparql, " / 60 % 60 ");
+		_append_string (sparql, ") AS INTEGER) / 60 % 60 ");
 		break;
 	case TIME_FORMAT_HOURS:
-		_append_string (sparql, " / 3600 % 24 ");
+		_append_string (sparql, ") AS INTEGER) / 3600 % 24 ");
 		break;
 	default:
 		g_assert_not_reached ();
@@ -5418,9 +7087,54 @@ helper_translate_time (TrackerSparql  *sparql,
 }
 
 static gboolean
+helper_datatype (TrackerSparql      *sparql,
+                 TrackerParserNode  *node,
+                 GError            **error)
+{
+	TrackerStringBuilder *dummy;
+	gboolean retval;
+
+	_append_string (sparql, "SparqlDataType (");
+
+	if (g_node_n_nodes ((GNode *) node, G_TRAVERSE_LEAVES) == 1) {
+		TrackerVariable *var, *type_var;
+		TrackerParserNode *arg;
+
+		arg = tracker_sparql_parser_tree_find_next (node, TRUE);
+		var = _extract_node_variable (arg, sparql);
+
+		if (var) {
+			/* This is a simple is*(?u) statement, check if the variable type is known */
+			type_var = lookup_subvariable (sparql, var, "type");
+
+			if (type_var && tracker_variable_has_bindings (type_var)) {
+				/* Exists and is known, use it */
+				_append_variable_sql (sparql, type_var);
+				_append_string (sparql, ") ");
+
+				return TRUE;
+			}
+		}
+	}
+
+	/* Redirect output to a dummy string, we just care of the parsed expression type */
+	dummy = tracker_string_builder_new ();
+	retval = _postprocess_rule (sparql, node, dummy, error);
+	tracker_string_builder_free (dummy);
+
+	if (!retval)
+		return retval;
+
+	_append_string_printf (sparql, "%d) ", sparql->current_state.expression_type);
+
+	return TRUE;
+}
+
+static gboolean
 translate_BuiltInCall (TrackerSparql  *sparql,
                        GError        **error)
 {
+	TrackerParserNode *node;
 	gboolean convert_to_string;
 	const gchar *old_sep;
 
@@ -5452,11 +7166,25 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 		tracker_sparql_swap_builder (sparql, old);
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DATATYPE)) {
-		_unimplemented ("DATATYPE");
-	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_IRI)) {
-		_unimplemented ("IRI");
-	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_URI)) {
-		_unimplemented ("URI");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		_append_string (sparql, "NULLIF (");
+		if (!helper_datatype (sparql, node, error))
+			return FALSE;
+
+		_append_string (sparql, ", \"" RDFS_NS "Resource\") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
+	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_URI) ||
+	           _accept (sparql, RULE_TYPE_LITERAL, LITERAL_IRI)) {
+		sparql->current_state.convert_to_string = TRUE;
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		_append_string (sparql, "SparqlUri (");
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+		_append_string (sparql, ") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ABS)) {
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, "ABS (");
@@ -5535,9 +7263,21 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 			return FALSE;
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DOUBLE;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_TIMEZONE)) {
-		_unimplemented ("TIMEZONE");
+		sparql->current_state.convert_to_string = TRUE;
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		_append_string (sparql, "SparqlTimezone (");
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+		_append_string (sparql, ") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_TZ)) {
-		_unimplemented ("TZ");
+		sparql->current_state.convert_to_string = TRUE;
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		_append_string (sparql, "SparqlTimezoneString (");
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+		_append_string (sparql, ") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_MD5)) {
 		sparql->current_state.convert_to_string = TRUE;
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
@@ -5580,30 +7320,63 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISIRI) ||
 		   _accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISURI)) {
-		TrackerBinding *binding;
-		const gchar *str;
-
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
-
-		_call_rule (sparql, NAMED_RULE_Expression, error);
-
-		str = (sparql->current_state.expression_type == TRACKER_PROPERTY_TYPE_RESOURCE) ? "1" : "0";
-
-		binding = tracker_literal_binding_new (str, NULL);
-		tracker_select_context_add_literal_binding (TRACKER_SELECT_CONTEXT (sparql->context),
-		                                            TRACKER_LITERAL_BINDING (binding));
-		_append_literal_sql (sparql, TRACKER_LITERAL_BINDING (binding));
-
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		if (!helper_datatype (sparql, node, error))
+			return FALSE;
+
+		_append_string (sparql, "== \"" RDFS_NS "Resource\" ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISBLANK)) {
-		_unimplemented ("ISBLANK");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		_append_string (sparql, "CASE ");
+
+		if (!helper_datatype (sparql, node, error))
+			return FALSE;
+
+		_append_string (sparql, "== \"" RDFS_NS "Resource\" ");
+		_append_string (sparql, "WHEN 1 THEN (SELECT BlankNode FROM Resource WHERE ID = ");
+
+		if (!_postprocess_rule (sparql, node, NULL, error))
+			return FALSE;
+
+		_append_string (sparql, ") ELSE NULL END ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISLITERAL)) {
-		_unimplemented ("ISLITERAL");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		if (!helper_datatype (sparql, node, error))
+			return FALSE;
+
+		_append_string (sparql, "!= \"" RDFS_NS "Resource\" ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ISNUMERIC)) {
-		_unimplemented ("ISNUMERIC");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		if (!helper_datatype (sparql, node, error))
+			return FALSE;
+
+		_append_string (sparql, "IN (\"" XSD_NS "integer\", \"" XSD_NS "double\")");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_LANGMATCHES)) {
-		_unimplemented ("LANGMATCHES");
+		_append_string (sparql, "SparqlLangMatches (");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA);
+		_append_string (sparql, ", ");
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+		_append_string (sparql, ") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_CONTAINS)) {
 		/* contains('A','B') => 'A' GLOB '*B*' */
 		sparql->current_state.convert_to_string = TRUE;
@@ -5675,9 +7448,67 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 		_append_string (sparql, ") ");
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRLANG)) {
-		_unimplemented ("STRLANG");
+		_append_string (sparql, "SparqlStrLang (");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA);
+		_append_string (sparql, ", ");
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+		_append_string (sparql, ") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_LANGSTRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRDT)) {
-		_unimplemented ("STRDT");
+		TrackerParserNode *expr, *node, *iri_node = NULL;
+		TrackerPropertyType type;
+		gchar *type_iri;
+		gboolean retval = TRUE;
+
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+		expr = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA);
+		node = _skip_rule (sparql, NAMED_RULE_Expression);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+
+		if (g_node_n_nodes ((GNode *) node, G_TRAVERSE_LEAVES) == 1)
+			iri_node = tracker_sparql_parser_tree_find_first (node, TRUE);
+
+		if (!iri_node)
+			_raise (PARSE, "Second argument must be IRI", "STRDT");
+
+		type_iri = _extract_node_string (iri_node, sparql);
+		type = rdf_type_to_property_type (type_iri);
+		g_free (type_iri);
+
+		switch (type) {
+		case TRACKER_PROPERTY_TYPE_UNKNOWN:
+		case TRACKER_PROPERTY_TYPE_STRING:
+		case TRACKER_PROPERTY_TYPE_LANGSTRING:
+		case TRACKER_PROPERTY_TYPE_RESOURCE:
+			retval = _postprocess_rule (sparql, expr, NULL, error);
+			break;
+		case TRACKER_PROPERTY_TYPE_BOOLEAN:
+			retval = _postprocess_rule (sparql, expr, NULL, error);
+			break;
+		case TRACKER_PROPERTY_TYPE_INTEGER:
+			_append_string (sparql, "CAST (");
+			retval = _postprocess_rule (sparql, expr, NULL, error);
+			_append_string (sparql, "AS INTEGER) ");
+			break;
+		case TRACKER_PROPERTY_TYPE_DOUBLE:
+			_append_string (sparql, "CAST (");
+			retval = _postprocess_rule (sparql, expr, NULL, error);
+			_append_string (sparql, "AS REAL) ");
+			break;
+		case TRACKER_PROPERTY_TYPE_DATE:
+		case TRACKER_PROPERTY_TYPE_DATETIME:
+			retval = _postprocess_rule (sparql, expr, NULL, error);
+			break;
+		}
+
+		if (!retval)
+			return FALSE;
+
+		sparql->current_state.expression_type = type;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SAMETERM)) {
 		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
 		_append_string (sparql, " ( ");
@@ -5711,7 +7542,17 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		_append_string (sparql, "IS NOT NULL) ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_BNODE)) {
-		_unimplemented ("BNODE");
+		if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL)) {
+			_append_string (sparql, "SparqlUUID(\"urn:bnode\") ");
+		} else {
+			_append_string (sparql, "SparqlBNODE(");
+			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+			_call_rule (sparql, NAMED_RULE_Expression, error);
+			_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
+			_append_string (sparql, ") ");
+		}
+
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_RAND)) {
 		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL);
 		_append_string (sparql, "SparqlRand() ");
@@ -5722,10 +7563,12 @@ translate_BuiltInCall (TrackerSparql  *sparql,
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DATETIME;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_UUID)) {
 		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL);
-		_unimplemented ("UUID");
+		_append_string (sparql, "SparqlUUID(\"urn:uuid\") ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_STRUUID)) {
 		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_NIL);
-		_unimplemented ("STRUUID");
+		_append_string (sparql, "SparqlUUID() ");
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_CONCAT)) {
 		sparql->current_state.convert_to_string = TRUE;
 		old_sep = tracker_sparql_swap_current_expression_list_separator (sparql, " || ");
@@ -5968,7 +7811,13 @@ translate_Aggregate (TrackerSparql  *sparql,
 		_append_string (sparql, ") ");
 		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SAMPLE)) {
-		_unimplemented ("SAMPLE");
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS);
+
+		if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DISTINCT))
+			_append_string (sparql, "DISTINCT ");
+
+		_call_rule (sparql, NAMED_RULE_Expression, error);
+		_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 	} else {
 		g_assert_not_reached ();
 	}
@@ -5980,59 +7829,94 @@ static gboolean
 translate_RDFLiteral (TrackerSparql  *sparql,
                       GError        **error)
 {
+	TrackerParserNode *node;
 	TrackerBinding *binding;
+	gchar *str, *langtag = NULL, *cast = NULL;
+	gboolean is_parameter;
+	const TrackerGrammarRule *rule;
+	TrackerPropertyType type;
 
 	/* RDFLiteral ::= String ( LANGTAG | ( '^^' iri ) )?
 	 */
 	_call_rule (sparql, NAMED_RULE_String, error);
-	binding = _convert_terminal (sparql);
+	node = sparql->current_state.prev_node;
+	str = _extract_node_string (node, sparql);
+	rule = tracker_parser_node_get_rule (node);
+	is_parameter = tracker_grammar_rule_is_a (rule, RULE_TYPE_TERMINAL,
+	                                          TERMINAL_TYPE_PARAMETERIZED_VAR);
 
 	if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_LANGTAG)) {
-		g_object_unref (binding);
-		_unimplemented ("LANGTAG");
+		langtag = _dup_last_string (sparql);
+		sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_LANGSTRING;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DOUBLE_CIRCUMFLEX)) {
-		gchar *cast;
-
 		_call_rule (sparql, NAMED_RULE_iri, error);
 		cast = _dup_last_string (sparql);
-
-		if (g_str_equal (cast, XSD_NS "boolean")) {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
-		} else if (g_str_equal (cast, XSD_NS "integer") ||
-		           g_str_equal (cast, XSD_NS "nonPositiveInteger") ||
-		           g_str_equal (cast, XSD_NS "negativeInteger") ||
-		           g_str_equal (cast, XSD_NS "long") ||
-		           g_str_equal (cast, XSD_NS "int") ||
-		           g_str_equal (cast, XSD_NS "short") ||
-		           g_str_equal (cast, XSD_NS "byte") ||
-		           g_str_equal (cast, XSD_NS "nonNegativeInteger") ||
-		           g_str_equal (cast, XSD_NS "unsignedLong") ||
-		           g_str_equal (cast, XSD_NS "unsignedInt") ||
-		           g_str_equal (cast, XSD_NS "unsignedShort") ||
-		           g_str_equal (cast, XSD_NS "unsignedByte") ||
-		           g_str_equal (cast, XSD_NS "positiveInteger")) {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
-		} else if (g_str_equal (cast, XSD_NS "double")) {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DOUBLE;
-		} else if (g_str_equal (cast, XSD_NS "date")) {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DATE;
-		} else if (g_str_equal (cast, XSD_NS "dateTime")) {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_DATETIME;
-		} else {
-			sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_STRING;
-		}
-
-		g_free (cast);
 	}
 
-	tracker_binding_set_data_type (binding, sparql->current_state.expression_type);
+	if (is_parameter && (langtag || cast)) {
+		g_free (str);
+		g_free (langtag);
+		g_free (cast);
+		_raise (PARSE, "Parameter cannot have LANGTAG/^^ modifiers", "RDFLiteral");
+	}
 
-	if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT) {
+	if (is_parameter) {
+		binding = tracker_parameter_binding_new (str, NULL);
+	} else {
+		GString *langstr;
+		GBytes *bytes;
+
+		langstr = g_string_new (str);
+
+		if (langtag) {
+			g_string_append_c (langstr, '\0');
+			g_string_append_printf (langstr, "%s", &langtag[1]);
+		}
+
+		bytes = g_bytes_new_take (langstr->str,
+		                          langstr->len + 1);
+		g_string_free (langstr, FALSE);
+
+		binding = tracker_literal_binding_new (bytes, NULL);
+		g_bytes_unref (bytes);
+	}
+
+	if (cast) {
+		type = rdf_type_to_property_type (cast);
+	} else if (langtag) {
+		type = TRACKER_PROPERTY_TYPE_LANGSTRING;
+	} else {
+		type = TRACKER_PROPERTY_TYPE_STRING;
+	}
+
+	sparql->current_state.expression_type = type;
+	tracker_binding_set_data_type (binding, type);
+
+	if (!is_parameter &&
+	    (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT ||
+	     sparql->current_state.type == TRACKER_SPARQL_TYPE_CONSTRUCT)) {
 		tracker_select_context_add_literal_binding (TRACKER_SELECT_CONTEXT (sparql->context),
 		                                            TRACKER_LITERAL_BINDING (binding));
 	}
 
+	if (sparql->current_state.token) {
+		if (is_parameter) {
+			tracker_token_parameter_init (sparql->current_state.token,
+			                              TRACKER_PARAMETER_BINDING (binding)->name);
+		} else {
+			gconstpointer data;
+			gsize len;
+
+			data = g_bytes_get_data (TRACKER_LITERAL_BINDING (binding)->bytes, &len);
+			tracker_token_literal_init (sparql->current_state.token,
+			                            data, len);
+		}
+	}
+
 	g_object_unref (binding);
+	g_free (langtag);
+	g_free (cast);
+	g_free (str);
 
 	return TRUE;
 }
@@ -6222,10 +8106,11 @@ translate_BlankNode (TrackerSparql  *sparql,
 
 	iface = tracker_data_manager_get_writable_db_interface (sparql->data_manager);
 
-        if (sparql->current_state.type != TRACKER_SPARQL_TYPE_SELECT) {
+        if (sparql->current_state.type != TRACKER_SPARQL_TYPE_SELECT &&
+	    sparql->current_state.type != TRACKER_SPARQL_TYPE_CONSTRUCT) {
 	        if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_ANON)) {
 		        bnode_id = tracker_data_query_unused_uuid (sparql->data_manager, iface);
-		        tracker_token_literal_init (sparql->current_state.token, bnode_id);
+		        tracker_token_literal_init (sparql->current_state.token, bnode_id, -1);
 		        g_free (bnode_id);
 	        } else if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_BLANK_NODE_LABEL)) {
 		        gchar *str;
@@ -6243,9 +8128,9 @@ translate_BlankNode (TrackerSparql  *sparql,
 						g_variant_builder_add (sparql->blank_nodes, "{ss}", str, bnode_id);
 			        }
 
-			        tracker_token_literal_init (sparql->current_state.token, bnode_id);
+			        tracker_token_literal_init (sparql->current_state.token, bnode_id, -1);
 		        } else {
-			        tracker_token_literal_init (sparql->current_state.token, str);
+			        tracker_token_literal_init (sparql->current_state.token, str, -1);
 		        }
 
 		        g_free (str);
@@ -6467,9 +8352,16 @@ tracker_sparql_init (TrackerSparql *sparql)
 {
 	sparql->prefix_map = g_hash_table_new_full (g_str_hash, g_str_equal,
 	                                            g_free, g_free);
-	sparql->parameters = g_hash_table_new (g_str_hash, g_str_equal);
+	sparql->cached_bindings = g_hash_table_new_full (g_str_hash, g_str_equal,
+							 g_free, g_object_unref);
+	sparql->parameters = g_hash_table_new_full (g_str_hash, g_str_equal,
+	                                            g_free, g_object_unref);
+	sparql->union_views = g_hash_table_new_full (g_str_hash, g_str_equal,
+	                                             g_free, NULL);
 	sparql->var_names = g_ptr_array_new_with_free_func (g_free);
 	sparql->var_types = g_array_new (FALSE, FALSE, sizeof (TrackerPropertyType));
+	sparql->anon_graphs = g_ptr_array_new_with_free_func (g_free);
+	sparql->named_graphs = g_ptr_array_new_with_free_func (g_free);
 	sparql->cacheable = TRUE;
 }
 
@@ -6491,18 +8383,16 @@ tracker_sparql_new (TrackerDataManager *manager,
 					   &sparql->parser_error);
 	if (tree) {
 		sparql->tree = tree;
-		sparql->sql = tracker_string_builder_new ();
-
 		sparql->current_state.node = tracker_node_tree_get_root (sparql->tree);
-		sparql->current_state.sql = sparql->sql;
-		sparql->current_state.with_clauses = _prepend_placeholder (sparql);
+		tracker_sparql_init_string_builder (sparql);
 	}
 
 	return sparql;
 }
 
 static TrackerDBStatement *
-prepare_query (TrackerDBInterface    *iface,
+prepare_query (TrackerSparql         *sparql,
+               TrackerDBInterface    *iface,
                TrackerStringBuilder  *str,
                GPtrArray             *literals,
 	       GHashTable            *parameters,
@@ -6512,6 +8402,10 @@ prepare_query (TrackerDBInterface    *iface,
 	TrackerDBStatement *stmt;
 	gchar *query;
 	guint i;
+
+	if (!tracker_data_manager_update_union_views (sparql->data_manager, iface,
+	                                              sparql->union_views, error))
+		return NULL;
 
 	query = tracker_string_builder_to_string (str);
 	stmt = tracker_db_interface_create_statement (iface,
@@ -6588,6 +8482,9 @@ prepare_query (TrackerDBInterface    *iface,
 			tracker_db_statement_bind_double (stmt, i, datetime);
 		} else if (prop_type == TRACKER_PROPERTY_TYPE_INTEGER) {
 			tracker_db_statement_bind_int (stmt, i, atoi (binding->literal));
+		} else if (prop_type == TRACKER_PROPERTY_TYPE_LANGSTRING &&
+			   g_bytes_get_size (binding->bytes) > strlen (binding->literal) + 1) {
+			tracker_db_statement_bind_bytes (stmt, i, binding->bytes);
 		} else {
 			tracker_db_statement_bind_text (stmt, i, binding->literal);
 		}
@@ -6617,7 +8514,7 @@ tracker_sparql_execute_cursor (TrackerSparql  *sparql,
 		return NULL;
 
 	iface = tracker_data_manager_get_db_interface (sparql->data_manager);
-	stmt = prepare_query (iface, sparql->sql,
+	stmt = prepare_query (sparql, iface, sparql->sql,
 	                      TRACKER_SELECT_CONTEXT (sparql->context)->literal_bindings,
 			      parameters,
 	                      sparql->cacheable,
@@ -6669,11 +8566,8 @@ tracker_sparql_new_update (TrackerDataManager *manager,
 
 	if (tree) {
 		sparql->tree = tree;
-		sparql->sql = tracker_string_builder_new ();
-
 		sparql->current_state.node = tracker_node_tree_get_root (sparql->tree);
-		sparql->current_state.sql = sparql->sql;
-		sparql->current_state.with_clauses = _prepend_placeholder (sparql);
+		tracker_sparql_init_string_builder (sparql);
 	}
 
 	return sparql;

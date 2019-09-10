@@ -387,7 +387,6 @@ class PropertyMaxCardinality1toN (OntologyChangeTestTemplate):
     Change cardinality of a property from 1 to N. There shouldn't be any data loss
     """
 
-    @expectedFailureJournal()
     def test_property_cardinality_1_to_n(self):
         self.template_test_ontology_change()
 

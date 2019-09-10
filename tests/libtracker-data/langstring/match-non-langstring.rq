@@ -1,0 +1,1 @@
+SELECT ?u { ?u example:string "bla"@es }

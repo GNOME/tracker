@@ -53,7 +53,6 @@ GType             tracker_class_get_type               (void) G_GNUC_CONST;
 TrackerClass *    tracker_class_new                    (gboolean             use_gvdb);
 const gchar *     tracker_class_get_uri                (TrackerClass        *service);
 const gchar *     tracker_class_get_name               (TrackerClass        *service);
-gint              tracker_class_get_count              (TrackerClass        *service);
 gint              tracker_class_get_id                 (TrackerClass        *service);
 gboolean          tracker_class_get_is_new             (TrackerClass        *service);
 gboolean          tracker_class_get_db_schema_changed  (TrackerClass        *service);
@@ -66,8 +65,6 @@ TrackerClass    **tracker_class_get_last_super_classes (TrackerClass        *ser
 
 void              tracker_class_set_uri                (TrackerClass        *service,
                                                         const gchar         *value);
-void              tracker_class_set_count              (TrackerClass        *service,
-                                                        gint                 value);
 void              tracker_class_add_super_class        (TrackerClass        *service,
                                                         TrackerClass        *value);
 void              tracker_class_add_domain_index       (TrackerClass        *service,

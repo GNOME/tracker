@@ -47,6 +47,8 @@ gchar *  tracker_utf8_truncate              (const gchar  *str,
                                              gsize         max_size);
 gchar *  tracker_unescape_unichars          (const gchar  *str,
 					     gssize        len);
+gchar *  tracker_resolve_relative_uri       (const gchar  *base,
+                                             const gchar  *rel_uri);
 
 G_END_DECLS
 

@@ -1,0 +1,4 @@
+SELECT ?s WHERE {
+	?s a example:A
+}
+ORDER BY ?s

@@ -1,0 +1,8 @@
+INSERT {
+	GRAPH example:graphA {
+		example:resource a example:A ;
+			example:p 42
+	}
+}
+
+ADD SILENT GRAPH example:graphB TO GRAPH example:graphA

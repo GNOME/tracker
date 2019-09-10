@@ -201,14 +201,15 @@ tracker_string_to_date (const gchar *date_string,
 }
 
 gchar *
-tracker_date_to_string (gdouble date_time)
+tracker_date_to_string (gdouble date_time,
+                        gint    offset)
 {
-	gchar     buffer[30];
+	gchar buffer[35];
 	time_t seconds;
 	gint64 total_milliseconds;
 	gint milliseconds;
 	struct tm utc_time;
-	size_t    count;
+	size_t count, size;
 
 	memset (buffer, '\0', sizeof (buffer));
 	memset (&utc_time, 0, sizeof (struct tm));
@@ -218,7 +219,7 @@ tracker_date_to_string (gdouble date_time)
 	if (milliseconds < 0) {
 		milliseconds += 1000;
 	}
-	seconds = (time_t) ((total_milliseconds - milliseconds) / 1000);
+	seconds = (time_t) ((total_milliseconds - milliseconds) / 1000) + offset;
 	gmtime_r (&seconds, &utc_time);
 
 	/* Output is ISO 8601 format : "YYYY-MM-DDThh:mm:ss" */
@@ -226,10 +227,24 @@ tracker_date_to_string (gdouble date_time)
 
 	/* Append milliseconds (if non-zero) and time zone */
 	if (milliseconds > 0) {
-		snprintf (buffer + count, sizeof (buffer) - count, ".%03dZ", milliseconds);
-	} else {
-		buffer[count] = 'Z';
+		size = snprintf (buffer + count, sizeof (buffer) - count, ".%03d", milliseconds);
+		count += size;
 	}
+
+	if (offset != 0) {
+		gint hours, mins;
+
+		hours = ABS (offset) / 3600;
+		mins = (ABS (offset) % 3600) / 60;
+		size = snprintf (buffer + count, sizeof (buffer) - count, "%c%.2d:%.2d",
+		                 offset < 0 ? '-' : '+',
+		                 hours, mins);
+		count += size;
+	} else {
+		buffer[count++] = 'Z';
+	}
+
+	g_assert (count <= sizeof (buffer));
 
 	return count > 0 ? g_strdup (buffer) : NULL;
 }

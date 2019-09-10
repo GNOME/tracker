@@ -1,0 +1,10 @@
+INSERT {
+	GRAPH example:graphA {
+		example:resource a example:A ;
+			example:p 42
+	}
+}
+
+CREATE GRAPH example:graphB
+
+COPY GRAPH example:graphA TO GRAPH example:graphB

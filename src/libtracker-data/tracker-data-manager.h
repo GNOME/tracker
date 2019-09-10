@@ -40,7 +40,6 @@ typedef struct _TrackerDataManagerClass TrackerDataManagerClass;
 #include <libtracker-data/tracker-data-update.h>
 #include <libtracker-data/tracker-db-interface.h>
 #include <libtracker-data/tracker-db-manager.h>
-#include <libtracker-data/tracker-db-journal.h>
 
 #define TRACKER_DATA_ONTOLOGY_ERROR                  (tracker_data_ontology_error_quark ())
 
@@ -64,7 +63,6 @@ TrackerDataManager * tracker_data_manager_new        (TrackerDBManagerFlags   fl
                                                       GFile                  *cache_location,
                                                       GFile                  *data_location,
                                                       GFile                  *ontology_location,
-                                                      gboolean                journal_check,
                                                       gboolean                restoring_backup,
                                                       guint                   select_cache_size,
                                                       guint                   update_cache_size);
@@ -73,8 +71,6 @@ void                 tracker_data_manager_shutdown            (TrackerDataManage
 
 GFile *              tracker_data_manager_get_cache_location  (TrackerDataManager *manager);
 GFile *              tracker_data_manager_get_data_location   (TrackerDataManager *manager);
-TrackerDBJournal *   tracker_data_manager_get_journal_writer  (TrackerDataManager *manager);
-TrackerDBJournal *   tracker_data_manager_get_ontology_writer (TrackerDataManager *manager);
 TrackerOntologies *  tracker_data_manager_get_ontologies      (TrackerDataManager *manager);
 
 TrackerDBManager *   tracker_data_manager_get_db_manager      (TrackerDataManager *manager);
@@ -82,10 +78,35 @@ TrackerDBInterface * tracker_data_manager_get_db_interface    (TrackerDataManage
 TrackerDBInterface * tracker_data_manager_get_writable_db_interface (TrackerDataManager *manager);
 TrackerData *        tracker_data_manager_get_data            (TrackerDataManager *manager);
 
-gboolean tracker_data_manager_init_fts               (TrackerDBInterface     *interface,
-						      gboolean                create);
-
 GHashTable *         tracker_data_manager_get_namespaces      (TrackerDataManager *manager);
+
+gboolean             tracker_data_manager_create_graph (TrackerDataManager  *manager,
+                                                        const gchar         *name,
+                                                        GError             **error);
+
+gboolean             tracker_data_manager_drop_graph (TrackerDataManager  *manager,
+                                                      const gchar         *name,
+                                                      GError             **error);
+
+gboolean             tracker_data_manager_clear_graph (TrackerDataManager  *manager,
+                                                       const gchar         *graph,
+                                                       GError             **error);
+gboolean             tracker_data_manager_copy_graph  (TrackerDataManager  *manager,
+                                                       const gchar         *source,
+                                                       const gchar         *destination,
+                                                       GError             **error);
+
+GHashTable *         tracker_data_manager_get_graphs       (TrackerDataManager *manager);
+
+gint                 tracker_data_manager_find_graph       (TrackerDataManager *manager,
+                                                            const gchar        *name);
+const gchar *        tracker_data_manager_find_graph_by_id (TrackerDataManager *manager,
+                                                            gint                id);
+
+gboolean             tracker_data_manager_update_union_views (TrackerDataManager  *manager,
+                                                              TrackerDBInterface  *iface,
+                                                              GHashTable          *tables,
+                                                              GError             **error);
 
 G_END_DECLS
 

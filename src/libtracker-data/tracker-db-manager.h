@@ -30,6 +30,10 @@ G_BEGIN_DECLS
 #error "only <libtracker-data/tracker-data.h> must be included directly."
 #endif
 
+#define TRACKER_TYPE_DB_MANAGER (tracker_db_manager_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerDBManager, tracker_db_manager,
+                      TRACKER, DB_MANAGER, GObject)
+
 #define TRACKER_DB_CACHE_SIZE_DEFAULT 250
 #define TRACKER_DB_CACHE_SIZE_UPDATE 2000
 
@@ -57,7 +61,6 @@ TrackerDBManager   *tracker_db_manager_new                    (TrackerDBManagerF
                                                                GObject                *iface_data,
                                                                gpointer                vtab_data,
                                                                GError                **error);
-void                tracker_db_manager_free                   (TrackerDBManager      *db_manager);
 void                tracker_db_manager_remove_all             (TrackerDBManager      *db_manager);
 void                tracker_db_manager_optimize               (TrackerDBManager      *db_manager);
 const gchar *       tracker_db_manager_get_file               (TrackerDBManager      *db_manager);
@@ -68,8 +71,7 @@ void                tracker_db_manager_ensure_locations       (TrackerDBManager 
 							       GFile                 *cache_location,
                                                                GFile                 *data_location);
 gboolean            tracker_db_manager_has_enough_space       (TrackerDBManager      *db_manager);
-void                tracker_db_manager_create_version_file    (TrackerDBManager      *db_manager);
-void                tracker_db_manager_remove_version_file    (TrackerDBManager      *db_manager);
+void                tracker_db_manager_update_version         (TrackerDBManager      *db_manager);
 
 TrackerDBManagerFlags
                     tracker_db_manager_get_flags              (TrackerDBManager      *db_manager,
@@ -95,6 +97,16 @@ gboolean            tracker_db_manager_get_tokenizer_changed  (TrackerDBManager 
 void                tracker_db_manager_tokenizer_update       (TrackerDBManager      *db_manager);
 
 void                tracker_db_manager_check_perform_vacuum   (TrackerDBManager      *db_manager);
+
+gboolean            tracker_db_manager_attach_database        (TrackerDBManager      *db_manager,
+                                                               TrackerDBInterface    *iface,
+                                                               const gchar           *name,
+                                                               gboolean               create,
+                                                               GError               **error);
+gboolean            tracker_db_manager_detach_database        (TrackerDBManager      *db_manager,
+                                                               TrackerDBInterface    *iface,
+                                                               const gchar           *name,
+                                                               GError               **error);
 
 G_END_DECLS
 

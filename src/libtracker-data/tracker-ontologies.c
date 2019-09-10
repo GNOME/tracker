@@ -217,9 +217,15 @@ tracker_ontologies_get_class_by_uri (TrackerOntologies *ontologies,
 
 	if (!class && priv->gvdb_table) {
 		if (tracker_ontologies_get_class_string_gvdb (ontologies, class_uri, "name") != NULL) {
+			const gchar *id_str;
+
 			class = tracker_class_new (TRUE);
 			tracker_class_set_ontologies (class, ontologies);
 			tracker_class_set_uri (class, class_uri);
+
+			id_str = tracker_ontologies_get_class_string_gvdb (ontologies, class_uri, "id");
+			if (id_str)
+				tracker_class_set_id (class, g_ascii_strtoll (id_str, NULL, 10));
 
 			g_hash_table_insert (priv->class_uris,
 				             g_strdup (class_uri),
@@ -379,9 +385,15 @@ tracker_ontologies_get_property_by_uri (TrackerOntologies *ontologies,
 
 	if (!property && priv->gvdb_table) {
 		if (tracker_ontologies_get_property_string_gvdb (ontologies, uri, "name") != NULL) {
+			const gchar *id_str;
+
 			property = tracker_property_new (TRUE);
 			tracker_property_set_ontologies (property, ontologies);
 			tracker_property_set_uri (property, uri);
+
+			id_str = tracker_ontologies_get_property_string_gvdb (ontologies, uri, "id");
+			if (id_str)
+				tracker_property_set_id (property, g_ascii_strtoll (id_str, NULL, 10));
 
 			g_hash_table_insert (priv->property_uris,
 				             g_strdup (uri),
@@ -518,6 +530,7 @@ tracker_ontologies_write_gvdb (TrackerOntologies  *ontologies,
 	GvdbItem *root, *item;
 	const gchar *uri;
 	gboolean retval;
+	gchar *str;
 	gint i;
 
 	root_table = gvdb_hash_table_new (NULL, NULL);
@@ -548,6 +561,10 @@ tracker_ontologies_write_gvdb (TrackerOntologies  *ontologies,
 
 		item = gvdb_hash_table_insert_item (table, root, uri);
 
+		str = g_strdup_printf ("%d", tracker_class_get_id (class));
+		gvdb_hash_table_insert_statement (table, item, uri, "id", str);
+		g_free (str);
+
 		gvdb_hash_table_insert_statement (table, item, uri, "name", tracker_class_get_name (class));
 
 		super_classes = tracker_class_get_super_classes (class);
@@ -575,6 +592,10 @@ tracker_ontologies_write_gvdb (TrackerOntologies  *ontologies,
 		uri = tracker_property_get_uri (property);
 
 		item = gvdb_hash_table_insert_item (table, root, uri);
+
+		str = g_strdup_printf ("%d", tracker_property_get_id (property));
+		gvdb_hash_table_insert_statement (table, item, uri, "id", str);
+		g_free (str);
 
 		gvdb_hash_table_insert_statement (table, item, uri, "name", tracker_property_get_name (property));
 		gvdb_hash_table_insert_statement (table, item, uri, "domain", tracker_class_get_uri (tracker_property_get_domain (property)));

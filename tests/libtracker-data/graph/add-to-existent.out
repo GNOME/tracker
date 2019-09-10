@@ -1,0 +1,4 @@
+"http://example/graphA"	"http://example/resource1"	"42"
+"http://example/graphB"	"http://example/resource1"	"42"
+"http://example/graphB"	"http://example/resource1"	"73"
+"http://example/graphB"	"http://example/resource2"	"113"

@@ -113,7 +113,7 @@ sql_by_query (void)
 
 	data_manager = tracker_data_manager_new (0, cache_location,
 	                                         data_location, ontology_location,
-	                                         FALSE, FALSE, 100, 100);
+	                                         FALSE, 100, 100);
 
 	if (!g_initable_init (G_INITABLE (data_manager), NULL, &error)) {
 		g_printerr ("%s: %s\n",
@@ -127,6 +127,8 @@ sql_by_query (void)
 	g_print ("\n\n");
 
 	iface = tracker_data_manager_get_db_interface (data_manager);
+
+	tracker_data_manager_update_union_views (data_manager, iface, NULL, NULL);
 
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &error, "%s", query);
 

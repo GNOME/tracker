@@ -26,6 +26,7 @@
 /* Ontology classes */
 #define RDFS_CLASS "http://www.w3.org/2000/01/rdf-schema#Class"
 #define RDF_PROPERTY "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+#define RDF_LIST "http://www.w3.org/1999/02/22-rdf-syntax-ns#List"
 #define RDFS_SUBCLASSOF  "http://www.w3.org/2000/01/rdf-schema#subClassOf"
 #define RDFS_TYPE "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 #define RDFS_RANGE "http://www.w3.org/2000/01/rdf-schema#range"
@@ -83,7 +84,8 @@ load_in_memory (Ontology    *ontology,
 
 	if (!g_strcmp0 (turtle_predicate, RDFS_TYPE)) {
 		/* It is a definition of class or property */
-		if (!g_strcmp0 (turtle_object, RDFS_CLASS)) {
+		if (!g_strcmp0 (turtle_object, RDFS_CLASS) ||
+		    !g_strcmp0 (turtle_object, RDF_LIST)) {
 			g_hash_table_insert (ontology->classes,
 			                     g_strdup (turtle_subject),
 			                     ttl_model_class_new (turtle_subject));

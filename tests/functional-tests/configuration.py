@@ -40,7 +40,6 @@ TOP_BUILDDIR = os.environ['TRACKER_FUNCTIONAL_TEST_BUILD_DIR']
 
 TEST_ONTOLOGIES_DIR = config['TEST_ONTOLOGIES_DIR']
 TRACKER_STORE_PATH = config['TRACKER_STORE_PATH']
-disableJournal = (len(config['disableJournal']) == 0)
 
 
 def get_environment_boolean(variable):

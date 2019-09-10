@@ -1,0 +1,12 @@
+INSERT {
+	example:resource1 a example:A ;
+
+	GRAPH example:graphA {
+		example:resource2 a example:A ;
+	}
+	GRAPH example:graphB {
+		example:resource3 a example:A ;
+	}
+}
+
+DROP ALL

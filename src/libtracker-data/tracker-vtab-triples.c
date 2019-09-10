@@ -37,6 +37,7 @@ enum {
 	COL_SUBJECT,
 	COL_PREDICATE,
 	COL_OBJECT,
+	COL_OBJECT_TYPE,
 	N_COLS
 };
 
@@ -140,7 +141,8 @@ triples_connect (sqlite3            *db,
 	                           "    graph INTEGER,"
 	                           "    subject INTEGER, "
 	                           "    predicate INTEGER, "
-	                           "    object INTEGER"
+	                           "    object INTEGER, "
+	                           "    object_type INTEGER"
 	                           ")");
 
 	if (rc == SQLITE_OK) {
@@ -180,7 +182,8 @@ triples_best_index (sqlite3_vtab       *vtab,
 		/* We let object be matched in upper layers, where proper
 		 * translation to strings can be done.
 		 */
-		if (info->aConstraint[i].iColumn == COL_OBJECT)
+		if (info->aConstraint[i].iColumn == COL_OBJECT ||
+		    info->aConstraint[i].iColumn == COL_OBJECT_TYPE)
 			continue;
 
 		if (info->aConstraint[i].iColumn == COL_ROWID)
@@ -284,6 +287,7 @@ convert_to_string (const gchar         *table_name,
 {
 	switch (type) {
 	case TRACKER_PROPERTY_TYPE_STRING:
+	case TRACKER_PROPERTY_TYPE_LANGSTRING:
 	case TRACKER_PROPERTY_TYPE_INTEGER:
 		return g_strdup_printf ("t.\"%s\"", table_name);
 	case TRACKER_PROPERTY_TYPE_RESOURCE:
@@ -362,20 +366,19 @@ init_stmt (TrackerTriplesCursor *cursor)
 
 		sql = g_string_new (NULL);
 		g_string_append_printf (sql,
-		                        "SELECT t.\"%s:graph\", t.ID, "
+		                        "SELECT t.graph, t.ID, "
 		                        "       (SELECT ID From Resource WHERE Uri = \"%s\"), "
-		                        "       %s "
-		                        "FROM \"%s\" AS t "
+		                        "       %s, "
+		                        "       %d "
+		                        "FROM \"unionGraph_%s\" AS t "
 		                        "WHERE 1 ",
-		                        tracker_property_get_name (property),
 		                        tracker_property_get_uri (property),
 		                        string_expr,
+		                        tracker_property_get_data_type (property),
 		                        tracker_property_get_table_name (property));
 
 		if (cursor->match.graph) {
-			g_string_append_printf (sql,
-			                        "AND t.\"%s:graph\" ",
-			                        tracker_property_get_name (property));
+			g_string_append (sql, "AND t.graph ");
 			add_arg_check (sql, cursor->match.graph,
 			               !!(cursor->match.idxFlags & IDX_MATCH_GRAPH_NEG),
 			               "@g");

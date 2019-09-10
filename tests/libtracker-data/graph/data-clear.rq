@@ -1,0 +1,12 @@
+INSERT {
+	GRAPH example:graphA {
+		example:resource a example:A ;
+			example:p 42
+	}
+	GRAPH example:graphB {
+		example:resource a example:A ;
+			example:p 42
+	}
+}
+
+CLEAR GRAPH example:graphA

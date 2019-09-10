@@ -7,7 +7,7 @@
 
 rdf: a tracker:Namespace, tracker:Ontology ;
 	tracker:prefix "rdf" ;
-	nao:lastModified "2011-01-31T15:00:00Z" .
+	nao:lastModified "2019-06-09T21:00:00Z" .
 
 rdfs: a tracker:Namespace ;
 	tracker:prefix "rdfs" .
@@ -27,6 +27,16 @@ rdf:Property a rdfs:Class ;
 rdfs:Literal a rdfs:Class ;
 	rdfs:label "Literal" ;
 	rdfs:subClassOf rdfs:Resource .
+
+rdfs:Datatype a rdfs:Class ;
+	rdfs:label "Datatype" ;
+	rdfs:comment "The class of RDF datatypes." ;
+	rdfs:subClassOf rdfs:Class .
+
+rdf:langString a rdfs:Class, rdfs:Datatype ;
+	rdfs:subClassOf rdfs:Literal ;
+	rdfs:label "langString" ;
+	rdfs:comment "The datatype of language-tagged string values" .
 
 rdf:type a rdf:Property ;
 	rdfs:domain rdfs:Resource ;
@@ -59,6 +69,27 @@ rdfs:range a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range rdfs:Class .
+
+rdf:List a rdfs:Class ;
+	rdfs:label "List" ;
+	rdfs:comment "The class of RDF Lists." ;
+	rdfs:subClassOf rdfs:Resource .
+
+rdf:nil a rdf:List ;
+	rdfs:label "nil" ;
+	rdfs:comment "The empty list, with no items in it. If the rest of a list is nil then the list has no more items in it." .
+
+rdf:first a rdf:Property ;
+	rdfs:label "first" ;
+	rdfs:comment "The first item in the subject RDF list." ;
+	rdfs:domain rdf:List ;
+	rdfs:range rdfs:Resource .
+
+rdf:rest a rdf:Property ;
+	rdfs:label "rest" ;
+	rdfs:comment "The rest of the subject RDF list after the first item." ;
+	rdfs:domain rdf:List ;
+	rdfs:range rdf:List .
 
 tracker: a tracker:Namespace ;
 	tracker:prefix "tracker" .
@@ -101,11 +132,6 @@ tracker:fulltextNoLimit a rdf:Property ;
 	rdfs:domain rdf:Property ;
 	rdfs:range xsd:boolean .
 
-tracker:transient a rdf:Property ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdf:Property ;
-	rdfs:range xsd:boolean .
-
 tracker:weight a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
@@ -140,11 +166,6 @@ tracker:notify a rdf:Property ;
 	rdfs:range xsd:boolean .
 
 tracker:writeback a rdf:Property ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdf:Property ;
-	rdfs:range xsd:boolean .
-
-tracker:forceJournal a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range xsd:boolean .

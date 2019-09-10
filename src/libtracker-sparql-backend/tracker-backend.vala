@@ -358,6 +358,10 @@ public static Tracker.Sparql.Connection tracker_sparql_connection_remote_new (st
 	return new Tracker.Remote.Connection (url_base);
 }
 
+public static Tracker.Sparql.Connection tracker_sparql_connection_bus_new (string service, DBusConnection? conn) throws Tracker.Sparql.Error, IOError, DBusError, GLib.Error {
+	return new Tracker.Bus.Connection (service, conn, true);
+}
+
 public static Tracker.Sparql.Connection tracker_sparql_connection_local_new (Tracker.Sparql.ConnectionFlags flags, File store, File? journal, File? ontology, Cancellable? cancellable = null) throws GLib.Error, Tracker.Sparql.Error, IOError {
 	var conn = new Tracker.Direct.Connection (flags, store, journal, ontology);
 	conn.init (cancellable);

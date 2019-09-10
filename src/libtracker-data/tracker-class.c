@@ -34,7 +34,6 @@ typedef struct _TrackerClassPrivate TrackerClassPrivate;
 struct _TrackerClassPrivate {
 	gchar *uri;
 	gchar *name;
-	gint count;
 	gint id;
 	gboolean is_new;
 	gboolean db_schema_changed;
@@ -138,18 +137,6 @@ tracker_class_get_name (TrackerClass *service)
 	priv = tracker_class_get_instance_private (service);
 
 	return priv->name;
-}
-
-gint
-tracker_class_get_count (TrackerClass *service)
-{
-	TrackerClassPrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_CLASS (service), 0);
-
-	priv = tracker_class_get_instance_private (service);
-
-	return priv->count;
 }
 
 gint
@@ -311,20 +298,6 @@ tracker_class_set_uri (TrackerClass *service,
 		}
 	}
 }
-
-void
-tracker_class_set_count (TrackerClass *service,
-                         gint          value)
-{
-	TrackerClassPrivate *priv;
-
-	g_return_if_fail (TRACKER_IS_CLASS (service));
-
-	priv = tracker_class_get_instance_private (service);
-
-	priv->count = value;
-}
-
 
 void
 tracker_class_set_id (TrackerClass *service,

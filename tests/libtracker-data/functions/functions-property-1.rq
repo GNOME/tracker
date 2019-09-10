@@ -5,4 +5,4 @@ SELECT ex:o(?b) ex:s(?a)
 { ?b a ex:B ;
   ex:a ?a
 }
-
+ORDER BY ex:o(?b)

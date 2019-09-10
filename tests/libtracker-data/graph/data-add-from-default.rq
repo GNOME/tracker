@@ -1,0 +1,10 @@
+INSERT {
+	example:resource1 a example:A ;
+		example:p 42 .
+	GRAPH example:graphA {
+		example:resource2 a example:A ;
+			example:p 42
+	}
+}
+
+ADD DEFAULT TO GRAPH example:graphA

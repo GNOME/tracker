@@ -1,0 +1,3 @@
+PREFIX : <http://example/>
+
+SELECT ?s ?p ISLITERAL(?o) ISURI(?o) ISIRI(?o) ISNUMERIC(?o) ISBLANK(?o) DATATYPE(?o) { ?s a :Person ; ?p ?o } ORDER BY ?s ?p

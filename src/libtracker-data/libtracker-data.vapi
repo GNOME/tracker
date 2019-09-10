@@ -122,7 +122,6 @@ namespace Tracker {
 	public class Class : GLib.Object {
 		public string name { get; set; }
 		public string uri { get; set; }
-		public int count { get; set; }
 		[CCode (array_length = false, array_null_terminated = true)]
 		public unowned Class[] get_super_classes ();
 		public void transact_events ();
@@ -192,11 +191,11 @@ namespace Tracker {
 		public void update_sparql (string update) throws Sparql.Error;
 		public GLib.Variant update_sparql_blank (string update) throws Sparql.Error;
 		public void load_turtle_file (GLib.File file) throws Sparql.Error;
-		public void delete_statement (string? graph, string subject, string predicate, string object) throws Sparql.Error, DateError;
-		public void update_statement (string? graph, string subject, string predicate, string? object) throws Sparql.Error, DateError;
-		public void insert_statement (string? graph, string subject, string predicate, string object) throws Sparql.Error, DateError;
-		public void insert_statement_with_uri (string? graph, string subject, string predicate, string object) throws Sparql.Error;
-		public void insert_statement_with_string (string? graph, string subject, string predicate, string object) throws Sparql.Error, DateError;
+		public void delete_statement (string? graph, string subject, string predicate, GLib.Bytes object) throws Sparql.Error, DateError;
+		public void update_statement (string? graph, string subject, string predicate, GLib.Bytes? object) throws Sparql.Error, DateError;
+		public void insert_statement (string? graph, string subject, string predicate, GLib.Bytes object) throws Sparql.Error, DateError;
+		public void insert_statement_with_uri (string? graph, string subject, string predicate, GLib.Bytes object) throws Sparql.Error;
+		public void insert_statement_with_string (string? graph, string subject, string predicate, GLib.Bytes object) throws Sparql.Error, DateError;
 		public void update_buffer_flush () throws DBInterfaceError;
 		public void update_buffer_might_flush () throws DBInterfaceError;
 		public void sync ();

@@ -55,6 +55,7 @@ namespace Tracker {
  * @TRACKER_SPARQL_NO_SPACE: There was no disk space available to perform the request.
  * @TRACKER_SPARQL_INTERNAL: Internal error.
  * @TRACKER_SPARQL_UNSUPPORTED: Unsupported feature or method.
+ * @TRACKER_SPARQL_UNKNOWN_GRAPH: Unknown graph.
  *
  * Error domain for Tracker Sparql. Errors in this domain will be from the
  * #TrackerSparqlError enumeration. See #GError for more information on error
@@ -71,7 +72,8 @@ public errordomain Tracker.Sparql.Error {
 	CONSTRAINT,
 	NO_SPACE,
 	INTERNAL,
-	UNSUPPORTED
+	UNSUPPORTED,
+	UNKNOWN_GRAPH
 }
 
 public enum Tracker.Sparql.ConnectionFlags {
@@ -236,6 +238,8 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * Since: 2.0
 	 */
 	public extern async static new Connection local_new_async (Tracker.Sparql.ConnectionFlags flags, File store, File? journal, File? ontology, Cancellable? cancellable = null) throws Sparql.Error, IOError;
+
+	public extern static new Connection bus_new (string service_name, DBusConnection? dbus_connection = null) throws Sparql.Error, IOError, DBusError, GLib.Error;
 
 	/**
 	 * tracker_sparql_connection_query:

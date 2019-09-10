@@ -36,6 +36,7 @@
 #define XSD_DOUBLE   TRACKER_PREFIX_XSD "double"
 #define XSD_INTEGER  TRACKER_PREFIX_XSD "integer"
 #define XSD_STRING   TRACKER_PREFIX_XSD "string"
+#define RDF_LANGSTRING TRACKER_PREFIX_RDF "langString"
 
 typedef struct _TrackerPropertyPrivate TrackerPropertyPrivate;
 
@@ -58,7 +59,6 @@ struct _TrackerPropertyPrivate {
 	gboolean       fulltext_indexed;
 	gboolean       multiple_values;
 	gboolean       last_multiple_values;
-	gboolean       transient;
 	gboolean       is_inverse_functional_property;
 	gboolean       is_new;
 	gboolean       db_schema_changed;
@@ -109,6 +109,9 @@ tracker_property_type_get_type (void)
 			{ TRACKER_PROPERTY_TYPE_RESOURCE,
 			  "TRACKER_PROPERTY_TYPE_RESOURCE",
 			  "resource" },
+			{ TRACKER_PROPERTY_TYPE_LANGSTRING,
+			  "TRACKER_PROPERTY_TYPE_LANGSTRING",
+			  "langString" },
 			{ 0, NULL, NULL }
 		};
 
@@ -137,7 +140,6 @@ tracker_property_init (TrackerProperty *property)
 
 	priv->id = 0;
 	priv->weight = 1;
-	priv->transient = FALSE;
 	priv->multiple_values = TRUE;
 	priv->force_journal = TRUE;
 	priv->super_properties = g_array_new (TRUE, TRUE, sizeof (TrackerProperty *));
@@ -220,19 +222,6 @@ tracker_property_get_uri (TrackerProperty *property)
 	return priv->uri;
 }
 
-gboolean
-tracker_property_get_transient (TrackerProperty *property)
-{
-	TrackerPropertyPrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_PROPERTY (property), FALSE);
-
-	priv = tracker_property_get_instance_private (property);
-
-	return priv->transient;
-}
-
-
 const gchar *
 tracker_property_get_name (TrackerProperty *property)
 {
@@ -282,6 +271,8 @@ tracker_property_get_data_type (TrackerProperty *property)
 		range_uri = tracker_ontologies_get_property_string_gvdb (priv->ontologies, priv->uri, "range");
 		if (strcmp (range_uri, XSD_STRING) == 0) {
 			priv->data_type = TRACKER_PROPERTY_TYPE_STRING;
+		} else if (strcmp (range_uri, RDF_LANGSTRING) == 0) {
+			priv->data_type = TRACKER_PROPERTY_TYPE_LANGSTRING;
 		} else if (strcmp (range_uri, XSD_BOOLEAN) == 0) {
 			priv->data_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 		} else if (strcmp (range_uri, XSD_INTEGER) == 0) {
@@ -728,19 +719,6 @@ tracker_property_set_uri (TrackerProperty *property,
 }
 
 void
-tracker_property_set_transient (TrackerProperty *property,
-                                gboolean         value)
-{
-	TrackerPropertyPrivate *priv;
-
-	g_return_if_fail (TRACKER_IS_PROPERTY (property));
-
-	priv = tracker_property_get_instance_private (property);
-
-	priv->transient = value;
-}
-
-void
 tracker_property_set_domain (TrackerProperty *property,
                              TrackerClass    *value)
 {
@@ -855,6 +833,8 @@ tracker_property_set_range (TrackerProperty *property,
 	range_uri = tracker_class_get_uri (priv->range);
 	if (strcmp (range_uri, XSD_STRING) == 0) {
 		priv->data_type = TRACKER_PROPERTY_TYPE_STRING;
+	} else if (strcmp (range_uri, RDF_LANGSTRING) == 0) {
+		priv->data_type = TRACKER_PROPERTY_TYPE_LANGSTRING;
 	} else if (strcmp (range_uri, XSD_BOOLEAN) == 0) {
 		priv->data_type = TRACKER_PROPERTY_TYPE_BOOLEAN;
 	} else if (strcmp (range_uri, XSD_INTEGER) == 0) {

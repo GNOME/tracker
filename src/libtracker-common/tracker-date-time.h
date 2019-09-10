@@ -57,7 +57,8 @@ gint     tracker_date_time_get_local_time      (const GValue *value);
 gdouble  tracker_string_to_date                (const gchar  *date_string,
                                                 gint         *offset,
                                                 GError      **error);
-gchar *  tracker_date_to_string                (gdouble       date_time);
+gchar *  tracker_date_to_string                (gdouble       date_time,
+                                                gint          offset);
 
 G_END_DECLS
 

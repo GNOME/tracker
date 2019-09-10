@@ -1,0 +1,1 @@
+SELECT ?u { ?u example:langString ?s . FILTER (?s = STRLANG ("foo", "en")) }
