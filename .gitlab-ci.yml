@@ -1,3 +1,9 @@
+variables:
+  # These can be used to see verbose log output from the functional-tests.
+  # See HACKING.md for more information.
+  TRACKER_VERBOSITY: "0"
+  TRACKER_TESTS_VERBOSE: "no"
+
 stages:
   - test
 
