@@ -24,6 +24,7 @@ from gi.repository import GLib
 import atexit
 import logging
 import os
+import signal
 
 from . import dbusdaemon
 from . import mainloop
@@ -463,6 +464,29 @@ class TrackerDBusSandbox:
         self.daemon.start_if_needed(self.dbus_daemon_config_file, env=env)
 
     def stop(self):
+        tracker_processes = []
+
+        log.info("Looking for active Tracker processes on the bus")
+        for busname in self.daemon.list_names_sync():
+            if busname.startswith('org.freedesktop.Tracker1'):
+                pid = self.daemon.get_connection_unix_process_id_sync(busname)
+                tracker_processes.append(pid)
+
+        log.info("Stopping %i Tracker processes", len(tracker_processes))
+        for pid in tracker_processes:
+            os.kill(pid, signal.SIGTERM)
+            try:
+                status = os.waitpid(pid, 0)
+                log.debug("  Got status: %s", str(status))
+            except ChildProcessError as e:
+                log.debug("  Got %s", str(e))
+
+        # We need to wait until Tracker processes have stopped before we
+        # terminate the D-Bus daemon, otherwise lots of criticals like this
+        # appear in the log output:
+        #
+        #  (tracker-miner-fs:14955): GLib-GIO-CRITICAL **: 11:38:40.386: Error  while sending AddMatch() message: The connection is closed
+
         log.info("Stopping D-Bus daemon for sandbox.")
         self.daemon.stop()
 
