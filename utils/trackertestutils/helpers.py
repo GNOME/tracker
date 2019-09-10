@@ -463,7 +463,7 @@ class TrackerDBusSandbox:
 
         log.info("Starting D-Bus daemon for sandbox.")
         log.debug("Added environment variables: %s", self.extra_env)
-        self.daemon.start_if_needed(self.dbus_daemon_config_file, env=env)
+        self.daemon.start(self.dbus_daemon_config_file, env=env)
 
     def stop(self):
         tracker_processes = []
