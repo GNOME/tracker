@@ -432,11 +432,15 @@ def main():
     try:
         if args.command:
             command = [shell, '-c', ' '.join(shlex.quote(c) for c in args.command)]
+
             log.debug("Running: %s", command)
-            subprocess.run(command)
+            result = subprocess.run(command)
 
             if len(miner_watches) > 0:
                 wait_for_miners(miner_watches)
+
+            log.debug("Process finished with returncode %i", result.returncode)
+            sys.exit(result.returncode)
         else:
             if args.dbus_config:
                 print(f"Using Tracker daemons from build tree with D-Bus config {args.dbus_config}")
