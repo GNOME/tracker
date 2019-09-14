@@ -358,14 +358,14 @@ class StoreHelper():
     # is useful for testing this API surface, but we recommand that all regular
     # applications use libtracker-sparql library to talk to the database.
 
-    def query(self, query, timeout=5000, **kwargs):
-        return self.resources.SparqlQuery('(s)', query, timeout=timeout, **kwargs)
+    def query(self, query, **kwargs):
+        return self.resources.SparqlQuery('(s)', query, **kwargs)
 
-    def update(self, update_sparql, timeout=5000, **kwargs):
-        return self.resources.SparqlUpdate('(s)', update_sparql, timeout=timeout, **kwargs)
+    def update(self, update_sparql, **kwargs):
+        return self.resources.SparqlUpdate('(s)', update_sparql, **kwargs)
 
-    def load(self, ttl_uri, timeout=5000, **kwargs):
-        return self.resources.Load('(s)', ttl_uri, timeout=timeout, **kwargs)
+    def load(self, ttl_uri, **kwargs):
+        return self.resources.Load('(s)', ttl_uri, **kwargs)
 
     def batch_update(self, update_sparql, **kwargs):
         return self.resources.BatchSparqlUpdate('(s)', update_sparql, **kwargs)
