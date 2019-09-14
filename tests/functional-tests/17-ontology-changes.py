@@ -918,4 +918,4 @@ class PropertyRelegationTest (OntologyChangeTestTemplate):
 
 
 if __name__ == "__main__":
-    ut.main()
+    ut.main(verbosity=2)
