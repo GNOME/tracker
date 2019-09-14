@@ -76,6 +76,7 @@ class OntologyChangeTestTemplate (ut.TestCase):
         self.__assert_ontology_dates(self.FIRST_ONTOLOGY_DIR, self.SECOND_ONTOLOGY_DIR)
 
         extra_env = cfg.test_environment(self.tmpdir)
+        extra_env['LANG'] = 'en_GB.utf8'
         extra_env['LC_COLLATE'] = 'en_GB.utf8'
         extra_env['TRACKER_DB_ONTOLOGIES_DIR'] = self.get_ontology_dir(self.FIRST_ONTOLOGY_DIR)
 
