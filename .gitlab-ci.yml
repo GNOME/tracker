@@ -28,6 +28,8 @@ test-fedora-latest:
 
   after_script:
     - |
+      python3 -c 'import multiprocessing; print(f"Meson probably started {multiprocessing.cpu_count()} tests in parallel.")
+    - |
       echo "Test suite settings:"
       echo
       echo "  TRACKER_VERBOSITY: ${TRACKER_VERBOSITY}"
