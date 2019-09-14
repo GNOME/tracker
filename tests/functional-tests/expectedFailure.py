@@ -27,6 +27,7 @@ on the files. Note that these tests are highly platform dependant.
 
 from functools import wraps
 import sys
+import unittest as ut
 
 import configuration as cfg
 
@@ -38,11 +39,6 @@ def expectedFailureJournal():
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            try:
-                func(*args, **kwargs)
-            except Exception:
-                raise ut.case._ExpectedFailure(sys.exc_info())
-            raise Exception(
-                "Unexpected success. This should fail because journal is disabled")
+            ut.expectedFailure(func)
         return wrapper
     return decorator

@@ -24,18 +24,20 @@
 #
 
 import argparse
+import configparser
 import locale
 import logging
 import os
 import shlex
+import shutil
 import signal
 import subprocess
 import sys
-import threading
-
-import configparser
+import tempfile
 
 from gi.repository import GLib
+
+import trackertestutils.dbusdaemon
 
 # Script
 script_name = 'tracker-sandbox'
@@ -84,116 +86,6 @@ log = logging.getLogger('sandbox')
 dbuslog = logging.getLogger('dbus')
 
 
-# Private DBus daemon
-
-class DBusDaemon:
-    """The private D-Bus instance that provides the sandbox's session bus.
-
-    We support reading and writing the session information to a file. This
-    means that if the user runs two sandbox instances on the same data
-    directory at the same time, they will share the same message bus.
-    """
-
-    def __init__(self, session_file=None):
-        self.session_file = session_file
-        self.existing_session = False
-        self.process = None
-
-        try:
-            self.address, self.pid = self.read_session_file(session_file)
-            self.existing_session = True
-        except FileNotFoundError:
-            log.debug("No existing D-Bus session file was found.")
-
-            self.address = None
-            self.pid = None
-
-    def get_session_file(self):
-        """Returns the path to the session file if we created it, or None."""
-        if self.existing_session:
-            return None
-        return self.session_file
-
-    def get_address(self):
-        return self.address
-
-    @staticmethod
-    def read_session_file(session_file):
-        with open(session_file, 'r') as f:
-            content = f.read()
-
-        try:
-            address = content.splitlines()[0]
-            pid = int(content.splitlines()[1])
-        except ValueError:
-            raise RuntimeError(f"D-Bus session file {session_file} is not valid. "
-                                "Remove this file to start a new session.")
-
-        return address, pid
-
-    @staticmethod
-    def write_session_file(session_file, address, pid):
-        os.makedirs(os.path.dirname(session_file), exist_ok=True)
-
-        content = '%s\n%s' % (address, pid)
-        with open(session_file, 'w') as f:
-            f.write(content)
-
-    def start_if_needed(self):
-        if self.existing_session:
-            log.debug('Using existing D-Bus session from file "%s" with address "%s"'
-                      ' with PID %d' % (self.session_file, self.address, self.pid))
-        else:
-            dbus_command = ['dbus-daemon', '--session', '--print-address=1', '--print-pid=1']
-            self.process = subprocess.Popen(dbus_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-            try:
-                self.address = self.process.stdout.readline().strip().decode('ascii')
-                self.pid = int(self.process.stdout.readline().strip().decode('ascii'))
-            except ValueError:
-                error = self.process.stderr.read().strip().decode('unicode-escape')
-                raise RuntimeError(f"Failed to start D-Bus daemon.\n{error}")
-
-            log.debug("Using new D-Bus session with address '%s' with PID %d",
-                      self.address, self.pid)
-
-            self.write_session_file(self.session_file, self.address, self.pid)
-            log.debug("Wrote D-Bus session file at %s", self.session_file)
-
-            # We must read from the pipes continuously, otherwise the daemon
-            # process will block.
-            self._threads=[threading.Thread(target=self.pipe_to_log, args=(self.process.stdout, 'stdout'), daemon=True),
-                           threading.Thread(target=self.pipe_to_log, args=(self.process.stderr, 'stderr'), daemon=True)]
-            self._threads[0].start()
-            self._threads[1].start()
-
-    def stop(self):
-        if self.process:
-            log.debug("  Stopping DBus daemon")
-            self.process.terminate()
-            self.process.wait()
-
-    def pipe_to_log(self, pipe, source):
-        """This function processes the output from our dbus-daemon instance."""
-        while True:
-            line_raw = pipe.readline()
-
-            if len(line_raw) == 0:
-                break
-
-            line = line_raw.decode('utf-8').rstrip()
-
-            if line.startswith('(tracker-'):
-                # We set G_MESSAGES_PREFIXED=all, meaning that all log messages
-                # output by Tracker processes have a prefix. Note that
-                # g_print() will NOT be captured here.
-                dbuslog.info(line)
-            else:
-                # Log messages from other daemons, including the dbus-daemon
-                # itself, go here. Any g_print() messages also end up here.
-                dbuslog.debug(line)
-
-
 # Environment / Clean up
 
 def environment_unset(dbus):
@@ -226,7 +118,7 @@ def environment_set_and_add_path(env, prefix, suffix):
     os.environ[env] = full
 
 
-def environment_set(index_location, prefix, verbosity=0):
+def environment_set(index_location, prefix, verbosity=0, dbus_config=None):
     # Environment
     index_location = os.path.abspath(index_location)
     prefix = os.path.abspath(os.path.expanduser(prefix))
@@ -260,8 +152,8 @@ def environment_set(index_location, prefix, verbosity=0):
     dbus_session_file = os.path.join(
         os.environ['XDG_RUNTIME_DIR'], 'dbus-session')
 
-    dbus = DBusDaemon(dbus_session_file)
-    dbus.start_if_needed()
+    dbus = trackertestutils.dbusdaemon.DBusDaemon(dbus_session_file)
+    dbus.start_if_needed(config_file=dbus_config)
 
     # Important, other subprocesses must use our new bus
     os.environ['DBUS_SESSION_BUS_ADDRESS'] = dbus.get_address()
@@ -347,6 +239,8 @@ def argument_parser():
                              "only show messages logged by Tracker daemons.")
     parser.add_argument('--debug-sandbox', action='store_true',
                         help="show debugging info from tracker-sandbox")
+    parser.add_argument('--dbus-config', metavar='FILE',
+                        help="use a custom config file for the private D-Bus daemon")
     parser.add_argument('-v', '--verbosity', default='0',
                         choices=['0', '1', '2', '3', 'errors', 'minimal', 'detailed', 'debug'],
                         help="show debugging info from Tracker processes")
@@ -355,6 +249,9 @@ def argument_parser():
     parser.add_argument('-i', '--index', metavar='DIR', type=str,
                         default=default_index_location, dest='index_location',
                         help=f"directory to the index (default={default_index_location})")
+    parser.add_argument('--index-tmpdir', action='store_true',
+                        help="create index in a temporary directory and "
+                             "delete it on exit (useful for automated testing)")
     parser.add_argument('command', type=str, nargs='*', help="Command to run inside the shell")
 
     return parser
@@ -405,8 +302,18 @@ if __name__ == "__main__":
 
     verbosity = verbosity_as_int(args.verbosity)
 
+    index_location = None
+    index_tmpdir = None
+
+    if args.index_location != default_index_location and args.index_tmpdir:
+        raise RuntimeError("The --index-tmpdir flag is enabled, but --index= was also passed.")
+    if args.index_tmpdir:
+        index_location = index_tmpdir = tempfile.mkdtemp(prefix='tracker-sandbox')
+    else:
+        index_location = args.index_location
+
     # Set up environment variables and foo needed to get started.
-    dbus = environment_set(args.index_location, args.prefix, verbosity)
+    dbus = environment_set(index_location, args.prefix, verbosity, dbus_config=args.dbus_config)
     config_set()
 
     link_to_mime_data()
@@ -423,3 +330,5 @@ if __name__ == "__main__":
             os.system(shell)
     finally:
         environment_unset(dbus)
+        if index_tmpdir:
+            shutil.rmtree(index_tmpdir, ignore_errors=True)

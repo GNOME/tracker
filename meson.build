@@ -273,6 +273,7 @@ conf.set('exec_prefix', get_option('prefix'))
 conf.set('bindir', join_paths(get_option('prefix'), get_option('bindir')))
 conf.set('datadir', datadir)
 conf.set('datarootdir', join_paths(get_option('prefix'), get_option('datadir')))
+conf.set('dbus_services_dir', dbus_services_dir)
 conf.set('includedir', join_paths(get_option('prefix'), get_option('includedir')))
 conf.set('libdir', libdir)
 conf.set('libexecdir', join_paths(get_option('prefix'), get_option('libexecdir')))
@@ -282,10 +283,6 @@ conf.set('VERSION', meson.project_version())
 conf.set('tracker_store', join_paths ('${libexecdir}', 'tracker-store'))
 conf.set('ontologies_dir', join_paths ('${datadir}', 'tracker', 'ontologies'))
 conf.set('domain_ontologies_dir', join_paths('${datadir}', 'tracker', 'domain-ontologies'))
-
-# Configure functional tests to run completely from source tree.
-conf.set('FUNCTIONAL_TESTS_ONTOLOGIES_DIR', join_paths(meson.current_source_dir(), 'tests', 'functional-tests', 'test-ontologies'))
-conf.set('FUNCTIONAL_TESTS_TRACKER_STORE_PATH', join_paths(meson.current_build_dir(), 'src', 'tracker-store', 'tracker-store'))
 
 configure_file(input: 'config.h.meson.in',
                output: 'config.h',

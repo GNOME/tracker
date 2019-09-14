@@ -3,11 +3,11 @@ using Tracker;
 using Tracker.Sparql;
 
 const string insert_query_replace = "
-DELETE { ?r nao:hasProperty ?property . }
+DELETE { ?r nao:hasTag ?tag . }
 WHERE { 
 	?r a nco:PhoneNumber;
 	   nco:phoneNumber \"02141730585%d\";
-	   nao:hasProperty ?property .
+	   nao:hasTag ?tag .
 }
 
 DELETE {
@@ -57,10 +57,10 @@ INSERT OR REPLACE {
 }";
 
 const string insert_query_original = "
-DELETE { ?r nao:hasProperty ?property . }
+DELETE { ?r nao:tag ?tag . }
 WHERE { 
 	?r a nco:PhoneNumber; nco:phoneNumber \"2141730585%d\";
-	   nao:hasProperty ?property .
+	   nao:hasTag ?tag .
 }
 
 DELETE {

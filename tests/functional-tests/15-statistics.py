@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-#
 # Copyright (C) 2010, Nokia <ivan.frade@nokia.com>
 # Copyright (C) 2019, Sam Thursfield <sam@afuera.me.uk>
 #
@@ -125,4 +123,4 @@ class TrackerStoreStatisticsTests (CommonTrackerStoreTest):
                 self.assertEqual(old_stats[k], new_stats[k])
 
 if __name__ == "__main__":
-    ut.main()
+    ut.main(verbosity=2)

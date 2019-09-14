@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2010, Nokia <ivan.frade@nokia.com>
@@ -132,4 +131,4 @@ if __name__ == "__main__":
       * Check what happens in non-english encoding
       * Dynamic change of collation (not implemented yet in tracker)
     """)
-    ut.main()
+    ut.main(verbosity=2)

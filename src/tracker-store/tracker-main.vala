@@ -118,14 +118,12 @@ License which can be viewed at:
 			do_shutdown ();
 
 			if (strsignal (signo) != null) {
-				print ("\n");
-				print ("Received signal:%d->'%s'", signo, strsignal (signo));
+				message ("Received signal:%d->'%s'", signo, strsignal (signo));
 			}
 			break;
 		default:
 			if (strsignal (signo) != null) {
-				print ("\n");
-				print ("Received signal:%d->'%s'", signo, strsignal (signo));
+				message ("Received signal:%d->'%s'", signo, strsignal (signo));
 			}
 			break;
 		}

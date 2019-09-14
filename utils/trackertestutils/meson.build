@@ -1,8 +1,10 @@
 sources = [
   '__init__.py',
+  'dbusdaemon.py',
   'dconf.py',
   'helpers.py',
-  'mainloop.py'
+  'mainloop.py',
+  'psutil_mini.py',
 ]
 
 install_data(sources,

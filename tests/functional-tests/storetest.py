@@ -19,6 +19,8 @@
 #
 
 import os
+import shutil
+import tempfile
 import time
 import unittest as ut
 
@@ -35,11 +37,28 @@ class CommonTrackerStoreTest (ut.TestCase):
 
     @classmethod
     def setUpClass(self):
-        extra_env = {'LC_COLLATE': 'en_GB.utf8'}
+        self.tmpdir = tempfile.mkdtemp(prefix='tracker-test-')
 
-        self.tracker = trackertestutils.helpers.StoreHelper(cfg.TRACKER_STORE_PATH)
-        self.tracker.start(extra_env=extra_env)
+        try:
+            extra_env = cfg.test_environment(self.tmpdir)
+            extra_env['LANG'] = 'en_GB.utf8'
+            extra_env['LC_COLLATE'] = 'en_GB.utf8'
+
+            self.sandbox = trackertestutils.helpers.TrackerDBusSandbox(
+                dbus_daemon_config_file=cfg.TEST_DBUS_DAEMON_CONFIG_FILE, extra_env=extra_env)
+            self.sandbox.start()
+
+            self.tracker = trackertestutils.helpers.StoreHelper(
+                self.sandbox.get_connection())
+            self.tracker.start_and_wait_for_ready()
+            self.tracker.start_watching_updates()
+        except Exception as e:
+            shutil.rmtree(self.tmpdir, ignore_errors=True)
+            raise
 
     @classmethod
     def tearDownClass(self):
-        self.tracker.stop()
+        self.tracker.stop_watching_updates()
+        self.sandbox.stop()
+
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
