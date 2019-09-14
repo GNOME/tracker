@@ -84,51 +84,51 @@ At this point you can run the Tracker test suite from the `build` directory:
 
     meson test --print-errorlogs
 
-## Developing with tracker-sandbox
+## Using the run-uninstalled script
 
 Tracker normally runs automatically, indexing content in the background so that
 search results are available quickly when needed.
 
 When developing and testing Tracker you will normally want it to run in the
-foreground instead. The `tracker-sandbox` tool exists to help with this.
+foreground instead. You also probably want to run it from a build tree, rather
+than installing it somewhere everytime you make a change, and you certainly
+should isolates your development version from the real Tracker database in your
+home directory.
 
-You can run the tool directly from the tracker.git source tree. Ensure you are
-in the top of the tracker source tree and type this to see the --help output: 
+There is a tool to help with this, which is part of the 'trackertestutils'
+Python module.  You can run the tool using a helper script generated in the
+tracker-miners.git build process named 'run-uninstalled'.
 
-    ./utils/sandbox/tracker-sandbox.py --help
+Check the helper script is set up correctly by running this from your
+tracker-miners.git build tree:
 
-You should always pass the `--prefix` option, which should be the same as the
---prefix argument you passed to Meson. You may pass `--index` which to controls
-where Tracker's database is kept. You may also want to pass `--debug` to see
-detailed log output.
+    ./run-uninstalled --help
 
-The remaining arguments you pass to `tracker-sandbox` are shell commands which
-get run inside the sandbox. Use the `--` sentinel to ensure that the
-commandline arguments are processed correctly. First, let's see the status of
-the Tracker daemons:
+If run with no arguments, the script will start an interactive shell. Any
+arguments after a `--` sentinel are treated as a command to run in a non-interactive
+shell.
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker -- tracker daemon status
+So, let's see the status of the Tracker daemons. They should be all stopped
+right now.
 
-Let's try and index some content...
+    ./run-uninstalled -- tracker daemon status
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker -- tracker index ~/Music
+Let's try and index some content. (Subtitute ~/Music for any other location
+where you have interesting data). We need to explicitly tell the script to wait
+for the miners to finish, or it will exit too soon. (This is a workaround for
+[issue #122](https://gitlab.gnome.org/GNOME/tracker/issues/122).)
 
-... let's see what files were found ...
+    ./run-uninstalled --wait-for-miner=Files --wait-for-miner=Extract -- tracker index --file ~/Music
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker -- tracker sparql --list-files
+Let's see what files were found!
 
-... run a full-text search ...
+    ./run-uninstalled  --prefix ~/opt/tracker -- tracker sparql -q 'SELECT ?url { ?u nie:url ?url }
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker -- tracker search "bananas"
+Or, you can try a full-text search ...
 
-... or run a SPARQL query on the content:
+    ./run-uninstalled -- tracker search "bananas"
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker -- tracker sparql
-        --query "SELECT ?url { ?resource a nfo:FileDataObject ; nie:url ?url . }"
-
-If you run `tracker-sandbox` without a command argument, it will open an
-interactive shell inside the sandbox. From here you can use debugging tools
-such as GDB.
+There are many more things you can do with the script.
 
 For more information about developing Tracker, look at
 https://wiki.gnome.org/Projects/Tracker and HACKING.md.

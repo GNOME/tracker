@@ -33,8 +33,8 @@ CI.
 # Attaching a debugger to Tracker daemons
 
 Tracker daemons are not started directly. Instead they are started by the D-Bus
-daemon by request. When using tracker-sandbox or the functional-tests, it's
-difficult to start the daemon manually under `gdb`.
+daemon by request. When using the run-uninstalled script or the
+functional-tests, it's difficult to start the daemon manually under `gdb`.
 
 Instead, we recommend adding a 10 second timeout at the top of the daemon's
 main() function. In Vala code, try this:
@@ -51,13 +51,12 @@ the 'Pausing' message, run the `gdb attach``command in another terminal within
 # Running Tracker daemons under Valgrind
 
 The Tracker daemons are launched using D-Bus autolaunch. When running them from
-the source tree using tracker-sandbox or the functional tests, the commandline
-is controlled by the D-Bus .service.in files stored in `./tests/services`. Just
-change the `Exec=` line to add Valgrind, like this:
+the source tree using the run-uninstalled script or the functional-tests, the
+commandline is controlled by the D-Bus .service.in files stored in
+`./tests/services`. Just change the `Exec=` line to add Valgrind, like this:
 
     Exec=/usr/bin/valgrind @abs_top_builddir@/src/tracker-store/tracker-store
 
-By default the tracker-sandbox utility and the functional-tests will only
-show output from Tracker code. For the functional-tests, set
-TRACKER_TESTS_VERBOSE=1 to see output from Valgrind. For tracker-sandbox use
-the `--debug-dbus` option.
+By default the run-uninstalled script and the functional-tests will only show
+output from Tracker code. For the functional-tests, set TRACKER_TESTS_VERBOSE=1
+to see output from Valgrind. For tracker-sandbox use the `--debug-dbus` option.

@@ -3,8 +3,7 @@ functional_ipc_test_c_args = [
   '-DTEST_ONTOLOGIES_DIR="@0@"'.format(tracker_uninstalled_nepomuk_ontologies_dir),
 ]
 
-tracker_sandbox = find_program(join_paths(source_root, 'utils', 'sandbox', 'tracker-sandbox.py'))
-sandbox_args = ['--dbus-config', test_dbus_config, '--debug-sandbox', '--index-tmpdir', '--']
+sandbox_args = ['-m', 'trackertestutils', '--dbus-config', test_dbus_config, '--debug-sandbox', '--index-tmpdir', '--']
 
 sandbox_env = environment()
 
@@ -16,7 +15,7 @@ test_env.set('TRACKER_TEST_DOMAIN_ONTOLOGY_RULE', tracker_uninstalled_domain_rul
 insert_or_replace_test = executable('test-insert-or-replace',
   'test-insert-or-replace.vala', tracker_sparql_vapi,
   dependencies: [tracker_common_dep, tracker_sparql_dep])
-test('functional-ipc-insert-or-replace', tracker_sandbox,
+test('functional-ipc-insert-or-replace', python,
   args: sandbox_args + [insert_or_replace_test],
   env: test_env)
 
@@ -25,6 +24,6 @@ bus_query_cancellation_test = executable('test-bus-query-cancellation',
   c_args: functional_ipc_test_c_args,
   dependencies: [tracker_common_dep, tracker_sparql_dep])
 
-test('functional-ipc-bus-query-cancellation', tracker_sandbox,
+test('functional-ipc-bus-query-cancellation', python,
   args: sandbox_args + [bus_query_cancellation_test],
   env: test_env)
