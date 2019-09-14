@@ -148,9 +148,9 @@ int main (string[] args) {
 
 			print ("ORIGINAL : %u contacts: %f\n", y, timer.elapsed());
 		}
+		return 0;
 	} catch (GLib.Error e) {
 		critical ("%s", e.message);
+		return 1;
 	}
-
-	return 0;
 }
