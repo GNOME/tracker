@@ -321,8 +321,12 @@ if __name__ == "__main__":
     try:
         if args.command:
             command = [shell, '-c', ' '.join(shlex.quote(c) for c in args.command)]
+
             log.debug("Running: %s", command)
-            subprocess.run(command)
+            result = subprocess.run(command)
+
+            log.debug("Process finished with returncode %i", result.returncode)
+            sys.exit(result.returncode)
         else:
             print('Starting shell... (type "exit" to finish)')
             print()
