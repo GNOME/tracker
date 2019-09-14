@@ -24,11 +24,12 @@ test-fedora-latest:
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
 
-      su tracker -c 'cd build; meson test --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
+      # We limit `meson test` to 4 parallel test processes. The default is to
+      # have one test process per CPU, but our tests are mostly IO bound
+      # and we get timeouts and failures if we try to run 32 of them at once.
+      su tracker -c 'cd build; meson test --num-processes=4 --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
 
   after_script:
-    - |
-      python3 -c 'import multiprocessing; print(f"Meson probably started {multiprocessing.cpu_count()} tests in parallel.")'
     - |
       echo "Test suite settings:"
       echo
