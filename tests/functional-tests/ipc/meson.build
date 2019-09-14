@@ -8,6 +8,7 @@ sandbox_args = ['-m', 'trackertestutils', '--dbus-config', test_dbus_config, '--
 sandbox_env = environment()
 
 test_env.set('GSETTINGS_SCHEMA_DIR', tracker_uninstalled_gsettings_schema_dir)
+test_env.set('LANG', 'en_GB.utf-8')
 test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
 test_env.set('TRACKER_DB_ONTOLOGIES_DIR', tracker_uninstalled_nepomuk_ontologies_dir)
 test_env.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', tracker_uninstalled_stop_words_dir)
