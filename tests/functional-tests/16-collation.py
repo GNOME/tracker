@@ -131,4 +131,4 @@ if __name__ == "__main__":
       * Check what happens in non-english encoding
       * Dynamic change of collation (not implemented yet in tracker)
     """)
-    ut.main()
+    ut.main(verbosity=2)

@@ -123,4 +123,4 @@ class TrackerStoreStatisticsTests (CommonTrackerStoreTest):
                 self.assertEqual(old_stats[k], new_stats[k])
 
 if __name__ == "__main__":
-    ut.main()
+    ut.main(verbosity=2)
