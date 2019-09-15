@@ -108,10 +108,9 @@ If run with no arguments, the script will start an interactive shell. Any
 arguments after a `--` sentinel are treated as a command to run in a non-interactive
 shell.
 
-So, let's see the status of the Tracker daemons. They should be all stopped
-right now.
+Now check that it runs the correct version of the Tracker CLI:
 
-    ./run-uninstalled -- tracker daemon status
+    ./run-uninstalled -- tracker --version
 
 Let's try and index some content. (Subtitute ~/Music for any other location
 where you have interesting data). We need to explicitly tell the script to wait
