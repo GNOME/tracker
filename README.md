@@ -122,7 +122,7 @@ for the miners to finish, or it will exit too soon. (This is a workaround for
 
 Let's see what files were found!
 
-    ./run-uninstalled  --prefix ~/opt/tracker -- tracker sparql -q 'SELECT ?url { ?u nie:url ?url }
+    ./run-uninstalled  -- tracker sparql -q 'SELECT ?url { ?u nie:url ?url } }'
 
 Or, you can try a full-text search ...
 
