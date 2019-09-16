@@ -131,6 +131,7 @@ run_builtin (struct cmd_struct *p, int argc, const char **argv)
 static void
 handle_command (int argc, const char **argv)
 {
+	gchar *log_filename = NULL;
 	const char *cmd = argv[0];
 	int i;
 
@@ -138,6 +139,12 @@ handle_command (int argc, const char **argv)
 	if (argc > 1 && !strcmp (argv[1], "--help")) {
 		argv[1] = argv[0];
 		argv[0] = cmd = "help";
+	}
+
+	tracker_log_init (0, &log_filename);
+	if (log_filename != NULL) {
+		g_message ("Using log file:'%s'", log_filename);
+		g_free (log_filename);
 	}
 
 	for (i = 0; i < G_N_ELEMENTS (commands); i++) {
