@@ -26,6 +26,7 @@
 import argparse
 import collections
 import configparser
+import contextlib
 import locale
 import logging
 import os
@@ -114,7 +115,8 @@ def environment_set_and_add_path(env, var, prefix, suffix):
     env[var] = full
 
 
-def create_sandbox(index_location, prefix=None, verbosity=0, dbus_config=None):
+def create_sandbox(index_location, prefix=None, verbosity=0, dbus_config=None,
+                   interactive=False):
     assert prefix is None or dbus_config is None
 
     extra_env = {}
@@ -142,7 +144,7 @@ def create_sandbox(index_location, prefix=None, verbosity=0, dbus_config=None):
     log.debug('Using index location "%s"' % index_location)
 
     sandbox = helpers.TrackerDBusSandbox(dbus_config, extra_env=extra_env)
-    sandbox.start()
+    sandbox.start(new_session=(interactive == True))
 
     # Update our own environment, so when we launch a subprocess it has the
     # same settings as the Tracker daemons.
@@ -371,6 +373,13 @@ def wait_for_miners(watches):
             time.sleep(0.1)
 
 
+@contextlib.contextmanager
+def ignore_sigint():
+    handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
+    yield
+    signal.signal(signal.SIGINT, handler)
+
+
 def main():
     locale.setlocale(locale.LC_ALL, '')
 
@@ -417,8 +426,12 @@ def main():
     else:
         index_location = args.index_location
 
+    interactive = not (args.command)
+
     # Set up environment variables and foo needed to get started.
-    sandbox = create_sandbox(index_location, args.prefix, verbosity, dbus_config=args.dbus_config)
+    sandbox = create_sandbox(index_location, args.prefix, verbosity,
+                             dbus_config=args.dbus_config,
+                             interactive=interactive)
     config_set()
 
     link_to_mime_data()
@@ -430,7 +443,17 @@ def main():
         miner_watches[miner] = watch
 
     try:
-        if args.command:
+        if interactive:
+            if args.dbus_config:
+                print(f"Using Tracker daemons from build tree with D-Bus config {args.dbus_config}")
+            else:
+                print(f"Using Tracker daemons from prefix {args.prefix}")
+            print("Starting interactive Tracker sandbox shell... (type 'exit' to finish)")
+            print()
+
+            with ignore_sigint():
+                subprocess.run(shell)
+        else:
             command = [shell, '-c', ' '.join(shlex.quote(c) for c in args.command)]
 
             log.debug("Running: %s", command)
@@ -441,15 +464,6 @@ def main():
 
             log.debug("Process finished with returncode %i", result.returncode)
             sys.exit(result.returncode)
-        else:
-            if args.dbus_config:
-                print(f"Using Tracker daemons from build tree with D-Bus config {args.dbus_config}")
-            else:
-                print(f"Using Tracker daemons from prefix {args.prefix}")
-            print("Starting interactive Tracker sandbox shell... (type 'exit' to finish)")
-            print()
-
-            os.system(shell)
     finally:
         sandbox.stop()
         if index_tmpdir:
