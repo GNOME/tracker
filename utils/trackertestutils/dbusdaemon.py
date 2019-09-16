@@ -58,7 +58,7 @@ class DBusDaemon:
             raise DaemonNotStartedError()
         return self._gdbus_connection
 
-    def start(self, config_file=None, env=None):
+    def start(self, config_file=None, env=None, new_session=False):
         dbus_command = ['dbus-daemon', '--print-address=1', '--print-pid=1']
         if config_file:
             dbus_command += ['--config-file=' + config_file]
@@ -66,7 +66,8 @@ class DBusDaemon:
             dbus_command += ['--session']
         log.debug("Running: %s", dbus_command)
         self.process = subprocess.Popen(
-            dbus_command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            dbus_command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            start_new_session=new_session)
 
         self._previous_sigterm_handler = signal.signal(
             signal.SIGTERM, self._sigterm_handler)

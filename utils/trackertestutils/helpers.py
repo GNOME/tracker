@@ -448,7 +448,7 @@ class TrackerDBusSandbox:
 
         self.daemon = dbusdaemon.DBusDaemon()
 
-    def start(self):
+    def start(self, new_session=False):
         env = os.environ
         env.update(self.extra_env)
         env['G_MESSAGES_PREFIXED'] = 'all'
@@ -463,7 +463,7 @@ class TrackerDBusSandbox:
 
         log.info("Starting D-Bus daemon for sandbox.")
         log.debug("Added environment variables: %s", self.extra_env)
-        self.daemon.start(self.dbus_daemon_config_file, env=env)
+        self.daemon.start(self.dbus_daemon_config_file, env=env, new_session=new_session)
 
     def stop(self):
         tracker_processes = []
