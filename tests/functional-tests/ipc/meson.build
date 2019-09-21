@@ -28,4 +28,5 @@ bus_query_cancellation_test = executable('test-bus-query-cancellation',
 
 test('functional-ipc-bus-query-cancellation', python,
   args: sandbox_args + [bus_query_cancellation_test],
-  env: test_env)
+  env: test_env,
+  timeout: 60)
