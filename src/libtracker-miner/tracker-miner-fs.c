@@ -30,56 +30,30 @@
 #include "tracker-sparql-buffer.h"
 #include "tracker-file-notifier.h"
 
-/* If defined will print the tree from GNode while running */
-#ifdef CRAWLED_TREE_ENABLE_TRACE
-#warning Tree debugging traces enabled
-#endif /* CRAWLED_TREE_ENABLE_TRACE */
-
 /* If defined will print push/pop actions on queues */
 #ifdef EVENT_QUEUE_ENABLE_TRACE
 #warning Event Queue traces enabled
 #define EVENT_QUEUE_LOG_PREFIX "[Event Queues] "
 #define EVENT_QUEUE_STATUS_TIMEOUT_SECS 30
-#define trace_eq(message, ...) g_debug (EVENT_QUEUE_LOG_PREFIX message, ##__VA_ARGS__)
-#define trace_eq_action(pushed, queue_name, position, gfile1, gfile2, reason) \
+#define trace_eq(message, ...) g_message (EVENT_QUEUE_LOG_PREFIX message, ##__VA_ARGS__)
+#define trace_eq_event(event) \
 	do { \
-		gchar *uri1 = g_file_get_uri (gfile1); \
-		gchar *uri2 = gfile2 ? g_file_get_uri (gfile2) : NULL; \
-		g_debug ("%s%s '%s%s%s' %s %s of queue '%s'%s%s", \
-		         EVENT_QUEUE_LOG_PREFIX, \
-		         pushed ? "Pushed" : "Popped", \
-		         uri1, \
-		         uri2 ? "->" : "", \
-		         uri2 ? uri2 : "", \
-		         pushed ? "to" : "from", \
-		         position, \
-		         queue_name, \
-		         reason ? ": " : "", \
-		         reason ? reason : ""); \
+		const gchar *event_type_name[] = { "CREATED", "UPDATED", "DELETED", "MOVED" }; \
+		gchar *uri1 = g_file_get_uri (event->file); \
+		gchar *uri2 = event->dest_file ? g_file_get_uri (event->dest_file) : NULL; \
+		g_message ("%s New %s event: %s%s%s%s", \
+		           EVENT_QUEUE_LOG_PREFIX, \
+		           event_type_name[event->type], \
+		           event->attributes_update ? "(attributes only) " : "", \
+		           uri1, \
+		           uri2 ? "->" : "", \
+		           uri2 ? uri2 : ""); \
 		g_free (uri1); \
 		g_free (uri2); \
 	} while (0)
-#define trace_eq_push_tail(queue_name, gfile, reason)	  \
-	trace_eq_action (TRUE, queue_name, "tail", gfile, NULL, reason)
-#define trace_eq_push_head(queue_name, gfile, reason)	  \
-	trace_eq_action (TRUE, queue_name, "head", gfile, NULL, reason)
-#define trace_eq_push_tail_2(queue_name, gfile1, gfile2, reason)	  \
-	trace_eq_action (TRUE, queue_name, "tail", gfile1, gfile2, reason)
-#define trace_eq_push_head_2(queue_name, gfile1, gfile2, reason)	  \
-	trace_eq_action (TRUE, queue_name, "head", gfile1, gfile2, reason)
-#define trace_eq_pop_head(queue_name, gfile)	  \
-	trace_eq_action (FALSE, queue_name, "head", gfile, NULL, NULL)
-#define trace_eq_pop_head_2(queue_name, gfile1, gfile2)	  \
-	trace_eq_action (FALSE, queue_name, "head", gfile1, gfile2, NULL)
-static gboolean miner_fs_queues_status_trace_timeout_cb (gpointer data);
 #else
 #define trace_eq(...)
-#define trace_eq_push_tail(...)
-#define trace_eq_push_head(...)
-#define trace_eq_push_tail_2(...)
-#define trace_eq_push_head_2(...)
-#define trace_eq_pop_head(...)
-#define trace_eq_pop_head_2(...)
+#define trace_eq_event(...)
 #endif /* EVENT_QUEUE_ENABLE_TRACE */
 
 /* Default processing pool limits to be set */
@@ -157,10 +131,6 @@ struct _TrackerMinerFSPrivate {
 
 	guint item_queues_handler_id;
 	GFile *item_queue_blocker;
-
-#ifdef EVENT_QUEUE_ENABLE_TRACE
-	guint queue_status_timeout_id;
-#endif /* EVENT_QUEUE_ENABLE_TRACE */
 
 	/* Root / tree / index */
 	GFile *root;
@@ -590,12 +560,6 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 
 	priv->items = tracker_priority_queue_new ();
 
-#ifdef EVENT_QUEUE_ENABLE_TRACE
-	priv->queue_status_timeout_id = g_timeout_add_seconds (EVENT_QUEUE_STATUS_TIMEOUT_SECS,
-	                                                       miner_fs_queues_status_trace_timeout_cb,
-	                                                       object);
-#endif /* PROCESSING_POOL_ENABLE_TRACE */
-
 	/* Create processing pools */
 	priv->task_pool = tracker_task_pool_new (DEFAULT_WAIT_POOL_LIMIT);
 	g_signal_connect (priv->task_pool, "notify::limit-reached",
@@ -894,11 +858,6 @@ fs_finalize (GObject *object)
 		/* Just in case we end up using this AFTER finalize, not expected */
 		priv->roots_to_notify = NULL;
 	}
-
-#ifdef EVENT_QUEUE_ENABLE_TRACE
-	if (priv->queue_status_timeout_id)
-		g_source_remove (priv->queue_status_timeout_id);
-#endif /* PROCESSING_POOL_ENABLE_TRACE */
 
 	G_OBJECT_CLASS (tracker_miner_fs_parent_class)->finalize (object);
 }
@@ -2125,6 +2084,8 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		tracker_file_notifier_get_file_iri (fs->priv->file_notifier,
 						    event->file, TRUE);
 
+		trace_eq_event (event);
+
 		link = tracker_priority_queue_add (fs->priv->items, event, priority);
 		queue_event_save_node (event, link);
 		item_queue_handlers_set_up (fs);
@@ -2314,31 +2275,6 @@ file_notifier_finished (TrackerFileNotifier *notifier,
 	}
 }
 
-
-#ifdef CRAWLED_TREE_ENABLE_TRACE
-
-static gboolean
-print_file_tree (GNode    *node,
-                 gpointer  user_data)
-{
-	gchar *name;
-	gint i;
-
-	name = g_file_get_basename (node->data);
-
-	/* Indentation */
-	for (i = g_node_depth (node) - 1; i > 0; i--) {
-		g_print ("  ");
-	}
-
-	g_print ("%s\n", name);
-	g_free (name);
-
-	return FALSE;
-}
-
-#endif /* CRAWLED_TREE_ENABLE_TRACE */
-
 static void
 task_pool_cancel_foreach (gpointer data,
                           gpointer user_data)
@@ -2474,11 +2410,11 @@ tracker_miner_fs_check_file (TrackerMinerFS *fs,
 			return;
 		}
 
-		trace_eq_push_tail ("UPDATED", file, "Requested by application");
 		tracker_file_notifier_get_file_iri (fs->priv->file_notifier,
 		                                    file, TRUE);
 
 		event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, file);
+		trace_eq_event (event);
 		miner_fs_queue_event (fs, event, priority);
 	}
 
@@ -2721,41 +2657,3 @@ tracker_miner_fs_get_data_provider (TrackerMinerFS *fs)
 
 	return fs->priv->data_provider;
 }
-
-#ifdef EVENT_QUEUE_ENABLE_TRACE
-
-static void
-trace_events_foreach (gpointer data,
-		      gpointer fs)
-{
-	QueueEvent *event = data;
-	gchar *uri, *dest_uri = NULL;
-
-	uri = g_file_get_uri (event->file);
-	if (event->dest_file)
-		dest_uri = g_file_get_uri (event->dest_file);
-
-	trace_eq ("(%d) '%s' '%s'",
-	          event->type, uri, dest_uri);
-
-	g_free (dest_uri);
-	g_free (uri);
-}
-
-static gboolean
-miner_fs_queues_status_trace_timeout_cb (gpointer data)
-{
-	TrackerMinerFS *fs = data;
-
-	trace_eq ("(%s) Queue '%s' has %u elements:",
-	          G_OBJECT_TYPE_NAME (fs),
-	          queue_name,
-	          tracker_priority_queue_get_length (queue));
-	tracker_priority_queue_foreach (queue,
-					trace_events_foreach,
-	                                fs);
-
-	return G_SOURCE_CONTINUE;
-}
-
-#endif /* EVENT_QUEUE_ENABLE_TRACE */
