@@ -1368,10 +1368,12 @@ get_old_property_values (TrackerData      *data,
                          GError          **error)
 {
 	GArray *old_values;
+#if HAVE_TRACKER_FTS
 	const gchar *database;
 
 	database = data->resource_buffer->graph->graph ?
 		data->resource_buffer->graph->graph : "main";
+#endif
 
 	/* read existing property values */
 	old_values = g_hash_table_lookup (data->resource_buffer->predicates, property);
@@ -2751,9 +2753,7 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 	TrackerDBInterface *iface;
 	GValue object_value = G_VALUE_INIT;
 	const gchar *object_str;
-#if HAVE_TRACKER_FTS
 	GError *new_error = NULL;
-#endif /* HAVE_TRACKER_FTS */
 
 	g_return_if_fail (subject != NULL);
 	g_return_if_fail (predicate != NULL);

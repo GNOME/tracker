@@ -4907,8 +4907,10 @@ tracker_data_manager_initable_init (GInitable     *initable,
 					g_hash_table_iter_init (&iter, graphs);
 
 					while (g_hash_table_iter_next (&iter, &value, NULL)) {
+#if HAVE_TRACKER_FTS
 						if (update_fts)
 							tracker_db_interface_sqlite_fts_delete_table (iface, value);
+#endif
 
 						tracker_data_ontology_setup_db (manager, iface, value, TRUE,
 						                                &ontology_error);
@@ -5291,7 +5293,9 @@ tracker_data_manager_create_graph (TrackerDataManager  *manager,
 	                                     FALSE, error))
 		goto detach;
 
+#if HAVE_TRACKER_FTS
 	tracker_data_manager_init_fts (manager, iface, name, TRUE);
+#endif
 
 	id = tracker_data_ensure_graph (manager->data_update, name, error);
 	if (id == 0)
