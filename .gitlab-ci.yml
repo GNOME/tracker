@@ -4,7 +4,7 @@
 variables:
   # These can be used to see verbose log output from the functional-tests.
   # See HACKING.md for more information.
-  TRACKER_VERBOSITY: "0"
+  TRACKER_VERBOSITY: "1"
   TRACKER_TESTS_VERBOSE: "no"
 
   # This can be used when debugging test failures that only occur within GitLab CI.
