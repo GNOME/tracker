@@ -252,12 +252,12 @@ db_set_params (TrackerDBInterface   *iface,
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".journal_size_limit = 10240000", database);
 
 	if (page_size != TRACKER_DB_PAGE_SIZE_DONT_SET) {
-		g_info ("  Setting page size to %d", page_size);
+		g_debug ("  Setting page size to %d", page_size);
 		tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".page_size = %d", database, page_size);
 	}
 
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".cache_size = %d", database, cache_size);
-	g_info ("  Setting cache size to %d", cache_size);
+	g_debug ("  Setting cache size to %d", cache_size);
 }
 
 void
@@ -265,9 +265,8 @@ tracker_db_manager_remove_all (TrackerDBManager *db_manager)
 {
 	gchar *filename;
 
-	g_info ("Removing all database/storage files");
+	g_info ("Removing all files for database %s", db_manager->db.abs_filename);
 
-	g_info ("  Removing database:'%s'", db_manager->db.abs_filename);
 	g_unlink (db_manager->db.abs_filename);
 
 	/* also delete shm and wal helper files */
@@ -499,12 +498,12 @@ db_recreate_all (TrackerDBManager  *db_manager,
 	 * because at the time 'initialized' = FALSE and that
 	 * will cause errors and do nothing.
 	 */
-	g_info ("Cleaning up database files for reindex");
+	g_debug ("Cleaning up database files for reindex");
 
 	tracker_db_manager_remove_all (db_manager);
 
 	/* Now create the databases and close them */
-	g_info ("Creating database files, this may take a few moments...");
+	g_info ("Creating database files for %s...", db_manager->db.abs_filename);
 
 	db_manager->db.iface = tracker_db_manager_create_db_interface (db_manager, FALSE, &internal_error);
 	if (internal_error) {
@@ -611,7 +610,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	need_reindex = FALSE;
 
 	/* Set up locations */
-	g_info ("Setting database locations");
+	g_debug ("Setting database locations");
 
 	db_manager->flags = flags;
 	db_manager->s_cache_size = select_cache_size;
@@ -631,13 +630,13 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 
 		/* Make sure the directories exist */
-		g_info ("Checking database directories exist");
+		g_debug ("Checking database directories exist");
 
 		g_mkdir_with_parents (db_manager->data_dir, 00755);
 		g_mkdir_with_parents (db_manager->user_data_dir, 00755);
 	}
 
-	g_info ("Checking whether database files exist");
+	g_debug ("Checking whether database files exist");
 
 	/* Check we have the database in place, if it is
 	 * missing, we reindex.
@@ -718,14 +717,14 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		tracker_db_manager_update_version (db_manager);
 
 		/* Load databases */
-		g_info ("Loading databases files...");
+		g_info ("Loading files for database %s...", db_manager->db.abs_filename);
 
 	} else if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 		/* do not do shutdown check for read-only mode (direct access) */
 		gboolean must_recreate = FALSE;
 
 		/* Load databases */
-		g_info ("Loading databases files...");
+		g_info ("Loading files for database %s...", db_manager->db.abs_filename);
 
 		if (!must_recreate && g_file_test (db_manager->in_use_filename, G_FILE_TEST_EXISTS)) {
 			gsize size = 0;
@@ -1123,8 +1122,6 @@ wal_checkpoint (TrackerDBInterface *iface,
 {
 	GError *error = NULL;
 
-	g_debug ("Checkpointing database...");
-
 	tracker_db_interface_sqlite_wal_checkpoint (iface, blocking,
 	                                            blocking ? &error : NULL);
 
@@ -1134,8 +1131,6 @@ wal_checkpoint (TrackerDBInterface *iface,
 			   error->message);
 		g_error_free (error);
 	}
-
-	g_debug ("Checkpointing complete");
 }
 
 static gpointer

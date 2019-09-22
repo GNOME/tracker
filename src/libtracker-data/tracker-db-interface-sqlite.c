@@ -1933,7 +1933,7 @@ open_database (TrackerDBInterface  *db_interface,
 		             "Could not open sqlite3 database:'%s': %s", db_interface->filename, str);
 		return;
 	} else {
-		g_info ("Opened sqlite3 database:'%s'", db_interface->filename);
+		g_debug ("Opened sqlite3 database:'%s'", db_interface->filename);
 	}
 
 	/* Set our unicode collation function */
@@ -2380,6 +2380,11 @@ tracker_db_interface_sqlite_wal_checkpoint (TrackerDBInterface  *interface,
                                             GError             **error)
 {
 	int return_val;
+	GLogLevelFlags log_level;
+
+	log_level = blocking ? G_LOG_LEVEL_INFO : G_LOG_LEVEL_DEBUG;
+
+	g_log (G_LOG_DOMAIN, log_level, "Checkpointing database (%s)...", blocking ? "blocking" : "non-blocking");
 
 	return_val = sqlite3_wal_checkpoint_v2 (interface->db, NULL,
 	                                        blocking ? SQLITE_CHECKPOINT_FULL : SQLITE_CHECKPOINT_PASSIVE,
@@ -2393,6 +2398,7 @@ tracker_db_interface_sqlite_wal_checkpoint (TrackerDBInterface  *interface,
 		return FALSE;
 	}
 
+	g_log (G_LOG_DOMAIN, log_level, "Checkpointing complete");
 	return TRUE;
 }
 
@@ -2406,7 +2412,7 @@ tracker_db_interface_sqlite_finalize (GObject *object)
 	close_database (db_interface);
 	g_free (db_interface->fts_properties);
 
-	g_info ("Closed sqlite3 database:'%s'", db_interface->filename);
+	g_debug ("Closed sqlite3 database:'%s'", db_interface->filename);
 
 	g_free (db_interface->filename);
 

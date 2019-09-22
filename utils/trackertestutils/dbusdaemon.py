@@ -111,6 +111,7 @@ class DBusDaemon:
         if self._previous_sigterm_handler:
             signal.signal(signal.SIGTERM, self._previous_sigterm_handler)
             self._previous_sigterm_handler = None
+        log.debug("DBus daemon stopped")
 
     def pipe_to_log(self, pipe, dbuslog):
         """This function processes the output from our dbus-daemon instance."""

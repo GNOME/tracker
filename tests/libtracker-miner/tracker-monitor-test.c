@@ -1442,6 +1442,8 @@ main (gint    argc,
 {
 	g_test_init (&argc, &argv, NULL);
 
+	tracker_log_init (0, NULL);
+
 	g_test_message ("Testing filesystem monitor");
 
 	/* Basic API tests */

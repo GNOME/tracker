@@ -241,7 +241,9 @@ tracker_log_init (gint    this_verbosity,
 			g_free (filename);
 		}
 	} else {
-		*used_filename = NULL;
+		if (used_filename) {
+			*used_filename = NULL;
+		}
 	}
 
 	verbosity = CLAMP (this_verbosity, 0, 3);
