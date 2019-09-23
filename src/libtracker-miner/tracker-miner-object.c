@@ -495,10 +495,11 @@ void
 tracker_miner_start (TrackerMiner *miner)
 {
 	g_return_if_fail (TRACKER_IS_MINER (miner));
-	g_return_if_fail (miner->priv->started == FALSE);
 
-	miner->priv->started = TRUE;
-	g_signal_emit (miner, signals[STARTED], 0);
+	if (miner->priv->started == FALSE) {
+		miner->priv->started = TRUE;
+		g_signal_emit (miner, signals[STARTED], 0);
+	}
 }
 
 /**
@@ -513,10 +514,11 @@ void
 tracker_miner_stop (TrackerMiner *miner)
 {
 	g_return_if_fail (TRACKER_IS_MINER (miner));
-	g_return_if_fail (miner->priv->started == TRUE);
 
-	miner->priv->started = FALSE;
-	g_signal_emit (miner, signals[STOPPED], 0);
+	if (miner->priv->started == TRUE) {
+		miner->priv->started = FALSE;
+		g_signal_emit (miner, signals[STOPPED], 0);
+	}
 }
 
 /**
