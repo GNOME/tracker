@@ -4,6 +4,7 @@ project('tracker', 'c', 'vala',
 
 gnome = import('gnome')
 i18n = import('i18n')
+pkg = import('pkgconfig')
 cc = meson.get_compiler('c')
 
 # This is the X.Y used in -llibtracker-FOO-X.Y
@@ -267,22 +268,9 @@ conf.set('TRACKER_MICRO_VERSION', tracker_micro_version)
 conf.set('TRACKER_INTERFACE_AGE', 0)
 conf.set('TRACKER_BINARY_AGE', 100 * tracker_minor_version + tracker_micro_version)
 
-# Config that goes in some other generated files (.desktop, .pc, etc)
+# Config that goes in some other generated files (.desktop, .service, etc)
 conf.set('abs_top_builddir', meson.current_build_dir())
-conf.set('exec_prefix', get_option('prefix'))
-conf.set('bindir', join_paths(get_option('prefix'), get_option('bindir')))
-conf.set('datadir', datadir)
-conf.set('datarootdir', join_paths(get_option('prefix'), get_option('datadir')))
-conf.set('dbus_services_dir', dbus_services_dir)
-conf.set('includedir', join_paths(get_option('prefix'), get_option('includedir')))
-conf.set('libdir', libdir)
 conf.set('libexecdir', join_paths(get_option('prefix'), get_option('libexecdir')))
-conf.set('prefix', get_option('prefix'))
-conf.set('TRACKER_API_VERSION', tracker_api_version)
-conf.set('VERSION', meson.project_version())
-conf.set('tracker_store', join_paths ('${libexecdir}', 'tracker-store'))
-conf.set('ontologies_dir', join_paths ('${datadir}', 'tracker', 'ontologies'))
-conf.set('domain_ontologies_dir', join_paths('${datadir}', 'tracker', 'domain-ontologies'))
 
 configure_file(input: 'config.h.meson.in',
                output: 'config.h',

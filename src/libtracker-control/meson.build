@@ -42,12 +42,14 @@ gnome.generate_vapi(
       install : true,
     )
 
-configure_file(
-    input: 'tracker-control.pc.in',
-    output: 'tracker-control-@0@.pc'.format(tracker_api_version),
-    configuration: conf,
-    install: true,
-    install_dir: join_paths(get_option('prefix'), get_option('libdir'), 'pkgconfig'))
+pkg.generate(libtracker_control,
+    description: 'A library to monitor/control tracker miners',
+    requires: [glib, gio],
+    subdirs: 'tracker-' + tracker_api_version,
+    variables: [
+        'exec_prefix=${prefix}'
+    ],
+)
 
 install_headers (headers,
     subdir: 'tracker-@0@/libtracker-control'.format(tracker_api_version))

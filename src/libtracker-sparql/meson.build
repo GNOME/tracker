@@ -89,13 +89,6 @@ tracker_sparql_intermediate_dep = declare_dependency(
     dependencies: [ tracker_sparql_intermediate_dependencies, libtracker_sparql_c_vapi_dep ],
 )
 
-configure_file(
-    input: 'tracker-sparql.pc.in',
-    output: 'tracker-sparql-@0@.pc'.format(tracker_api_version),
-    configuration: conf,
-    install: true,
-    install_dir: join_paths(get_option('prefix'), get_option('libdir'), 'pkgconfig'))
-
 install_headers(
     libtracker_sparql_c_public_headers,
     'tracker-ontologies.h',
