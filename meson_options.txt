@@ -22,3 +22,7 @@ option('dbus_services', type: 'string', value: '',
        description: 'Directory to install D-Bus .service files (leave blank to use the value from dbus-1.pc)')
 option('systemd_user_services', type: 'string', value: 'yes',
        description: 'Directory to install systemd user .service files (or "yes" for default directory, "no" to disable installation)')
+option('test_utils', type: 'boolean', value: true,
+       description: 'Whether to install the tracker test utils')
+option('test_utils_dir', type: 'string', value: '',
+       description: 'Directory to install tracker test utils (or empty to use the default)')
