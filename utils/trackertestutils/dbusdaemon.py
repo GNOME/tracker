@@ -21,6 +21,7 @@ from gi.repository import GLib
 
 import logging
 import os
+import shutil
 import signal
 import subprocess
 import threading
@@ -58,8 +59,16 @@ class DBusDaemon:
             raise DaemonNotStartedError()
         return self._gdbus_connection
 
+    def _dbus_daemon_path(self):
+        dbus_daemon = shutil.which('dbus-daemon')
+
+        if dbus_daemon is None:
+            raise RuntimeError("Could not find `dbus-daemon` binary in PATH (%s)." % os.environ.get('PATH'))
+
+        return dbus_daemon
+
     def start(self, config_file=None, env=None, new_session=False):
-        dbus_command = ['dbus-daemon', '--print-address=1', '--print-pid=1']
+        dbus_command = [self._dbus_daemon_path(), '--print-address=1', '--print-pid=1']
         if config_file:
             dbus_command += ['--config-file=' + config_file]
         else:
