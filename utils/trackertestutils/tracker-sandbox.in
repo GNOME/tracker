@@ -1,0 +1,5 @@
+#!/bin/sh
+
+export PYTHONPATH=@testutils_dir@
+
+python3 -m trackertestutils --prefix=@prefix@ $@

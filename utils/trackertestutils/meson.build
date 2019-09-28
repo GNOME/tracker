@@ -1,5 +1,6 @@
 sources = [
   '__init__.py',
+  '__main__.py',
   'dbusdaemon.py',
   'dconf.py',
   'helpers.py',
