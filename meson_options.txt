@@ -23,6 +23,6 @@ option('dbus_services', type: 'string', value: '',
 option('systemd_user_services', type: 'string', value: 'yes',
        description: 'Directory to install systemd user .service files (or "yes" for default directory, "no" to disable installation)')
 option('test_utils', type: 'boolean', value: true,
-       description: 'Whether to install the tracker test utils')
+       description: 'Whether to install the trackertestutils Python package')
 option('test_utils_dir', type: 'string', value: '',
-       description: 'Directory to install tracker test utils (or empty to use the default)')
+       description: 'Directory to install trackertestutils Python package (or empty to use the default)')
