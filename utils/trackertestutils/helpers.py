@@ -453,6 +453,14 @@ class TrackerDBusSandbox:
         env.update(self.extra_env)
         env['G_MESSAGES_PREFIXED'] = 'all'
 
+        # This avoids an issue where gvfsd-fuse can start up while the bus is
+        # shutting down. If it fails to connect to the bus, it continues to
+        # run anyway which leads to our dbus-daemon failing to shut down.
+        #
+        # Since https://gitlab.gnome.org/GNOME/gvfs/issues/323 was implemented
+        # in GVFS 1.42 this problem may have gone away.
+        env['GVFS_DISABLE_FUSE'] = '1'
+
         # Precreate runtime dir, to avoid this warning from dbus-daemon:
         #
         #    Unable to set up transient service directory: XDG_RUNTIME_DIR "/home/sam/tracker-tests/tmp_59i3ev1/run" not available: No such file or directory
