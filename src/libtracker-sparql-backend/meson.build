@@ -25,6 +25,25 @@ tracker_sparql_dep = declare_dependency(
     dependencies: [tracker_common_dep],
 )
 
+pkg.generate(libtracker_sparql,
+    description: 'Tracker : A library to perform SPARQL queries and updates in the Tracker Store',
+    requires: [glib, gio, gobject, gmodule],
+    subdirs: [
+        'tracker-' + tracker_api_version,
+        'tracker-' + tracker_api_version / 'libtracker-sparql',
+    ],
+    variables: [
+        'exec_prefix=${prefix}',
+        'libexecdir=${prefix}' / get_option('libexecdir'),
+        'tracker_store=${libexecdir}' / 'tracker-store',
+        'datadir=${prefix}' / get_option('datadir'),
+        'tracker_datadir=${datadir}' / 'tracker',
+        'ontologies_dir=' + tracker_ontologies_dir,
+        'domain_ontologies_dir=${tracker_datadir}' / 'domain-ontologies',
+        'dbus_services_dir=' + dbus_services_dir,
+    ],
+)
+
 # The introspection generation for libtracker-sparql is awkward because we have
 # both C and Vala code, and we have to generate an introspection repo for each
 # one separately and then combine them together manually.

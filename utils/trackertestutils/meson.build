@@ -1,5 +1,3 @@
-pkg = import('pkgconfig')
-
 sources = [
   '__init__.py',
   'dbusdaemon.py',

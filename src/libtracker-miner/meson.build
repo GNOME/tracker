@@ -101,12 +101,14 @@ gnome.generate_vapi(
       install : true,
     )
 
-configure_file(
-    input: 'tracker-miner.pc.in',
-    output: 'tracker-miner-@0@.pc'.format(tracker_api_version),
-    configuration: conf,
-    install: true,
-    install_dir: join_paths(get_option('prefix'), get_option('libdir'), 'pkgconfig'))
+pkg.generate(libtracker_miner,
+    description: 'A library to develop tracker data miners',
+    requires: [libtracker_sparql],
+    subdirs: 'tracker-' + tracker_api_version,
+    variables: [
+        'exec_prefix=${prefix}'
+    ],
+)
 
 install_headers(miner_headers, subdir: 'tracker-@0@/libtracker-miner'.format(tracker_api_version))
 
