@@ -12,6 +12,7 @@ global:
   tracker_resource_*;
   tracker_notifier_*;
   tracker_endpoint_*;
+  tracker_check_version;
 local:
   *;
 };

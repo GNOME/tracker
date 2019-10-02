@@ -24,6 +24,7 @@
 #include <glib-object.h>
 
 #include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-sparql/tracker-version.h>
 
 typedef struct {
 	const gchar *input ;
@@ -354,6 +355,14 @@ test_tracker_sparql_connection_interleaved (void)
 	g_object_unref(cursor1);
 }
 
+static void
+test_tracker_check_version (void)
+{
+	g_assert_true(tracker_check_version(TRACKER_MAJOR_VERSION,
+	                                    TRACKER_MINOR_VERSION,
+	                                    TRACKER_MICRO_VERSION) == NULL);
+}
+
 gint
 main (gint argc, gchar **argv)
 {
@@ -385,6 +394,8 @@ main (gint argc, gchar **argv)
 	                 test_tracker_sparql_connection_locking_async);
 	g_test_add_func ("/libtracker-sparql/tracker-sparql/tracker_sparql_cursor_next_async",
 	                 test_tracker_sparql_cursor_next_async);
+	g_test_add_func ("/libtracker-sparql/tracker-sparql/tracker_check_version",
+	                 test_tracker_check_version);
 
 	result = g_test_run ();
 
