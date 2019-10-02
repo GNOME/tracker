@@ -1352,10 +1352,7 @@ generate_sparql_relation_inserts_foreach (gpointer key,
 		                      data->namespaces))
 			return;
 
-		if (g_list_find_resource (data->done_list, relation) == NULL) {
-			data->done_list = g_list_prepend (data->done_list, relation);
-			generate_sparql_insert_pattern (relation, data);
-		}
+		generate_sparql_insert_pattern (relation, data);
 	} else if (G_VALUE_HOLDS (value, G_TYPE_PTR_ARRAY)) {
 		GPtrArray *array = g_value_get_boxed (value);
 		const GValue *array_value;
@@ -1375,10 +1372,6 @@ generate_sparql_relation_inserts_foreach (gpointer key,
 					      data->namespaces))
 				continue;
 
-			if (g_list_find_resource (data->done_list, relation) != NULL)
-				continue;
-
-			data->done_list = g_list_prepend (data->done_list, relation);
 			generate_sparql_insert_pattern (relation, data);
 		}
 	}
@@ -1459,6 +1452,12 @@ generate_sparql_insert_pattern (TrackerResource    *resource,
 	char *full_property;
 	const GValue *value;
 	gboolean had_property = FALSE;
+
+	if (g_list_find_resource (data->done_list, resource) == NULL)
+		/* We already processed this resource. */
+		return;
+
+	data->done_list = g_list_prepend (data->done_list, resource);
 
 	/* First, emit any sub-resources. */
 	g_hash_table_foreach (priv->properties, generate_sparql_relation_inserts_foreach, data);
@@ -1551,7 +1550,7 @@ tracker_resource_print_sparql_update (TrackerResource         *resource,
 	generate_sparql_deletes (resource, &context);
 
 	g_list_free (context.done_list);
-	context.done_list = g_list_prepend (NULL, resource);
+	context.done_list = NULL;
 
 	/* Finally insert the data */
 	g_string_append (context.string, "INSERT DATA {\n");
