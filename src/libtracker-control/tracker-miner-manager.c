@@ -820,9 +820,16 @@ static void
 initialize_miners_data (TrackerMinerManager *manager)
 {
 	GFile *file;
+	const gchar *miners_dir;
+
+	if (g_getenv("TRACKER_MINER_SERVICES_DIR") != NULL) {
+		miners_dir = g_getenv("TRACKER_MINER_SERVICES_DIR");
+	} else {
+		miners_dir = TRACKER_MINERS_DIR;
+	}
 
 	/* Go through service files */
-	file = g_file_new_for_path (TRACKER_MINERS_DIR);
+	file = g_file_new_for_path (miners_dir);
 	directory_foreach (file, ".service", (GFunc) check_file, manager);
 	g_object_unref (file);
 }
