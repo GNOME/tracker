@@ -961,6 +961,13 @@ tracker_resource_compare (TrackerResource *a,
 	return strcmp (a_priv->identifier, b_priv->identifier);
 };
 
+/* Internal helper. */
+static GList *
+g_list_find_resource (GList *list,
+                      TrackerResource *resource) {
+	return g_list_find_custom (list, resource, (GCompareFunc) tracker_resource_compare);
+}
+
 
 /* Helper function for serialization code. This allows you to selectively
  * populate 'interned_namespaces' from 'all_namespaces' based on when a
@@ -1039,7 +1046,7 @@ generate_nested_turtle_resource (TrackerResource    *resource,
 	                      data->all_namespaces))
 		return;
 
-	if (g_list_find_custom (data->done_list, resource, (GCompareFunc) tracker_resource_compare) == NULL) {
+	if (g_list_find_resource (data->done_list, resource) == NULL) {
 		data->done_list = g_list_prepend (data->done_list, resource);
 		generate_turtle (resource, data);
 		g_string_append (data->string, "\n");
@@ -1308,13 +1315,23 @@ generate_sparql_relation_deletes_foreach (gpointer key,
 {
 	const GValue *value = value_ptr;
 	GenerateSparqlData *data = user_data;
+	int i;
 
 	if (G_VALUE_HOLDS (value, TRACKER_TYPE_RESOURCE)) {
 		TrackerResource *relation = g_value_get_object (value);
 
-		if (g_list_find_custom (data->done_list, relation, (GCompareFunc) tracker_resource_compare) == NULL) {
-			data->done_list = g_list_prepend (data->done_list, relation);
-			generate_sparql_deletes (relation, data);
+		generate_sparql_deletes (relation, data);
+	} else if (G_VALUE_HOLDS (value, G_TYPE_PTR_ARRAY)) {
+		GPtrArray *array = g_value_get_boxed (value);
+
+		for (i = 0; i < array->len; i ++) {
+			GValue *value = g_ptr_array_index (array, i);
+
+			if (G_VALUE_HOLDS (value, TRACKER_TYPE_RESOURCE)) {
+				TrackerResource *relation = g_value_get_object (value);
+
+				generate_sparql_deletes (relation, data);
+			}
 		}
 	}
 }
@@ -1335,10 +1352,7 @@ generate_sparql_relation_inserts_foreach (gpointer key,
 		                      data->namespaces))
 			return;
 
-		if (g_list_find_custom (data->done_list, relation, (GCompareFunc) tracker_resource_compare) == NULL) {
-			data->done_list = g_list_prepend (data->done_list, relation);
-			generate_sparql_insert_pattern (relation, data);
-		}
+		generate_sparql_insert_pattern (relation, data);
 	} else if (G_VALUE_HOLDS (value, G_TYPE_PTR_ARRAY)) {
 		GPtrArray *array = g_value_get_boxed (value);
 		const GValue *array_value;
@@ -1358,11 +1372,6 @@ generate_sparql_relation_inserts_foreach (gpointer key,
 					      data->namespaces))
 				continue;
 
-			if (g_list_find_custom (data->done_list, relation,
-						(GCompareFunc) tracker_resource_compare) != NULL)
-				continue;
-
-			data->done_list = g_list_prepend (data->done_list, relation);
 			generate_sparql_insert_pattern (relation, data);
 		}
 	}
@@ -1419,6 +1428,12 @@ generate_sparql_deletes (TrackerResource    *resource,
 {
 	TrackerResourcePrivate *priv = GET_PRIVATE (resource);
 
+	if (g_list_find_resource (data->done_list, resource) != NULL)
+		/* We already processed this resource. */
+		return;
+
+	data->done_list = g_list_prepend (data->done_list, resource);
+
 	if (! is_blank_node (priv->identifier) && g_hash_table_size (priv->overwrite) > 0) {
 		generate_sparql_delete_queries (resource, priv->overwrite, data);
 	}
@@ -1437,6 +1452,12 @@ generate_sparql_insert_pattern (TrackerResource    *resource,
 	char *full_property;
 	const GValue *value;
 	gboolean had_property = FALSE;
+
+	if (g_list_find_resource (data->done_list, resource) != NULL)
+		/* We already processed this resource. */
+		return;
+
+	data->done_list = g_list_prepend (data->done_list, resource);
 
 	/* First, emit any sub-resources. */
 	g_hash_table_foreach (priv->properties, generate_sparql_relation_inserts_foreach, data);
@@ -1520,7 +1541,7 @@ tracker_resource_print_sparql_update (TrackerResource         *resource,
 	/* Resources can be recursive, and may have repeated or even cyclic
 	 * relationships. This list keeps track of what we already processed.
 	 */
-	context.done_list = g_list_prepend (NULL, resource);
+	context.done_list = NULL;
 
 	/* Delete the existing data. If we don't do this, we may get constraint
 	 * violations due to trying to add a second value to a single-valued
@@ -1529,7 +1550,7 @@ tracker_resource_print_sparql_update (TrackerResource         *resource,
 	generate_sparql_deletes (resource, &context);
 
 	g_list_free (context.done_list);
-	context.done_list = g_list_prepend (NULL, resource);
+	context.done_list = NULL;
 
 	/* Finally insert the data */
 	g_string_append (context.string, "INSERT DATA {\n");
@@ -1589,7 +1610,7 @@ generate_jsonld_value (const GValue       *value,
 
 		resource = TRACKER_RESOURCE (g_value_get_object (value));
 
-		if (g_list_find_custom (data->done_list, resource, (GCompareFunc) tracker_resource_compare) == NULL) {
+		if (g_list_find_resource (data->done_list, resource) == NULL) {
 			data->done_list = g_list_prepend (data->done_list, resource);
 			json_builder_begin_object (data->builder);
 
