@@ -1308,13 +1308,23 @@ generate_sparql_relation_deletes_foreach (gpointer key,
 {
 	const GValue *value = value_ptr;
 	GenerateSparqlData *data = user_data;
+	int i;
 
 	if (G_VALUE_HOLDS (value, TRACKER_TYPE_RESOURCE)) {
 		TrackerResource *relation = g_value_get_object (value);
 
-		if (g_list_find_custom (data->done_list, relation, (GCompareFunc) tracker_resource_compare) == NULL) {
-			data->done_list = g_list_prepend (data->done_list, relation);
-			generate_sparql_deletes (relation, data);
+		generate_sparql_deletes (relation, data);
+	} else if (G_VALUE_HOLDS (value, G_TYPE_PTR_ARRAY)) {
+		GPtrArray *array = g_value_get_boxed (value);
+
+		for (i = 0; i < array->len; i ++) {
+			GValue *value = g_ptr_array_index (array, i);
+
+			if (G_VALUE_HOLDS (value, TRACKER_TYPE_RESOURCE)) {
+				TrackerResource *relation = g_value_get_object (value);
+
+				generate_sparql_deletes (relation, data);
+			}
 		}
 	}
 }
@@ -1419,6 +1429,12 @@ generate_sparql_deletes (TrackerResource    *resource,
 {
 	TrackerResourcePrivate *priv = GET_PRIVATE (resource);
 
+	if (g_list_find_custom (data->done_list, resource, (GCompareFunc) tracker_resource_compare) != NULL)
+		/* We already processed this resource. */
+		return;
+
+	data->done_list = g_list_prepend (data->done_list, resource);
+
 	if (! is_blank_node (priv->identifier) && g_hash_table_size (priv->overwrite) > 0) {
 		generate_sparql_delete_queries (resource, priv->overwrite, data);
 	}
@@ -1520,7 +1536,7 @@ tracker_resource_print_sparql_update (TrackerResource         *resource,
 	/* Resources can be recursive, and may have repeated or even cyclic
 	 * relationships. This list keeps track of what we already processed.
 	 */
-	context.done_list = g_list_prepend (NULL, resource);
+	context.done_list = NULL;
 
 	/* Delete the existing data. If we don't do this, we may get constraint
 	 * violations due to trying to add a second value to a single-valued
