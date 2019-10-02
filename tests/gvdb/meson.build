@@ -7,4 +7,5 @@ gvdb_test = executable('gvdb-test',
 tests += {
   'name': 'gvdb',
   'exe': gvdb_test,
+  'suite': ['gvdb']
 }

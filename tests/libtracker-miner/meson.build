@@ -27,7 +27,6 @@ libtracker_miner_test_deps = [tracker_common_dep, tracker_miner_dep, tracker_spa
 foreach base_name: libtracker_miner_tests
     source = 'tracker-@0@-test.c'.format(base_name)
     binary_name = 'tracker-@0@-test'.format(base_name)
-    test_name = 'miner-@0@'.format(base_name)
 
     binary = executable(binary_name, source,
       dependencies: libtracker_miner_test_deps,
@@ -35,15 +34,15 @@ foreach base_name: libtracker_miner_tests
       link_with: [libtracker_miner_private])
 
     tests += {
-      'name': test_name,
-      'exe': binary
+      'name': base_name,
+      'exe': binary,
+      'suite': ['miner'],
     }
 endforeach
 
 foreach base_name: libtracker_miner_slow_tests
     source = 'tracker-@0@-test.c'.format(base_name)
     binary_name = 'tracker-@0@-test'.format(base_name)
-    test_name = 'miner-@0@'.format(base_name)
 
     binary = executable(binary_name, source,
       dependencies: libtracker_miner_test_deps,
@@ -51,8 +50,9 @@ foreach base_name: libtracker_miner_slow_tests
       link_with: [libtracker_miner_private])
 
     tests += {
-      'name': test_name,
+      'name': base_name,
       'exe': binary,
+      'suite': ['miner', 'slow'],
       'timeout': 180
     }
 endforeach

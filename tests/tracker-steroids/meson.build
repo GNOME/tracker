@@ -10,5 +10,6 @@ steroids_test = executable('tracker-steroids-test',
 tests += {
   'name': 'steroids',
   'exe': steroids_test,
+  'suite': ['steroids'],
   'requires_dbus': true,
 }

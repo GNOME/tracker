@@ -14,8 +14,9 @@ tracker_resource_test = executable('tracker-resource-test',
   c_args: libtracker_sparql_test_c_args)
 
 tests += {
-  'name': 'tracker-resource-test',
+  'name': 'resource',
   'exe': tracker_resource_test,
+  'suite': ['resource'],
 }
 
 tracker_sparql_test = executable('tracker-sparql-test',
@@ -24,8 +25,9 @@ tracker_sparql_test = executable('tracker-sparql-test',
   c_args: libtracker_sparql_test_c_args)
 
 tests += {
-  'name': 'tracker-sparql-test',
+  'name': 'sparql',
   'exe': tracker_sparql_test,
+  'suite': ['sparql'],
   'is_parallel': false,
   'requires_dbus': true,
 }

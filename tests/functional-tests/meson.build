@@ -24,7 +24,6 @@ config_json = configure_file(
 functional_tests = [
   '01-insertion',
   '02-sparql-bugs',
-  '03-fts-functions',
   '04-group-concat',
   '05-coalesce',
   '06-distance',
@@ -37,6 +36,10 @@ functional_tests = [
   '17-ontology-changes',
 ]
 
+if get_option('fts')
+  functional_tests += '03-fts-functions'
+endif
+
 test_env = environment()
 
 tracker_uninstalled_testutils_dir = join_paths(meson.current_source_dir(), '..', '..', 'utils')
@@ -46,10 +49,24 @@ test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
 
 foreach t: functional_tests
   file = '@0@.py'.format(t)
-  test('functional-' + t, python,
+  test_parts = t.split('-')
+  test_name = t
+  if test_parts.length() > 1
+    parts = []
+    i = 0
+    foreach p: test_parts
+      if i > 0
+        parts += p
+      endif
+      i += 1
+    endforeach
+    test_name = '-'.join(parts)
+  endif
+  test(test_name, python,
     args: [file],
     env: test_env,
     workdir: meson.current_source_dir(),
+    suite: ['functional'],
     timeout: 60)
 endforeach
 

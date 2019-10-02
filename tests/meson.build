@@ -28,6 +28,7 @@ test_bus_conf_file = configure_file(
 foreach t: tests
   test_name = t.get('name')
   test_exe = t.get('exe')
+  test_suite = t.get('suite', [])
   test_timeout = t.get('timeout', 30)
 
   # This flag marks unit tests which can't run alongside other unit tests. It
@@ -47,17 +48,19 @@ foreach t: tests
   test_env.set('LANG', 'en_US.UTF8')
 
   if test_requires_dbus
-    test (test_name, dbus_run_session,
+    test(test_name, dbus_run_session,
       env: test_env,
       args: ['--config-file=@0@'.format(join_paths(meson.current_build_dir(), 'test-bus.conf')),
              '--',
              test_exe],
+      suite: test_suite,
       timeout: test_timeout,
       is_parallel: test_is_parallel)
   else
-    test (test_name, test_exe,
-          env: test_env,
-          timeout: test_timeout,
-          is_parallel: test_is_parallel)
+    test(test_name, test_exe,
+      env: test_env,
+      timeout: test_timeout,
+      suite: test_suite,
+      is_parallel: test_is_parallel)
   endif
 endforeach

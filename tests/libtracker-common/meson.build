@@ -14,15 +14,15 @@ libtracker_common_test_deps = [
 foreach base_name: libtracker_common_tests
     source = 'tracker-@0@-test.c'.format(base_name)
     binary_name = 'tracker-@0@-test'.format(base_name)
-    test_name = 'common-@0@'.format(base_name)
 
     binary = executable(binary_name, source,
       dependencies: libtracker_common_test_deps,
       c_args: test_c_args)
 
     tests += {
-        'name': test_name,
-        'exe': binary
+        'name': base_name,
+        'exe': binary,
+        'suite': ['common']
     }
 endforeach
 
