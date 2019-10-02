@@ -106,8 +106,8 @@ def environment_unset(dbus):
 def environment_set_and_add_path(env, var, prefix, suffix):
     new = os.path.join(prefix, suffix)
 
-    if var in env:
-        existing = env[var]
+    if var in os.environ:
+        existing = os.environ[var]
         full = '%s:%s' % (new, existing)
     else:
         full = new
