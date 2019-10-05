@@ -1,4 +1,9 @@
 <?xml version='1.0' encoding="ISO-8859-1"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2001/XInclude'">
+]>
+
 
 <part id="tracker-examples">
   <title>Examples</title>
@@ -10,68 +15,29 @@
 
 
   <chapter id="tracker-examples-builder">
-    <title>SPARQL query builder</title>
+    <title>Executing a SPARQL query</title>
 
     <para>
-      The Tracker SPARQL library provides an easy and secure way of creating
-      SPARQL queries with the proper syntax. This is achieved using the
-      <type><link linkend="TrackerSparqlBuilder-struct">TrackerSparqlBuilder</link></type>
-      object.
+      The Tracker SPARQL library provides an easy way to execute queries.
+      The <type><link linkend="TrackerSparqlStatement">TrackerSparqlStatement</link></type> object
+      allows querries to be reused by replacing only the values of the query at execution time.
     </para>
 
+    <informalexample>
+      <programlisting language="C">
+        <xi:include href="insert-example.c" parse="text"/>
+      </programlisting>
+    </informalexample>
+
     <para>
-<programlisting>
-#include &lt;tracker-sparql.h&gt;
-
-int main (int argc, char **argv)
-{
-  <type><link linkend="TrackerSparqlBuilder-struct">TrackerSparqlBuilder</link></type> *builder;
-  const gchar *iri = "urn:example:0001";
-  const gchar *query_str;
-  time_t now;
-
-  /* Create builder */
-  builder = <function><link linkend="tracker-sparql-builder-new-update">tracker_sparql_builder_new_update</link></function> ();
-
-  /* Insert new data */
-  <function><link linkend="tracker-sparql-builder-insert-open">tracker_sparql_builder_insert_open</link></function> (builder, NULL);
-
-  <function><link linkend="tracker-sparql-builder-subject-iri">tracker_sparql_builder_subject_iri</link></function> (builder, iri);
-
-  <function><link linkend="tracker-sparql-builder-predicate">tracker_sparql_builder_predicate</link></function> (builder, "a");
-  <function><link linkend="tracker-sparql-builder-object">tracker_sparql_builder_object</link></function> (builder, "nie:DataObject");
-  <function><link linkend="tracker-sparql-builder-object">tracker_sparql_builder_object</link></function> (builder, "nfo:FileDataObject");
-
-  now = time (NULL);
-  <function><link linkend="tracker-sparql-builder-predicate">tracker_sparql_builder_predicate</link></function> (builder, "nfo:fileLastModified");
-  <function><link linkend="tracker-sparql-builder-object-date">tracker_sparql_builder_object_date</link></function> (builder, &amp;now);
-
-  <function><link linkend="tracker-sparql-builder-insert-close">tracker_sparql_builder_insert_close</link></function> (builder);
-
-  /* Get query as string. Do NOT g_free() the resulting string! */
-  query_str = <function><link linkend="tracker-sparql-builder-get-result">tracker_sparql_builder_get_result</link></function> (builder);
-
-  /* Print it */
-  g_print ("Generated SPARQL query: '%s'\n", query_str);
-
-  /* Once builder no longer needed, unref it. Note that after
-   * this operation, you must not use the returned query result
-   * any more
-   */
-  g_object_unref (builder);
-
-  return 0;
-}
-</programlisting>
-
       The previous code will generate the following SPARQL query:
-<programlisting>
-  DROP GRAPH &lt;urn:example:0001&gt;
-  INSERT INTO &lt;urn:example:0001&gt; {
+      <programlisting>
+DROP GRAPH &lt;urn:example:0001&gt;
+INSERT INTO &lt;urn:example:0001&gt; {
     &lt;urn:example:0001&gt; a nie:DataObject , nfo:FileDataObject ;
                        nfo:fileLastModified "2010-08-04T13:09:26Z" .
 }
-</programlisting>
+      </programlisting>
     </para>
   </chapter>
 
