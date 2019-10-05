@@ -1,4 +1,8 @@
 <?xml version='1.0' encoding="ISO-8859-1"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2001/XInclude'">
+]>
 
 <part id="tracker-examples">
   <title>Examples</title>
@@ -20,56 +24,18 @@
     </para>
 
     <para>
-<programlisting>
-#include &lt;tracker-sparql.h&gt;
-
-int main (int argc, char **argv)
-{
-  <type><link linkend="TrackerSparqlBuilder-struct">TrackerSparqlBuilder</link></type> *builder;
-  const gchar *iri = "urn:example:0001";
-  const gchar *query_str;
-  time_t now;
-
-  /* Create builder */
-  builder = <function><link linkend="tracker-sparql-builder-new-update">tracker_sparql_builder_new_update</link></function> ();
-
-  /* Insert new data */
-  <function><link linkend="tracker-sparql-builder-insert-open">tracker_sparql_builder_insert_open</link></function> (builder, NULL);
-
-  <function><link linkend="tracker-sparql-builder-subject-iri">tracker_sparql_builder_subject_iri</link></function> (builder, iri);
-
-  <function><link linkend="tracker-sparql-builder-predicate">tracker_sparql_builder_predicate</link></function> (builder, "a");
-  <function><link linkend="tracker-sparql-builder-object">tracker_sparql_builder_object</link></function> (builder, "nie:DataObject");
-  <function><link linkend="tracker-sparql-builder-object">tracker_sparql_builder_object</link></function> (builder, "nfo:FileDataObject");
-
-  now = time (NULL);
-  <function><link linkend="tracker-sparql-builder-predicate">tracker_sparql_builder_predicate</link></function> (builder, "nfo:fileLastModified");
-  <function><link linkend="tracker-sparql-builder-object-date">tracker_sparql_builder_object_date</link></function> (builder, &amp;now);
-
-  <function><link linkend="tracker-sparql-builder-insert-close">tracker_sparql_builder_insert_close</link></function> (builder);
-
-  /* Get query as string. Do NOT g_free() the resulting string! */
-  query_str = <function><link linkend="tracker-sparql-builder-get-result">tracker_sparql_builder_get_result</link></function> (builder);
-
-  /* Print it */
-  g_print ("Generated SPARQL query: '%s'\n", query_str);
-
-  /* Once builder no longer needed, unref it. Note that after
-   * this operation, you must not use the returned query result
-   * any more
-   */
-  g_object_unref (builder);
-
-  return 0;
-}
-</programlisting>
+    <informalexample>
+      <programlisting language="C">
+        <xi:include href="builder-example.c" parse="text"/>
+      </programlisting>
+    </informalexample>
 
       The previous code will generate the following SPARQL query:
 <programlisting>
-  DROP GRAPH &lt;urn:example:0001&gt;
-  INSERT INTO &lt;urn:example:0001&gt; {
-    &lt;urn:example:0001&gt; a nie:DataObject , nfo:FileDataObject ;
-                       nfo:fileLastModified "2010-08-04T13:09:26Z" .
+DROP GRAPH &lt;urn:example:0001&gt;
+INSERT INTO &lt;urn:example:0001&gt; {
+  &lt;urn:example:0001&gt; a nie:DataObject , nfo:FileDataObject ;
+                     nfo:fileLastModified "2010-08-04T13:09:26Z" .
 }
 </programlisting>
     </para>
@@ -106,64 +72,11 @@ int main (int argc, char **argv)
     <para>
       The following program shows how Read-Only queries can be done to the store in a
       synchronous way:
-
-<programlisting>
-#include &lt;tracker-sparql.h&gt;
-
-int main (int argc, const char **argv)
-{
-  GError *error = NULL;
-  <type><link linkend="TrackerSparqlConnection-struct">TrackerSparqlConnection</link></type> *connection;
-  <type><link linkend="TrackerSparqlCursor-struct">TrackerSparqlCursor</link></type> *cursor;
-  const gchar *query = "SELECT nie:url(?u) WHERE { ?u a nfo:FileDataObject }";
-
-  connection = <function><link linkend="tracker-sparql-connection-get">tracker_sparql_connection_get</link></function> (NULL, &amp;error);
-  if (!connection) {
-    g_printerr ("Couldn't obtain a connection to the Tracker store: %s",
-                error ? error-&gt;message : "unknown error");
-    g_clear_error (&amp;error);
-
-    return 1;
-  }
-
-  /* Make a synchronous query to the store */
-  cursor = <function><link linkend="tracker-sparql-connection-query">tracker_sparql_connection_query</link></function> (connection,
-                                            query,
-                                            NULL,
-                                            &amp;error);
-
-  if (error) {
-    /* Some error happened performing the query, not good */
-    g_printerr ("Couldn't query the Tracker Store: '%s'",
-                error ? error-&gt;message : "unknown error");
-    g_clear_error (&amp;error);
-
-    return 1;
-  }
-
-  /* Check results... */
-  if (!cursor) {
-    g_print ("No results found :-/\n");
-  } else {
-    gint i = 0;
-
-    /* Iterate, synchronously, the results... */
-    while (<function><link linkend="tracker-sparql-cursor-next">tracker_sparql_cursor_next</link></function> (cursor, NULL, &amp;error)) {
-      g_print ("Result [%d]: %s\n",
-	       i++,
-	       <function><link linkend="tracker-sparql-cursor-get-string">tracker_sparql_cursor_get_string</link></function> (cursor, 0, NULL));
-    }
-
-    g_print ("A total of '%d' results were found\n", i);
-
-    g_object_unref (cursor);
-  }
-
-  g_object_unref (connection);
-
-  return 0;
-}
-</programlisting>
+      <informalexample>
+        <programlisting language="C">
+          <xi:include href="readonly-example.c" parse="text"/>
+        </programlisting>
+      </informalexample>
     </para>
   </chapter>
 
@@ -189,57 +102,11 @@ int main (int argc, const char **argv)
 
     <para>
       The following program shows how a synchronous update can be done to the store:
-
-<programlisting>
-#include &lt;tracker-sparql.h&gt;
-
-int main (int argc, const char **argv)
-{
-  GError *error = NULL;
-  <type><link linkend="TrackerSparqlConnection-struct">TrackerSparqlConnection</link></type> *connection;
-  const gchar *query =
-    "INSERT { "
-    "  _:tag a nao:Tag ; "
-    "        nao:prefLabel 'mylabel' . "
-    "} WHERE { "
-    "  OPTIONAL { "
-    "    ?tag a nao:Tag ; "
-    "    nao:prefLabel 'mylabel' "
-    "  } . "
-    "FILTER (!bound(?tag)) "
-    "}";
-
-  connection = <function><link linkend="tracker-sparql-connection-get">tracker_sparql_connection_get</link></function> (NULL, &amp;error);
-  if (!connection) {
-    g_printerr ("Couldn't obtain a connection to the Tracker store: %s",
-                error ? error-&gt;message : "unknown error");
-    g_clear_error (&amp;error);
-
-    return 1;
-  }
-
-  /* Run a synchronous update query */
-  <function><link linkend="tracker-sparql-connection-update">tracker_sparql_connection_update</link></function> (connection,
-                                            query,
-                                            G_PRIORITY_DEFAULT,
-                                            NULL,
-                                            &amp;error);
-  if (error) {
-    /* Some error happened performing the query, not good */
-    g_printerr ("Couldn't update the Tracker store: %s",
-                error ? error-&gt;message : "unknown error");
-
-    g_clear_error (&amp;error);
-    g_object_unref (connection);
-
-    return 1;
-  }
-
-  g_object_unref (connection);
-
-  return 0;
-}
-</programlisting>
+      <informalexample>
+        <programlisting language="C">
+          <xi:include href="writeonly-example.c" parse="text"/>
+        </programlisting>
+      </informalexample>
     </para>
   </chapter>
 
@@ -286,71 +153,11 @@ int main (int argc, const char **argv)
 
     <para>
       The following program shows how a synchronous blank node update can be done to the store:
-
-<programlisting>
-#include &lt;tracker-sparql.h&gt;
-
-int main (int argc, const char **argv)
-{
-  GError *error = NULL;
-  GVariant *v;
-  <type><link linkend="TrackerSparqlConnection-struct">TrackerSparqlConnection</link></type> *connection;
-  const gchar *query =
-    "INSERT { _:foo a nie:InformationElement } WHERE { ?x a rdfs:Class }";
-
-  connection = <function><link linkend="tracker-sparql-connection-get">tracker_sparql_connection_get</link></function> (NULL, &amp;error);
-  if (!connection) {
-    g_printerr ("Couldn't obtain a connection to the Tracker store: %s",
-                error ? error-&gt;message : "unknown error");
-    g_clear_error (&amp;error);
-
-    return 1;
-  }
-
-  /* Run a synchronous blank node update query */
-  v = <function><link linkend="tracker-sparql-connection-update-blank">tracker_sparql_connection_update_blank</link></function> (connection,
-  				              query,
-  				              G_PRIORITY_DEFAULT,
-  				              NULL,
-  				              &amp;error);
-
-  if (error) {
-    /* Some error happened performing the query, not good */
-    g_printerr ("Couldn't update the Tracker store: %s",
-                error ? error-&gt;message : "unknown error");
-
-    g_clear_error (&amp;error);
-    g_object_unref (connection);
-
-    return 1;
-  }
-
-  if (!v) {
-    g_print ("No results were returned\n");
-  } else {
-    GVariantIter iter1, *iter2, *iter3;
-    const gchar *node;
-    const gchar *urn;
-
-    g_print ("Results:\n");
-
-    g_variant_iter_init (&amp;iter1, v);
-    while (g_variant_iter_loop (&amp;iter1, "aa{ss}", &amp;iter2)) { /* aa{ss} */
-      while (g_variant_iter_loop (iter2, "a{ss}", &amp;iter3)) { /* a{ss} */
-        while (g_variant_iter_loop (iter3, "{ss}", &amp;node, &amp;urn)) { /* {ss} */
-	  g_print ("  Node:'%s', URN:'%s'\n", node, urn);
-	}
-      }
-    }
-
-    g_variant_unref (v);
-  }
-
-  g_object_unref (connection);
-
-  return 0;
-}
-</programlisting>
+      <informalexample>
+        <programlisting language="C">
+          <xi:include href="writeonly-with-blank-nodes-example.c" parse="text"/>
+        </programlisting>
+      </informalexample>
     </para>
   </chapter>
 
