@@ -132,7 +132,6 @@ struct _TrackerSparql
 	gboolean cacheable;
 
 	GHashTable *parameters;
-	GHashTable *union_views;
 
 	GPtrArray *anon_graphs;
 	GPtrArray *named_graphs;
@@ -159,6 +158,8 @@ struct _TrackerSparql
 		GHashTable *blank_node_map;
 		TrackerVariableBinding *as_in_group_by;
 
+		GHashTable *union_views;
+
 		const gchar *expression_list_separator;
 		TrackerPropertyType expression_type;
 		guint type;
@@ -180,7 +181,6 @@ tracker_sparql_finalize (GObject *object)
 	g_hash_table_destroy (sparql->prefix_map);
 	g_hash_table_destroy (sparql->parameters);
 	g_hash_table_destroy (sparql->cached_bindings);
-	g_clear_pointer (&sparql->union_views, g_hash_table_unref);
 
 	if (sparql->sql)
 		tracker_string_builder_free (sparql->sql);
@@ -194,6 +194,7 @@ tracker_sparql_finalize (GObject *object)
 	tracker_token_unset (&sparql->current_state.subject);
 	tracker_token_unset (&sparql->current_state.predicate);
 	tracker_token_unset (&sparql->current_state.object);
+	g_clear_pointer (&sparql->current_state.union_views, g_hash_table_unref);
 	g_clear_pointer (&sparql->current_state.construct_query,
 	                 tracker_string_builder_free);
 	g_clear_object (&sparql->current_state.as_in_group_by);
@@ -558,12 +559,163 @@ _append_variable_sql (TrackerSparql   *sparql,
 	                       tracker_variable_get_sql_expression (variable));
 }
 
+static gchar *
+build_properties_string_for_class (TrackerSparql *sparql,
+                                   TrackerClass  *class)
+{
+	TrackerOntologies *ontologies;
+	TrackerProperty **properties;
+	guint n_properties, i;
+	GString *str;
+
+	ontologies = tracker_data_manager_get_ontologies (sparql->data_manager);
+	properties = tracker_ontologies_get_properties (ontologies, &n_properties);
+	str = g_string_new (NULL);
+
+	for (i = 0; i < n_properties; i++) {
+		if (tracker_property_get_multiple_values (properties[i]))
+			continue;
+
+		if (tracker_property_get_domain (properties[i]) != class) {
+			TrackerClass **domain_indexes;
+			gboolean is_domain_index = FALSE;
+			guint j;
+
+			/* The property does not belong in this class, but could
+			 * still be a domain index.
+			 */
+			domain_indexes = tracker_property_get_domain_indexes (properties[i]);
+			for (j = 0; !is_domain_index && domain_indexes[j] != NULL; j++)
+				is_domain_index = domain_indexes[j] == class;
+
+			if (!is_domain_index)
+				continue;
+		}
+
+		g_string_append_printf (str, "\"%s\",",
+		                        tracker_property_get_name (properties[i]));
+	}
+
+	return g_string_free (str, FALSE);
+}
+
+static gchar *
+build_properties_string (TrackerSparql   *sparql,
+                         TrackerProperty *property)
+{
+	if (tracker_property_get_multiple_values (property)) {
+		GString *str;
+
+		str = g_string_new (NULL);
+		g_string_append_printf (str, "\"%s\",",
+		                        tracker_property_get_name (property));
+		return g_string_free (str, FALSE);
+	} else {
+		TrackerClass *class;
+
+		class = tracker_property_get_domain (property);
+		return build_properties_string_for_class (sparql, class);
+	}
+}
+
+static void
+_append_union_graph_with_clause (TrackerSparql *sparql,
+                                 const gchar   *table_name,
+                                 const gchar   *properties)
+{
+	gpointer graph_name, graph_id;
+	GHashTable *graphs;
+	GHashTableIter iter;
+
+	graphs = tracker_data_manager_get_graphs (sparql->data_manager);
+
+	_append_string_printf (sparql, "\"unionGraph_%s\"(ID, %s graph) AS (",
+	                       table_name, properties);
+
+	_append_string_printf (sparql,
+	                       "SELECT ID, %s 0 AS graph FROM \"main\".\"%s\" ",
+	                       properties, table_name);
+
+	g_hash_table_iter_init (&iter, graphs);
+	while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
+		_append_string_printf (sparql,
+		                       "UNION ALL SELECT ID, %s %d AS graph FROM \"%s\".\"%s\" ",
+		                       properties,
+		                       GPOINTER_TO_INT (graph_id),
+		                       (gchar *) graph_name,
+		                       table_name);
+	}
+
+	_append_string (sparql, ") ");
+}
+
+static void
+tracker_sparql_add_union_graph_subquery (TrackerSparql   *sparql,
+                                         TrackerProperty *property)
+{
+	TrackerStringBuilder *old;
+	const gchar *table_name;
+	gchar *properties;
+
+	table_name = tracker_property_get_table_name (property);
+
+	if (g_hash_table_lookup (sparql->current_state.union_views, table_name))
+		return;
+
+	g_hash_table_add (sparql->current_state.union_views, g_strdup (table_name));
+	old = tracker_sparql_swap_builder (sparql, sparql->current_state.with_clauses);
+
+	if (tracker_string_builder_is_empty (sparql->current_state.with_clauses))
+		_append_string (sparql, "WITH ");
+	else
+		_append_string (sparql, ", ");
+
+	properties = build_properties_string (sparql, property);
+	_append_union_graph_with_clause (sparql, table_name, properties);
+	g_free (properties);
+
+	tracker_sparql_swap_builder (sparql, old);
+}
+
+static void
+tracker_sparql_add_union_graph_subquery_for_class (TrackerSparql *sparql,
+                                                   TrackerClass  *class)
+{
+	TrackerStringBuilder *old;
+	const gchar *table_name;
+	gchar *properties;
+
+	table_name = tracker_class_get_name (class);
+
+	if (g_hash_table_lookup (sparql->current_state.union_views, table_name))
+		return;
+
+	g_hash_table_add (sparql->current_state.union_views, g_strdup (table_name));
+	old = tracker_sparql_swap_builder (sparql, sparql->current_state.with_clauses);
+
+	if (tracker_string_builder_is_empty (sparql->current_state.with_clauses))
+		_append_string (sparql, "WITH ");
+	else
+		_append_string (sparql, ", ");
+
+	properties = build_properties_string_for_class (sparql, class);
+	_append_union_graph_with_clause (sparql, table_name, properties);
+	g_free (properties);
+
+	tracker_sparql_swap_builder (sparql, old);
+}
+
 static void
 _prepend_path_element (TrackerSparql      *sparql,
                        TrackerPathElement *path_elem)
 {
 	TrackerStringBuilder *old;
 	gchar *table_name, *graph_column;
+
+	if (path_elem->op == TRACKER_PATH_OPERATOR_NONE &&
+	    tracker_token_is_empty (&sparql->current_state.graph)) {
+		tracker_sparql_add_union_graph_subquery (sparql, path_elem->data.property);
+	}
 
 	old = tracker_sparql_swap_builder (sparql, sparql->current_state.with_clauses);
 
@@ -579,11 +731,6 @@ _prepend_path_element (TrackerSparql      *sparql,
 			table_name = g_strdup_printf ("\"unionGraph_%s\"",
 			                              tracker_property_get_table_name (path_elem->data.property));
 			graph_column = g_strdup ("graph");
-
-			if (sparql->union_views) {
-				g_hash_table_add (sparql->union_views,
-				                  g_strdup (tracker_property_get_table_name (path_elem->data.property)));
-			}
 		} else {
 			const gchar *graph;
 
@@ -695,7 +842,6 @@ _prepend_path_element (TrackerSparql      *sparql,
 		}
 
 		_append_string (sparql, ") ");
-		g_clear_pointer (&sparql->union_views, g_hash_table_unref);
 		break;
 	case TRACKER_PATH_OPERATOR_INTERSECTION:
 		_append_string_printf (sparql,
@@ -1191,6 +1337,9 @@ _add_quad (TrackerSparql  *sparql,
 				return FALSE;
 			}
 
+			if (!graph_db || !tracker_data_manager_find_graph (sparql->data_manager, graph_db))
+				tracker_sparql_add_union_graph_subquery_for_class (sparql, subject_type);
+
 			is_rdf_type = TRUE;
 			db_table = tracker_class_get_name (subject_type);
 			share_table = !tracker_token_is_empty (graph);
@@ -1230,10 +1379,16 @@ _add_quad (TrackerSparql  *sparql,
 						i++;
 					}
 
-					if (domain_index)
+					if (domain_index) {
+						if (!graph_db || !tracker_data_manager_find_graph (sparql->data_manager, graph_db))
+							tracker_sparql_add_union_graph_subquery_for_class (sparql, domain_index);
 						db_table = tracker_class_get_name (domain_index);
+					}
 				}
 			}
+
+			if (!graph_db || !tracker_data_manager_find_graph (sparql->data_manager, graph_db))
+				tracker_sparql_add_union_graph_subquery (sparql, property);
 
 			/* We can never share the table with multiple triples for
 			 * multi value properties as a property may consist of multiple rows.
@@ -1838,7 +1993,6 @@ _end_triples_block (TrackerSparql  *sparql,
 			_append_string (sparql,
 			                "(SELECT subject AS ID, predicate, "
 			                "object, object_type, graph FROM tracker_triples ");
-			g_clear_pointer (&sparql->union_views, g_hash_table_unref);
 
 			if (table->graph) {
 				_append_graph_checks (sparql, "graph",
@@ -1891,9 +2045,6 @@ _end_triples_block (TrackerSparql  *sparql,
 				}
 
 				_append_string (sparql, ") ");
-
-				if (sparql->union_views)
-					g_hash_table_add (sparql->union_views, g_strdup (table->sql_db_tablename));
 			}
 		}
 
@@ -2010,6 +2161,10 @@ translate_Query (TrackerSparql  *sparql,
 	sparql->current_state.select_context = sparql->context;
 	tracker_sparql_push_context (sparql, sparql->context);
 
+	sparql->current_state.union_views =
+		g_hash_table_new_full (g_str_hash, g_str_equal,
+		                       g_free, NULL);
+
 	/* Query ::= Prologue
 	 *           ( SelectQuery | ConstructQuery | DescribeQuery | AskQuery )
 	 *           ValuesClause
@@ -2032,6 +2187,9 @@ translate_Query (TrackerSparql  *sparql,
 	_call_rule (sparql, NAMED_RULE_ValuesClause, error);
 
 	tracker_sparql_pop_context (sparql, FALSE);
+
+	g_clear_pointer (&sparql->current_state.union_views,
+	                 g_hash_table_unref);
 
 	return TRUE;
 }
@@ -2520,8 +2678,6 @@ translate_DescribeQuery (TrackerSparql  *sparql,
 	                "  object "
 	                "FROM tracker_triples "
 	                "WHERE object IS NOT NULL AND subject IN (");
-
-	g_clear_pointer (&sparql->union_views, g_hash_table_unref);
 
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GLOB)) {
 		glob = TRUE;
@@ -3112,6 +3268,10 @@ translate_Update1 (TrackerSparql  *sparql,
 	TrackerGrammarNamedRule rule;
 	GError *inner_error = NULL;
 
+	sparql->current_state.union_views =
+		g_hash_table_new_full (g_str_hash, g_str_equal,
+		                       g_free, NULL);
+
 	/* Update1 ::= Load | Clear | Drop | Add | Move | Copy | Create | InsertData | DeleteData | DeleteWhere | Modify
 	 */
 	rule = _current_rule (sparql);
@@ -3133,6 +3293,8 @@ translate_Update1 (TrackerSparql  *sparql,
 	default:
 		g_assert_not_reached ();
 	}
+
+	g_clear_pointer (&sparql->current_state.union_views, g_hash_table_unref);
 
 	tracker_data_update_buffer_flush (tracker_data_manager_get_data (sparql->data_manager),
 	                                  &inner_error);
@@ -6605,12 +6767,10 @@ handle_property_function (TrackerSparql    *sparql,
 	}
 
 	if (tracker_token_is_empty (&sparql->current_state.graph)) {
+		tracker_sparql_add_union_graph_subquery (sparql, property);
+
 		_append_string_printf (sparql, "FROM \"unionGraph_%s\" ",
 		                       tracker_property_get_table_name (property));
-		if (sparql->union_views) {
-			g_hash_table_add (sparql->union_views,
-			                  g_strdup (tracker_property_get_table_name (property)));
-		}
 	} else {
 		_append_string_printf (sparql, "FROM \"%s\".\"%s\" ",
 		                       tracker_token_get_idstring (&sparql->current_state.graph),
@@ -8356,8 +8516,6 @@ tracker_sparql_init (TrackerSparql *sparql)
 							 g_free, g_object_unref);
 	sparql->parameters = g_hash_table_new_full (g_str_hash, g_str_equal,
 	                                            g_free, g_object_unref);
-	sparql->union_views = g_hash_table_new_full (g_str_hash, g_str_equal,
-	                                             g_free, NULL);
 	sparql->var_names = g_ptr_array_new_with_free_func (g_free);
 	sparql->var_types = g_array_new (FALSE, FALSE, sizeof (TrackerPropertyType));
 	sparql->anon_graphs = g_ptr_array_new_with_free_func (g_free);
@@ -8402,10 +8560,6 @@ prepare_query (TrackerSparql         *sparql,
 	TrackerDBStatement *stmt;
 	gchar *query;
 	guint i;
-
-	if (!tracker_data_manager_update_union_views (sparql->data_manager, iface,
-	                                              sparql->union_views, error))
-		return NULL;
 
 	query = tracker_string_builder_to_string (str);
 	stmt = tracker_db_interface_create_statement (iface,
