@@ -23,7 +23,7 @@
 
 #include <libtracker-sparql/tracker-sparql.h>
 
-#define MAX_TRIES 900
+#define MAX_TRIES 100
 
 static int counter = 0;
 

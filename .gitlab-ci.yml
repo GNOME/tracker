@@ -1,3 +1,15 @@
+# The container images used in this pipeline are built from this
+# GitLab project: https://gitlab.gnome.org/GNOME/tracker-oci-images
+
+variables:
+  # These can be used to see verbose log output from the functional-tests.
+  # See HACKING.md for more information.
+  TRACKER_VERBOSITY: "1"
+  TRACKER_TESTS_VERBOSE: "no"
+
+  # This can be used when debugging test failures that only occur within GitLab CI.
+  MESON_TEST_EXTRA_ARGS: ""
+
 stages:
   - test
 
@@ -15,7 +27,20 @@ test-fedora-latest:
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
 
-      su tracker -c 'cd build; meson test --print-errorlogs'
+      # We limit `meson test` to 4 parallel test processes. The default is to
+      # have one test process per CPU, but our tests are mostly IO bound
+      # and we get timeouts and failures if we try to run 32 of them at once.
+      su tracker -c 'cd build; meson test --num-processes=4 --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
+
+  after_script:
+    - |
+      echo "Test suite settings:"
+      echo
+      echo "  TRACKER_VERBOSITY: ${TRACKER_VERBOSITY}"
+      echo "  TRACKER_TESTS_VERBOSE: ${TRACKER_TESTS_VERBOSE}"
+      echo "  MESON_TEST_EXTRA_ARGS: ${MESON_TEST_EXTRA_ARGS}"
+      echo
+      echo "These values can be set at https://gitlab.gnome.org/GNOME/tracker/pipelines/new"
 
   artifacts:
     when: always

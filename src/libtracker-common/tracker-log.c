@@ -151,6 +151,18 @@ hide_log_handler (const gchar    *domain,
 	/* do nothing */
 }
 
+static void
+ensure_g_messages_debug_set ()
+{
+	const gchar *value;
+
+	value = g_getenv ("G_MESSAGES_DEBUG");
+
+	if (value == NULL) {
+		g_setenv ("G_MESSAGES_DEBUG", "Tracker", TRUE);
+	}
+}
+
 gboolean
 tracker_log_init (gint    this_verbosity,
                   gchar **used_filename)
@@ -192,8 +204,8 @@ tracker_log_init (gint    this_verbosity,
 	/* If we have debug enabled, we imply G_MESSAGES_DEBUG or we
 	 * see nothing, this came in since GLib 2.32.
 	 */
-	if (this_verbosity > 1) {
-		g_setenv ("G_MESSAGES_DEBUG", "all", TRUE);
+	if (this_verbosity > 0) {
+		ensure_g_messages_debug_set ();
 	}
 
 	if (use_log_files) {
@@ -229,7 +241,9 @@ tracker_log_init (gint    this_verbosity,
 			g_free (filename);
 		}
 	} else {
-		*used_filename = NULL;
+		if (used_filename) {
+			*used_filename = NULL;
+		}
 	}
 
 	verbosity = CLAMP (this_verbosity, 0, 3);

@@ -84,48 +84,50 @@ At this point you can run the Tracker test suite from the `build` directory:
 
     meson test --print-errorlogs
 
-## Developing with tracker-sandbox
+## Using the run-uninstalled script
 
 Tracker normally runs automatically, indexing content in the background so that
 search results are available quickly when needed.
 
 When developing and testing Tracker you will normally want it to run in the
-foreground instead. The `tracker-sandbox` tool exists to help with this.
+foreground instead. You also probably want to run it from a build tree, rather
+than installing it somewhere everytime you make a change, and you certainly
+should isolates your development version from the real Tracker database in your
+home directory.
 
-You can run the tool directly from the tracker.git source tree. Ensure you are
-in the top of the tracker source tree and type this to see the --help output: 
+There is a tool to help with this, which is part of the 'trackertestutils'
+Python module.  You can run the tool using a helper script generated in the
+tracker-miners.git build process named 'run-uninstalled'.
 
-    ./utils/sandbox/tracker-sandbox.py --help
+Check the helper script is set up correctly by running this from your
+tracker-miners.git build tree:
 
-You should always pass the `--prefix` option, which should be the same as the
---prefix argument you passed to Meson. You also need to use `--index` which
-controls where internal state files like the database are kept. You may also
-want to pass `--debug` to see detailed log output.
+    ./run-uninstalled --help
 
-Now you can index some files using `--update` mode. Here's how to index files
-in `~/Documents` for example:
+If run with no arguments, the script will start an interactive shell. Any
+arguments after a `--` sentinel are treated as a command to run in a non-interactive
+shell.
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
-        --update --content ~/Documents
+Now check that it runs the correct version of the Tracker CLI:
 
-You can then list the files that have been indexed...
+    ./run-uninstalled -- tracker --version
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
-        --list-files
+Let's try and index some content. (Subtitute ~/Music for any other location
+where you have interesting data). We need to explicitly tell the script to wait
+for the miners to finish, or it will exit too soon. (This is a workaround for
+[issue #122](https://gitlab.gnome.org/GNOME/tracker/issues/122).)
 
-... run a full-text search ...
+    ./run-uninstalled --wait-for-miner=Files --wait-for-miner=Extract -- tracker index --file ~/Music
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
-        --search "bananas"
+Let's see what files were found!
 
-... or run a SPARQL query on the content:
+    ./run-uninstalled  -- tracker sparql -q 'SELECT ?url { ?u nie:url ?url } }'
 
-    ./utils/sandbox/tracker-sandbox.py  --prefix ~/opt/tracker --index ~/tracker-content \
-        --sparql "SELECT ?url { ?resource a nfo:FileDataObject ; nie:url ?url . }"
+Or, you can try a full-text search ...
 
-You can also open a shell inside the sandbox environment. From here you can run
-the `tracker` commandline tool, and you can run the Tracker daemons manually
-under a debugger such as GDB.
+    ./run-uninstalled -- tracker search "bananas"
+
+There are many more things you can do with the script.
 
 For more information about developing Tracker, look at
-https://wiki.gnome.org/Projects/Tracker.
+https://wiki.gnome.org/Projects/Tracker and HACKING.md.

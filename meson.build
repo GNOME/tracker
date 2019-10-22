@@ -275,6 +275,7 @@ conf.set('exec_prefix', get_option('prefix'))
 conf.set('bindir', join_paths(get_option('prefix'), get_option('bindir')))
 conf.set('datadir', datadir)
 conf.set('datarootdir', join_paths(get_option('prefix'), get_option('datadir')))
+conf.set('dbus_services_dir', dbus_services_dir)
 conf.set('includedir', join_paths(get_option('prefix'), get_option('includedir')))
 conf.set('libdir', libdir)
 conf.set('libexecdir', join_paths(get_option('prefix'), get_option('libexecdir')))
@@ -289,14 +290,7 @@ conf.set('domain_ontologies_dir', join_paths('${datadir}', 'tracker', 'domain-on
 conf.set('FUNCTIONAL_TESTS_ONTOLOGIES_DIR', join_paths(meson.current_source_dir(), 'tests', 'functional-tests', 'test-ontologies'))
 conf.set('FUNCTIONAL_TESTS_TRACKER_STORE_PATH', join_paths(meson.current_build_dir(), 'src', 'tracker-store', 'tracker-store'))
 
-# This is set in an awkward way for compatibility with Autoconf. Switch it
-# to a normal boolean once we get rid of the Autotools build system. It's
-# only used in tests/functional-tests/common/utils/configuration.py.in.
-if get_option('journal')
-    conf.set('DISABLE_JOURNAL_TRUE', 'true')
-else
-    conf.set('DISABLE_JOURNAL_TRUE', '')
-endif
+conf.set10('DISABLE_JOURNAL', get_option('journal'))
 
 configure_file(input: 'config.h.meson.in',
                output: 'config.h',
@@ -352,6 +346,7 @@ test_c_args = tracker_c_args + [
     '-DTOP_SRCDIR="@0@"'.format(source_root),
 ]
 
+tracker_uninstalled_cli_dir = join_paths(meson.current_build_dir(), 'src', 'tracker')
 tracker_uninstalled_domain_rule = join_paths(meson.current_source_dir(), 'src', 'tracker-store', 'default.rule')
 tracker_uninstalled_nepomuk_ontologies_dir = join_paths(meson.current_source_dir(), 'src', 'ontologies', 'nepomuk')
 tracker_uninstalled_stop_words_dir = join_paths(meson.current_source_dir(), 'src', 'libtracker-common', 'stop-words')
