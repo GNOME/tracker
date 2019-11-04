@@ -330,6 +330,7 @@ tracker_uninstalled_cli_dir = join_paths(meson.current_build_dir(), 'src', 'trac
 tracker_uninstalled_domain_rule = join_paths(meson.current_source_dir(), 'src', 'tracker-store', 'default.rule')
 tracker_uninstalled_nepomuk_ontologies_dir = join_paths(meson.current_source_dir(), 'src', 'ontologies', 'nepomuk')
 tracker_uninstalled_stop_words_dir = join_paths(meson.current_source_dir(), 'src', 'libtracker-common', 'stop-words')
+tracker_uninstalled_testutils_dir = join_paths(meson.current_source_dir(), 'utils')
 
 subdir('tests')
 

@@ -41,10 +41,7 @@ if get_option('fts')
 endif
 
 test_env = environment()
-
-tracker_uninstalled_testutils_dir = join_paths(meson.current_source_dir(), '..', '..', 'utils')
 test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
-
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
 
 foreach t: functional_tests
