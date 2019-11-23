@@ -3540,9 +3540,6 @@ tracker_data_ontology_import_into_db (TrackerDataManager  *manager,
 	TrackerProperty **properties;
 	guint i, n_props, n_classes;
 
-	if (!tracker_data_manager_update_union_views (manager, iface, NULL, error))
-		return;
-
 	classes = tracker_ontologies_get_classes (manager->ontologies, &n_classes);
 	properties = tracker_ontologies_get_properties (manager->ontologies, &n_props);
 
@@ -3919,85 +3916,6 @@ tracker_data_manager_get_data_location (TrackerDataManager *manager)
 	return manager->data_location ? g_object_ref (manager->data_location) : NULL;
 }
 
-gboolean
-tracker_data_manager_update_union_views (TrackerDataManager  *manager,
-                                         TrackerDBInterface  *iface,
-                                         GHashTable          *tables,
-                                         GError             **error)
-{
-	TrackerDBStatement *stmt;
-	GError *inner_error = NULL;
-	GHashTableIter iter;
-	GHashTable *graphs;
-	gpointer graph_name, graph_id;
-	GString *str;
-	GHashTable *view_generations;
-	gpointer generation;
-
-	generation = GUINT_TO_POINTER (manager->generation);
-
-	graphs = tracker_data_manager_ensure_graphs (manager, iface, error);
-
-	if (!graphs)
-		return FALSE;
-
-	view_generations = g_object_get_data (G_OBJECT (iface),
-	                                      "tracker-data-view-generations");
-
-	if (!view_generations) {
-		view_generations = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-		g_object_set_data_full (G_OBJECT (iface),
-		                        "tracker-data-view-generations",
-		                        view_generations,
-		                        (GDestroyNotify) g_hash_table_unref);
-	}
-
-	/* Refcounts */
-	if (g_hash_table_lookup (view_generations, "refcount") != generation) {
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_Refcount\"");
-		if (!stmt)
-			goto error;
-
-		tracker_db_statement_execute (stmt, NULL);
-		g_object_unref (stmt);
-
-		str = g_string_new (NULL);
-		g_string_append (str,
-		                 "CREATE VIEW temp.\"unionGraph_Refcount\" AS "
-		                 "SELECT 0 AS graph, * FROM \"main\".\"Refcount\" ");
-
-		g_hash_table_iter_init (&iter, graphs);
-		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
-			g_string_append_printf (str, "UNION ALL SELECT %d AS graph, * FROM \"%s\".\"Refcount\" ",
-			                        GPOINTER_TO_INT (graph_id),
-			                        (gchar *) graph_name);
-		}
-
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "%s", str->str);
-		g_string_free (str, TRUE);
-
-		if (stmt) {
-			tracker_db_statement_execute (stmt, &inner_error);
-			g_object_unref (stmt);
-		}
-
-		if (inner_error)
-			goto error;
-
-		g_hash_table_insert (view_generations, g_strdup ("refcount"), generation);
-	}
-
-error:
-	if (inner_error) {
-		g_propagate_error (error, inner_error);
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
 TrackerDataManager *
 tracker_data_manager_new (TrackerDBManagerFlags   flags,
                           GFile                  *cache_location,
@@ -4104,10 +4022,6 @@ setup_interface_cb (TrackerDBManager   *db_manager,
 	}
 
 	g_object_get (iface, "flags", &flags, NULL);
-
-	if (flags & TRACKER_DB_INTERFACE_READONLY) {
-		tracker_data_manager_update_union_views (data_manager, iface, NULL, NULL);
-	}
 }
 
 static gboolean
@@ -4864,9 +4778,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		}
 	}
 
-	if (!tracker_data_manager_update_union_views (manager, iface, NULL, error))
-		return FALSE;
-
 skip_ontology_check:
 	if (!read_only && is_first_time_index) {
 		tracker_db_manager_set_current_locale (manager->db_manager);
@@ -5133,9 +5044,6 @@ tracker_data_manager_create_graph (TrackerDataManager  *manager,
 
 	manager->generation++;
 
-	if (!tracker_data_manager_update_union_views (manager, iface, NULL, error))
-		goto detach;
-
 	return TRUE;
 
 detach:
@@ -5168,9 +5076,6 @@ tracker_data_manager_drop_graph (TrackerDataManager  *manager,
 		return FALSE;
 
 	manager->generation++;
-
-	if (!tracker_data_manager_update_union_views (manager, iface, NULL, error))
-		return FALSE;
 
 	if (manager->graphs)
 		g_hash_table_remove (manager->graphs, name);
