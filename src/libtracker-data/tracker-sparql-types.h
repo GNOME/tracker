@@ -78,6 +78,7 @@ struct _TrackerDataTable {
 	gchar *sql_query_tablename; /* temp. name, generated */
 	gboolean predicate_variable;
 	gboolean predicate_path;
+	gboolean fts;
 };
 
 struct _TrackerBinding {
