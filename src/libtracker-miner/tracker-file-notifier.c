@@ -649,6 +649,16 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 		g_object_unref (priv->cancellable);
 	priv->cancellable = g_cancellable_new ();
 
+	/* Begin crawling the directory non-recursively.
+	 *
+	 *  - We receive ::check-file, ::check-directory and ::check-directory-contents signals
+	 *    during the crawl, which control which directories are crawled and which files are
+	 *    returned.
+	 *  - We receive ::directory-crawled each time a directory crawl completes. This provides
+	 *    the list of contents for a directory.
+	 *  - We receive ::finished when the crawler completes.
+	 *
+	 */
 	if (!tracker_crawler_start (priv->crawler,
 	                            directory,
 	                            priv->current_index_root->flags)) {
