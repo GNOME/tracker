@@ -46,3 +46,16 @@ test-fedora-latest:
     when: always
     paths:
     - build/meson-logs/testlog.txt
+
+pages:
+  before_script:
+    - pip3 install mkdocs mkdocs-cinder
+  script:
+    - mkdocs build
+    - mv site public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+    - sam/website
