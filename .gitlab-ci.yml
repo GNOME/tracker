@@ -59,3 +59,17 @@ test-fedora-latest:
 test-ubuntu-rolling:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/ubuntu:rolling
   <<: *test
+
+
+pages:
+  before_script:
+    - pip3 install mkdocs mkdocs-cinder
+  script:
+    - mkdocs build
+    - mv site public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+    - sam/website
