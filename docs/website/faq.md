@@ -1,16 +1,23 @@
 # FAQ
 
-## Why is Tracker consuming lots of resources?
+## What is Tracker?
 
-Tracker automatically indexes content in your home directory.
-Tracker aims to perform well even on large collections of content, but there is
-a limit to how much it can index without causing noticably high CPU and IO
-usage.
+It's a search engine, and a database.
 
-The problem may be:
+Tracker indexes content from your home directory automatically, so applications
+can provide instant search results when you need them.
 
-  * A very large amount of content being indexed by Tracker. See [How can I control what Tracker indexes?].
-  * A bug in Tracker or one of its dependencies
+See the [overview](/overview) for more information.
+
+## What files will Tracker index?
+
+The default configuration of Tracker is to look at files and folders in your
+XDG content directories such as `Documents`, `Music`, `Pictures` and `Videos`.
+It also looks at files in your home directory and `Downloads` directory, but
+it doesn't recurse into folders.
+
+You might want to [control what Tracker indexes] so that it finds files in
+other places too.
 
 ## How can I control what Tracker indexes?
 
@@ -23,19 +30,32 @@ tool.
 The relevant schemas are `org.freedesktop.Tracker.Miner.Files` and
 `org.freedesktop.Tracker.Extract`.
 
+## Why does Tracker consume resources on my PC?
+
+When you add or edit files, Tracker will update its index. This should be very
+quick, but if a huge number of files are added then it may cause noticably high
+CPU and IO usage until the new files have been indexed. This is normal.
+
+Tracker is not designed to index directories of source code or video game data.
+If content like this appears in the locations Tracker is configured to index
+then you might see unwanted high resource usage.
+
+If you see high resource usage from Tracker even when no files have changed on
+disk, this probably indicates a bug in Tracker or one of its dependencies.
+We can [work together](/community) to find out what the problem is.
+
 ## How can I disable Tracker in GNOME?
 
 Tracker is a core dependency of GNOME, and some things will not work as
 expected if you disable it completely.
 
-If you are experiencing performance problems, you should first check that
-Tracker is only indexing data that you care about.
+If you are experiencing performance problems, see [Why does Tracker consume
+resources on my PC?](#why-does-tracker-consume-resources-on-my-pc).
 
-In case you still see unwanted resource usage, you can tell Tracker not
-to index any directories on your system at all.
-This should bring resource usage close to zero. The Tracker daemons
-will still be started, but they should remain idle -- if they don't,
-this suggests there is a bug and we would appreciate if you report a bug.
+In case of a bug you may need to temporarily stop Tracker indexing.
+The simplest way is to [edit the
+configuration](#how-can-i-control-what-tracker-indexes) so that no directories
+are indexed. This should bring resource usage to zero.
 
 If the Tracker store is using a lot of disk space and you are sure that
 there is no unreplaceable data stored in the database, you can run `tracker
@@ -52,4 +72,4 @@ Musicbrainz database.
 Programs that fix tags and organize music collections on disk, such as
 [Beets](http://beets.io/), work well with Tracker.
 
-[How can I control what Tracker indexes?]: #how-can-i-control-what-tracker-indexes
+[control what Tracker indexes]: #how-can-i-control-what-tracker-indexes
