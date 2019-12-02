@@ -13,3 +13,5 @@ posts.
 
 Real time discussion can be found in the #tracker channel on the GIMPnet IRC
 network.
+
+There is also a [Tracker project wiki](https://wiki.gnome.org/Projects/Tracker).
