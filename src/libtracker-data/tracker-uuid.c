@@ -23,24 +23,11 @@
 
 #define DEFAULT_PREFIX "urn:uuid"
 
-#if ! GLIB_CHECK_VERSION (2, 52, 0)
-#include <uuid/uuid.h>
-#endif
-
 gchar *
 tracker_generate_uuid (const gchar *uri_prefix)
 {
 	gchar *result;
-#if GLIB_CHECK_VERSION (2, 52, 0)
 	result = g_uuid_string_random ();
-#else
-	uuid_t base = { 0, };
-	gchar uuid[37];
-
-	uuid_generate (base);
-	uuid_unparse_lower (base, uuid);
-	result = g_strdup_printf (uuid);
-#endif
 
 	if (uri_prefix) {
 		gchar *uri;
