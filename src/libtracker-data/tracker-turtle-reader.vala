@@ -63,7 +63,7 @@ public class Tracker.TurtleReader : Object {
 
 	int bnodeid = 0;
 	// base UUID used for blank nodes
-	uchar[] base_uuid;
+	string base_uuid;
 
 	MappedFile? mapped_file;
 	uchar[]? buffer;
@@ -85,8 +85,7 @@ public class Tracker.TurtleReader : Object {
 			scanner = new SparqlScanner (buffer, len);
 		}
 
-		base_uuid = new uchar[16];
-		uuid_generate (base_uuid);
+		base_uuid = GLib.Uuid.string_random();
 
 		tokens = new TokenInfo[BUFFER_SIZE];
 		prefix_map = new HashTable<string,string>.full (str_hash, str_equal, g_free, g_free);
@@ -101,7 +100,7 @@ public class Tracker.TurtleReader : Object {
 		} else {
 			var checksum = new Checksum (ChecksumType.SHA1);
 			// base UUID, unique per file
-			checksum.update (base_uuid, 16);
+			checksum.update ((uchar[]) base_uuid, -1);
 			// node ID
 			checksum.update ((uchar[]) user_bnodeid, -1);
 
@@ -380,8 +379,5 @@ public class Tracker.TurtleReader : Object {
 			}
 		}
 	}
-
-	[CCode (cname = "uuid_generate")]
-	public extern static void uuid_generate ([CCode (array_length = false)] uchar[] uuid);
 }
 

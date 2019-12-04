@@ -28,7 +28,7 @@ tracker_data_enums = gnome.mkenums('tracker-data-enum-types',
 )
 
 tracker_data_dependencies = [
-    tracker_common_dep, gvdb_dep, sqlite, uuid,
+    tracker_common_dep, gvdb_dep, sqlite,
 ]
 
 if get_option('fts')

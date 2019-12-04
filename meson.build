@@ -24,7 +24,7 @@ libversion = '@0@.@1@.@2@'.format(soversion, tracker_binary_age - tracker_interf
 libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
-glib_required = '2.46.0'
+glib_required = '2.52.0'
 
 # 3.6.11 for sqlite_backup API
 # 3.6.16 to fix test failures
@@ -50,14 +50,6 @@ libxml2 = dependency('libxml-2.0', version: '> 2.6')
 sqlite = dependency('sqlite3', version: '>' + sqlite_required)
 
 libmath = cc.find_library('m', required: false)
-
-# FIXME: here we work around a quirk todo with Meson and Vala: the 'uuid'
-# pkg-config component corresponds to 'libuuid.vapi', but Meson assumes that
-# .vapi name always matches pkg-config name, and will add `--pkg uuid` to the
-# Vala commandline. By finding 'uuid' using find_library() instead, we get
-# a dependency object back that won't cause any `--pkg` arguments to be added
-# to the Vala commandline, but still works as expected for C code.
-uuid = cc.find_library('uuid')
 
 add_project_arguments('-Wformat', '-Wformat-security', language: 'c')
 
