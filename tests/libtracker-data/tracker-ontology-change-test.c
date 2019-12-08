@@ -253,6 +253,7 @@ test_ontology_change (void)
 			g_free (results_filename);
 		}
 
+		tracker_data_manager_shutdown (manager);
 		g_object_unref (manager);
 	}
 
@@ -277,6 +278,7 @@ test_ontology_change (void)
 		g_free (results_filename);
 	}
 
+	tracker_data_manager_shutdown (manager);
 	g_object_unref (manager);
 
 	g_file_delete (file2, NULL, NULL);
