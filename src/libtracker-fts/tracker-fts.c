@@ -153,7 +153,6 @@ tracker_fts_create_table (sqlite3     *db,
 
 	g_string_append (fts, "tokenize=TrackerTokenizer)");
 	rc = sqlite3_exec(db, fts->str, NULL, NULL, NULL);
-	g_string_free (fts, TRUE);
 
 	if (rc != SQLITE_OK)
 		return FALSE;
@@ -174,18 +173,19 @@ tracker_fts_delete_table (sqlite3     *db,
                           gchar       *table_name)
 {
 	gchar *query;
-	int rc;
+	gint rc;
 
 	query = g_strdup_printf ("DROP VIEW fts_view");
 	rc = sqlite3_exec (db, query, NULL, NULL, NULL);
 	g_free (query);
 
-	if (rc == SQLITE_OK) {
-		query = g_strdup_printf ("DROP TABLE \"%s\".%s",
-					 database, table_name);
-		sqlite3_exec (db, query, NULL, NULL, NULL);
-		g_free (query);
-	}
+	if (rc != SQLITE_OK)
+		return FALSE;
+
+	query = g_strdup_printf ("DROP TABLE \"%s\".%s",
+	                         database, table_name);
+	rc = sqlite3_exec (db, query, NULL, NULL, NULL);
+	g_free (query);
 
 	return rc == SQLITE_OK;
 }
@@ -197,43 +197,13 @@ tracker_fts_alter_table (sqlite3     *db,
 			 GHashTable  *tables,
 			 GHashTable  *grouped_columns)
 {
-	gchar *query, *tmp_name;
-	int rc;
+	tracker_fts_delete_table (db, database, table_name);
 
-	tmp_name = g_strdup_printf ("%s_TMP", table_name);
-
-	if (!tracker_fts_create_table (db, database, tmp_name, tables, grouped_columns)) {
-		g_free (tmp_name);
+	if (!tracker_fts_create_table (db, database, table_name, tables, grouped_columns))
 		return FALSE;
-	}
 
-	query = g_strdup_printf ("INSERT INTO \"%s\".%s (rowid) SELECT rowid FROM fts_view",
-				 database, tmp_name);
-	rc = sqlite3_exec (db, query, NULL, NULL, NULL);
-	g_free (query);
-
-	if (rc != SQLITE_OK) {
-		g_free (tmp_name);
-		return FALSE;
-	}
-
-	query = g_strdup_printf ("INSERT INTO \"%s\".%s(%s) VALUES('rebuild')",
-				 database, tmp_name, tmp_name);
-	rc = sqlite3_exec (db, query, NULL, NULL, NULL);
-	g_free (query);
-
-	if (rc != SQLITE_OK) {
-		g_free (tmp_name);
-		return FALSE;
-	}
-
-	query = g_strdup_printf ("ALTER TABLE \"%s\".%s RENAME TO %s",
-				 database, tmp_name, table_name);
-	rc = sqlite3_exec (db, query, NULL, NULL, NULL);
-	g_free (query);
-	g_free (tmp_name);
-
-	return rc == SQLITE_OK;
+	tracker_fts_rebuild_tokens (db, database, table_name);
+	return TRUE;
 }
 
 void
