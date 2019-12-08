@@ -181,7 +181,7 @@ tracker_fts_delete_table (sqlite3     *db,
 	g_free (query);
 
 	if (rc == SQLITE_OK) {
-		query = g_strdup_printf ("DROP TABLE \"%s\".%s",
+		query = g_strdup_printf ("DROP VIRTUAL TABLE \"%s\".%s",
 					 database, table_name);
 		sqlite3_exec (db, query, NULL, NULL, NULL);
 		g_free (query);
@@ -197,41 +197,18 @@ tracker_fts_alter_table (sqlite3     *db,
 			 GHashTable  *tables,
 			 GHashTable  *grouped_columns)
 {
-	gchar *query, *tmp_name;
+	gchar *query;
 	int rc;
 
-	tmp_name = g_strdup_printf ("%s_TMP", table_name);
-
-	if (!tracker_fts_create_table (db, database, tmp_name, tables, grouped_columns)) {
-		g_free (tmp_name);
+	if (!tracker_fts_delete_table (db, database, table_name))
 		return FALSE;
-	}
-
-	query = g_strdup_printf ("INSERT INTO \"%s\".%s (rowid) SELECT rowid FROM fts_view",
-				 database, tmp_name);
-	rc = sqlite3_exec (db, query, NULL, NULL, NULL);
-	g_free (query);
-
-	if (rc != SQLITE_OK) {
-		g_free (tmp_name);
+	if (!tracker_fts_create_table (db, database, table_name, tables, grouped_columns))
 		return FALSE;
-	}
 
 	query = g_strdup_printf ("INSERT INTO \"%s\".%s(%s) VALUES('rebuild')",
-				 database, tmp_name, tmp_name);
+				 database, table_name, table_name);
 	rc = sqlite3_exec (db, query, NULL, NULL, NULL);
 	g_free (query);
-
-	if (rc != SQLITE_OK) {
-		g_free (tmp_name);
-		return FALSE;
-	}
-
-	query = g_strdup_printf ("ALTER TABLE \"%s\".%s RENAME TO %s",
-				 database, tmp_name, table_name);
-	rc = sqlite3_exec (db, query, NULL, NULL, NULL);
-	g_free (query);
-	g_free (tmp_name);
 
 	return rc == SQLITE_OK;
 }
