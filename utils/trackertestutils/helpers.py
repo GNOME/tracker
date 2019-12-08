@@ -338,7 +338,8 @@ class StoreHelper():
 
         # Check the list of previously received events for matches
         (existing_match, self.inserts_list) = find_property_change(self.inserts_list)
-        (existing_match, self.deletes_list) = find_property_change(self.deletes_list)
+        if not existing_match:
+            (existing_match, self.deletes_list) = find_property_change(self.deletes_list)
 
         if not existing_match:
             self._enable_await_timeout()
@@ -350,9 +351,10 @@ class StoreHelper():
             except GraphUpdateTimeoutException:
                 raise GraphUpdateTimeoutException(
                     "Timeout waiting for property change, subject %i property %s (%i)" % (subject_id, property_uri, property_id))
-            self.inserts_match_function = None
-            self.deletes_match_function = None
-            self.class_to_track = None
+
+        self.inserts_match_function = None
+        self.deletes_match_function = None
+        self.class_to_track = None
 
     # Note: The methods below call the tracker-store D-Bus API directly. This
     # is useful for testing this API surface, but we recommand that all regular
