@@ -170,6 +170,8 @@ test_ontology_change (void)
 	GFile *data_location, *test_schemas;
 	TrackerDataManager *manager;
 
+	g_setenv ("TRACKER_VERBOSITY", "3", TRUE);
+
 	prefix = g_build_path (G_DIR_SEPARATOR_S, TOP_SRCDIR, "tests", "libtracker-data", NULL);
 	build_prefix = g_build_path (G_DIR_SEPARATOR_S, TOP_BUILDDIR, "tests", "libtracker-data", NULL);
 	ontologies = g_build_filename (prefix, "ontologies", NULL);
