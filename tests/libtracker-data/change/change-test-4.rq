@@ -1,1 +1,1 @@
-select ?u { ?u <http://www.tracker-project.org/ontologies/fts#match> 'resource' } order by ?u
+select ?u { ?u <http://www.tracker-project.org/ontologies/fts#match> 'resource' }
