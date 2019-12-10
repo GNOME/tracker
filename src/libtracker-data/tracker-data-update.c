@@ -1577,12 +1577,16 @@ get_old_property_values (TrackerData      *data,
 				TrackerOntologies *ontologies;
 				guint i, n_props;
 				TrackerProperty   **properties, *prop;
+				GPtrArray *fts_props, *fts_text;
 
 				/* first fulltext indexed property to be modified
 				 * retrieve values of all fulltext indexed properties
 				 */
 				ontologies = tracker_data_manager_get_ontologies (data->manager);
 				properties = tracker_ontologies_get_properties (ontologies, &n_props);
+
+				fts_props = g_ptr_array_new ();
+				fts_text = g_ptr_array_new_with_free_func (g_free);
 
 				for (i = 0; i < n_props; i++) {
 					prop = properties[i];
@@ -1605,13 +1609,21 @@ get_old_property_values (TrackerData      *data,
 							g_string_append (str, g_value_get_string (value));
 						}
 
-						tracker_db_interface_sqlite_fts_delete_text (iface,
-						                                             data->resource_buffer->id,
-						                                             property_name,
-						                                             str->str);
-						g_string_free (str, TRUE);
+						g_ptr_array_add (fts_props, (gpointer) property_name);
+						g_ptr_array_add (fts_text, g_string_free (str, FALSE));
 					}
 				}
+
+				g_ptr_array_add (fts_props, NULL);
+				g_ptr_array_add (fts_text, NULL);
+
+				tracker_db_interface_sqlite_fts_delete_text (iface,
+				                                             data->resource_buffer->id,
+				                                             (const gchar **) fts_props->pdata,
+				                                             (const gchar **) fts_text->pdata);
+
+				g_ptr_array_unref (fts_props);
+				g_ptr_array_unref (fts_text);
 
 				data->update_buffer.fts_ever_updated = TRUE;
 

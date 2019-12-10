@@ -1824,13 +1824,13 @@ tracker_db_interface_sqlite_fts_update_text (TrackerDBInterface  *db_interface,
 gboolean
 tracker_db_interface_sqlite_fts_delete_text (TrackerDBInterface  *db_interface,
                                              int                  rowid,
-                                             const gchar         *property,
-                                             const gchar         *old_text)
+                                             const gchar        **properties,
+                                             const gchar        **old_text)
 {
 	TrackerDBStatement *stmt;
 	GError *error = NULL;
-	const gchar *properties[] = { property, NULL };
 	gchar *query;
+	gint i;
 
 	query = tracker_db_interface_sqlite_fts_create_query (db_interface,
 	                                                      TRUE, properties);
@@ -1848,7 +1848,9 @@ tracker_db_interface_sqlite_fts_delete_text (TrackerDBInterface  *db_interface,
 	}
 
 	tracker_db_statement_bind_int (stmt, 0, rowid);
-	tracker_db_statement_bind_text (stmt, 1, old_text);
+	for (i = 0; old_text[i] != NULL; i++)
+		tracker_db_statement_bind_text (stmt, i + 1, old_text[i]);
+
 	tracker_db_statement_execute (stmt, &error);
 	g_object_unref (stmt);
 
