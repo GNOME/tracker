@@ -1,7 +1,6 @@
 libtracker_bus = static_library('tracker-bus',
     'tracker-bus.vala',
     'tracker-namespace.vala',
-    'tracker-array-cursor.vala',
     'tracker-bus-fd-cursor.vala',
     '../libtracker-common/libtracker-common.vapi',
     tracker_common_enum_header,
