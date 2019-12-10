@@ -3540,9 +3540,6 @@ tracker_data_ontology_import_into_db (TrackerDataManager  *manager,
 	TrackerProperty **properties;
 	guint i, n_props, n_classes;
 
-	if (!tracker_data_manager_update_union_views (manager, iface, NULL, error))
-		return;
-
 	classes = tracker_ontologies_get_classes (manager->ontologies, &n_classes);
 	properties = tracker_ontologies_get_properties (manager->ontologies, &n_props);
 
@@ -3919,249 +3916,6 @@ tracker_data_manager_get_data_location (TrackerDataManager *manager)
 	return manager->data_location ? g_object_ref (manager->data_location) : NULL;
 }
 
-gboolean
-tracker_data_manager_update_union_views (TrackerDataManager  *manager,
-                                         TrackerDBInterface  *iface,
-                                         GHashTable          *tables,
-                                         GError             **error)
-{
-	TrackerOntologies *ontologies = manager->ontologies;
-	TrackerClass **classes;
-	TrackerProperty **properties;
-	TrackerDBStatement *stmt;
-	guint i, n_classes, n_properties;
-	GError *inner_error = NULL;
-	GHashTableIter iter;
-	GHashTable *graphs;
-	gpointer graph_name, graph_id;
-	GString *str;
-	GHashTable *view_generations;
-	gpointer generation;
-
-	generation = GUINT_TO_POINTER (manager->generation);
-
-	classes = tracker_ontologies_get_classes (ontologies, &n_classes);
-	properties = tracker_ontologies_get_properties (ontologies, &n_properties);
-	graphs = tracker_data_manager_ensure_graphs (manager, iface, error);
-
-	if (!graphs)
-		return FALSE;
-
-	view_generations = g_object_get_data (G_OBJECT (iface),
-	                                      "tracker-data-view-generations");
-
-	if (!view_generations) {
-		view_generations = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-		g_object_set_data_full (G_OBJECT (iface),
-		                        "tracker-data-view-generations",
-		                        view_generations,
-		                        (GDestroyNotify) g_hash_table_unref);
-	}
-
-	for (i = 0; !inner_error && i < n_classes; i++) {
-		const gchar *name;
-
-		if (g_str_has_prefix (tracker_class_get_name (classes[i]), "xsd:"))
-			continue;
-
-		name = tracker_class_get_name (classes[i]);
-		if ((tables && !g_hash_table_contains (tables, name)) ||
-		    g_hash_table_lookup (view_generations, name) == generation)
-			continue;
-
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_%s\"",
-		                                              tracker_class_get_name (classes[i]));
-		if (!stmt)
-			goto error;
-
-		tracker_db_statement_execute (stmt, NULL);
-		g_object_unref (stmt);
-
-		str = g_string_new (NULL);
-		g_string_append_printf (str,
-		                        "CREATE VIEW temp.\"unionGraph_%s\" AS "
-		                        "SELECT 0 AS graph, * FROM \"main\".\"%s\" ",
-		                        tracker_class_get_name (classes[i]),
-		                        tracker_class_get_name (classes[i]));
-
-		g_hash_table_iter_init (&iter, graphs);
-		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
-			g_string_append_printf (str, "UNION ALL SELECT %d AS graph, * FROM \"%s\".\"%s\" ",
-			                        GPOINTER_TO_INT (graph_id),
-			                        (gchar *) graph_name,
-			                        tracker_class_get_name (classes[i]));
-		}
-
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "%s", str->str);
-		g_string_free (str, TRUE);
-		if (!stmt)
-			goto error;
-
-		tracker_db_statement_execute (stmt, &inner_error);
-		g_object_unref (stmt);
-
-		if (inner_error)
-			goto error;
-
-		g_hash_table_insert (view_generations,
-		                     g_strdup (tracker_class_get_name (classes[i])),
-		                     generation);
-	}
-
-	for (i = 0; !inner_error && i < n_properties; i++) {
-		TrackerClass *service;
-		gchar *name;
-
-		if (!tracker_property_get_multiple_values (properties[i]))
-			continue;
-
-		service = tracker_property_get_domain (properties[i]);
-		name = g_strdup_printf ("%s_%s",
-		                        tracker_class_get_name (service),
-		                        tracker_property_get_name (properties[i]));
-
-		if ((tables && !g_hash_table_contains (tables, name)) ||
-		    g_hash_table_lookup (view_generations, name) == generation) {
-			g_free (name);
-			continue;
-		}
-
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_%s_%s\"",
-		                                              tracker_class_get_name (service),
-		                                              tracker_property_get_name (properties[i]));
-		if (!stmt) {
-			g_free (name);
-			goto error;
-		}
-
-		tracker_db_statement_execute (stmt, NULL);
-		g_object_unref (stmt);
-
-		str = g_string_new (NULL);
-		g_string_append_printf (str,
-		                        "CREATE VIEW temp.\"unionGraph_%s_%s\" AS "
-		                        "SELECT 0 AS graph, * FROM \"main\".\"%s_%s\" ",
-		                        tracker_class_get_name (service),
-		                        tracker_property_get_name (properties[i]),
-		                        tracker_class_get_name (service),
-		                        tracker_property_get_name (properties[i]));
-
-		g_hash_table_iter_init (&iter, graphs);
-		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
-			g_string_append_printf (str, "UNION ALL SELECT %d AS graph, * FROM \"%s\".\"%s_%s\" ",
-			                        GPOINTER_TO_INT (graph_id),
-			                        (gchar *) graph_name,
-			                        tracker_class_get_name (service),
-			                        tracker_property_get_name (properties[i]));
-		}
-
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "%s", str->str);
-		g_string_free (str, TRUE);
-
-		if (!stmt) {
-			g_free (name);
-			goto error;
-		}
-
-		tracker_db_statement_execute (stmt, &inner_error);
-		g_object_unref (stmt);
-
-		if (inner_error) {
-			g_free (name);
-			goto error;
-		}
-
-		g_hash_table_insert (view_generations, name, generation);
-	}
-
-	/* Update FTS5 union view */
-	if ((!tables || g_hash_table_contains (tables, "fts5")) &&
-	    g_hash_table_lookup (view_generations, "fts5") != generation) {
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_fts5\"");
-		if (!stmt)
-			goto error;
-
-		tracker_db_statement_execute (stmt, NULL);
-		g_object_unref (stmt);
-
-		str = g_string_new (NULL);
-		g_string_append (str,
-		                 "CREATE VIEW temp.\"unionGraph_fts5\" AS "
-		                 "SELECT 0 AS graph, ROWID, *, fts5, rank FROM \"main\".\"fts5\" ");
-
-		g_hash_table_iter_init (&iter, graphs);
-		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
-			g_string_append_printf (str, "UNION ALL SELECT %d AS graph, ROWID, *, fts5, rank FROM \"%s\".\"fts5\" ",
-			                        GPOINTER_TO_INT (graph_id),
-			                        (gchar *) graph_name);
-		}
-
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "%s", str->str);
-		g_string_free (str, TRUE);
-
-		if (stmt) {
-			tracker_db_statement_execute (stmt, &inner_error);
-			g_object_unref (stmt);
-		}
-
-		if (inner_error)
-			goto error;
-
-		g_hash_table_insert (view_generations, g_strdup ("fts5"), generation);
-	}
-
-	/* Refcounts */
-	if (g_hash_table_lookup (view_generations, "refcount") != generation) {
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "DROP VIEW IF EXISTS temp.\"unionGraph_Refcount\"");
-		if (!stmt)
-			goto error;
-
-		tracker_db_statement_execute (stmt, NULL);
-		g_object_unref (stmt);
-
-		str = g_string_new (NULL);
-		g_string_append (str,
-		                 "CREATE VIEW temp.\"unionGraph_Refcount\" AS "
-		                 "SELECT 0 AS graph, * FROM \"main\".\"Refcount\" ");
-
-		g_hash_table_iter_init (&iter, graphs);
-		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
-			g_string_append_printf (str, "UNION ALL SELECT %d AS graph, * FROM \"%s\".\"Refcount\" ",
-			                        GPOINTER_TO_INT (graph_id),
-			                        (gchar *) graph_name);
-		}
-
-		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, &inner_error,
-		                                              "%s", str->str);
-		g_string_free (str, TRUE);
-
-		if (stmt) {
-			tracker_db_statement_execute (stmt, &inner_error);
-			g_object_unref (stmt);
-		}
-
-		if (inner_error)
-			goto error;
-
-		g_hash_table_insert (view_generations, g_strdup ("refcount"), generation);
-	}
-
-error:
-	if (inner_error) {
-		g_propagate_error (error, inner_error);
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
 TrackerDataManager *
 tracker_data_manager_new (TrackerDBManagerFlags   flags,
                           GFile                  *cache_location,
@@ -4268,10 +4022,6 @@ setup_interface_cb (TrackerDBManager   *db_manager,
 	}
 
 	g_object_get (iface, "flags", &flags, NULL);
-
-	if (flags & TRACKER_DB_INTERFACE_READONLY) {
-		tracker_data_manager_update_union_views (data_manager, iface, NULL, NULL);
-	}
 }
 
 static gboolean
@@ -5028,9 +4778,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		}
 	}
 
-	if (!tracker_data_manager_update_union_views (manager, iface, NULL, error))
-		return FALSE;
-
 skip_ontology_check:
 	if (!read_only && is_first_time_index) {
 		tracker_db_manager_set_current_locale (manager->db_manager);
@@ -5069,61 +4816,65 @@ skip_ontology_check:
 }
 
 static gboolean
-data_manager_check_perform_cleanup (TrackerDataManager *manager)
+data_manager_perform_cleanup (TrackerDataManager  *manager,
+                              TrackerDBInterface  *iface,
+                              GError             **error)
 {
 	TrackerDBStatement *stmt;
-	TrackerDBInterface *iface;
-	TrackerDBCursor *cursor = NULL;
-	guint count = 0;
+	GError *internal_error = NULL;
+	GHashTable *graphs;
+	GHashTableIter iter;
+	const gchar *graph;
+	GString *str;
 
-	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
-	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
-	                                              NULL, "SELECT COUNT(*) FROM Graph");
-	if (stmt) {
-		cursor = tracker_db_statement_start_cursor (stmt, NULL);
-		g_object_unref (stmt);
+	str = g_string_new ("WITH referencedElements(ID) AS ("
+	                    "SELECT ID FROM \"main\".Refcount ");
+
+	graphs = tracker_data_manager_ensure_graphs (manager, iface, &internal_error);
+	if (!graphs)
+		goto fail;
+
+	g_hash_table_iter_init (&iter, graphs);
+
+	while (g_hash_table_iter_next (&iter, (gpointer*) &graph, NULL)) {
+		g_string_append_printf (str,
+		                        "UNION ALL SELECT ID FROM \"%s\".Refcount ",
+		                        graph);
 	}
 
-	if (cursor && tracker_db_cursor_iter_next (cursor, NULL, NULL))
-		count = tracker_db_cursor_get_int (cursor, 0);
+	g_string_append (str, ") ");
+	g_string_append_printf (str,
+	                        "DELETE FROM Resource "
+	                        "WHERE Resource.ID > %d "
+	                        "AND Resource.ID NOT IN (SELECT ID FROM referencedElements) "
+	                        "AND Resource.ID NOT IN (SELECT ID FROM Graph)",
+	                        TRACKER_ONTOLOGIES_MAX_ID);
 
-	g_clear_object (&cursor);
+	stmt = tracker_db_interface_create_statement (iface,
+	                                              TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE,
+	                                              &internal_error,
+	                                              "%s", str->str);
+	g_string_free (str, TRUE);
 
-	/* We need to be sure the data is coherent, so we'll refrain from
-	 * doing any clean ups till there are elements in the Graph table.
-	 *
-	 * A database that's been freshly updated to the refcounted
-	 * resources will have an empty Graph table, so we might
-	 * unintentionally delete graph URNs if we clean up in this state.
-	 */
-	if (count == 0)
+	if (!stmt)
+		goto fail;
+
+	tracker_db_statement_execute (stmt, &internal_error);
+	g_object_unref (stmt);
+
+fail:
+	if (internal_error) {
+		g_propagate_error (error, internal_error);
 		return FALSE;
-
-	count = 0;
-	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE, NULL,
-	                                              "SELECT COUNT(*) FROM Resource "
-	                                              "WHERE Resource.ID > %d "
-	                                              "AND Resource.ID NOT IN (SELECT ROWID FROM unionGraph_Refcount) "
-	                                              "AND Resource.ID NOT IN (SELECT ID FROM Graph)",
-	                                              TRACKER_ONTOLOGIES_MAX_ID);
-	if (stmt) {
-		cursor = tracker_db_statement_start_cursor (stmt, NULL);
-		g_object_unref (stmt);
 	}
 
-	if (cursor && tracker_db_cursor_iter_next (cursor, NULL, NULL))
-		count = tracker_db_cursor_get_int (cursor, 0);
-
-	g_clear_object (&cursor);
-
-	return count > 0;
+	return TRUE;
 }
 
 void
 tracker_data_manager_dispose (GObject *object)
 {
 	TrackerDataManager *manager = TRACKER_DATA_MANAGER (object);
-	TrackerDBStatement *stmt;
 	TrackerDBInterface *iface;
 	GError *error = NULL;
 	gboolean readonly = TRUE;
@@ -5131,25 +4882,13 @@ tracker_data_manager_dispose (GObject *object)
 	if (manager->db_manager) {
 		readonly = (tracker_db_manager_get_flags (manager->db_manager, NULL, NULL) & TRACKER_DB_MANAGER_READONLY) != 0;
 
-		if (!readonly && data_manager_check_perform_cleanup (manager)) {
+		if (!readonly) {
 			/* Delete stale URIs in the Resource table */
 			g_debug ("Cleaning up stale resource URIs");
 
 			iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
-			stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE,
-			                                              &error,
-			                                              "DELETE FROM Resource "
-			                                              "WHERE Resource.ID > %d "
-			                                              "AND Resource.ID NOT IN (SELECT ROWID FROM unionGraph_Refcount) "
-			                                              "AND Resource.ID NOT IN (SELECT ID FROM Graph)",
-			                                              TRACKER_ONTOLOGIES_MAX_ID);
 
-			if (stmt) {
-				tracker_db_statement_execute (stmt, &error);
-				g_object_unref (stmt);
-			}
-
-			if (error) {
+			if (!data_manager_perform_cleanup (manager, iface, &error)) {
 				g_warning ("Could not clean up stale resource URIs: %s\n",
 				           error->message);
 				g_clear_error (&error);
@@ -5305,9 +5044,6 @@ tracker_data_manager_create_graph (TrackerDataManager  *manager,
 
 	manager->generation++;
 
-	if (!tracker_data_manager_update_union_views (manager, iface, NULL, error))
-		goto detach;
-
 	return TRUE;
 
 detach:
@@ -5340,9 +5076,6 @@ tracker_data_manager_drop_graph (TrackerDataManager  *manager,
 		return FALSE;
 
 	manager->generation++;
-
-	if (!tracker_data_manager_update_union_views (manager, iface, NULL, error))
-		return FALSE;
 
 	if (manager->graphs)
 		g_hash_table_remove (manager->graphs, name);

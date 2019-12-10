@@ -328,19 +328,25 @@ subdir('tests')
 
 subdir('po')
 
-# Make sure we're not using versions of SQLite which cause problems.
-#
-# Avoid versions:
-sqlite_safe = true
-if sqlite.version().version_compare('>= 3.7.10') and sqlite.version().version_compare('<= 3.7.13')
-  # See https://mail.gnome.org/archives/tracker-list/2012-October/msg00028.html
-  sqlite_safe = false
-elif sqlite.version().version_compare('3.8.1')
-  # See https://mail.gnome.org/archives/tracker-list/2013-November/msg00021.html
-  sqlite_safe = false
-elif sqlite.version().version_compare('3.8.4.2')
-  # See https://mail.gnome.org/archives/tracker-list/2014-April/msg00001.html
-  sqlite_safe = false
+if not get_option('override_sqlite_version_check')
+    template = 'SQLite3 version is unsafe (@0@).\nSee @1@ for details.\nYou can bypass this check with -Doverride_sqlite_version_check=true'
+
+    # Make sure we're not using versions of SQLite which cause problems.
+    #
+    # Avoid versions:
+    if sqlite.version().version_compare('>= 3.7.10') and sqlite.version().version_compare('<= 3.7.13')
+        error(template.format('>=3.7.10, <= 3.7.13',
+                              'https://mail.gnome.org/archives/tracker-list/2012-October/msg00028.html'))
+    elif sqlite.version().version_compare('3.8.1')
+        error(template.format('3.8.1',
+                              'https://mail.gnome.org/archives/tracker-list/2013-November/msg00021.html'))
+    elif sqlite.version().version_compare('3.8.4.2')
+        error(template.format('3.8.4.2',
+                              'https://mail.gnome.org/archives/tracker-list/2014-April/msg00001.html'))
+    elif sqlite.version().version_compare('>= 3.24.0') and sqlite.version().version_compare('<= 3.28.0')
+        error(template.format('>=3.24.0, <= 3.28.0',
+                              'https://gitlab.gnome.org/GNOME/tracker/merge_requests/160#note_664713'))
+    endif
 endif
 
 meson.add_install_script('meson_integration_commands.sh', glib_compile_schemas.path(), gsettings_schema_dir)
@@ -361,12 +367,3 @@ summary = [
 ]
 
 message('\n'.join(summary))
-
-if not sqlite_safe
-  message('''WARNING:
-        SQLite3 version @0@ is not safe. For detail
-        3.7.10 - 3.7.13: https://mail.gnome.org/archives/tracker-list/2012-October/msg00028.html
-        3.8.1:           https://mail.gnome.org/archives/tracker-list/2013-November/msg00021.html
-        3.8.4.2:         https://mail.gnome.org/archives/tracker-list/2014-April/msg00001.html
-  ''').format(sqlite.version())
-endif
