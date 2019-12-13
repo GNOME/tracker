@@ -13,7 +13,8 @@ variables:
 stages:
   - test
 
-test-fedora-latest:
+
+.test_template: &test
   stage: test
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
 
@@ -34,11 +35,15 @@ test-fedora-latest:
 
   after_script:
     - |
+      echo "Distribution: "
+      echo
+      egrep '^NAME=|^VERSION=' /etc/os-release
+      echo
       echo "Test suite settings:"
       echo
-      echo "  TRACKER_VERBOSITY: ${TRACKER_VERBOSITY}"
-      echo "  TRACKER_TESTS_VERBOSE: ${TRACKER_TESTS_VERBOSE}"
-      echo "  MESON_TEST_EXTRA_ARGS: ${MESON_TEST_EXTRA_ARGS}"
+      echo "TRACKER_VERBOSITY: ${TRACKER_VERBOSITY}"
+      echo "TRACKER_TESTS_VERBOSE: ${TRACKER_TESTS_VERBOSE}"
+      echo "MESON_TEST_EXTRA_ARGS: ${MESON_TEST_EXTRA_ARGS}"
       echo
       echo "These values can be set at https://gitlab.gnome.org/GNOME/tracker/pipelines/new"
 
@@ -46,3 +51,14 @@ test-fedora-latest:
     when: always
     paths:
     - build/meson-logs/testlog.txt
+
+
+test-fedora-latest:
+  stage: test
+  image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
+  <<: *test
+
+test-ubuntu-rolling:
+  stage: test
+  image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/ubuntu:rolling
+  <<: *test
