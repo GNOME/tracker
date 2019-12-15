@@ -150,4 +150,38 @@ ORDER BY DESC ?count
       simply returns a boolean return value.
     </para>
   </section>
+  <section>
+    <title>No tracker_sparql_connection_get()/get_async()</title>
+    <para>
+      There is no longer a singleton SPARQL connection. If you are only interested in
+      tracker-miner-fs data, you can create a dedicated DBus connection to it through:
+    </para>
+    <programlisting>
+      conn = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker1.Miner.Files", ...);
+    </programlisting>
+    <para>
+      If you are interested in storing your own data, you can do it through:
+    </para>
+    <programlisting>
+      conn = tracker_sparql_connection_new (...);
+    </programlisting>
+    <para>
+      Note that you still may access other endpoints in SELECT queries, eg. for
+      tracker-miner-fs:
+    </para>
+    <programlisting>
+SELECT ?url ?tag {
+  SERVICE &lt;dbus:org.freedesktop.Tracker1.Miner.Files&gt; {
+    ?a a rdfs:Resource;
+       nie:url ?url .
+  }
+  ?b nie:url ?url;
+     nao:hasTag ?tag
+}
+    </programlisting>
+    <para>
+      This SELECT query merges together data from the tracker-miner-fs endpoint
+      with data from the local endpoint.
+    </para>
+  </section>
 </chapter>
