@@ -30,19 +30,6 @@
  * </para>
  */
 
-// Convenience, hidden in the documentation
-namespace Tracker {
-	public const string DBUS_SERVICE = "org.freedesktop.Tracker1";
-	public const string DBUS_INTERFACE_RESOURCES = "org.freedesktop.Tracker1.Resources";
-	public const string DBUS_OBJECT_RESOURCES = "/org/freedesktop/Tracker1/Resources";
-	public const string DBUS_INTERFACE_STATISTICS = "org.freedesktop.Tracker1.Statistics";
-	public const string DBUS_OBJECT_STATISTICS = "/org/freedesktop/Tracker1/Statistics";
-	public const string DBUS_INTERFACE_STATUS = "org.freedesktop.Tracker1.Status";
-	public const string DBUS_OBJECT_STATUS = "/org/freedesktop/Tracker1/Status";
-	public const string DBUS_INTERFACE_STEROIDS = "org.freedesktop.Tracker1.Steroids";
-	public const string DBUS_OBJECT_STEROIDS = "/org/freedesktop/Tracker1/Steroids";
-}
-
 /**
  * TrackerSparqlError:
  * @TRACKER_SPARQL_ERROR_PARSE: Error parsing the SPARQL string.
