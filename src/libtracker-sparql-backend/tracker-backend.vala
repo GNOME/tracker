@@ -18,7 +18,6 @@
  */
 
 static string domain_name = null;
-static DBusConnection global_dbus_connection = null;
 
 public static Tracker.Sparql.Connection tracker_sparql_connection_remote_new (string url_base) {
 	return new Tracker.Remote.Connection (url_base);
@@ -48,12 +47,4 @@ public static void tracker_sparql_connection_set_domain (string? domain) {
 
 public static string? tracker_sparql_connection_get_domain () {
 	return domain_name;
-}
-
-public static void tracker_sparql_connection_set_dbus_connection (DBusConnection dbus_connection) {
-	global_dbus_connection = dbus_connection;
-}
-
-public static DBusConnection? tracker_sparql_connection_get_dbus_connection () {
-	return global_dbus_connection;
 }

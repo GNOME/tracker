@@ -424,35 +424,6 @@ public abstract class Tracker.Sparql.Connection : Object {
 	public extern static string? get_domain ();
 
 	/**
-	 * tracker_sparql_connection_set_dbus_connection:
-	 * @dbus_connection: A #GDBusConnection to a suitable message bus.
-	 *
-	 * By default, a connection is opened to the session-wide Tracker services
-	 * running on the D-Bus session bus. This function allows you to connect to
-	 * Tracker services that are running on a different bus.
-	 *
-	 * This function must be called before any tracker_sparql_connection_get()
-	 * calls happen.
-	 *
-	 * See also: the TRACKER_IPC_BUS environment variable.
-	 *
-	 * Since: 2.2
-	 */
-	public extern static void set_dbus_connection (DBusConnection dbus_connection);
-
-	/**
-	 * tracker_sparql_connection_get_dbus_connection:
-	 *
-	 * Gets the D-Bus connection that is used to contact the Tracker services.
-	 *
-	 * Returns: (transfer none): A #GDBusConnection instance, or %NULL if the
-	 *                           default is being used.
-	 *
-	 * Since: 2.0
-	 */
-	public extern static DBusConnection? get_dbus_connection ();
-
-	/**
 	 * tracker_sparql_connection_query_statement:
 	 * @self: a #TrackerSparqlConnection
 	 * @sparql: the SPARQL query
