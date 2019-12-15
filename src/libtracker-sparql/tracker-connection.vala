@@ -168,14 +168,14 @@ public abstract class Tracker.Sparql.Connection : Object {
 	public extern static new Connection remote_new (string uri_base);
 
 	/**
-	 * tracker_sparql_connection_local_new:
+	 * tracker_sparql_connection_new:
 	 * @flags: Flags to define connection behavior
 	 * @store: Location for the database
 	 * @ontology: Location of the ontology used for this connection, or %NULL
 	 * @cancellable: A #GCancellable
 	 * @error: The error which occurred or %NULL
 	 *
-	 * Returns: a new local #TrackerSparqlConnection using the specified
+	 * Returns: a new #TrackerSparqlConnection using the specified
 	 * @cache location, and the ontology specified in the @ontology
 	 * directory. Call g_object_unref() on the object when no longer used.
 	 *
@@ -194,12 +194,12 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * The @store argument expects a directory, and it is
 	 * assumed to be entirely private to Tracker.
 	 *
-	 * Since: 2.0
+	 * Since: 3.0
 	 */
-	public extern static new Connection local_new (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws Sparql.Error, IOError;
+	public extern static new Connection new (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws Sparql.Error, IOError;
 
 	/**
-	 * tracker_sparql_connection_local_new_async:
+	 * tracker_sparql_connection_new_async:
 	 * @flags: Flags to define connection behavior
 	 * @store: Location for the database
 	 * @ontology: Location of the ontology used for this connection, or %NULL
@@ -208,17 +208,17 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 *              asynchronous operation is finished.
 	 * @_user_data_: user-defined data to be passed to @_callback_
 	 *
-	 * Returns: a new local #TrackerSparqlConnection using the specified
+	 * Returns: a new #TrackerSparqlConnection using the specified
 	 * @cache location, and the ontology specified in the @ontology
 	 * directory. Call g_object_unref() on the object when no longer used.
 	 *
-	 * See tracker_sparql_connection_local_new() for more details.
+	 * See tracker_sparql_connection_new() for more details.
 	 *
-	 * Since: 2.0
+	 * Since: 3.0
 	 */
 
 	/**
-	 * tracker_sparql_connection_local_new_finish:
+	 * tracker_sparql_connection_new_finish:
 	 * @_res_: a #GAsyncResult with the result of the operation
 	 * @error: #GError for error reporting.
 	 *
@@ -228,9 +228,9 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * On error, #NULL is returned and the @error is set accordingly.
 	 * Call g_object_unref() on the returned connection when no longer needed.
 	 *
-	 * Since: 2.0
+	 * Since: 3.0
 	 */
-	public extern async static new Connection local_new_async (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws Sparql.Error, IOError;
+	public extern async static new Connection new_async (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws Sparql.Error, IOError;
 
 	public extern static new Connection bus_new (string service_name, DBusConnection? dbus_connection = null) throws Sparql.Error, IOError, DBusError, GLib.Error;
 
