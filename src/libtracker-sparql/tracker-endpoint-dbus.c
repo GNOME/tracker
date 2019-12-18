@@ -32,25 +32,17 @@ static const gchar introspection_xml[] =
 	"<node>"
 	"  <interface name='org.freedesktop.Tracker1.Endpoint'>"
 	"    <method name='Query'>"
-	"      <arg type='as' name='anon_graphs' direction='in' />"
-	"      <arg type='as' name='named_graphs' direction='in' />"
 	"      <arg type='s' name='query' direction='in' />"
 	"      <arg type='h' name='output_stream' direction='in' />"
 	"      <arg type='as' name='result' direction='out' />"
 	"    </method>"
 	"    <method name='Update'>"
-	"      <arg type='as' name='anon_graphs' direction='in' />"
-	"      <arg type='as' name='named_graphs' direction='in' />"
 	"      <arg type='h' name='input_stream' direction='in' />"
 	"    </method>"
 	"    <method name='UpdateArray'>"
-	"      <arg type='as' name='anon_graphs' direction='in' />"
-	"      <arg type='as' name='named_graphs' direction='in' />"
 	"      <arg type='h' name='input_stream' direction='in' />"
 	"    </method>"
 	"    <method name='UpdateBlank'>"
-	"      <arg type='as' name='anon_graphs' direction='in' />"
-	"      <arg type='as' name='named_graphs' direction='in' />"
 	"      <arg type='h' name='input_stream' direction='in' />"
 	"      <arg type='aaa{ss}' name='result' direction='out' />"
 	"    </method>"
@@ -393,8 +385,7 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 	fd_list = g_dbus_message_get_unix_fd_list (g_dbus_method_invocation_get_message (invocation));
 
 	if (g_strcmp0 (method_name, "Query") == 0) {
-		/* FIXME: Anon/named graphs are ignored ATM */
-		g_variant_get (parameters, "(asassh)", NULL, NULL, &query, &handle);
+		g_variant_get (parameters, "(sh)", &query, &handle);
 
 		if (fd_list)
 			fd = g_unix_fd_list_get (fd_list, handle, &error);
@@ -418,8 +409,7 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 		g_free (query);
 	} else if (g_strcmp0 (method_name, "Update") == 0 ||
 	           g_strcmp0 (method_name, "UpdateArray") == 0) {
-		/* FIXME: Anon/named graphs are ignored ATM */
-		g_variant_get (parameters, "(asash)", NULL, NULL, &handle);
+		g_variant_get (parameters, "(h)", &handle);
 
 		if (fd_list)
 			fd = g_unix_fd_list_get (fd_list, handle, &error);
@@ -438,8 +428,7 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 			update_request_read_next (request, read_update_cb);
 		}
 	} else if (g_strcmp0 (method_name, "UpdateBlank") == 0) {
-		/* FIXME: Anon/named graphs are ignored ATM */
-		g_variant_get (parameters, "(asash)", NULL, NULL, &handle);
+		g_variant_get (parameters, "(h)", &handle);
 
 		if (fd_list)
 			fd = g_unix_fd_list_get (fd_list, handle, &error);
