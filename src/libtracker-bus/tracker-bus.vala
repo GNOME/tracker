@@ -21,24 +21,16 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 	DBusConnection bus;
 	string dbus_name;
 
-	public Connection (string dbus_name, DBusConnection? dbus_connection, bool start) throws Sparql.Error, IOError, DBusError, GLib.Error {
+	private const string ENDPOINT_PATH = "/org/freedesktop/Tracker1/Endpoint";
+	private const string ENDPOINT_IFACE = "org.freedesktop.Tracker1.Endpoint";
+
+	public Connection (string dbus_name, DBusConnection? dbus_connection) throws Sparql.Error, IOError, DBusError, GLib.Error {
 		this.dbus_name = dbus_name;
 
 		if (dbus_connection == null)
 			bus = GLib.Bus.get_sync (Tracker.IPC.bus ());
 		else
 			bus = dbus_connection;
-
-		if (start) {
-			debug ("Waiting for service to become available...");
-
-			// do not use proxy to work around race condition in GDBus
-			// NB#259760
-			var msg = new DBusMessage.method_call (dbus_name, Tracker.DBUS_OBJECT_STATUS, Tracker.DBUS_INTERFACE_STATUS, "Wait");
-			bus.send_message_with_reply_sync (msg, 0, /* timeout */ int.MAX, null).to_gerror ();
-
-			debug ("Service is ready");
-		}
 
 		// ensure that error domain is registered with GDBus
 		new Sparql.Error.INTERNAL ("");
@@ -68,7 +60,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 	}
 
 	void send_query (string sparql, UnixOutputStream output, Cancellable? cancellable, AsyncReadyCallback? callback) throws GLib.IOError, GLib.Error {
-		var message = new DBusMessage.method_call (dbus_name, Tracker.DBUS_OBJECT_STEROIDS, Tracker.DBUS_INTERFACE_STEROIDS, "Query");
+		var message = new DBusMessage.method_call (dbus_name, ENDPOINT_PATH, ENDPOINT_IFACE, "Query");
 		var fd_list = new UnixFDList ();
 		message.set_body (new Variant ("(sh)", sparql, fd_list.append (output.fd)));
 		message.set_unix_fd_list (fd_list);
@@ -130,7 +122,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 	}
 
 	void send_update (string method, UnixInputStream input, Cancellable? cancellable, AsyncReadyCallback? callback) throws GLib.Error, GLib.IOError {
-		var message = new DBusMessage.method_call (dbus_name, Tracker.DBUS_OBJECT_STEROIDS, Tracker.DBUS_INTERFACE_STEROIDS, method);
+		var message = new DBusMessage.method_call (dbus_name, ENDPOINT_PATH, ENDPOINT_IFACE, method);
 		var fd_list = new UnixFDList ();
 		message.set_body (new Variant ("(h)", fd_list.append (input.fd)));
 		message.set_unix_fd_list (fd_list);
