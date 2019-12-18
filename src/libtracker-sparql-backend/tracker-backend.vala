@@ -324,7 +324,7 @@ public static Tracker.Sparql.Connection tracker_sparql_connection_remote_new (st
 }
 
 public static Tracker.Sparql.Connection tracker_sparql_connection_bus_new (string service, DBusConnection? conn) throws Tracker.Sparql.Error, IOError, DBusError, GLib.Error {
-	return new Tracker.Bus.Connection (service, conn, true);
+	return new Tracker.Bus.Connection (service, conn);
 }
 
 public static Tracker.Sparql.Connection tracker_sparql_connection_new (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws GLib.Error, Tracker.Sparql.Error, IOError {
