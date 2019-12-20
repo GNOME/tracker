@@ -42,20 +42,15 @@
  * }
  * ]|
  *
- * If the flags %TRACKER_NOTIFIER_FLAG_QUERY_URN or
- * %TRACKER_NOTIFIER_FLAG_QUERY_LOCATION are passed, the extra metadata
- * will be available through tracker_notifier_event_get_urn() and/or
- * tracker_notifier_event_get_location(). Note that this metadata can't
- * be obtained for every element and situation, most notably during
- * %TRACKER_NOTIFIER_EVENT_DELETE events.
+ * If the %TRACKER_NOTIFIER_FLAG_QUERY_URN flag is passed, the extra
+ * metadata will be available through tracker_notifier_event_get_urn().
  *
  * # Known caveats # {#trackernotifier-caveats}
  *
- * * If a resource is deleted, the %TRACKER_NOTIFIER_EVENT_DELETE event
- *   emitted will have a %NULL location, even if the notifier was created
- *   with the %TRACKER_NOTIFIER_FLAG_QUERY_LOCATION flag enabled. At the
- *   time of notifying, the resource does not exist anymore, so no
- *   meatadata can be retrieved.
+ * * The %TRACKER_NOTIFIER_EVENT_DELETE events will be received after the
+ *   resource has been deleted. At that time queries on those elements will
+ *   not bring any metadata. Only the ID/URN obtained through the event
+ *   remain meaningful.
  * * Notifications of files being moved across indexed folders will
  *   appear as %TRACKER_NOTIFIER_EVENT_UPDATE events, containing
  *   the new location (if requested). The older location is no longer
@@ -102,7 +97,6 @@ struct _TrackerNotifierEvent {
 	gint64 id;
 	const gchar *rdf_type; /* Belongs to cache */
 	gchar *urn;
-	gchar *location;
 	guint ref_count;
 };
 
@@ -195,7 +189,6 @@ tracker_notifier_event_unref (TrackerNotifierEvent *event)
 {
 	if (g_atomic_int_dec_and_test (&event->ref_count)) {
 		g_free (event->urn);
-		g_free (event->location);
 		g_free (event);
 	}
 }
@@ -406,8 +399,6 @@ create_extra_info_query (TrackerNotifier *notifier,
 
 	if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
 		g_string_append (sparql, "?u ");
-	if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_LOCATION)
-		g_string_append (sparql, "nie:url(nie:isStoredAs(?u)) ");
 
 	g_string_append_printf (sparql,
 	                        "{ ?u a rdfs:Resource . "
@@ -456,8 +447,6 @@ tracker_notifier_query_extra_info (TrackerNotifier *notifier,
 
 		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
 			event->urn = g_strdup (tracker_sparql_cursor_get_string (cursor, col++, NULL));
-		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_LOCATION)
-			event->location = g_strdup (tracker_sparql_cursor_get_string (cursor, col++, NULL));
 	}
 
 	g_object_unref (cursor);
@@ -581,9 +570,7 @@ graph_updated_cb (GDBusConnection *connection,
 
 	events = tracker_notifier_event_cache_flush_events (cache);
 	if (events) {
-		if (priv->flags &
-		    (TRACKER_NOTIFIER_FLAG_QUERY_URN |
-		     TRACKER_NOTIFIER_FLAG_QUERY_LOCATION))
+		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
 			tracker_notifier_query_extra_info (notifier, events);
 
 		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
@@ -946,23 +933,4 @@ tracker_notifier_event_get_urn (TrackerNotifierEvent *event)
 {
 	g_return_val_if_fail (event != NULL, NULL);
 	return event->urn;
-}
-
-/**
- * tracker_notifier_event_get_location:
- * @event: A #TrackerNotifierEvent
- *
- * Returns the location (e.g. an URI) of the element if the notifier
- * has the flag %TRACKER_NOTIFIER_FLAG_QUERY_LOCATION, and it can
- * be obtained at the time of emission.
- *
- * Returns: (nullable): The element location, or %NULL
- *
- * Since: 1.12
- **/
-const gchar *
-tracker_notifier_event_get_location (TrackerNotifierEvent *event)
-{
-	g_return_val_if_fail (event != NULL, NULL);
-	return event->location;
 }
