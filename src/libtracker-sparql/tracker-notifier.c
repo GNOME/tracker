@@ -73,16 +73,20 @@
 #include <libtracker-common/tracker-common.h>
 
 typedef struct _TrackerNotifierPrivate TrackerNotifierPrivate;
+typedef struct _TrackerNotifierSubscription TrackerNotifierSubscription;
 typedef struct _TrackerNotifierEventCache TrackerNotifierEventCache;
+
+struct _TrackerNotifierSubscription {
+	GDBusConnection *connection;
+	guint handler_id;
+};
 
 struct _TrackerNotifierPrivate {
 	TrackerSparqlConnection *connection;
-	GDBusConnection *dbus_connection;
 	TrackerNotifierFlags flags;
+	GHashTable *subscriptions; /* guint -> TrackerNotifierSubscription */
 	gchar **expanded_classes;
 	gchar **classes;
-	guint graph_updated_signal_id;
-	guint has_arg0_filter : 1;
 };
 
 struct _TrackerNotifierEventCache {
@@ -119,6 +123,28 @@ G_DEFINE_TYPE_WITH_CODE (TrackerNotifier, tracker_notifier, G_TYPE_OBJECT,
                          G_ADD_PRIVATE (TrackerNotifier)
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 tracker_notifier_initable_iface_init))
+
+static TrackerNotifierSubscription *
+tracker_notifier_subscription_new (GDBusConnection *connection,
+                                   guint            handler_id)
+{
+	TrackerNotifierSubscription *subscription;
+
+	subscription = g_new0 (TrackerNotifierSubscription, 1);
+	subscription->connection = g_object_ref (connection);
+	subscription->handler_id = handler_id;
+
+	return subscription;
+}
+
+static void
+tracker_notifier_subscription_free (TrackerNotifierSubscription *subscription)
+{
+	g_dbus_connection_signal_unsubscribe (subscription->connection,
+	                                      subscription->handler_id);
+	g_object_unref (subscription->connection);
+	g_free (subscription);
+}
 
 static TrackerNotifierEvent *
 tracker_notifier_event_new (gint64       id,
@@ -467,9 +493,7 @@ tracker_notifier_initable_init (GInitable     *initable,
                                 GError       **error)
 {
 	TrackerNotifier *notifier = TRACKER_NOTIFIER (initable);
-	TrackerDomainOntology *domain_ontology;
 	TrackerNotifierPrivate *priv;
-	gchar *dbus_name;
 
 	priv = tracker_notifier_get_instance_private (notifier);
 	priv->connection = tracker_sparql_connection_get (cancellable, error);
@@ -478,32 +502,6 @@ tracker_notifier_initable_init (GInitable     *initable,
 
 	if (!expand_class_iris (notifier, cancellable, error))
 		return FALSE;
-
-	priv->dbus_connection = tracker_sparql_connection_get_dbus_connection ();
-	if (!priv->dbus_connection)
-		priv->dbus_connection = g_bus_get_sync (G_BUS_TYPE_SESSION, cancellable, error);
-	if (!priv->dbus_connection)
-		return FALSE;
-
-	domain_ontology = tracker_domain_ontology_new (tracker_sparql_connection_get_domain (),
-	                                               cancellable, error);
-	if (!domain_ontology)
-		return FALSE;
-
-	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, "Tracker1");
-
-	priv->graph_updated_signal_id =
-		g_dbus_connection_signal_subscribe (priv->dbus_connection,
-		                                    dbus_name,
-		                                    "org.freedesktop.Tracker1.Endpoint",
-		                                    "GraphUpdated",
-		                                    "/org/freedesktop/Tracker1/Endpoint",
-		                                    NULL,
-		                                    G_DBUS_SIGNAL_FLAGS_NONE,
-		                                    graph_updated_cb,
-		                                    initable, NULL);
-	tracker_domain_ontology_unref (domain_ontology);
-	g_free (dbus_name);
 
 	return TRUE;
 }
@@ -565,16 +563,10 @@ tracker_notifier_finalize (GObject *object)
 
 	priv = tracker_notifier_get_instance_private (TRACKER_NOTIFIER (object));
 
-	if (priv->dbus_connection) {
-		g_dbus_connection_signal_unsubscribe (priv->dbus_connection,
-		                                      priv->graph_updated_signal_id);
-
-		g_object_unref (priv->dbus_connection);
-	}
-
 	if (priv->connection)
 		g_object_unref (priv->connection);
 
+	g_hash_table_unref (priv->subscriptions);
 	g_strfreev (priv->expanded_classes);
 	g_strfreev (priv->classes);
 
@@ -641,6 +633,11 @@ tracker_notifier_class_init (TrackerNotifierClass *klass)
 static void
 tracker_notifier_init (TrackerNotifier *notifier)
 {
+	TrackerNotifierPrivate *priv;
+
+	priv = tracker_notifier_get_instance_private (notifier);
+	priv->subscriptions = g_hash_table_new_full (NULL, NULL, NULL,
+	                                             (GDestroyNotify) tracker_notifier_subscription_free);
 }
 
 /**
@@ -669,6 +666,56 @@ tracker_notifier_new (const gchar * const   *classes,
 	                       "classes", classes,
 	                       "flags", flags,
 	                       NULL);
+}
+
+guint
+tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
+                                   GDBusConnection *connection,
+                                   const gchar     *service,
+                                   const gchar     *graph)
+{
+	TrackerNotifierSubscription *subscription;
+	TrackerNotifierPrivate *priv;
+	guint handler_id;
+
+	g_return_val_if_fail (TRACKER_IS_NOTIFIER (notifier), 0);
+	g_return_val_if_fail (G_IS_DBUS_CONNECTION (connection), 0);
+	g_return_val_if_fail (service != NULL, 0);
+
+	priv = tracker_notifier_get_instance_private (notifier);
+
+	handler_id =
+		g_dbus_connection_signal_subscribe (connection,
+		                                    service,
+		                                    "org.freedesktop.Tracker1.Endpoint",
+		                                    "GraphUpdated",
+		                                    "/org/freedesktop/Tracker1/Endpoint",
+		                                    graph,
+		                                    G_DBUS_SIGNAL_FLAGS_NONE,
+		                                    graph_updated_cb,
+		                                    notifier, NULL);
+
+	subscription = tracker_notifier_subscription_new (connection, handler_id);
+
+	g_hash_table_insert (priv->subscriptions,
+	                     GUINT_TO_POINTER (subscription->handler_id),
+	                     subscription);
+
+	return handler_id;
+}
+
+void
+tracker_notifier_signal_unsubscribe (TrackerNotifier *notifier,
+                                     guint            handler_id)
+{
+	TrackerNotifierPrivate *priv;
+
+	g_return_if_fail (TRACKER_IS_NOTIFIER (notifier));
+	g_return_if_fail (handler_id != 0);
+
+	priv = tracker_notifier_get_instance_private (notifier);
+
+	g_hash_table_remove (priv->subscriptions, GUINT_TO_POINTER (handler_id));
 }
 
 /**
