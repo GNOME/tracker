@@ -377,11 +377,8 @@ create_extra_info_query (TrackerNotifier *notifier,
 
 		event = g_ptr_array_index (events, idx);
 
-		/* Skip delete events, we can't get anything from those here */
-		if (event->type == TRACKER_NOTIFIER_EVENT_DELETE)
-			continue;
 		if (has_elements)
-			g_string_append_c (filter, ',');
+			g_string_append_c (filter, ' ');
 
 		g_string_append_printf (filter, "%" G_GINT64_FORMAT, event->id);
 		has_elements = TRUE;
@@ -392,15 +389,14 @@ create_extra_info_query (TrackerNotifier *notifier,
 		return NULL;
 	}
 
-	sparql = g_string_new ("SELECT tracker:id(?u) ");
+	sparql = g_string_new ("SELECT ?id ");
 
 	if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
-		g_string_append (sparql, "?u ");
+		g_string_append (sparql, "tracker:uri(xsd:integer(?id)) ");
 
 	g_string_append_printf (sparql,
-	                        "{ ?u a rdfs:Resource . "
-	                        "  FILTER (tracker:id(?u) IN (%s)) } "
-	                        "ORDER BY tracker:id(?u)", filter->str);
+	                        "{ VALUES ?id { %s } } "
+	                        "ORDER BY ?id", filter->str);
 	g_string_free (filter, TRUE);
 
 	return g_string_free (sparql, FALSE);
@@ -449,88 +445,6 @@ tracker_notifier_query_extra_info (TrackerNotifier *notifier,
 	g_object_unref (cursor);
 }
 
-static gchar *
-create_extra_deleted_info_query (TrackerNotifier *notifier,
-                                 GPtrArray       *events)
-{
-	gboolean has_elements = FALSE;
-	GString *sparql;
-	gint idx;
-
-	sparql = g_string_new ("SELECT ");
-
-	for (idx = 0; idx < events->len; idx++) {
-		TrackerNotifierEvent *event;
-
-		event = g_ptr_array_index (events, idx);
-
-		/* This is for delete events, skip all others */
-		if (event->type != TRACKER_NOTIFIER_EVENT_DELETE)
-			continue;
-
-		g_string_append_printf (sparql, "%" G_GINT64_FORMAT " "
-		                        "tracker:uri(%" G_GINT64_FORMAT ")",
-		                        event->id, event->id);
-		has_elements = TRUE;
-	}
-
-	if (!has_elements) {
-		g_string_free (sparql, TRUE);
-		return NULL;
-	}
-
-	g_string_append (sparql, "{}");
-
-	return g_string_free (sparql, FALSE);
-}
-
-static void
-tracker_notifier_query_extra_deleted_info (TrackerNotifier *notifier,
-                                           GPtrArray       *events)
-{
-	TrackerNotifierPrivate *priv;
-	TrackerSparqlCursor *cursor;
-	TrackerNotifierEvent *event;
-	const gchar *urn;
-	gchar *sparql;
-	gint idx = 0, col = 0;
-	gint64 id;
-
-	sparql = create_extra_deleted_info_query (notifier, events);
-	if (!sparql)
-		return;
-
-	priv = tracker_notifier_get_instance_private (notifier);
-	cursor = tracker_sparql_connection_query (priv->connection, sparql,
-	                                          NULL, NULL);
-	g_free (sparql);
-
-	if (!cursor || !tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		g_clear_object (&cursor);
-		return;
-	}
-
-	/* We rely here in both the GPtrArray and the query columns having
-	 * the same sort criteria.
-	 */
-	while (col < tracker_sparql_cursor_get_n_columns (cursor)) {
-		id = tracker_sparql_cursor_get_integer (cursor, col++);
-		urn = tracker_sparql_cursor_get_string (cursor, col++, NULL);
-		event = find_event_in_array (events, id, &idx);
-
-		if (!event) {
-			g_critical ("Queried for id %" G_GINT64_FORMAT " in column %d "
-			            "but it is not found, bailing out", id, col);
-			break;
-		}
-
-		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
-			event->urn = g_strdup (urn);
-	}
-
-	g_object_unref (cursor);
-}
-
 static void
 tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
 {
@@ -541,10 +455,8 @@ tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
 	events = tracker_notifier_event_cache_take_events (cache);
 
 	if (events) {
-		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN) {
+		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
 			tracker_notifier_query_extra_info (notifier, events);
-			tracker_notifier_query_extra_deleted_info (notifier, events);
-		}
 
 		g_signal_emit (notifier, signals[EVENTS], 0, events);
 		g_ptr_array_unref (events);
