@@ -46,14 +46,12 @@ struct _TrackerNotifierClass {
  * TrackerNotifierFlags:
  * @TRACKER_NOTIFIER_FLAG_NONE: No flags
  * @TRACKER_NOTIFIER_FLAG_QUERY_URN: Query URN of notified elements
- * @TRACKER_NOTIFIER_FLAG_QUERY_LOCATION: Query location of notified elements
  *
  * Flags affecting #TrackerNotifier behavior.
  */
 typedef enum {
 	TRACKER_NOTIFIER_FLAG_NONE               = 0,
 	TRACKER_NOTIFIER_FLAG_QUERY_URN          = 1 << 1,
-	TRACKER_NOTIFIER_FLAG_QUERY_LOCATION     = 1 << 2,
 } TrackerNotifierFlags;
 
 /**
@@ -80,6 +78,5 @@ TrackerNotifierEventType
 gint64        tracker_notifier_event_get_id         (TrackerNotifierEvent *event);
 const gchar * tracker_notifier_event_get_type       (TrackerNotifierEvent *event);
 const gchar * tracker_notifier_event_get_urn        (TrackerNotifierEvent *event);
-const gchar * tracker_notifier_event_get_location   (TrackerNotifierEvent *event);
 
 #endif /* __TRACKER_NOTIFIER_H__ */
