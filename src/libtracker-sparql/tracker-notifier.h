@@ -73,6 +73,13 @@ TrackerNotifier * tracker_notifier_new (const gchar * const   *classes,
                                         GCancellable          *cancellable,
                                         GError               **error);
 
+guint tracker_notifier_signal_subscribe   (TrackerNotifier *notifier,
+                                           GDBusConnection *connection,
+                                           const gchar     *service,
+                                           const gchar     *graph);
+void  tracker_notifier_signal_unsubscribe (TrackerNotifier *notifier,
+                                           guint            handler_id);
+
 TrackerNotifierEventType
               tracker_notifier_event_get_event_type (TrackerNotifierEvent *event);
 gint64        tracker_notifier_event_get_id         (TrackerNotifierEvent *event);
