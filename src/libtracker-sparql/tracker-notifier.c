@@ -80,7 +80,6 @@ struct _TrackerNotifierPrivate {
 	GDBusConnection *dbus_connection;
 	TrackerNotifierFlags flags;
 	GHashTable *cached_ids; /* gchar -> gint64* */
-	GHashTable *cached_events; /* gchar -> GSequence */
 	gchar **expanded_classes;
 	gchar **classes;
 	guint graph_updated_signal_id;
@@ -89,6 +88,7 @@ struct _TrackerNotifierPrivate {
 
 struct _TrackerNotifierEventCache {
 	gchar *class;
+	TrackerNotifier *notifier;
 	GSequence *sequence;
 };
 
@@ -203,11 +203,13 @@ compare_event_cb (gconstpointer a,
 }
 
 static TrackerNotifierEventCache *
-tracker_notifier_event_cache_new (const gchar *rdf_class)
+tracker_notifier_event_cache_new (TrackerNotifier *notifier,
+                                  const gchar     *rdf_class)
 {
 	TrackerNotifierEventCache *event_cache;
 
 	event_cache = g_new0 (TrackerNotifierEventCache, 1);
+	event_cache->notifier = g_object_ref (notifier);
 	event_cache->class = g_strdup (rdf_class);
 	event_cache->sequence = g_sequence_new ((GDestroyNotify) tracker_notifier_event_unref);
 
@@ -218,27 +220,9 @@ static void
 tracker_notifier_event_cache_free (TrackerNotifierEventCache *event_cache)
 {
 	g_sequence_free (event_cache->sequence);
+	g_object_unref (event_cache->notifier);
 	g_free (event_cache->class);
 	g_free (event_cache);
-}
-
-static TrackerNotifierEventCache *
-tracker_notifier_get_event_cache (TrackerNotifier *notifier,
-                                  const gchar     *rdf_class)
-{
-	TrackerNotifierPrivate *priv;
-	TrackerNotifierEventCache *event_cache;
-
-	priv = tracker_notifier_get_instance_private (notifier);
-	event_cache = g_hash_table_lookup (priv->cached_events, rdf_class);
-
-	if (!event_cache) {
-		event_cache = tracker_notifier_event_cache_new (rdf_class);
-		g_hash_table_insert (priv->cached_events,
-		                     event_cache->class, event_cache);
-	}
-
-	return event_cache;
 }
 
 /* This is always meant to return a pointer */
@@ -271,6 +255,19 @@ tracker_notifier_event_cache_get_event (TrackerNotifierEventCache *cache,
 }
 
 static void
+tracker_notifier_event_cache_push_event (TrackerNotifierEventCache *cache,
+                                         gint64                     id,
+                                         TrackerNotifierEventType   event_type)
+{
+	TrackerNotifierEvent *event;
+
+	event = tracker_notifier_event_cache_get_event (cache, id);
+
+	if (event->type < 0 || event_type != TRACKER_NOTIFIER_EVENT_UPDATE)
+		event->type = event_type;
+}
+
+static void
 handle_deletes (TrackerNotifier           *notifier,
                 TrackerNotifierEventCache *cache,
                 GVariantIter              *iter)
@@ -279,15 +276,15 @@ handle_deletes (TrackerNotifier           *notifier,
 
 	while (g_variant_iter_loop (iter, "(iiii)",
 	                            &graph, &subject, &predicate, &object)) {
-		TrackerNotifierEvent *event;
-
-		event = tracker_notifier_event_cache_get_event (cache, subject);
+		TrackerNotifierEventType type;
 
 		if (tracker_notifier_id_matches (notifier, predicate, "rdf:type")) {
-			event->type = TRACKER_NOTIFIER_EVENT_DELETE;
-		} else if (event->type < 0) {
-			event->type = TRACKER_NOTIFIER_EVENT_UPDATE;
+			type = TRACKER_NOTIFIER_EVENT_DELETE;
+		} else {
+			type = TRACKER_NOTIFIER_EVENT_UPDATE;
 		}
+
+		tracker_notifier_event_cache_push_event (cache, subject, type);
 	}
 }
 
@@ -300,20 +297,20 @@ handle_updates (TrackerNotifier           *notifier,
 
 	while (g_variant_iter_loop (iter, "(iiii)",
 	                            &graph, &subject, &predicate, &object)) {
-		TrackerNotifierEvent *event;
-
-		event = tracker_notifier_event_cache_get_event (cache, subject);
+		TrackerNotifierEventType type;
 
 		if (tracker_notifier_id_matches (notifier, predicate, "rdf:type")) {
-			event->type = TRACKER_NOTIFIER_EVENT_CREATE;
-		} else if (event->type < 0) {
-			event->type = TRACKER_NOTIFIER_EVENT_UPDATE;
+			type = TRACKER_NOTIFIER_EVENT_CREATE;
+		} else {
+			type = TRACKER_NOTIFIER_EVENT_UPDATE;
 		}
+
+		tracker_notifier_event_cache_push_event (cache, subject, type);
 	}
 }
 
 static GPtrArray *
-tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
+tracker_notifier_event_cache_take_events (TrackerNotifierEventCache *cache)
 {
 	TrackerNotifierEvent *event;
 	GSequenceIter *iter, *next;
@@ -535,6 +532,26 @@ tracker_notifier_query_extra_deleted_info (TrackerNotifier *notifier,
 }
 
 static void
+tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
+{
+	TrackerNotifier *notifier = cache->notifier;
+	TrackerNotifierPrivate *priv = tracker_notifier_get_instance_private (notifier);
+	GPtrArray *events;
+
+	events = tracker_notifier_event_cache_take_events (cache);
+
+	if (events) {
+		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN) {
+			tracker_notifier_query_extra_info (notifier, events);
+			tracker_notifier_query_extra_deleted_info (notifier, events);
+		}
+
+		g_signal_emit (notifier, signals[EVENTS], 0, events);
+		g_ptr_array_unref (events);
+	}
+}
+
+static void
 graph_updated_cb (GDBusConnection *connection,
                   const gchar     *sender_name,
                   const gchar     *object_path,
@@ -547,7 +564,6 @@ graph_updated_cb (GDBusConnection *connection,
 	TrackerNotifierPrivate *priv;
 	TrackerNotifierEventCache *cache;
 	GVariantIter *deletes, *updates;
-	GPtrArray *events;
 	const gchar *class;
 
 	priv = tracker_notifier_get_instance_private (notifier);
@@ -561,24 +577,15 @@ graph_updated_cb (GDBusConnection *connection,
 		return;
 	}
 
-	cache = tracker_notifier_get_event_cache (notifier, class);
+	cache = tracker_notifier_event_cache_new (notifier, class);
 	handle_deletes (notifier, cache, deletes);
 	handle_updates (notifier, cache, updates);
 
 	g_variant_iter_free (deletes);
 	g_variant_iter_free (updates);
 
-	events = tracker_notifier_event_cache_flush_events (cache);
-	if (events) {
-		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
-			tracker_notifier_query_extra_info (notifier, events);
-
-		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
-			tracker_notifier_query_extra_deleted_info (notifier, events);
-
-		g_signal_emit (notifier, signals[EVENTS], 0, events);
-		g_ptr_array_unref (events);
-	}
+	tracker_notifier_event_cache_flush_events (cache);
+	tracker_notifier_event_cache_free (cache);
 }
 
 static gboolean
@@ -747,7 +754,6 @@ tracker_notifier_finalize (GObject *object)
 		g_object_unref (priv->connection);
 
 	g_hash_table_unref (priv->cached_ids);
-	g_hash_table_unref (priv->cached_events);
 	g_strfreev (priv->expanded_classes);
 	g_strfreev (priv->classes);
 
@@ -817,10 +823,6 @@ tracker_notifier_init (TrackerNotifier *notifier)
 	TrackerNotifierPrivate *priv;
 
 	priv = tracker_notifier_get_instance_private (notifier);
-	priv->cached_events = g_hash_table_new_full (g_str_hash,
-						     g_str_equal,
-						     NULL,
-	                                             (GDestroyNotify) tracker_notifier_event_cache_free);
 	priv->cached_ids = g_hash_table_new_full (g_str_hash,
 	                                          g_str_equal,
 	                                          g_free, g_free);
