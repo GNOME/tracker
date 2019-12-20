@@ -66,6 +66,7 @@
 #include "config.h"
 
 #include "tracker-notifier.h"
+#include "tracker-notifier-private.h"
 #include "tracker-sparql-enum-types.h"
 #include "tracker-generated-no-checks.h"
 #include <libtracker-common/tracker-common.h>
@@ -175,10 +176,10 @@ compare_event_cb (gconstpointer a,
 	return event1->id - event2->id;
 }
 
-static TrackerNotifierEventCache *
-tracker_notifier_event_cache_new (TrackerNotifier *notifier,
-                                  const gchar     *service,
-                                  const gchar     *graph)
+TrackerNotifierEventCache *
+_tracker_notifier_event_cache_new (TrackerNotifier *notifier,
+                                   const gchar     *service,
+                                   const gchar     *graph)
 {
 	TrackerNotifierEventCache *event_cache;
 
@@ -191,8 +192,8 @@ tracker_notifier_event_cache_new (TrackerNotifier *notifier,
 	return event_cache;
 }
 
-static void
-tracker_notifier_event_cache_free (TrackerNotifierEventCache *event_cache)
+void
+_tracker_notifier_event_cache_free (TrackerNotifierEventCache *event_cache)
 {
 	g_sequence_free (event_cache->sequence);
 	g_object_unref (event_cache->notifier);
@@ -230,10 +231,10 @@ tracker_notifier_event_cache_get_event (TrackerNotifierEventCache *cache,
 	return event;
 }
 
-static void
-tracker_notifier_event_cache_push_event (TrackerNotifierEventCache *cache,
-                                         gint64                     id,
-                                         TrackerNotifierEventType   event_type)
+void
+_tracker_notifier_event_cache_push_event (TrackerNotifierEventCache *cache,
+                                          gint64                     id,
+                                          TrackerNotifierEventType   event_type)
 {
 	TrackerNotifierEvent *event;
 
@@ -251,7 +252,7 @@ handle_events (TrackerNotifier           *notifier,
 	gint32 type, resource;
 
 	while (g_variant_iter_loop (iter, "(ii)", &type, &resource))
-		tracker_notifier_event_cache_push_event (cache, resource, type);
+		_tracker_notifier_event_cache_push_event (cache, resource, type);
 }
 
 static GPtrArray *
@@ -390,8 +391,8 @@ tracker_notifier_query_extra_info (TrackerNotifier *notifier,
 	g_object_unref (cursor);
 }
 
-static void
-tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
+void
+_tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
 {
 	TrackerNotifier *notifier = cache->notifier;
 	TrackerNotifierPrivate *priv = tracker_notifier_get_instance_private (notifier);
@@ -426,14 +427,14 @@ graph_updated_cb (GDBusConnection *connection,
 	g_variant_get (parameters, "(&sa(ii))", &graph, &events);
 
 	service = g_strdup_printf ("dbus:%s", sender_name);
-	cache = tracker_notifier_event_cache_new (notifier, sender_name, graph);
+	cache = _tracker_notifier_event_cache_new (notifier, sender_name, graph);
 	g_free (service);
 
 	handle_events (notifier, cache, events);
 	g_variant_iter_free (events);
 
-	tracker_notifier_event_cache_flush_events (cache);
-	tracker_notifier_event_cache_free (cache);
+	_tracker_notifier_event_cache_flush_events (cache);
+	_tracker_notifier_event_cache_free (cache);
 }
 
 static void
@@ -611,6 +612,16 @@ tracker_notifier_signal_unsubscribe (TrackerNotifier *notifier,
 	priv = tracker_notifier_get_instance_private (notifier);
 
 	g_hash_table_remove (priv->subscriptions, GUINT_TO_POINTER (handler_id));
+}
+
+gpointer
+_tracker_notifier_get_connection (TrackerNotifier *notifier)
+{
+	TrackerNotifierPrivate *priv;
+
+	priv = tracker_notifier_get_instance_private (notifier);
+
+	return priv->connection;
 }
 
 /**
