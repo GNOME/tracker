@@ -253,7 +253,7 @@ tracker_file_get_mime_type (GFile *file)
 
 #define __bsize f_frsize
 
-#if HAVE_STATVFS64
+#ifdef HAVE_STATVFS64
 #define __statvfs statvfs64
 #else
 #define __statvfs statvfs
