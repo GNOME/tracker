@@ -24,11 +24,9 @@
  *
  * #TrackerNotifier is an object that receives notifications about
  * changes to the Tracker database. A #TrackerNotifier is created
- * through tracker_notifier_new(), passing the RDF types that are
- * relevant to the caller, and possible different #TrackerNotifierFlags
- * to change #TrackerNotifier behavior. After the notifier is created,
- * events can be listened for by connecting to the #TrackerNotifier::events
- * signal. This object was added in Tracker 1.12.
+ * through tracker_sparql_connection_create_notifier(), after the notifier
+ * is created, events can be listened for by connecting to the
+ * #TrackerNotifier::events signal. This object was added in Tracker 1.12.
  *
  * #TrackerNotifier is tracker:id centric, the ID can be
  * obtained from every event through tracker_notifier_event_get_id().
@@ -85,8 +83,6 @@ struct _TrackerNotifierPrivate {
 	TrackerSparqlConnection *connection;
 	TrackerNotifierFlags flags;
 	GHashTable *subscriptions; /* guint -> TrackerNotifierSubscription */
-	gchar **expanded_classes;
-	gchar **classes;
 };
 
 struct _TrackerNotifierEventCache {
@@ -105,7 +101,7 @@ struct _TrackerNotifierEvent {
 
 enum {
 	PROP_0,
-	PROP_CLASSES,
+	PROP_CONNECTION,
 	PROP_FLAGS,
 	N_PROPS
 };
@@ -117,12 +113,8 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0 };
 
-static void tracker_notifier_initable_iface_init (GInitableIface *iface);
-
 G_DEFINE_TYPE_WITH_CODE (TrackerNotifier, tracker_notifier, G_TYPE_OBJECT,
-                         G_ADD_PRIVATE (TrackerNotifier)
-                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
-                                                tracker_notifier_initable_iface_init))
+                         G_ADD_PRIVATE (TrackerNotifier))
 
 static TrackerNotifierSubscription *
 tracker_notifier_subscription_new (GDBusConnection *connection,
@@ -440,78 +432,6 @@ graph_updated_cb (GDBusConnection *connection,
 	tracker_notifier_event_cache_free (cache);
 }
 
-static gboolean
-expand_class_iris (TrackerNotifier  *notifier,
-                   GCancellable     *cancellable,
-                   GError          **error)
-{
-	TrackerNotifierPrivate *priv;
-	TrackerSparqlCursor *cursor;
-	GArray *expanded;
-	GString *sparql;
-	gint i, n_classes;
-
-	priv = tracker_notifier_get_instance_private (notifier);
-
-	if (!priv->classes) {
-		priv->expanded_classes = NULL;
-		return TRUE;
-	}
-
-	n_classes = g_strv_length (priv->classes);
-
-	sparql = g_string_new ("SELECT ");
-	for (i = 0; i < n_classes; i++)
-		g_string_append_printf (sparql, "%s ", priv->classes[i]);
-	g_string_append_printf (sparql, "{}");
-
-	cursor = tracker_sparql_connection_query (priv->connection, sparql->str,
-	                                          cancellable, error);
-	g_string_free (sparql, TRUE);
-
-	if (!cursor)
-		return FALSE;
-	if (!tracker_sparql_cursor_next (cursor, cancellable, error))
-		return FALSE;
-
-	expanded = g_array_new (TRUE, TRUE, sizeof (gchar*));
-
-	for (i = 0; i < tracker_sparql_cursor_get_n_columns (cursor); i++) {
-		gchar *str = g_strdup (tracker_sparql_cursor_get_string (cursor, i, NULL));
-		g_array_append_val (expanded, str);
-	}
-
-	priv->expanded_classes = (gchar **) g_array_free (expanded, FALSE);
-	g_object_unref (cursor);
-
-	return TRUE;
-}
-
-static gboolean
-tracker_notifier_initable_init (GInitable     *initable,
-                                GCancellable  *cancellable,
-                                GError       **error)
-{
-	TrackerNotifier *notifier = TRACKER_NOTIFIER (initable);
-	TrackerNotifierPrivate *priv;
-
-	priv = tracker_notifier_get_instance_private (notifier);
-	priv->connection = tracker_sparql_connection_get (cancellable, error);
-	if (!priv->connection)
-		return FALSE;
-
-	if (!expand_class_iris (notifier, cancellable, error))
-		return FALSE;
-
-	return TRUE;
-}
-
-static void
-tracker_notifier_initable_iface_init (GInitableIface *iface)
-{
-	iface->init = tracker_notifier_initable_init;
-}
-
 static void
 tracker_notifier_set_property (GObject      *object,
                                guint         prop_id,
@@ -522,8 +442,8 @@ tracker_notifier_set_property (GObject      *object,
 	TrackerNotifierPrivate *priv = tracker_notifier_get_instance_private (notifier);
 
 	switch (prop_id) {
-	case PROP_CLASSES:
-		priv->classes = g_value_dup_boxed (value);
+	case PROP_CONNECTION:
+		priv->connection = g_value_dup_object (value);
 		break;
 	case PROP_FLAGS:
 		priv->flags = g_value_get_flags (value);
@@ -544,8 +464,8 @@ tracker_notifier_get_property (GObject    *object,
 	TrackerNotifierPrivate *priv = tracker_notifier_get_instance_private (notifier);
 
 	switch (prop_id) {
-	case PROP_CLASSES:
-		g_value_set_boxed (value, priv->classes);
+	case PROP_CONNECTION:
+		g_value_set_object (value, priv->connection);
 		break;
 	case PROP_FLAGS:
 		g_value_set_flags (value, priv->flags);
@@ -567,8 +487,6 @@ tracker_notifier_finalize (GObject *object)
 		g_object_unref (priv->connection);
 
 	g_hash_table_unref (priv->subscriptions);
-	g_strfreev (priv->expanded_classes);
-	g_strfreev (priv->classes);
 
 	G_OBJECT_CLASS (tracker_notifier_parent_class)->finalize (object);
 }
@@ -604,14 +522,14 @@ tracker_notifier_class_init (TrackerNotifierClass *klass)
 	 *
 	 * RDF classes to listen notifications about.
 	 */
-	pspecs[PROP_CLASSES] =
-		g_param_spec_boxed ("classes",
-		                    "Classes",
-		                    "Classes",
-		                    G_TYPE_STRV,
-		                    G_PARAM_READWRITE |
-		                    G_PARAM_STATIC_STRINGS |
-		                    G_PARAM_CONSTRUCT_ONLY);
+	pspecs[PROP_CONNECTION] =
+		g_param_spec_object ("connection",
+		                     "SPARQL connection",
+		                     "SPARQL connection",
+		                     TRACKER_SPARQL_TYPE_CONNECTION,
+		                     G_PARAM_READWRITE |
+		                     G_PARAM_STATIC_STRINGS |
+		                     G_PARAM_CONSTRUCT_ONLY);
 	/**
 	 * TrackerNotifier:flags:
 	 *
@@ -638,34 +556,6 @@ tracker_notifier_init (TrackerNotifier *notifier)
 	priv = tracker_notifier_get_instance_private (notifier);
 	priv->subscriptions = g_hash_table_new_full (NULL, NULL, NULL,
 	                                             (GDestroyNotify) tracker_notifier_subscription_free);
-}
-
-/**
- * tracker_notifier_new:
- * @classes: (array zero-terminated=1) (allow-none): Array of RDF classes to
- *           receive notifications from, or %NULL for all.
- * @flags: flags affecting the notifier behavior
- * @cancellable: Cancellable for the operation
- * @error: location for the possible resulting error.
- *
- * Creates a new notifier, events can be listened through the
- * TrackerNotifier::events signal.
- *
- * Returns: (nullable): a newly created #TrackerNotifier, %NULL on error.
- *
- * Since: 1.12
- **/
-TrackerNotifier*
-tracker_notifier_new (const gchar * const   *classes,
-                      TrackerNotifierFlags   flags,
-                      GCancellable          *cancellable,
-                      GError               **error)
-{
-	return g_initable_new (TRACKER_TYPE_NOTIFIER,
-	                       cancellable, error,
-	                       "classes", classes,
-	                       "flags", flags,
-	                       NULL);
 }
 
 guint
