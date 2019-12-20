@@ -79,7 +79,6 @@ struct _TrackerNotifierPrivate {
 	TrackerSparqlConnection *connection;
 	GDBusConnection *dbus_connection;
 	TrackerNotifierFlags flags;
-	GHashTable *cached_ids; /* gchar -> gint64* */
 	gchar **expanded_classes;
 	gchar **classes;
 	guint graph_updated_signal_id;
@@ -120,47 +119,6 @@ G_DEFINE_TYPE_WITH_CODE (TrackerNotifier, tracker_notifier, G_TYPE_OBJECT,
                          G_ADD_PRIVATE (TrackerNotifier)
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 tracker_notifier_initable_iface_init))
-
-static void
-tracker_notifier_cache_id (TrackerNotifier *notifier,
-                           const gchar     *urn)
-{
-	TrackerSparqlCursor *cursor;
-	TrackerNotifierPrivate *priv;
-	gchar *sparql;
-
-	priv = tracker_notifier_get_instance_private (notifier);
-	sparql = g_strdup_printf ("SELECT tracker:id(%s) {}", urn);
-	cursor = tracker_sparql_connection_query (priv->connection, sparql,
-	                                          NULL, NULL);
-	g_free (sparql);
-
-	if (!cursor)
-		return;
-
-	if (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		gint64 id = tracker_sparql_cursor_get_integer (cursor, 0);
-		gint64 *ptr = g_memdup (&id, sizeof (gint64));
-
-		g_hash_table_insert (priv->cached_ids, g_strdup (urn), ptr);
-	}
-
-	g_object_unref (cursor);
-}
-
-static gboolean
-tracker_notifier_id_matches (TrackerNotifier *notifier,
-                             gint64           id,
-                             const gchar     *urn)
-{
-	TrackerNotifierPrivate *priv;
-	gint64 *cached_id;
-
-	priv = tracker_notifier_get_instance_private (notifier);
-	cached_id = g_hash_table_lookup (priv->cached_ids, urn);
-
-	return (cached_id && *cached_id == id);
-}
 
 static TrackerNotifierEvent *
 tracker_notifier_event_new (gint64       id,
@@ -268,45 +226,14 @@ tracker_notifier_event_cache_push_event (TrackerNotifierEventCache *cache,
 }
 
 static void
-handle_deletes (TrackerNotifier           *notifier,
-                TrackerNotifierEventCache *cache,
-                GVariantIter              *iter)
+handle_events (TrackerNotifier           *notifier,
+               TrackerNotifierEventCache *cache,
+               GVariantIter              *iter)
 {
-	gint32 graph, subject, predicate, object;
+	gint32 type, resource;
 
-	while (g_variant_iter_loop (iter, "(iiii)",
-	                            &graph, &subject, &predicate, &object)) {
-		TrackerNotifierEventType type;
-
-		if (tracker_notifier_id_matches (notifier, predicate, "rdf:type")) {
-			type = TRACKER_NOTIFIER_EVENT_DELETE;
-		} else {
-			type = TRACKER_NOTIFIER_EVENT_UPDATE;
-		}
-
-		tracker_notifier_event_cache_push_event (cache, subject, type);
-	}
-}
-
-static void
-handle_updates (TrackerNotifier           *notifier,
-                TrackerNotifierEventCache *cache,
-                GVariantIter              *iter)
-{
-	gint32 graph, subject, predicate, object;
-
-	while (g_variant_iter_loop (iter, "(iiii)",
-	                            &graph, &subject, &predicate, &object)) {
-		TrackerNotifierEventType type;
-
-		if (tracker_notifier_id_matches (notifier, predicate, "rdf:type")) {
-			type = TRACKER_NOTIFIER_EVENT_CREATE;
-		} else {
-			type = TRACKER_NOTIFIER_EVENT_UPDATE;
-		}
-
-		tracker_notifier_event_cache_push_event (cache, subject, type);
-	}
+	while (g_variant_iter_loop (iter, "(ii)", &type, &resource))
+		tracker_notifier_event_cache_push_event (cache, resource, type);
 }
 
 static GPtrArray *
@@ -473,28 +400,15 @@ graph_updated_cb (GDBusConnection *connection,
                   gpointer         user_data)
 {
 	TrackerNotifier *notifier = user_data;
-	TrackerNotifierPrivate *priv;
 	TrackerNotifierEventCache *cache;
-	GVariantIter *deletes, *updates;
-	const gchar *class;
+	GVariantIter *events;
+	const gchar *graph;
 
-	priv = tracker_notifier_get_instance_private (notifier);
-	g_variant_get (parameters, "(&sa(iiii)a(iiii))", &class, &deletes, &updates);
+	g_variant_get (parameters, "(&sa(ii))", &graph, &events);
 
-	if (!priv->has_arg0_filter && priv->expanded_classes &&
-	    !g_strv_contains ((const gchar * const *) priv->expanded_classes, class)) {
-		/* This class is not listened for */
-		g_variant_iter_free (deletes);
-		g_variant_iter_free (updates);
-		return;
-	}
-
-	cache = tracker_notifier_event_cache_new (notifier, class);
-	handle_deletes (notifier, cache, deletes);
-	handle_updates (notifier, cache, updates);
-
-	g_variant_iter_free (deletes);
-	g_variant_iter_free (updates);
+	cache = tracker_notifier_event_cache_new (notifier, NULL);
+	handle_events (notifier, cache, events);
+	g_variant_iter_free (events);
 
 	tracker_notifier_event_cache_flush_events (cache);
 	tracker_notifier_event_cache_free (cache);
@@ -565,8 +479,6 @@ tracker_notifier_initable_init (GInitable     *initable,
 	if (!expand_class_iris (notifier, cancellable, error))
 		return FALSE;
 
-	tracker_notifier_cache_id (notifier, "rdf:type");
-
 	priv->dbus_connection = tracker_sparql_connection_get_dbus_connection ();
 	if (!priv->dbus_connection)
 		priv->dbus_connection = g_bus_get_sync (G_BUS_TYPE_SESSION, cancellable, error);
@@ -580,15 +492,13 @@ tracker_notifier_initable_init (GInitable     *initable,
 
 	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, "Tracker1");
 
-	priv->has_arg0_filter =
-		priv->expanded_classes && g_strv_length (priv->expanded_classes) == 1;
 	priv->graph_updated_signal_id =
 		g_dbus_connection_signal_subscribe (priv->dbus_connection,
 		                                    dbus_name,
-		                                    TRACKER_DBUS_INTERFACE_RESOURCES,
+		                                    "org.freedesktop.Tracker1.Endpoint",
 		                                    "GraphUpdated",
-		                                    TRACKER_DBUS_OBJECT_RESOURCES,
-		                                    priv->has_arg0_filter ? priv->expanded_classes[0] : NULL,
+		                                    "/org/freedesktop/Tracker1/Endpoint",
+		                                    NULL,
 		                                    G_DBUS_SIGNAL_FLAGS_NONE,
 		                                    graph_updated_cb,
 		                                    initable, NULL);
@@ -665,7 +575,6 @@ tracker_notifier_finalize (GObject *object)
 	if (priv->connection)
 		g_object_unref (priv->connection);
 
-	g_hash_table_unref (priv->cached_ids);
 	g_strfreev (priv->expanded_classes);
 	g_strfreev (priv->classes);
 
@@ -732,12 +641,6 @@ tracker_notifier_class_init (TrackerNotifierClass *klass)
 static void
 tracker_notifier_init (TrackerNotifier *notifier)
 {
-	TrackerNotifierPrivate *priv;
-
-	priv = tracker_notifier_get_instance_private (notifier);
-	priv->cached_ids = g_hash_table_new_full (g_str_hash,
-	                                          g_str_equal,
-	                                          g_free, g_free);
 }
 
 /**
