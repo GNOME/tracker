@@ -47,10 +47,6 @@ struct _TrackerNotifierClass {
  * @TRACKER_NOTIFIER_FLAG_NONE: No flags
  * @TRACKER_NOTIFIER_FLAG_QUERY_URN: Query URN of notified elements
  * @TRACKER_NOTIFIER_FLAG_QUERY_LOCATION: Query location of notified elements
- * @TRACKER_NOTIFIER_FLAG_NOTIFY_UNEXTRACTED: Added/updated Elements are
- *   notified in 2 steps (a CREATE/UPDATE event after the file is first
- *   known, and an UPDATE event after metadata is extracted). The default
- *   #TrackerNotifier behavior coalesces those events in one.
  *
  * Flags affecting #TrackerNotifier behavior.
  */
@@ -58,7 +54,6 @@ typedef enum {
 	TRACKER_NOTIFIER_FLAG_NONE               = 0,
 	TRACKER_NOTIFIER_FLAG_QUERY_URN          = 1 << 1,
 	TRACKER_NOTIFIER_FLAG_QUERY_LOCATION     = 1 << 2,
-	TRACKER_NOTIFIER_FLAG_NOTIFY_UNEXTRACTED = 1 << 3,
 } TrackerNotifierFlags;
 
 /**
