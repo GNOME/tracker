@@ -120,4 +120,11 @@ ORDER BY DESC ?count
       TrackerNotifier will inform of each.
     </para>
   </section>
+  <section>
+    <title>No TRACKER_NOTIFIER_FLAG_QUERY_LOCATION</title>
+    <para>
+      If using the Nepomuk ontology, It is possible to query for the "nie:url" of
+      those elements in place. Other ontologies might have similar concepts.
+    </para>
+  </section>
 </chapter>
