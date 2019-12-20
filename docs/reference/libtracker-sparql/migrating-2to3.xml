@@ -133,4 +133,13 @@ ORDER BY DESC ?count
       Notifiers are now created through tracker_sparql_connection_create_notifier().
     </para>
   </section>
+  <section>
+    <title>Different signature of TrackerNotifier::events signal</title>
+    <para>
+      A TrackerNotifier may hint changes across multiple endpoints (local or remote),
+      in consequence the signal additionally contains 2 string arguments, notifying
+      about the SPARQL endpoint the changes came from, and the SPARQL graph the changes
+      apply to.
+    </para>
+  </section>
 </chapter>

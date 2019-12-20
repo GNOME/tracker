@@ -86,7 +86,8 @@ struct _TrackerNotifierPrivate {
 };
 
 struct _TrackerNotifierEventCache {
-	gchar *class;
+	gchar *service;
+	gchar *graph;
 	TrackerNotifier *notifier;
 	GSequence *sequence;
 };
@@ -94,7 +95,6 @@ struct _TrackerNotifierEventCache {
 struct _TrackerNotifierEvent {
 	gint8 type;
 	gint64 id;
-	const gchar *rdf_type; /* Belongs to cache */
 	gchar *urn;
 	guint ref_count;
 };
@@ -139,15 +139,12 @@ tracker_notifier_subscription_free (TrackerNotifierSubscription *subscription)
 }
 
 static TrackerNotifierEvent *
-tracker_notifier_event_new (gint64       id,
-                            const gchar *rdf_type)
+tracker_notifier_event_new (gint64 id)
 {
 	TrackerNotifierEvent *event;
 
 	event = g_new0 (TrackerNotifierEvent, 1);
 	event->type = -1;
-	/* The type string belongs to the cache, and lives longer */
-	event->rdf_type = rdf_type;
 	event->id = id;
 	event->ref_count = 1;
 	return event;
@@ -180,13 +177,15 @@ compare_event_cb (gconstpointer a,
 
 static TrackerNotifierEventCache *
 tracker_notifier_event_cache_new (TrackerNotifier *notifier,
-                                  const gchar     *rdf_class)
+                                  const gchar     *service,
+                                  const gchar     *graph)
 {
 	TrackerNotifierEventCache *event_cache;
 
 	event_cache = g_new0 (TrackerNotifierEventCache, 1);
 	event_cache->notifier = g_object_ref (notifier);
-	event_cache->class = g_strdup (rdf_class);
+	event_cache->service = g_strdup (service);
+	event_cache->graph = g_strdup (graph);
 	event_cache->sequence = g_sequence_new ((GDestroyNotify) tracker_notifier_event_unref);
 
 	return event_cache;
@@ -197,7 +196,8 @@ tracker_notifier_event_cache_free (TrackerNotifierEventCache *event_cache)
 {
 	g_sequence_free (event_cache->sequence);
 	g_object_unref (event_cache->notifier);
-	g_free (event_cache->class);
+	g_free (event_cache->graph);
+	g_free (event_cache->service);
 	g_free (event_cache);
 }
 
@@ -224,7 +224,7 @@ tracker_notifier_event_cache_get_event (TrackerNotifierEventCache *cache,
 			return event;
 	}
 
-	event = tracker_notifier_event_new (id, cache->class);
+	event = tracker_notifier_event_new (id);
 	g_sequence_insert_before (iter, event);
 
 	return event;
@@ -403,7 +403,7 @@ tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
 		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
 			tracker_notifier_query_extra_info (notifier, events);
 
-		g_signal_emit (notifier, signals[EVENTS], 0, events);
+		g_signal_emit (notifier, signals[EVENTS], 0, cache->service, cache->graph, events);
 		g_ptr_array_unref (events);
 	}
 }
@@ -421,10 +421,14 @@ graph_updated_cb (GDBusConnection *connection,
 	TrackerNotifierEventCache *cache;
 	GVariantIter *events;
 	const gchar *graph;
+	gchar *service;
 
 	g_variant_get (parameters, "(&sa(ii))", &graph, &events);
 
-	cache = tracker_notifier_event_cache_new (notifier, NULL);
+	service = g_strdup_printf ("dbus:%s", sender_name);
+	cache = tracker_notifier_event_cache_new (notifier, sender_name, graph);
+	g_free (service);
+
 	handle_events (notifier, cache, events);
 	g_variant_iter_free (events);
 
@@ -512,9 +516,10 @@ tracker_notifier_class_init (TrackerNotifierClass *klass)
 		g_signal_new ("events",
 		              TRACKER_TYPE_NOTIFIER, 0,
 		              G_STRUCT_OFFSET (TrackerNotifierClass, events),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__BOXED,
-		              G_TYPE_NONE, 1,
+		              NULL, NULL, NULL,
+		              G_TYPE_NONE, 3,
+		              G_TYPE_STRING | G_SIGNAL_TYPE_STATIC_SCOPE,
+		              G_TYPE_STRING | G_SIGNAL_TYPE_STATIC_SCOPE,
 		              G_TYPE_PTR_ARRAY | G_SIGNAL_TYPE_STATIC_SCOPE);
 
 	/**
@@ -640,32 +645,6 @@ tracker_notifier_event_get_id (TrackerNotifierEvent *event)
 {
 	g_return_val_if_fail (event != NULL, 0);
 	return event->id;
-}
-
-/**
- * tracker_notifier_event_get_type:
- * @event: A #TrackerNotifierEvent
- *
- * Returns the RDF type that this notification event relates to, in their
- * expanded forms (for example,
- * <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#Audio>).
- *
- * A resource may have multiple RDF types. In the case of changes to a
- * resource with multiple types, one event will be notified for each
- * RDF type the notifier is subscribed to.
- *
- * For performance reasons, Tracker only sends notifications for events that
- * are explicitly marked with the tracker:notify property in their ontology.
- *
- * Returns: the RDF type of the element
- *
- * Since: 1.12
- **/
-const gchar *
-tracker_notifier_event_get_type (TrackerNotifierEvent *event)
-{
-	g_return_val_if_fail (event != NULL, NULL);
-	return event->rdf_type;
 }
 
 /**
