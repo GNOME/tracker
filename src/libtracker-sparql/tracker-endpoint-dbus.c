@@ -47,7 +47,7 @@ static const gchar introspection_xml[] =
 	"      <arg type='aaa{ss}' name='result' direction='out' />"
 	"    </method>"
 	"    <signal name='GraphUpdate'>"
-	"      <arg type='a(ii)' name='updates' />"
+	"      <arg type='sa(ii)' name='updates' />"
 	"    </signal>"
 	"  </interface>"
 	"</node>";
