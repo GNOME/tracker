@@ -176,7 +176,7 @@ class Tracker.Sparql.Backend : Connection {
 				direct_failed = true;
 			}
 
-			bus = new Tracker.Bus.Connection (domain_ontology.get_domain ("Tracker1"), global_dbus_connection, direct_failed);
+			bus = new Tracker.Bus.Connection (domain_ontology.get_domain ("Tracker1"), global_dbus_connection);
 
 			if (direct_failed) {
 				try {
@@ -193,7 +193,7 @@ class Tracker.Sparql.Backend : Connection {
 			break;
 
 		case Backend.BUS:
-			bus = new Tracker.Bus.Connection (domain_ontology.get_domain ("Tracker1"), global_dbus_connection, false);
+			bus = new Tracker.Bus.Connection (domain_ontology.get_domain ("Tracker1"), global_dbus_connection);
 			break;
 
 		default:
