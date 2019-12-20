@@ -84,9 +84,7 @@ namespace Tracker {
 	}
 
 	[CCode (cheader_filename = "libtracker-sparql/tracker-notifier.h")]
-	public class Notifier : GLib.Object, GLib.Initable {
-		public Notifier (string[] classes, NotifierFlags flags, GLib.Cancellable? cancellable) throws GLib.Error;
-
+	public class Notifier : GLib.Object {
 		public class NotifierEvent {
 			public enum Type {
 				CREATE,
