@@ -552,4 +552,9 @@ public abstract class Tracker.Sparql.Connection : Object {
 		warning ("Interface 'query_statement' not implemented");
 		return null;
 	}
+
+	public virtual Tracker.Notifier? create_notifier (Tracker.NotifierFlags flags) {
+		warning ("Interface 'create_notifier' not implemented");
+		return null;
+	}
 }

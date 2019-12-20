@@ -127,4 +127,10 @@ ORDER BY DESC ?count
       those elements in place. Other ontologies might have similar concepts.
     </para>
   </section>
+  <section>
+    <title>No tracker_notifier_new()</title>
+    <para>
+      Notifiers are now created through tracker_sparql_connection_create_notifier().
+    </para>
+  </section>
 </chapter>
