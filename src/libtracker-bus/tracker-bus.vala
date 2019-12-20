@@ -288,4 +288,12 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		handle_error_reply (reply);
 		return reply.get_body ().get_child_value (0);
 	}
+
+	public override Tracker.Notifier? create_notifier (Tracker.NotifierFlags flags) {
+		var notifier = (Tracker.Notifier) Object.new (typeof (Tracker.Notifier));
+
+		notifier.signal_subscribe (this.bus, this.dbus_name, null);
+
+		return notifier;
+	}
 }
