@@ -68,11 +68,6 @@ typedef enum {
 	TRACKER_NOTIFIER_EVENT_UPDATE
 } TrackerNotifierEventType;
 
-TrackerNotifier * tracker_notifier_new (const gchar * const   *classes,
-                                        TrackerNotifierFlags   flags,
-                                        GCancellable          *cancellable,
-                                        GError               **error);
-
 guint tracker_notifier_signal_subscribe   (TrackerNotifier *notifier,
                                            GDBusConnection *connection,
                                            const gchar     *service,
