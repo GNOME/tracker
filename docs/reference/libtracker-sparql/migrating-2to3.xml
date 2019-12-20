@@ -113,4 +113,11 @@ ORDER BY DESC ?count
       But of course, other more detailed statistics may be obtained.
     </para>
   </section>
+  <section>
+    <title>No TRACKER_NOTIFIER_FLAG_NOTIFY_UNEXTRACTED</title>
+    <para>
+      There is no replacement. If metadata about resources is added in several steps.
+      TrackerNotifier will inform of each.
+    </para>
+  </section>
 </chapter>

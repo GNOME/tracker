@@ -30,18 +30,6 @@
  * events can be listened for by connecting to the #TrackerNotifier::events
  * signal. This object was added in Tracker 1.12.
  *
- * #TrackerNotifier by default coalesces events so the user is only
- * notified of changes after all metadata is extracted and inserted
- * in the database, so the user is guaranteed that all relevant data
- * will be available at the time of notification. If this is not desired,
- * or when dealing with data not dealt with by tracker-extract, the
- * %TRACKER_NOTIFIER_FLAG_NOTIFY_UNEXTRACTED flag can be passed.
- *
- * If the %TRACKER_NOTIFIER_FLAG_NOTIFY_UNEXTRACTED flag is passed,
- * created/updated elements may be notified in two steps, first a
- * CREATED/UPDATED event will be emitted, and then a second UPDATED
- * event might appear after further metadata is extracted.
- *
  * #TrackerNotifier is tracker:id centric, the ID can be
  * obtained from every event through tracker_notifier_event_get_id().
  * The expected way to retrieving metadata is a query of the form:
@@ -111,7 +99,6 @@ struct _TrackerNotifierEventCache {
 
 struct _TrackerNotifierEvent {
 	gint8 type;
-	guint delayed : 1;
 	gint64 id;
 	const gchar *rdf_type; /* Belongs to cache */
 	gchar *urn;
@@ -296,9 +283,6 @@ handle_deletes (TrackerNotifier           *notifier,
                 GVariantIter              *iter)
 {
 	gint32 graph, subject, predicate, object;
-	TrackerNotifierPrivate *priv;
-
-	priv = tracker_notifier_get_instance_private (notifier);
 
 	while (g_variant_iter_loop (iter, "(iiii)",
 	                            &graph, &subject, &predicate, &object)) {
@@ -307,21 +291,7 @@ handle_deletes (TrackerNotifier           *notifier,
 		event = tracker_notifier_event_cache_get_event (cache, subject);
 
 		if (tracker_notifier_id_matches (notifier, predicate, "rdf:type")) {
-			if (event->delayed &&
-			    event->type == TRACKER_NOTIFIER_EVENT_CREATE) {
-				/* This rdf:type was created and dropped,
-				 * restore type to its original unset state so
-				 * it is ignored and freed afterwards.
-				 */
-				event->type = -1;
-			} else {
-				event->type = TRACKER_NOTIFIER_EVENT_DELETE;
-			}
-		} else if (event->type != TRACKER_NOTIFIER_EVENT_DELETE &&
-		           (priv->flags & TRACKER_NOTIFIER_FLAG_NOTIFY_UNEXTRACTED) == 0 &&
-		           tracker_notifier_id_matches (notifier, predicate, "nie:dataSource") &&
-		           tracker_notifier_id_matches (notifier, object, "tracker:extractor-data-source")) {
-			event->delayed = TRUE;
+			event->type = TRACKER_NOTIFIER_EVENT_DELETE;
 		} else if (event->type < 0) {
 			event->type = TRACKER_NOTIFIER_EVENT_UPDATE;
 		}
@@ -334,9 +304,6 @@ handle_updates (TrackerNotifier           *notifier,
                 GVariantIter              *iter)
 {
 	gint32 graph, subject, predicate, object;
-	TrackerNotifierPrivate *priv;
-
-	priv = tracker_notifier_get_instance_private (notifier);
 
 	while (g_variant_iter_loop (iter, "(iiii)",
 	                            &graph, &subject, &predicate, &object)) {
@@ -346,14 +313,6 @@ handle_updates (TrackerNotifier           *notifier,
 
 		if (tracker_notifier_id_matches (notifier, predicate, "rdf:type")) {
 			event->type = TRACKER_NOTIFIER_EVENT_CREATE;
-
-			if ((priv->flags & TRACKER_NOTIFIER_FLAG_NOTIFY_UNEXTRACTED) == 0)
-				event->delayed = TRUE;
-		} else if (tracker_notifier_id_matches (notifier, predicate, "nie:dataSource") &&
-		           tracker_notifier_id_matches (notifier, object, "tracker:extractor-data-source")) {
-			if (event->type < 0)
-				event->type = TRACKER_NOTIFIER_EVENT_UPDATE;
-			event->delayed = FALSE;
 		} else if (event->type < 0) {
 			event->type = TRACKER_NOTIFIER_EVENT_UPDATE;
 		}
@@ -378,7 +337,7 @@ tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
 		if (event->type == -1) {
 			/* This event turned out a NO-OP, just remove it */
 			g_sequence_remove (iter);
-		} else if (!event->delayed) {
+		} else {
 			g_ptr_array_add (events, tracker_notifier_event_ref (event));
 			g_sequence_remove (iter);
 		}
@@ -701,8 +660,6 @@ tracker_notifier_initable_init (GInitable     *initable,
 		return FALSE;
 
 	tracker_notifier_cache_id (notifier, "rdf:type");
-	tracker_notifier_cache_id (notifier, "nie:dataSource");
-	tracker_notifier_cache_id (notifier, "tracker:extractor-data-source");
 
 	priv->dbus_connection = tracker_sparql_connection_get_dbus_connection ();
 	if (!priv->dbus_connection)
