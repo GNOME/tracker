@@ -3919,8 +3919,13 @@ tracker_data_manager_new (TrackerDBManagerFlags   flags,
 {
 	TrackerDataManager *manager;
 
-	if (!cache_location || !ontology_location) {
-		g_warning ("All data storage and ontology locations must be provided");
+	if (!cache_location) {
+		g_warning ("Data storage location must be provided");
+		return NULL;
+	}
+
+	if ((flags & TRACKER_DB_MANAGER_READONLY) == 0 && !ontology_location) {
+		g_warning ("Ontology location must be provided");
 		return NULL;
 	}
 
@@ -4215,7 +4220,8 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		return FALSE;
 	}
 
-	if (g_file_query_file_type (manager->ontology_location, G_FILE_QUERY_INFO_NONE, NULL) != G_FILE_TYPE_DIRECTORY) {
+	if (manager->ontology_location &&
+	    g_file_query_file_type (manager->ontology_location, G_FILE_QUERY_INFO_NONE, NULL) != G_FILE_TYPE_DIRECTORY) {
 		gchar *uri;
 
 		uri = g_file_get_uri (manager->ontology_location);
