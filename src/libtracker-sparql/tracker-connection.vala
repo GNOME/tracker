@@ -172,7 +172,10 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 *
 	 * The caller is entirely free to define an ontology or reuse Nepomuk for
 	 * its purposes. For the former see the "Defining ontologies" section in
-	 * this library docs. For the latter pass a %NULL @ontology.
+	 * this library documentation. For the latter pass a %NULL @ontology.
+	 *
+	 * If the connection is readonly the @ontology argument will be ignored,
+	 * and the ontology reconstructed from the database itself.
 	 *
 	 * The @ontology argument may be a resource:/// URI, a directory location
 	 * must be provided, all children .ontology and .description files will
