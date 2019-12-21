@@ -44,8 +44,23 @@ static gboolean plain_text_content;
 static gboolean resource_is_iri;
 static gboolean turtle;
 static gchar *url_property;
+static gchar *database_path;
+static gchar *dbus_service;
+static gchar *remote_service;
 
 static GOptionEntry entries[] = {
+	{ "database", 'd', 0, G_OPTION_ARG_FILENAME, &database_path,
+	  N_("Location of the database"),
+	  N_("FILE")
+	},
+	{ "dbus-service", 's', 0, G_OPTION_ARG_STRING, &dbus_service,
+	  N_("Connects to a DBus service"),
+	  N_("DBus service name")
+	},
+	{ "remote-service", 'r', 0, G_OPTION_ARG_STRING, &remote_service,
+	  N_("Connects to a remote service"),
+	  N_("Remote service URI")
+	},
 	{ "full-namespaces", 'f', 0, G_OPTION_ARG_NONE, &full_namespaces,
 	  N_("Show full namespaces (i.e. don’t use nie:title, use full URLs)"),
 	  NULL,
@@ -253,6 +268,32 @@ print_turtle (gchar               *urn,
 	g_free (subject);
 }
 
+static TrackerSparqlConnection *
+create_connection (GError **error)
+{
+	if (database_path && !dbus_service && !remote_service) {
+		GFile *file;
+
+		file = g_file_new_for_commandline_arg (database_path);
+		return tracker_sparql_connection_new (TRACKER_SPARQL_CONNECTION_FLAGS_READONLY,
+		                                      file, NULL, NULL, error);
+	} else if (dbus_service && !database_path && !remote_service) {
+		GDBusConnection *dbus_conn;
+
+		dbus_conn = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, error);
+		if (!dbus_conn)
+			return NULL;
+
+		return tracker_sparql_connection_bus_new (dbus_service, dbus_conn, error);
+	} else if (remote_service && !database_path && !dbus_service) {
+		return tracker_sparql_connection_remote_new (remote_service);
+	} else {
+		/* TRANSLATORS: Those are commandline arguments */
+		g_printerr (_("Specify one --database, --dbus-service or --remote-service option"));
+		exit (EXIT_FAILURE);
+	}
+}
+
 static int
 info_run (void)
 {
@@ -261,7 +302,7 @@ info_run (void)
 	GHashTable *prefixes;
 	gchar **p;
 
-	connection = tracker_sparql_connection_get (NULL, &error);
+	connection = create_connection (&error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
