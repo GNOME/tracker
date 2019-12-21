@@ -223,12 +223,14 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 		return FALSE;
 
 	/* Init data manager */
-	if (priv->flags & TRACKER_SPARQL_CONNECTION_FLAGS_READONLY)
+	if (priv->flags & TRACKER_SPARQL_CONNECTION_FLAGS_READONLY) {
 		db_flags |= TRACKER_DB_MANAGER_READONLY;
-
-	if (!priv->ontology) {
+	} else if (!priv->ontology) {
 		gchar *filename;
 
+		/* If the connection is read/write, and no ontology is specified,
+		 * we use the Nepomuk one.
+		 */
 		filename = g_build_filename (SHAREDIR, "tracker", "ontologies",
 		                             "nepomuk", NULL);
 		priv->ontology = g_file_new_for_path (filename);
