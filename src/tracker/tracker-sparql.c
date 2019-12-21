@@ -98,9 +98,23 @@ static gchar *tree;
 static gchar *get_shorthand;
 static gchar *get_longhand;
 static gchar *search;
-static gchar *remote_url;
+static gchar *database_path;
+static gchar *dbus_service;
+static gchar *remote_service;
 
 static GOptionEntry entries[] = {
+	{ "database", 'd', 0, G_OPTION_ARG_FILENAME, &database_path,
+	  N_("Location of the database"),
+	  N_("FILE")
+	},
+	{ "dbus-service", 's', 0, G_OPTION_ARG_STRING, &dbus_service,
+	  N_("Connects to a DBus service"),
+	  N_("DBus service name")
+	},
+	{ "remote-service", 'r', 0, G_OPTION_ARG_STRING, &remote_service,
+	  N_("Connects to a remote service"),
+	  N_("Remote service URI")
+	},
 	{ "file", 'f', 0, G_OPTION_ARG_FILENAME, &file,
 	  N_("Path to use to run a query or update from file"),
 	  N_("FILE"),
@@ -149,12 +163,34 @@ static GOptionEntry entries[] = {
 	  N_("Returns the full namespace for a class."),
 	  N_("CLASS"),
 	},
-	{ "remote-service", 'r', 0, G_OPTION_ARG_STRING, &remote_url,
-	  N_("Remote service to query to"),
-	  N_("BASE_URL"),
-	},
 	{ NULL }
 };
+
+static TrackerSparqlConnection *
+create_connection (GError **error)
+{
+	if (database_path && !dbus_service && !remote_service) {
+		GFile *file;
+
+		file = g_file_new_for_commandline_arg (database_path);
+		return tracker_sparql_connection_new (TRACKER_SPARQL_CONNECTION_FLAGS_READONLY,
+		                                      file, NULL, NULL, error);
+	} else if (dbus_service && !database_path && !remote_service) {
+		GDBusConnection *dbus_conn;
+
+		dbus_conn = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, error);
+		if (!dbus_conn)
+			return NULL;
+
+		return tracker_sparql_connection_bus_new (dbus_service, dbus_conn, error);
+	} else if (remote_service && !database_path && !dbus_service) {
+		return tracker_sparql_connection_remote_new (remote_service);
+	} else {
+		/* TRANSLATORS: Those are commandline arguments */
+		g_printerr (_("Specify one --database, --dbus-service or --remote-service option"));
+		exit (EXIT_FAILURE);
+	}
+}
 
 GHashTable *
 tracker_sparql_get_prefixes (void)
@@ -165,7 +201,7 @@ tracker_sparql_get_prefixes (void)
 	GHashTable *retval;
 	const gchar *query;
 
-	connection = tracker_sparql_connection_get (NULL, &error);
+	connection = create_connection (&error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
@@ -1075,11 +1111,7 @@ sparql_run (void)
 	TrackerSparqlCursor *cursor;
 	GError *error = NULL;
 
-	if (remote_url != NULL) {
-		connection = tracker_sparql_connection_remote_new (remote_url);
-	} else {
-		connection = tracker_sparql_connection_get (NULL, &error);
-	}
+	connection = create_connection (&error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
