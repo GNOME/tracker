@@ -46,8 +46,8 @@ static const gchar introspection_xml[] =
 	"      <arg type='h' name='input_stream' direction='in' />"
 	"      <arg type='aaa{ss}' name='result' direction='out' />"
 	"    </method>"
-	"    <signal name='GraphUpdate'>"
-	"      <arg type='sa(ii)' name='updates' />"
+	"    <signal name='GraphUpdated'>"
+	"      <arg type='sa{ii}' name='updates' />"
 	"    </signal>"
 	"  </interface>"
 	"</node>";
@@ -66,6 +66,7 @@ struct _TrackerEndpointDBus {
 	guint register_id;
 	GDBusNodeInfo *node_info;
 	GCancellable *cancellable;
+	TrackerNotifier *notifier;
 };
 
 typedef struct {
@@ -452,12 +453,54 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 	}
 }
 
+static void
+notifier_events_cb (TrackerNotifier *notifier,
+                    const gchar     *service,
+                    const gchar     *graph,
+                    GPtrArray       *events,
+                    gpointer         user_data)
+{
+	TrackerEndpointDBus *endpoint_dbus = user_data;
+	GVariantBuilder builder;
+	GError *error = NULL;
+	gint i;
+
+	g_variant_builder_init (&builder, G_VARIANT_TYPE ("(sa{ii})"));
+	g_variant_builder_add (&builder, "s", graph ? graph : "");
+	g_variant_builder_open (&builder, G_VARIANT_TYPE ("a{ii}"));
+
+	for (i = 0; i < events->len; i++) {
+		TrackerNotifierEvent *event;
+		gint event_type, id;
+
+		event = g_ptr_array_index (events, i);
+		event_type = tracker_notifier_event_get_event_type (event);
+		id = tracker_notifier_event_get_id (event);
+		g_variant_builder_add (&builder, "{ii}", event_type, id);
+	}
+
+	g_variant_builder_close (&builder);
+
+	if (!g_dbus_connection_emit_signal (endpoint_dbus->dbus_connection,
+	                                    NULL,
+	                                    endpoint_dbus->object_path,
+	                                    "org.freedesktop.Tracker1.Endpoint",
+	                                    "GraphUpdated",
+	                                    g_variant_builder_end (&builder),
+	                                    &error)) {
+		g_warning ("Could not emit GraphUpdated signal: %s", error->message);
+		g_error_free (error);
+	}
+}
+
 static gboolean
 tracker_endpoint_dbus_initable_init (GInitable     *initable,
                                      GCancellable  *cancellable,
                                      GError       **error)
 {
-	TrackerEndpointDBus *endpoint_dbus = TRACKER_ENDPOINT_DBUS (initable);
+	TrackerEndpoint *endpoint = TRACKER_ENDPOINT (initable);
+	TrackerEndpointDBus *endpoint_dbus = TRACKER_ENDPOINT_DBUS (endpoint);
+	TrackerSparqlConnection *conn;
 
 	endpoint_dbus->node_info = g_dbus_node_info_new_for_xml (introspection_xml,
 	                                                         error);
@@ -476,6 +519,12 @@ tracker_endpoint_dbus_initable_init (GInitable     *initable,
 		                                   endpoint_dbus,
 		                                   NULL,
 		                                   error);
+
+	conn = tracker_endpoint_get_sparql_connection (endpoint);
+	endpoint_dbus->notifier = tracker_sparql_connection_create_notifier (conn, 0);
+	g_signal_connect (endpoint_dbus->notifier, "events",
+	                  G_CALLBACK (notifier_events_cb), endpoint);
+
 	return TRUE;
 }
 
@@ -498,6 +547,7 @@ tracker_endpoint_dbus_finalize (GObject *object)
 		endpoint_dbus->register_id = 0;
 	}
 
+	g_clear_object (&endpoint_dbus->notifier);
 	g_clear_object (&endpoint_dbus->cancellable);
 	g_clear_object (&endpoint_dbus->dbus_connection);
 	g_clear_pointer (&endpoint_dbus->object_path, g_free);
@@ -590,6 +640,9 @@ tracker_endpoint_dbus_new (TrackerSparqlConnection  *sparql_connection,
 	g_return_val_if_fail (G_IS_DBUS_CONNECTION (dbus_connection), NULL);
 	g_return_val_if_fail (!cancellable || G_IS_CANCELLABLE (cancellable), NULL);
 	g_return_val_if_fail (!error || !*error, NULL);
+
+	if (!object_path)
+		object_path = "/org/freedesktop/Tracker1/Endpoint";
 
 	return g_initable_new (TRACKER_TYPE_ENDPOINT_DBUS, cancellable, error,
 	                       "dbus-connection", dbus_connection,
