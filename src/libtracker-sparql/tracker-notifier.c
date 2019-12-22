@@ -251,7 +251,7 @@ handle_events (TrackerNotifier           *notifier,
 {
 	gint32 type, resource;
 
-	while (g_variant_iter_loop (iter, "(ii)", &type, &resource))
+	while (g_variant_iter_loop (iter, "{ii}", &type, &resource))
 		_tracker_notifier_event_cache_push_event (cache, resource, type);
 }
 
@@ -424,7 +424,7 @@ graph_updated_cb (GDBusConnection *connection,
 	const gchar *graph;
 	gchar *service;
 
-	g_variant_get (parameters, "(&sa(ii))", &graph, &events);
+	g_variant_get (parameters, "(sa{ii})", &graph, &events);
 
 	service = g_strdup_printf ("dbus:%s", sender_name);
 	cache = _tracker_notifier_event_cache_new (notifier, sender_name, graph);
