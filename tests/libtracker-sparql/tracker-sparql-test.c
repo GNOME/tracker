@@ -56,6 +56,27 @@ static const gchar *queries[N_QUERIES] = {
 	"SELECT ?p WHERE { ?p tracker:fulltextIndexed true }",
 };
 
+TrackerSparqlConnection *
+create_local_connection (GError **error)
+{
+	TrackerSparqlConnection *conn;
+	GFile *store, *ontology;
+	gchar *path;
+
+	path = g_build_filename (g_get_tmp_dir (), "libtracker-sparql-test-XXXXXX", NULL);
+	g_mkdtemp_full (path, 0700);
+	store = g_file_new_for_path (path);
+	g_free (path);
+
+	ontology = g_file_new_for_path (TEST_ONTOLOGIES_DIR);
+
+	conn = tracker_sparql_connection_new (0, store, ontology, NULL, error);
+	g_object_unref (store);
+	g_object_unref (ontology);
+
+	return conn;
+}
+
 static void
 test_tracker_sparql_escape_string (void)
 {
@@ -191,7 +212,7 @@ test_tracker_sparql_cursor_next_async (void)
 	 * 3. Handle multiple async queries + async cursor_next() calls.
 	 */
 
-	connection = tracker_sparql_connection_get (NULL, &error);
+	connection = create_local_connection (&error);
 	g_assert_no_error (error);
 	g_assert (connection != NULL);
 
@@ -210,7 +231,7 @@ test_tracker_sparql_connection_interleaved (void)
 
 	const gchar* query = "select ?u {?u a rdfs:Resource .}";
 
-	connection = tracker_sparql_connection_get (NULL, &error);
+	connection = create_local_connection (&error);
 	g_assert_no_error (error);
 
 	cursor1 = tracker_sparql_connection_query (connection, query, 0, &error);
