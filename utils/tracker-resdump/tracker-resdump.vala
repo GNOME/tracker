@@ -103,7 +103,7 @@ static int main(string[] args)
 	}
 
 	try {
-		conn = Connection.get();
+		conn = Connection.bus_new("org.freedesktop.Tracker1");
 	} catch (GLib.Error e) {
 		critical("Couldn't connect to Tracker: %s", e.message);
 		return 1;
