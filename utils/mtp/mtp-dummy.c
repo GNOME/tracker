@@ -286,7 +286,8 @@ context_init (gint    argc,
 	}
 
 	/* Get connection */
-	connection = tracker_sparql_connection_get (NULL, &error);
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker1",
+	                                                NULL, &error);
 	if (!connection) {
 		/* Some error happened performing the query, not good */
 		g_error ("Couldn't get sparql connection: %s",
