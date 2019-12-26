@@ -32,13 +32,13 @@
 #include <glib/gprintf.h>
 
 #include <libtracker-common/tracker-common.h>
-#include <libtracker-miner/tracker-miner.h>
-#include <libtracker-control/tracker-control.h>
+#include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-daemon.h"
 #include "tracker-config.h"
 #include "tracker-process.h"
 #include "tracker-dbus.h"
+#include "tracker-miner-manager.h"
 
 typedef struct {
 	TrackerSparqlConnection *connection;

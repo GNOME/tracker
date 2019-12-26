@@ -24,9 +24,9 @@
 #include <glib/gi18n.h>
 
 #include <libtracker-common/tracker-common.h>
-#include <libtracker-control/tracker-control.h>
 
 #include "tracker-config.h"
+#include "tracker-miner-manager.h"
 
 GSList *
 tracker_gsettings_get_all (gint *longest_name_length)

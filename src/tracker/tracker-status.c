@@ -31,10 +31,10 @@
 
 #include <libtracker-common/tracker-common.h>
 #include <libtracker-sparql/tracker-sparql.h>
-#include <libtracker-control/tracker-control.h>
 
 #include "tracker-status.h"
 #include "tracker-config.h"
+#include "tracker-miner-manager.h"
 
 #define STATUS_OPTIONS_ENABLED()	  \
 	(show_stat || \

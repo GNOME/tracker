@@ -1,6 +1,0 @@
-*.*.cancellable#parameter nullable default=null
-
-MinerManager
-	.miner_progress#virtual_method skip
-
-MinerManagerError errordomain

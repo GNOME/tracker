@@ -68,4 +68,22 @@ SELECT ?s { ?s a nfo:FileDataObject }
       graph, with ?g being NULL.
     </para>
   </section>
+  <section>
+    <title>No libtracker-control</title>
+    <para>
+      This library offered fully generic control method to Tracker
+      miners. This genericity is not widely useful, so the feature is
+      no longer exposed as a library. Users are recommended to perform
+      direct DBus calls to the well-known name of the miner(s) of
+      interest.
+    </para>
+  </section>
+  <section>
+    <title>No libtracker-miner</title>
+    <para>
+      This library offered a too shallow collection of abstract objects
+      whose sole role is inserting data to Tracker data store. There is
+      no provided migration path, use TrackerSparqlConnection directly.
+    </para>
+  </section>
 </chapter>

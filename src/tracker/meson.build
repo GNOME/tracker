@@ -1,4 +1,5 @@
 sources = [
+    'tracker-miner-manager.c',
     'tracker-main.c',
     'tracker-config.c',
     'tracker-daemon.c',
@@ -25,7 +26,7 @@ executable('tracker', sources,
     install_rpath: tracker_install_rpath,
     # This doesn't depend on tracker_common_dep because of
     # https://github.com/mesonbuild/meson/issues/671
-    dependencies: [tracker_control_dep, tracker_sparql_dep, tracker_data_dep],
+    dependencies: [tracker_sparql_dep, tracker_data_dep],
     include_directories: [commoninc, configinc, srcinc],
 )
 

@@ -20,12 +20,6 @@ subdir('libtracker-direct')
 subdir('libtracker-remote')
 subdir('libtracker-sparql-backend')
 
-# Public libtracker-miner library
-subdir('libtracker-miner')
-
-# Internal control library
-subdir('libtracker-control')
-
 # Public commandline control tool
 subdir('tracker')
 

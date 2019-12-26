@@ -1,6 +1,0 @@
-{
-global:
-  tracker_miner_manager_*;
-local:
-  *;
-};

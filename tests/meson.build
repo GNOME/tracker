@@ -10,7 +10,6 @@ if enable_fts
   subdir('libtracker-fts')
 endif
 
-subdir('libtracker-miner')
 subdir('libtracker-sparql')
 subdir('tracker-steroids')
 

@@ -30,11 +30,11 @@
 #include <glib/gi18n.h>
 #include <gio/gio.h>
 
-#include <libtracker-control/tracker-control.h>
 #include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-index.h"
 #include "tracker-dbus.h"
+#include "tracker-miner-manager.h"
 
 static gchar **reindex_mime_types;
 static gboolean index_file;

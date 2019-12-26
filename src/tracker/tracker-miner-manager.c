@@ -26,7 +26,6 @@
 #include <libtracker-common/tracker-dbus.h>
 #include <libtracker-common/tracker-type-utils.h>
 #include <libtracker-common/tracker-domain-ontology.h>
-#include <libtracker-miner/tracker-miner.h>
 
 #include "tracker-miner-manager.h"
 
@@ -48,6 +47,8 @@
 
 #define METHOD_INDEX_FILE "IndexFile"
 #define METHOD_INDEX_FILE_FOR_PROCESS "IndexFileForProcess"
+
+#define TRACKER_MINER_DBUS_INTERFACE "org.freedesktop.Tracker1.Miner"
 
 typedef struct TrackerMinerManagerPrivate TrackerMinerManagerPrivate;
 typedef struct MinerData MinerData;

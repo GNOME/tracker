@@ -29,13 +29,13 @@
 
 #include <libtracker-common/tracker-common.h>
 #include <libtracker-data/tracker-data.h>
-#include <libtracker-control/tracker-control.h>
 
 #include "tracker-reset.h"
 #include "tracker-daemon.h"
 #include "tracker-process.h"
 #include "tracker-config.h"
 #include "tracker-color.h"
+#include "tracker-miner-manager.h"
 
 static gboolean hard_reset;
 static gboolean soft_reset;

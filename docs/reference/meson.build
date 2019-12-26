@@ -11,8 +11,6 @@ fixxref_args = [
     '--extra-dir=@0@'.format(join_paths(docpath, 'libtracker-sparql')),
 ]
 
-subdir('libtracker-control')
-subdir('libtracker-miner')
 subdir('libtracker-sparql')
 
 subdir('ontology')
