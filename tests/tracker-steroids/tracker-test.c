@@ -36,6 +36,7 @@ typedef struct {
 } DataFixture;
 
 static TrackerSparqlConnection *connection;
+gboolean started = FALSE;
 
 static void
 delete_test_data (DataFixture   *fixture,
@@ -712,6 +713,75 @@ test_tracker_sparql_update_blank_async (DataFixture *fixture,
 	g_main_loop_unref (main_loop);
 }
 
+TrackerSparqlConnection *
+create_local_connection (GError **error)
+{
+        TrackerSparqlConnection *conn;
+        GFile *store, *ontology;
+        gchar *path;
+
+        path = g_build_filename (g_get_tmp_dir (), "libtracker-sparql-test-XXXXXX", NULL);
+        g_mkdtemp_full (path, 0700);
+        store = g_file_new_for_path (path);
+        g_free (path);
+
+        ontology = g_file_new_for_path (TEST_ONTOLOGIES_DIR);
+
+        conn = tracker_sparql_connection_new (0, store, ontology, NULL, error);
+        g_object_unref (store);
+        g_object_unref (ontology);
+
+        return conn;
+}
+
+static gpointer
+thread_func (gpointer user_data)
+{
+	GDBusConnection *dbus_conn = user_data;
+	TrackerSparqlConnection *direct;
+	TrackerEndpointDBus *endpoint;
+	GMainContext *context;
+	GMainLoop *main_loop;
+
+	context = g_main_context_new ();
+	g_main_context_push_thread_default (context);
+
+	main_loop = g_main_loop_new (context, FALSE);
+
+	direct = create_local_connection (NULL);
+	if (!direct)
+		return NULL;
+
+	endpoint = tracker_endpoint_dbus_new (direct, dbus_conn, NULL, NULL, NULL);
+	if (!endpoint)
+		return NULL;
+
+	started = TRUE;
+	g_main_loop_run (main_loop);
+
+	return NULL;
+}
+
+static TrackerSparqlConnection *
+create_dbus_connection (GError **error)
+{
+	TrackerSparqlConnection *dbus;
+	GDBusConnection *dbus_conn;
+
+	dbus_conn = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, error);
+	if (!dbus_conn)
+		return NULL;
+
+	g_thread_new (NULL, thread_func, dbus_conn);
+
+	while (!started)
+		g_usleep (100);
+
+	dbus = tracker_sparql_connection_bus_new (g_dbus_connection_get_unique_name (dbus_conn),
+						  dbus_conn, error);
+	return dbus;
+}
+
 gint
 main (gint argc, gchar **argv)
 {
@@ -722,7 +792,7 @@ main (gint argc, gchar **argv)
 	g_setenv ("TRACKER_TEST_DOMAIN_ONTOLOGY_RULE", TEST_DOMAIN_ONTOLOGY_RULE, TRUE);
 	g_setenv ("TRACKER_DB_ONTOLOGIES_DIR", TEST_ONTOLOGIES_DIR, TRUE);
 
-	connection = tracker_sparql_connection_get (NULL, NULL);
+	connection = create_dbus_connection (NULL);
 
 	g_test_add ("/steroids/tracker/tracker_sparql_query_iterate", DataFixture, NULL, insert_test_data,
 			test_tracker_sparql_query_iterate, delete_test_data);
