@@ -177,7 +177,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		handle_error_reply (reply);
 	}
 
-	public async override GenericArray<Sparql.Error?>? update_array_async (string[] sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public async override bool update_array_async (string[] sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
 		UnixInputStream input;
 		UnixOutputStream output;
 		pipe (out input, out output);
@@ -211,26 +211,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		var reply = bus.send_message_with_reply.end (dbus_res);
 		handle_error_reply (reply);
 
-		// process results (errors)
-		var result = new GenericArray<Sparql.Error?> ();
-		Variant resultv;
-		resultv = reply.get_body ().get_child_value (0);
-		var iter = resultv.iterator ();
-		string code, message;
-		while (iter.next ("s", out code)) {
-			if (iter.next ("s", out message)) {
-				if (code != "" && message != "") {
-					result.add (new Sparql.Error.INTERNAL (message));
-				} else {
-					result.add (null);
-				}
-
-                                message = null;
-			}
-
-                        code = null;
-		}
-		return result;
+                return true;
 	}
 
 	public override GLib.Variant? update_blank (string sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
