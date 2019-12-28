@@ -332,10 +332,16 @@ update_blank_cb (GObject      *object,
 
 	results = tracker_sparql_connection_update_blank_finish (TRACKER_SPARQL_CONNECTION (object),
 	                                                         res, &error);
-	if (results)
-		g_dbus_method_invocation_return_value (request->invocation, results);
-	else
+	if (results) {
+		GVariantBuilder builder;
+
+		g_variant_builder_init (&builder, G_VARIANT_TYPE ("(aaa{ss})"));
+		g_variant_builder_add_value (&builder, results);
+		g_dbus_method_invocation_return_value (request->invocation,
+		                                       g_variant_builder_end (&builder));
+	} else {
 		g_dbus_method_invocation_return_gerror (request->invocation, error);
+	}
 
 	update_request_free (request);
 }
