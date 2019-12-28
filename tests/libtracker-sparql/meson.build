@@ -31,3 +31,15 @@ tests += {
   'is_parallel': false,
   'requires_dbus': true,
 }
+
+tracker_fd_test = executable('tracker-fd-test',
+  'tracker-fd-test.c',
+  dependencies: [tracker_common_dep, tracker_sparql_dep],
+  c_args: libtracker_sparql_test_c_args)
+
+tests += {
+  'name': 'fd',
+  'exe': tracker_fd_test,
+  'suite': ['sparql'],
+  'requires_dbus': true,
+}
