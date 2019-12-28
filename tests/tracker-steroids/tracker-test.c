@@ -332,23 +332,11 @@ async_update_array_callback (GObject      *source_object,
 {
 	GError *error = NULL;
 	AsyncData *data = user_data;
-	GPtrArray *errors;
 
-	errors = tracker_sparql_connection_update_array_finish (connection, result, &error);
+	tracker_sparql_connection_update_array_finish (connection, result, &error);
 
 	/* main error is only set on fatal (D-Bus) errors that apply to the whole update */
-	g_assert_no_error (error);
-
-	g_assert (errors->len == 6);
-
-	g_assert (g_ptr_array_index (errors, 0) == NULL);
-	g_assert (g_ptr_array_index (errors, 1) == NULL);
-	g_assert (g_ptr_array_index (errors, 2) == NULL);
-	g_assert (g_ptr_array_index (errors, 3) != NULL);
-	g_assert (g_ptr_array_index (errors, 4) == NULL);
-	g_assert (g_ptr_array_index (errors, 5) == NULL);
-
-	g_ptr_array_unref (errors);
+	g_assert (error != NULL);
 
 	g_main_loop_quit (data->main_loop);
 }
