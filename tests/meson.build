@@ -11,7 +11,6 @@ if enable_fts
 endif
 
 subdir('libtracker-sparql')
-subdir('tracker-steroids')
 
 if get_option('functional_tests')
   subdir('functional-tests')
