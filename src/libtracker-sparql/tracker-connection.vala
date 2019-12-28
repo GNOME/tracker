@@ -337,9 +337,7 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 *              asynchronous operation is finished.
 	 * @_user_data_: user-defined data to be passed to @_callback_
 	 *
-	 * Executes asynchronously an array of SPARQL updates. Each update in the
-	 * array is its own transaction. This means that update n+1 is not halted
-	 * due to an error in update n.
+	 * Executes asynchronously an array of SPARQL updates.
 	 *
 	 * Since: 0.10
 	 */
@@ -377,19 +375,13 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 * </programlisting>
 	 * </example>
 	 *
-	 * Returns: a #GPtrArray of size @sparql_length1 with elements that are
-	 * either NULL or a GError instance. The returned array should be freed with
-	 * g_ptr_array_unref when no longer used, not with g_ptr_array_free. When
-	 * you use errors of the array, you must g_error_copy them. Errors inside of
-	 * the array must be considered as const data and not freed. The index of
-	 * the error corresponds to the index of the update query in the array that
-	 * you passed to tracker_sparql_connection_update_array_async.
+	 * Returns: %TRUE if the update was successful, %FALSE otherwise.
 	 *
 	 * Since: 0.10
 	 */
-	public async virtual GenericArray<Sparql.Error?>? update_array_async (string[] sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public async virtual bool update_array_async (string[] sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
 		warning ("Interface 'update_array_async' not implemented");
-		return null;
+		return false;
 	}
 
 	/**
