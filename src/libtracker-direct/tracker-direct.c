@@ -734,39 +734,21 @@ update_array_async_thread_func (GTask        *task,
 	gchar *concatenated;
 	GPtrArray *errors;
 	GError *error = NULL;
-	gint i;
 
 	errors = g_ptr_array_new_with_free_func ((GDestroyNotify) error_free);
 	g_ptr_array_set_size (errors, g_strv_length (updates));
 
-	/* Fast path, perform everything as a single update */
-	concatenated = g_strjoinv ("; ", updates);
+	concatenated = g_strjoinv ("\n", updates);
 	tracker_sparql_connection_update (source_object, concatenated,
 	                                  g_task_get_priority (task),
 	                                  cancellable, &error);
 	g_free (concatenated);
 
-	if (!error) {
-		g_task_return_pointer (task, errors,
-		                       (GDestroyNotify) g_ptr_array_unref);
-		g_object_unref (task);
-		return;
-	}
+	if (error)
+		g_task_return_error (task, error);
+	else
+		g_task_return_boolean (task, TRUE);
 
-	g_error_free (error);
-
-	/* Slow path, perform updates one by one */
-	for (i = 0; updates[i]; i++) {
-		GError **err = NULL;
-
-		err = (GError **) &g_ptr_array_index (errors, i);
-		tracker_sparql_connection_update (source_object, updates[i],
-		                                  g_task_get_priority (task),
-		                                  cancellable, err);
-	}
-
-	g_task_return_pointer (task, errors,
-	                       (GDestroyNotify) g_ptr_array_unref);
 	g_object_unref (task);
 }
 
@@ -797,12 +779,12 @@ tracker_direct_connection_update_array_async (TrackerSparqlConnection  *self,
 	g_task_run_in_thread (task, update_array_async_thread_func);
 }
 
-static GPtrArray *
+static gboolean
 tracker_direct_connection_update_array_finish (TrackerSparqlConnection  *self,
                                                GAsyncResult             *res,
                                                GError                  **error)
 {
-	return g_task_propagate_pointer (G_TASK (res), error);
+	return g_task_propagate_boolean (G_TASK (res), error);
 }
 
 static GVariant *
