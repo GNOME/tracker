@@ -66,6 +66,12 @@ Although Tracker is able to store contacts and calendar entries,
 GNOME uses [Evolution Data Server](https://developer.gnome.org/platform-overview/stable/tech-eds.html)
 for this.
 
+### GTK
+
+The file chooser dialog supplied by GTK has a search interface. There's
+a [Tracker backend](https://gitlab.gnome.org/GNOME/gtk/blob/master/gtk/gtksearchenginetracker.c)
+for this.
+
 ### Sailfish OS
 
 [Sailfish OS](https://sailfishos.org) uses Tracker for [indexing media
