@@ -255,7 +255,7 @@ test_tracker_sparql_connection_locking_async (void)
 }
 
 static void
-test_tracker_sparql_nb237150_cb (GObject      *source_object,
+test_tracker_sparql_get_connection_async_cb (GObject      *source_object,
                                  GAsyncResult *result,
                                  gpointer      user_data)
 {
@@ -283,29 +283,29 @@ test_tracker_sparql_nb237150_cb (GObject      *source_object,
 }
 
 static void
-test_tracker_sparql_nb237150_subprocess (void)
+test_tracker_sparql_get_connection_async_subprocess (void)
 {
 	main_loop = g_main_loop_new (NULL, TRUE);
 
 	g_print ("\n");
 	g_print ("Calling #1 - tracker_sparql_connection_get_async()\n");
-	tracker_sparql_connection_get_async (NULL, test_tracker_sparql_nb237150_cb, GINT_TO_POINTER(1));
+	tracker_sparql_connection_get_async (NULL, test_tracker_sparql_get_connection_async_cb, GINT_TO_POINTER(1));
 
 	g_print ("Calling #2 - tracker_sparql_connection_get_async()\n");
-	tracker_sparql_connection_get_async (NULL, test_tracker_sparql_nb237150_cb, GINT_TO_POINTER(2));
+	tracker_sparql_connection_get_async (NULL, test_tracker_sparql_get_connection_async_cb, GINT_TO_POINTER(2));
 
 	g_print ("Calling both finished\n");
 	g_main_loop_run (main_loop);
 }
 
 static void
-test_tracker_sparql_nb237150 (void)
+test_tracker_sparql_get_connection_async (void)
 {
-	/* Test NB#237150 - Second tracker_sparql_connection_get_async
-	 * never returns
+	/* Regression test for an issue where a second
+	 * tracker_sparql_connection_get_async would never return.
 	 */
-	g_test_trap_subprocess ("/libtracker-sparql/tracker-sparql/nb237150/subprocess",
-	                        G_USEC_PER_SEC * 2,
+	g_test_trap_subprocess ("/libtracker-sparql/tracker-sparql/get_connection_async/subprocess",
+	                        G_USEC_PER_SEC * 5,
 	                        G_TEST_SUBPROCESS_INHERIT_STDOUT |
 	                        G_TEST_SUBPROCESS_INHERIT_STDERR);
 
@@ -378,10 +378,10 @@ main (gint argc, gchar **argv)
 	/* NOTE: this first test must come BEFORE any others because
 	 * connections are cached by libtracker-sparql.
 	 */
-	g_test_add_func ("/libtracker-sparql/tracker-sparql/nb237150",
-	                 test_tracker_sparql_nb237150);
-	g_test_add_func ("/libtracker-sparql/tracker-sparql/nb237150/subprocess",
-	                 test_tracker_sparql_nb237150_subprocess);
+	g_test_add_func ("/libtracker-sparql/tracker-sparql/get_connection_async",
+	                 test_tracker_sparql_get_connection_async);
+	g_test_add_func ("/libtracker-sparql/tracker-sparql/get_connection_async/subprocess",
+	                 test_tracker_sparql_get_connection_async_subprocess);
 	g_test_add_func ("/libtracker-sparql/tracker-sparql/tracker_sparql_escape_string",
 	                 test_tracker_sparql_escape_string);
 	g_test_add_func ("/libtracker-sparql/tracker-sparql/tracker_sparql_escape_uri_vprintf",
