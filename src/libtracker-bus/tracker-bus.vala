@@ -265,4 +265,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 
 		return notifier;
 	}
+
+	public override void close () {
+	}
 }
