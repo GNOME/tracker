@@ -85,6 +85,16 @@ public abstract class Tracker.Sparql.Statement : Object {
 	 */
 	public abstract void bind_double (string name, double value);
 
+        /**
+         * tracker_sparql_statement_clear_bindings:
+         * @self: a #TrackerSparqlStatement
+         *
+         * Clears all boolean/string/integer/double bindings.
+         *
+         * Since: 3.0
+         */
+	public abstract void clear_bindings ();
+
 	/**
 	 * tracker_sparql_statement_execute:
 	 * @self: a #TrackerSparqlStatement
