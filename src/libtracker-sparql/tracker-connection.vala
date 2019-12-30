@@ -413,4 +413,21 @@ public abstract class Tracker.Sparql.Connection : Object {
 		warning ("Interface 'create_notifier' not implemented");
 		return null;
 	}
+
+	/**
+	 * tracker_sparql_connection_close:
+	 * @self: a #TrackerSparqlConnection
+	 *
+	 * Closes a SPARQL connection. No other API calls than g_object_unref()
+	 * should happen after this call.
+	 *
+	 * This call is blocking. All pending updates will be flushed, and the
+	 * store databases will be closed orderly. All ongoing SELECT queries
+	 * will be cancelled.
+	 *
+	 * Since: 3.0
+	 */
+	public virtual void close () {
+		warning ("Not implemented");
+	}
 }
