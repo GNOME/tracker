@@ -26,8 +26,6 @@
 #include <libtracker-data/tracker-sparql.h>
 #include <libtracker-sparql/tracker-notifier-private.h>
 
-static TrackerDBManagerFlags default_flags = 0;
-
 typedef struct _TrackerDirectConnectionPrivate TrackerDirectConnectionPrivate;
 
 struct _TrackerDirectConnectionPrivate
@@ -237,7 +235,7 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 		g_free (filename);
 	}
 
-	priv->data_manager = tracker_data_manager_new (db_flags | default_flags, priv->store,
+	priv->data_manager = tracker_data_manager_new (db_flags, priv->store,
 	                                               priv->ontology,
 	                                               FALSE, 100, 100);
 	if (!g_initable_init (G_INITABLE (priv->data_manager), cancellable, error)) {
@@ -990,30 +988,4 @@ tracker_direct_connection_get_data_manager (TrackerDirectConnection *conn)
 
 	priv = tracker_direct_connection_get_instance_private (conn);
 	return priv->data_manager;
-}
-
-void
-tracker_direct_connection_set_default_flags (TrackerDBManagerFlags flags)
-{
-	default_flags = flags;
-}
-
-void
-tracker_direct_connection_sync (TrackerDirectConnection *conn)
-{
-	TrackerDirectConnectionPrivate *priv;
-
-	priv = tracker_direct_connection_get_instance_private (conn);
-
-	if (!priv->data_manager)
-		return;
-
-	/* Wait for pending updates. */
-	if (priv->update_thread)
-		g_thread_pool_free (priv->update_thread, TRUE, TRUE);
-	/* Selects are less important, readonly interfaces won't be bothersome */
-	if (priv->select_pool)
-		g_thread_pool_free (priv->select_pool, TRUE, FALSE);
-
-	set_up_thread_pools (conn, NULL);
 }
