@@ -26,11 +26,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 
 	public Connection (string dbus_name, DBusConnection? dbus_connection) throws Sparql.Error, IOError, DBusError, GLib.Error {
 		this.dbus_name = dbus_name;
-
-		if (dbus_connection == null)
-			bus = GLib.Bus.get_sync (Tracker.IPC.bus ());
-		else
-			bus = dbus_connection;
+		this.bus = dbus_connection;
 
 		// ensure that error domain is registered with GDBus
 		new Sparql.Error.INTERNAL ("");
