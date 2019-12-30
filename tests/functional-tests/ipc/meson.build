@@ -14,14 +14,6 @@ test_env.set('TRACKER_DB_ONTOLOGIES_DIR', tracker_uninstalled_nepomuk_ontologies
 test_env.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', tracker_uninstalled_stop_words_dir)
 test_env.set('TRACKER_TEST_DOMAIN_ONTOLOGY_RULE', tracker_uninstalled_domain_rule)
 
-insert_or_replace_test = executable('test-insert-or-replace',
-  'test-insert-or-replace.vala', tracker_sparql_vapi,
-  dependencies: [tracker_common_dep, tracker_sparql_dep])
-test('insert-or-replace', python,
-  args: sandbox_args + [insert_or_replace_test],
-  env: test_env,
-  suite: ['functional', 'ipc'])
-
 bus_query_cancellation_test = executable('test-bus-query-cancellation',
   'test-bus-query-cancellation.c',
   c_args: functional_ipc_test_c_args,
