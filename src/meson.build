@@ -22,6 +22,3 @@ subdir('libtracker-sparql-backend')
 
 # Public commandline control tool
 subdir('tracker')
-
-# Public shared database
-subdir('tracker-store')
