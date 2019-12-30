@@ -86,4 +86,7 @@ public class Tracker.Remote.Connection : Tracker.Sparql.Connection {
 
 		return create_cursor (message);
 	}
+
+	public override void close () {
+	}
 }
