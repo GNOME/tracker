@@ -12,10 +12,7 @@ tracker_common_enum_header = enums[1]
 
 tracker_common_sources = [
   'tracker-date-time.c',
-  'tracker-dbus.c',
-  'tracker-domain-ontology.c',
   'tracker-file-utils.c',
-  'tracker-ioprio.c',
   'tracker-log.c',
   'tracker-type-utils.c',
   'tracker-utils.c',

@@ -1,6 +1,5 @@
 libtracker_common_tests = [
     'date-time',
-    'dbus',
     'file-utils',
     'type-utils',
     'utils',
