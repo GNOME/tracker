@@ -394,36 +394,6 @@ public abstract class Tracker.Sparql.Connection : Object {
 	}
 
 	/**
-	 * tracker_sparql_connection_set_domain:
-	 * @domain: The domain name for the default connection
-	 *
-	 * Sets the domain (usually a DBus name or application ID) that
-	 * will be used on on the connection obtained by
-	 * tracker_sparql_connection_get(). See the "Isolating tracker-store
-	 * clients" section in the docs for this library.
-	 *
-	 * This function must be called before any tracker_sparql_connection_get()
-	 * calls happen.
-	 *
-	 * Since: 2.0
-	 */
-	public extern static void set_domain (string? domain);
-
-	/**
-	 * tracker_sparql_connection_get_domain:
-	 *
-	 * Gets the domain (usually a DBus name or application ID) that
-	 * will be used on on the connection obtained by
-	 * tracker_sparql_connection_get().
-	 * See tracker_sparql_connection_set_domain() for more information.
-	 *
-	 * Returns: (transfer full): The domain string, or %NULL if none is set
-	 *
-	 * Since: 2.0
-	 */
-	public extern static string? get_domain ();
-
-	/**
 	 * tracker_sparql_connection_query_statement:
 	 * @self: a #TrackerSparqlConnection
 	 * @sparql: the SPARQL query
