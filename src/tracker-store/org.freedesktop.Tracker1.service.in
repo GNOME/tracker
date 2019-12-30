@@ -1,4 +1,0 @@
-[D-BUS Service]
-Name=org.freedesktop.Tracker1
-Exec=@libexecdir@/tracker-store
-SystemdService=tracker-store.service
