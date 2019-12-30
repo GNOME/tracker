@@ -508,7 +508,7 @@ weak_ref_notify (gpointer  data,
 }
 
 static void
-tracker_direct_connection_finalize (GObject *object)
+tracker_direct_connection_dispose (GObject *object)
 {
 	TrackerDirectConnectionPrivate *priv;
 	TrackerDirectConnection *conn;
@@ -516,15 +516,32 @@ tracker_direct_connection_finalize (GObject *object)
 	conn = TRACKER_DIRECT_CONNECTION (object);
 	priv = tracker_direct_connection_get_instance_private (conn);
 
-	if (priv->update_thread)
+	if (priv->update_thread) {
 		g_thread_pool_free (priv->update_thread, TRUE, TRUE);
-	if (priv->select_pool)
+		priv->update_thread = NULL;
+	}
+
+	if (priv->select_pool) {
 		g_thread_pool_free (priv->select_pool, TRUE, FALSE);
+		priv->select_pool = NULL;
+	}
 
 	if (priv->data_manager) {
 		tracker_data_manager_shutdown (priv->data_manager);
 		g_clear_object (&priv->data_manager);
 	}
+
+	G_OBJECT_CLASS (tracker_direct_connection_parent_class)->dispose (object);
+}
+
+static void
+tracker_direct_connection_finalize (GObject *object)
+{
+	TrackerDirectConnectionPrivate *priv;
+	TrackerDirectConnection *conn;
+
+	conn = TRACKER_DIRECT_CONNECTION (object);
+	priv = tracker_direct_connection_get_instance_private (conn);
 
 	while (priv->notifiers) {
 		TrackerNotifier *notifier = priv->notifiers->data;
@@ -888,6 +905,12 @@ tracker_direct_connection_create_notifier (TrackerSparqlConnection *self,
 }
 
 static void
+tracker_direct_connection_close (TrackerSparqlConnection *self)
+{
+	g_object_run_dispose (G_OBJECT (self));
+}
+
+static void
 tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 {
 	TrackerSparqlConnectionClass *sparql_connection_class;
@@ -897,6 +920,7 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 	sparql_connection_class = TRACKER_SPARQL_CONNECTION_CLASS (klass);
 
 	object_class->finalize = tracker_direct_connection_finalize;
+	object_class->dispose = tracker_direct_connection_dispose;
 	object_class->set_property = tracker_direct_connection_set_property;
 	object_class->get_property = tracker_direct_connection_get_property;
 
@@ -914,6 +938,7 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 	sparql_connection_class->update_blank_finish = tracker_direct_connection_update_blank_finish;
 	sparql_connection_class->get_namespace_manager = tracker_direct_connection_get_namespace_manager;
 	sparql_connection_class->create_notifier = tracker_direct_connection_create_notifier;
+	sparql_connection_class->close = tracker_direct_connection_close;
 
 	props[PROP_FLAGS] =
 		g_param_spec_enum ("flags",
