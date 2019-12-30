@@ -184,4 +184,10 @@ SELECT ?url ?tag {
       with data from the local endpoint.
     </para>
   </section>
+  <section>
+    <title>No tracker_sparql_connection_set_domain</title>
+    <para>
+      Use a dedicated DBus TrackerSparqlConnection to the specific domain.
+    </para>
+  </section>
 </chapter>
