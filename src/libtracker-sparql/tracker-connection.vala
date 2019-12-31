@@ -155,7 +155,7 @@ public abstract class Tracker.Sparql.Connection : Object {
 	 */
 	public extern async static new Connection new_async (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws Sparql.Error, IOError;
 
-	public extern static new Connection bus_new (string service_name, DBusConnection? dbus_connection = null) throws Sparql.Error, IOError, DBusError, GLib.Error;
+	public extern static new Connection bus_new (string service_name, string? object_path, DBusConnection? dbus_connection = null) throws Sparql.Error, IOError, DBusError, GLib.Error;
 
 	/**
 	 * tracker_sparql_connection_query:
