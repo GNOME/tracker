@@ -766,7 +766,7 @@ create_dbus_connection (GError **error)
 		g_usleep (100);
 
 	dbus = tracker_sparql_connection_bus_new (g_dbus_connection_get_unique_name (dbus_conn),
-						  dbus_conn, error);
+						  NULL, dbus_conn, error);
 	return dbus;
 }
 
