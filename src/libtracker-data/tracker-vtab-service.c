@@ -230,7 +230,7 @@ service_filter (sqlite3_vtab_cursor  *vtab_cursor,
 	if (g_strcmp0 (uri_scheme, "dbus") == 0) {
 		const gchar *bus_name = &cursor->service[strlen (uri_scheme) + 1];
 
-		cursor->conn = tracker_sparql_connection_bus_new (bus_name, NULL, &error);
+		cursor->conn = tracker_sparql_connection_bus_new (bus_name, NULL, NULL, &error);
 		if (!cursor->conn)
 			goto fail;
 	} else if (g_strcmp0 (uri_scheme, "http") == 0) {
