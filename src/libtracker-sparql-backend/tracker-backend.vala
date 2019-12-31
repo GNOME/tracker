@@ -21,14 +21,21 @@ public static Tracker.Sparql.Connection tracker_sparql_connection_remote_new (st
 	return new Tracker.Remote.Connection (url_base);
 }
 
-public static Tracker.Sparql.Connection tracker_sparql_connection_bus_new (string service, DBusConnection? conn) throws Tracker.Sparql.Error, IOError, DBusError, GLib.Error {
+public static Tracker.Sparql.Connection tracker_sparql_connection_bus_new (string service, string? object_path, DBusConnection? conn) throws Tracker.Sparql.Error, IOError, DBusError, GLib.Error {
 	GLib.DBusConnection dbus_conn;
+	string path;
+
 	if (conn != null)
 		dbus_conn = conn;
 	else
 		dbus_conn = GLib.Bus.get_sync (GLib.BusType.SESSION, null);
 
-	return new Tracker.Bus.Connection (service, dbus_conn);
+	if (object_path != null)
+		path = object_path;
+	else
+		path = "/org/freedesktop/Tracker1/Endpoint";
+
+	return new Tracker.Bus.Connection (service, path, dbus_conn);
 }
 
 public static Tracker.Sparql.Connection tracker_sparql_connection_new (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws GLib.Error, Tracker.Sparql.Error, IOError {
