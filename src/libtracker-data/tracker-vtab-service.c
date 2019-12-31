@@ -20,6 +20,7 @@
  */
 #include "config.h"
 
+#include "libtracker-common/tracker-utils.h"
 #include "tracker-vtab-service.h"
 #include <libtracker-sparql/tracker-sparql.h>
 
@@ -228,9 +229,24 @@ service_filter (sqlite3_vtab_cursor  *vtab_cursor,
 
 	uri_scheme = g_uri_parse_scheme (cursor->service);
 	if (g_strcmp0 (uri_scheme, "dbus") == 0) {
-		const gchar *bus_name = &cursor->service[strlen (uri_scheme) + 1];
+		gchar *bus_name, *object_path;
+		GDBusConnection *dbus_connection;
+		GBusType bus_type;
 
-		cursor->conn = tracker_sparql_connection_bus_new (bus_name, NULL, NULL, &error);
+		if (!tracker_util_parse_dbus_uri (cursor->service,
+						  &bus_type,
+						  &bus_name, &object_path))
+			goto fail;
+
+		dbus_connection = g_bus_get_sync (bus_type, NULL, &error);
+		if (!dbus_connection)
+			goto fail;
+
+		cursor->conn = tracker_sparql_connection_bus_new (bus_name, object_path,
+		                                                  dbus_connection, &error);
+		g_free (bus_name);
+		g_free (object_path);
+
 		if (!cursor->conn)
 			goto fail;
 	} else if (g_strcmp0 (uri_scheme, "http") == 0) {
