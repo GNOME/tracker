@@ -22,6 +22,7 @@
 #define __LIBTRACKER_COMMON_UTILS_H__
 
 #include <glib.h>
+#include <gio/gio.h>
 
 G_BEGIN_DECLS
 
@@ -49,6 +50,10 @@ gchar *  tracker_unescape_unichars          (const gchar  *str,
 					     gssize        len);
 gchar *  tracker_resolve_relative_uri       (const gchar  *base,
                                              const gchar  *rel_uri);
+gboolean tracker_util_parse_dbus_uri        (const gchar  *uri,
+                                             GBusType     *bus_type,
+                                             gchar       **service,
+                                             gchar       **path);
 
 G_END_DECLS
 

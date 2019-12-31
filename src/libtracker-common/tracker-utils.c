@@ -439,3 +439,41 @@ tracker_resolve_relative_uri (const gchar  *base,
 
 	return g_string_free (str, FALSE);
 }
+
+gboolean
+tracker_util_parse_dbus_uri (const gchar  *uri,
+                             GBusType     *bus_type,
+                             gchar       **service,
+                             gchar       **path)
+{
+	const gchar *separator;
+
+	if (!g_str_has_prefix (uri, "dbus:"))
+		return FALSE;
+
+	uri += strlen ("dbus:");
+
+	if (g_str_has_prefix (uri, "system:")) {
+		*bus_type = G_BUS_TYPE_SYSTEM;
+		uri += strlen ("system:");
+	} else if (g_str_has_prefix (uri, "session:")) {
+		*bus_type = G_BUS_TYPE_SESSION;
+		uri += strlen ("session:");
+	} else {
+		/* Fall back to session bus by default */
+		*bus_type = G_BUS_TYPE_SESSION;
+	}
+
+	separator = strstr (uri, ":/");
+
+	if (separator) {
+		*service = g_strndup (uri, separator - uri);
+		separator += 1;
+		*path = g_strdup (separator);
+	} else {
+		*service = g_strdup (uri);
+		*path = NULL;
+	}
+
+	return TRUE;
+}
