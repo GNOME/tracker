@@ -182,7 +182,7 @@ create_connection (GError **error)
 		if (!dbus_conn)
 			return NULL;
 
-		return tracker_sparql_connection_bus_new (dbus_service, dbus_conn, error);
+		return tracker_sparql_connection_bus_new (dbus_service, NULL, dbus_conn, error);
 	} else if (remote_service && !database_path && !dbus_service) {
 		return tracker_sparql_connection_remote_new (remote_service);
 	} else {
