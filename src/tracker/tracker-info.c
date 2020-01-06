@@ -43,6 +43,7 @@ static gboolean full_namespaces;
 static gboolean plain_text_content;
 static gboolean resource_is_iri;
 static gboolean turtle;
+static gchar *url_property;
 
 static GOptionEntry entries[] = {
 	{ "full-namespaces", 'f', 0, G_OPTION_ARG_NONE, &full_namespaces,
@@ -65,6 +66,10 @@ static GOptionEntry entries[] = {
 	},
 	{ "turtle", 't', 0, G_OPTION_ARG_NONE, &turtle,
 	  N_("Output results as RDF in Turtle format"),
+	  NULL,
+	},
+	{ "url", 'u', 0, G_OPTION_ARG_STRING, &url_property,
+	  N_("RDF property to treat as URL (eg. “nie:url”)"),
 	  NULL,
 	},
 	{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &filenames,
@@ -274,6 +279,9 @@ info_run (void)
 		g_print ("\n");
 	}
 
+	if (!url_property)
+		url_property = g_strdup ("nie:url");
+
 	for (p = filenames; *p; p++) {
 		TrackerSparqlCursor *cursor = NULL;
 		GError *error = NULL;
@@ -300,7 +308,7 @@ info_run (void)
 
 		if (!resource_is_iri) {
 			/* First check whether there's some entity with nie:url like this */
-			query = g_strdup_printf ("SELECT ?urn WHERE { ?urn nie:url \"%s\" }", uri);
+			query = g_strdup_printf ("SELECT ?urn WHERE { ?urn %s \"%s\" }", url_property, uri);
 			cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
 			g_free (query);
 

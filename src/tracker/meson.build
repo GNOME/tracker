@@ -1,26 +1,23 @@
-sources = [
-    'tracker-miner-manager.c',
-    'tracker-main.c',
-    'tracker-config.c',
-    'tracker-daemon.c',
-    'tracker-dbus.c',
-    'tracker-extract.c',
-    'tracker-help.c',
-    'tracker-index.c',
-    'tracker-info.c',
-    'tracker-process.c',
-    'tracker-reset.c',
-    'tracker-search.c',
-    'tracker-sparql.c',
-    'tracker-sql.c',
-    'tracker-status.c',
-    'tracker-tag.c',
+modules = [
+    'help',
+    'info',
+    'sparql',
+    'sql',
 ]
+
+sources = [
+    'tracker-main.c',
+]
+
+foreach m: modules
+    sources += 'tracker-@0@.c'.format(m)
+endforeach
 
 executable('tracker', sources,
     c_args: tracker_c_args + [
         '-DLIBEXECDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('libexecdir'))),
         '-DMANDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('datadir'), 'man')),
+        '-DBINDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('bindir'))),
     ],
     install: true,
     install_rpath: tracker_install_rpath,
@@ -30,6 +27,7 @@ executable('tracker', sources,
     include_directories: [commoninc, configinc, srcinc],
 )
 
+meson.add_install_script('make-subcommand-links.sh', modules)
 
 if install_bash_completion
     install_data(
