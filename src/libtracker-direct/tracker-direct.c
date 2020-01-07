@@ -572,7 +572,7 @@ tracker_direct_connection_set_property (GObject      *object,
 
 	switch (prop_id) {
 	case PROP_FLAGS:
-		priv->flags = g_value_get_enum (value);
+		priv->flags = g_value_get_flags (value);
 		break;
 	case PROP_STORE_LOCATION:
 		priv->store = g_value_dup_object (value);
@@ -600,7 +600,7 @@ tracker_direct_connection_get_property (GObject    *object,
 
 	switch (prop_id) {
 	case PROP_FLAGS:
-		g_value_set_enum (value, priv->flags);
+		g_value_set_flags (value, priv->flags);
 		break;
 	case PROP_STORE_LOCATION:
 		g_value_set_object (value, priv->store);
@@ -940,13 +940,13 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 	sparql_connection_class->close = tracker_direct_connection_close;
 
 	props[PROP_FLAGS] =
-		g_param_spec_enum ("flags",
-		                   "Flags",
-		                   "Flags",
-		                   TRACKER_TYPE_SPARQL_CONNECTION_FLAGS,
-		                   TRACKER_SPARQL_CONNECTION_FLAGS_NONE,
-		                   G_PARAM_READWRITE |
-		                   G_PARAM_CONSTRUCT_ONLY);
+		g_param_spec_flags ("flags",
+		                    "Flags",
+		                    "Flags",
+		                    TRACKER_TYPE_SPARQL_CONNECTION_FLAGS,
+		                    TRACKER_SPARQL_CONNECTION_FLAGS_NONE,
+		                    G_PARAM_READWRITE |
+		                    G_PARAM_CONSTRUCT_ONLY);
 	props[PROP_STORE_LOCATION] =
 		g_param_spec_object ("store-location",
 		                     "Store location",
