@@ -58,6 +58,7 @@ static gboolean feeds;
 static gboolean software;
 static gboolean software_categories;
 static gboolean bookmarks;
+static gchar *search_directory;
 
 #define SEARCH_OPTIONS_ENABLED() \
 	(music_albums || music_artists || music_files || \
@@ -164,6 +165,10 @@ static GOptionEntry entries[] = {
 	},
 	{ "disable-color", 0, 0, G_OPTION_ARG_NONE, &disable_color,
 	  N_("Disable color when printing snippets and results"),
+	  NULL,
+	},
+	{ "path", 'p', 0, G_OPTION_ARG_STRING, &search_directory,
+	  N_("Limit search to certain directory"),
 	  NULL,
 	},
 
@@ -481,6 +486,21 @@ get_emails (TrackerSparqlConnection *connection,
 	return success;
 }
 
+static gchar *
+get_directory_limit_search()
+{
+	gchar * search_directory_str, * full_path;
+
+	full_path = g_canonicalize_filename (search_directory, NULL); // get full path from relative if used
+	//check if directory limiting is requested
+	search_directory_str = full_path?
+		g_strdup_printf ("nie:url ?furl ."
+			"  FILTER(fn:starts-with(?furl, \"file://%s\")) ."
+			, full_path) : ".";
+
+	return search_directory_str;
+}
+
 static gboolean
 get_files_results (TrackerSparqlConnection *connection,
                    const gchar             *query,
@@ -489,7 +509,6 @@ get_files_results (TrackerSparqlConnection *connection,
 {
 	GError *error = NULL;
 	TrackerSparqlCursor *cursor;
-
 	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
 
 	if (error) {
@@ -557,7 +576,9 @@ get_document_files (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
+	gchar *search_directory_str;
 
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?document tracker:available true .";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -580,12 +601,14 @@ get_document_files (TrackerSparqlConnection *connection,
 	} else {
 		query = g_strdup_printf ("SELECT ?document nie:url(?document) "
 		                         "WHERE { "
-		                         "  ?document a nfo:Document ."
+		                         "  ?document a nfo:Document ;"
+		                         "  %s"
 		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:url(?document)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         show_all_str,
 		                         search_offset,
 		                         search_limit);
@@ -611,7 +634,9 @@ get_video_files (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?video tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -634,12 +659,14 @@ get_video_files (TrackerSparqlConnection *connection,
 	} else {
 		query = g_strdup_printf ("SELECT ?video nie:url(?video) "
 		                         "WHERE { "
-		                         "  ?video a nfo:Video ."
+		                         "  ?video a nfo:Video ;"
+		                         "  %s"
 		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:url(?video)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         show_all_str,
 		                         search_offset,
 		                         search_limit);
@@ -665,7 +692,9 @@ get_image_files (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?image tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -686,14 +715,18 @@ get_image_files (TrackerSparqlConnection *connection,
 		                         search_offset,
 		                         search_limit);
 	} else {
+		
+
 		query = g_strdup_printf ("SELECT ?image nie:url(?image) "
 		                         "WHERE { "
-		                         "  ?image a nfo:Image ."
+		                         "  ?image a nfo:Image ;"
+		                         "  %s"
 		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:url(?image)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         show_all_str,
 		                         search_offset,
 		                         search_limit);
@@ -719,7 +752,9 @@ get_music_files (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?song tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -742,12 +777,14 @@ get_music_files (TrackerSparqlConnection *connection,
 	} else {
 		query = g_strdup_printf ("SELECT ?song nie:url(?song) "
 		                         "WHERE { "
-		                         "  ?song a nmm:MusicPiece ."
+		                         "  ?song a nmm:MusicPiece ;"
+		                         "  %s"
 		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:url(?song)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         show_all_str,
 		                         search_offset,
 		                         search_limit);
@@ -772,7 +809,9 @@ get_music_artists (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -792,11 +831,13 @@ get_music_artists (TrackerSparqlConnection *connection,
 		query = g_strdup_printf ("SELECT ?artist ?title "
 		                         "WHERE {"
 		                         "  ?artist a nmm:Artist ;"
-		                         "  nmm:artistName ?title . "
+		                         "  nmm:artistName ?title ; "
+		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(?title) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         search_offset,
 		                         search_limit);
 	}
@@ -863,7 +904,9 @@ get_music_albums (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_words, use_or_operator);
 
 	if (fts) {
@@ -881,11 +924,13 @@ get_music_albums (TrackerSparqlConnection *connection,
 	} else {
 		query = g_strdup_printf ("SELECT ?album nie:title(?album) "
 		                         "WHERE {"
-		                         "  ?album a nmm:MusicAlbum ."
+		                         "  ?album a nmm:MusicAlbum ;"
+		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:title(?album)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         search_offset,
 		                         search_limit);
 	}
@@ -951,7 +996,9 @@ get_bookmarks (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -971,11 +1018,13 @@ get_bookmarks (TrackerSparqlConnection *connection,
 		query = g_strdup_printf ("SELECT nie:title(?urn) nie:url(?bookmark) "
 		                         "WHERE {"
 		                         "  ?urn a nfo:Bookmark ;"
-		                         "       nfo:bookmarks ?bookmark ."
+		                         "       nfo:bookmarks ?bookmark ;"
+		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:title(?urn)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         search_offset,
 		                         search_limit);
 	}
@@ -1035,7 +1084,9 @@ get_feeds (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -1053,11 +1104,13 @@ get_feeds (TrackerSparqlConnection *connection,
 	} else {
 		query = g_strdup_printf ("SELECT ?feed nie:title(?feed) "
 		                         "WHERE {"
-		                         "  ?feed a mfo:FeedMessage ."
+		                         "  ?feed a mfo:FeedMessage ;"
+		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:title(?feed)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         search_offset,
 		                         search_limit);
 	}
@@ -1117,7 +1170,9 @@ get_software (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -1137,11 +1192,13 @@ get_software (TrackerSparqlConnection *connection,
 	} else {
 		query = g_strdup_printf ("SELECT ?soft nie:title(?soft) "
 		                         "WHERE {"
-		                         "  ?soft a nfo:Software ."
+		                         "  ?soft a nfo:Software ;"
+		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:title(?soft)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         search_offset,
 		                         search_limit);
 	}
@@ -1201,7 +1258,9 @@ get_software_categories (TrackerSparqlConnection *connection,
 	TrackerSparqlCursor *cursor;
 	gchar *fts;
 	gchar *query;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -1219,11 +1278,13 @@ get_software_categories (TrackerSparqlConnection *connection,
 	} else {
 		query = g_strdup_printf ("SELECT ?cat nie:title(?cat) "
 		                         "WHERE {"
-		                         "  ?cat a nfo:SoftwareCategory ."
+		                         "  ?cat a nfo:SoftwareCategory ;"
+		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:title(?cat)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         search_offset,
 		                         search_limit);
 	}
@@ -1285,7 +1346,9 @@ get_files (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?u tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -1308,12 +1371,14 @@ get_files (TrackerSparqlConnection *connection,
 		query = g_strdup_printf ("SELECT ?u ?url "
 		                         "WHERE { "
 		                         "  ?u a nie:InformationElement ;"
-		                         "     nie:url ?url ."
+		                         "     nie:url ?url ;"
+		                         "  %s"
 		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:url(?u)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         show_all_str,
 		                         search_offset,
 		                         search_limit);
@@ -1339,7 +1404,9 @@ get_folders (TrackerSparqlConnection *connection,
 	gchar *query;
 	const gchar *show_all_str;
 	gboolean success;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	show_all_str = show_all ? "" : "?u tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
@@ -1360,12 +1427,14 @@ get_folders (TrackerSparqlConnection *connection,
 	} else {
 		query = g_strdup_printf ("SELECT ?u nie:url(?u) "
 		                         "WHERE { "
-		                         "  ?u a nfo:Folder ."
+		                         "  ?u a nfo:Folder ;"
+		                         "  %s"
 		                         "  %s"
 		                         "} "
 		                         "ORDER BY ASC(nie:url(?u)) "
 		                         "OFFSET %d "
 		                         "LIMIT %d",
+		                         search_directory_str,
 		                         show_all_str,
 		                         search_offset,
 		                         search_limit);
@@ -1392,7 +1461,9 @@ get_all_by_search (TrackerSparqlConnection *connection,
 	gchar *fts;
 	gchar *query;
 	const gchar *show_all_str;
-
+	gchar *search_directory_str;
+	
+	search_directory_str = get_directory_limit_search ();
 	fts = get_fts_string (search_words, use_or_operator);
 	if (!fts) {
 		return FALSE;
@@ -1419,7 +1490,8 @@ get_all_by_search (TrackerSparqlConnection *connection,
 	} else {
 		query = g_strdup_printf ("SELECT tracker:coalesce (nie:url (?s), ?s) fts:snippet(?s, \"%s\", \"%s\") "
 		                         "WHERE {"
-		                         "  ?s fts:match \"%s\" ."
+		                         "  ?s fts:match \"%s\" ;"
+		                         "  %s"
 		                         "  %s"
 		                         "} "
 		                         "ORDER BY nie:url(?s) "
@@ -1427,6 +1499,7 @@ get_all_by_search (TrackerSparqlConnection *connection,
 		                         disable_color ? "" : SNIPPET_BEGIN,
 		                         disable_color ? "" : SNIPPET_END,
 		                         fts,
+		                         search_directory_str,
 		                         show_all_str,
 		                         search_offset,
 		                         search_limit);
@@ -1597,7 +1670,7 @@ search_run (void)
 			limit = 10;
 		}
 	}
-
+	
 	if (files) {
 		gboolean success;
 
