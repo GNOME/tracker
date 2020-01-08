@@ -31,6 +31,7 @@
 #include "config.h"
 
 #include "tracker-cursor.h"
+#include "tracker-private.h"
 
 enum {
 	PROP_0,
