@@ -24,6 +24,7 @@
 #endif
 
 #include <gio/gio.h>
+#include <libtracker-sparql/tracker-version.h>
 
 /**
  * TrackerSparqlCursor:
@@ -33,6 +34,7 @@
  */
 #define TRACKER_TYPE_SPARQL_CURSOR tracker_sparql_cursor_get_type ()
 #define TRACKER_SPARQL_TYPE_CURSOR TRACKER_TYPE_SPARQL_CURSOR
+TRACKER_AVAILABLE_IN_ALL
 G_DECLARE_DERIVABLE_TYPE (TrackerSparqlCursor, tracker_sparql_cursor,
                           TRACKER, SPARQL_CURSOR, GObject)
 
@@ -96,40 +98,54 @@ struct _TrackerSparqlCursorClass
         gint (* get_n_columns) (TrackerSparqlCursor *cursor);
 };
 
+TRACKER_AVAILABLE_IN_ALL
 TrackerSparqlConnection * tracker_sparql_cursor_get_connection (TrackerSparqlCursor *cursor);
+TRACKER_AVAILABLE_IN_ALL
 gint tracker_sparql_cursor_get_n_columns (TrackerSparqlCursor *cursor);
 
+TRACKER_AVAILABLE_IN_ALL
 const gchar * tracker_sparql_cursor_get_string (TrackerSparqlCursor *cursor,
                                                 gint                 column,
                                                 glong               *length);
+TRACKER_AVAILABLE_IN_ALL
 gboolean tracker_sparql_cursor_get_boolean (TrackerSparqlCursor *cursor,
                                             gint                 column);
+TRACKER_AVAILABLE_IN_ALL
 gdouble tracker_sparql_cursor_get_double (TrackerSparqlCursor *cursor,
                                           gint                 column);
+TRACKER_AVAILABLE_IN_ALL
 gint64 tracker_sparql_cursor_get_integer (TrackerSparqlCursor *cursor,
                                           gint                 column);
+TRACKER_AVAILABLE_IN_ALL
 TrackerSparqlValueType tracker_sparql_cursor_get_value_type (TrackerSparqlCursor *cursor,
                                                              gint                 column);
+TRACKER_AVAILABLE_IN_ALL
 const gchar * tracker_sparql_cursor_get_variable_name (TrackerSparqlCursor *cursor,
                                                        gint                 column);
+TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_cursor_close (TrackerSparqlCursor *cursor);
 
+TRACKER_AVAILABLE_IN_ALL
 gboolean tracker_sparql_cursor_is_bound (TrackerSparqlCursor *cursor,
                                          gint                 column);
 
+TRACKER_AVAILABLE_IN_ALL
 gboolean tracker_sparql_cursor_next (TrackerSparqlCursor  *cursor,
                                      GCancellable         *cancellable,
                                      GError              **error);
 
+TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_cursor_next_async (TrackerSparqlCursor  *cursor,
                                        GCancellable         *cancellable,
                                        GAsyncReadyCallback   callback,
                                        gpointer              user_data);
 
+TRACKER_AVAILABLE_IN_ALL
 gboolean tracker_sparql_cursor_next_finish (TrackerSparqlCursor  *cursor,
                                             GAsyncResult         *res,
                                             GError              **error);
 
+TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_cursor_rewind (TrackerSparqlCursor *cursor);
 
 #endif /* __TRACKER_SPARQL_CURSOR_H__ */

@@ -27,10 +27,13 @@
 #endif
 
 #include <libtracker-sparql/tracker-endpoint.h>
+#include <libtracker-sparql/tracker-version.h>
 
 #define TRACKER_TYPE_ENDPOINT_DBUS tracker_endpoint_dbus_get_type()
+TRACKER_AVAILABLE_IN_ALL
 G_DECLARE_FINAL_TYPE (TrackerEndpointDBus, tracker_endpoint_dbus, TRACKER, ENDPOINT_DBUS, TrackerEndpoint)
 
+TRACKER_AVAILABLE_IN_ALL
 TrackerEndpointDBus *
 tracker_endpoint_dbus_new (TrackerSparqlConnection  *sparql_connection,
                            GDBusConnection          *dbus_connection,
