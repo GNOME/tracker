@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "tracker-connection.h"
+#include "tracker-private.h"
 
 G_DEFINE_ABSTRACT_TYPE (TrackerSparqlConnection, tracker_sparql_connection,
                         G_TYPE_OBJECT)

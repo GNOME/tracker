@@ -22,6 +22,7 @@
 #include "config.h"
 
 #include "tracker-endpoint.h"
+#include "tracker-private.h"
 
 enum {
 	PROP_0,
