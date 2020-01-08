@@ -31,6 +31,7 @@
 #include <libtracker-common/tracker-parser.h>
 
 #include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-sparql/tracker-private.h>
 
 #if HAVE_TRACKER_FTS
 #include <libtracker-fts/tracker-fts.h>

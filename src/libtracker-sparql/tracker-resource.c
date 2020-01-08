@@ -31,6 +31,8 @@
 /* For tracker_sparql_escape_string */
 #include "tracker-utils.h"
 
+#include <tracker-private.h>
+
 typedef struct {
 	char *identifier;
 	GHashTable *properties;

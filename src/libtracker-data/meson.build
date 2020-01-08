@@ -9,7 +9,9 @@ libtracker_data_vala = static_library('tracker-sparql-query',
     'libtracker-data.vapi',
     tracker_sparql_vapi,
     tracker_common_enum_header,
-    c_args: tracker_c_args,
+    c_args: tracker_c_args + [
+        '-include', 'libtracker-sparql/tracker-private.h',
+    ],
     vala_args: [
         '--debug',
         '--pkg', 'posix',

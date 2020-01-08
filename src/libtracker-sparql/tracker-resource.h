@@ -30,11 +30,6 @@ G_BEGIN_DECLS
 TRACKER_AVAILABLE_IN_ALL
 G_DECLARE_DERIVABLE_TYPE (TrackerResource, tracker_resource, TRACKER, RESOURCE, GObject)
 
-struct _TrackerResourceClass
-{
-	GObjectClass parent_class;
-};
-
 TRACKER_AVAILABLE_IN_ALL
 TrackerResource *tracker_resource_new (const char *identifier);
 

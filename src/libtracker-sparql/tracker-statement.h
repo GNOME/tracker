@@ -37,36 +37,6 @@ G_DECLARE_DERIVABLE_TYPE (TrackerSparqlStatement,
 #include "tracker-connection.h"
 #include "tracker-cursor.h"
 
-struct _TrackerSparqlStatementClass
-{
-	GObjectClass parent_class;
-
-        void (* bind_int) (TrackerSparqlStatement *stmt,
-                           const gchar            *name,
-                           gint64                  value);
-        void (* bind_boolean) (TrackerSparqlStatement *stmt,
-                               const gchar            *name,
-                               gboolean                value);
-        void (* bind_string) (TrackerSparqlStatement *stmt,
-                              const gchar            *name,
-                              const gchar            *value);
-        void (* bind_double) (TrackerSparqlStatement *stmt,
-                              const gchar            *name,
-                              gdouble                 value);
-
-        TrackerSparqlCursor * (* execute) (TrackerSparqlStatement  *stmt,
-                                           GCancellable            *cancellable,
-                                           GError                 **error);
-        void (* execute_async) (TrackerSparqlStatement *stmt,
-                                GCancellable           *cancellable,
-                                GAsyncReadyCallback     callback,
-                                gpointer                user_data);
-        TrackerSparqlCursor * (* execute_finish) (TrackerSparqlStatement  *stmt,
-                                                  GAsyncResult            *res,
-                                                  GError                 **error);
-	void (* clear_bindings) (TrackerSparqlStatement *stmt);
-};
-
 TRACKER_AVAILABLE_IN_ALL
 TrackerSparqlConnection * tracker_sparql_statement_get_connection (TrackerSparqlStatement *stmt);
 
