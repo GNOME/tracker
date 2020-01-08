@@ -19,6 +19,7 @@ libtracker_remote = static_library('tracker-remote', sources,
         # doesn't seem to work here.
         '--target-glib', glib_required,
     ],
+    gnu_symbol_visibility: 'hidden',
 )
 
 tracker_sparql_remote_dep = declare_dependency(

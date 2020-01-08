@@ -28,21 +28,32 @@ G_BEGIN_DECLS
 #error "only <libtracker-sparql/tracker-sparql.h> must be included directly."
 #endif
 
+#include <libtracker-sparql/tracker-version.h>
+
 #define TRACKER_TYPE_NAMESPACE_MANAGER (tracker_namespace_manager_get_type())
+TRACKER_AVAILABLE_IN_ALL
 G_DECLARE_FINAL_TYPE (TrackerNamespaceManager, tracker_namespace_manager, TRACKER, NAMESPACE_MANAGER, GObject)
 
+TRACKER_AVAILABLE_IN_ALL
 TrackerNamespaceManager *tracker_namespace_manager_new (void);
+TRACKER_AVAILABLE_IN_ALL
 TrackerNamespaceManager *tracker_namespace_manager_get_default (void);
 
+TRACKER_AVAILABLE_IN_ALL
 char *tracker_namespace_manager_expand_uri (TrackerNamespaceManager *self, const char *compact_uri);
 
+TRACKER_AVAILABLE_IN_ALL
 gboolean tracker_namespace_manager_has_prefix (TrackerNamespaceManager *self, const char *prefix);
+TRACKER_AVAILABLE_IN_ALL
 const char *tracker_namespace_manager_lookup_prefix (TrackerNamespaceManager *self, const char *prefix);
 
+TRACKER_AVAILABLE_IN_ALL
 void tracker_namespace_manager_add_prefix (TrackerNamespaceManager *self, const char *prefix, const char *ns);
 
+TRACKER_AVAILABLE_IN_ALL
 char *tracker_namespace_manager_print_turtle (TrackerNamespaceManager *self);
 
+TRACKER_AVAILABLE_IN_ALL
 void tracker_namespace_manager_foreach (TrackerNamespaceManager *self, GHFunc func, gpointer user_data);
 
 G_END_DECLS
