@@ -24,9 +24,11 @@
 #endif
 
 #include <gio/gio.h>
+#include <libtracker-sparql/tracker-version.h>
 
 #define TRACKER_TYPE_SPARQL_STATEMENT tracker_sparql_statement_get_type ()
 #define TRACKER_SPARQL_TYPE_STATEMENT TRACKER_TYPE_SPARQL_STATEMENT
+TRACKER_AVAILABLE_IN_ALL
 G_DECLARE_DERIVABLE_TYPE (TrackerSparqlStatement,
                           tracker_sparql_statement,
                           TRACKER, SPARQL_STATEMENT,
@@ -65,39 +67,49 @@ struct _TrackerSparqlStatementClass
 	void (* clear_bindings) (TrackerSparqlStatement *stmt);
 };
 
+TRACKER_AVAILABLE_IN_ALL
 TrackerSparqlConnection * tracker_sparql_statement_get_connection (TrackerSparqlStatement *stmt);
 
+TRACKER_AVAILABLE_IN_ALL
 const gchar * tracker_sparql_statement_get_sparql (TrackerSparqlStatement *stmt);
 
+TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_statement_bind_boolean (TrackerSparqlStatement *stmt,
                                             const gchar            *name,
                                             gboolean                value);
 
+TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_statement_bind_int (TrackerSparqlStatement *stmt,
                                         const gchar            *name,
                                         gint64                  value);
 
+TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_statement_bind_double (TrackerSparqlStatement *stmt,
                                            const gchar            *name,
                                            gdouble                 value);
 
+TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_statement_bind_string (TrackerSparqlStatement *stmt,
                                            const gchar            *name,
                                            const gchar            *value);
 
+TRACKER_AVAILABLE_IN_ALL
 TrackerSparqlCursor * tracker_sparql_statement_execute (TrackerSparqlStatement  *stmt,
                                                         GCancellable            *cancellable,
                                                         GError                 **error);
 
+TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_statement_execute_async (TrackerSparqlStatement *stmt,
                                              GCancellable           *cancellable,
                                              GAsyncReadyCallback     callback,
                                              gpointer                user_data);
 
+TRACKER_AVAILABLE_IN_ALL
 TrackerSparqlCursor * tracker_sparql_statement_execute_finish (TrackerSparqlStatement  *stmt,
                                                                GAsyncResult            *res,
                                                                GError                 **error);
 
+TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_statement_clear_bindings (TrackerSparqlStatement *stmt);
 
 #endif /* __TRACKER_SPARQL_STATEMENT_H__ */

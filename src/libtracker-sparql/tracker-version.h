@@ -29,6 +29,12 @@ G_BEGIN_DECLS
 #error "only <libtracker-sparql/tracker-sparql.h> must be included directly."
 #endif
 
+#ifndef _TRACKER_EXTERN
+#define _TRACKER_EXTERN __attribute__((visibility("default"))) extern
+#endif
+
+#define TRACKER_AVAILABLE_IN_ALL _TRACKER_EXTERN
+
 GLIB_VAR const guint tracker_major_version;
 GLIB_VAR const guint tracker_minor_version;
 GLIB_VAR const guint tracker_micro_version;
@@ -65,6 +71,7 @@ GLIB_VAR const guint tracker_binary_age;
      (TRACKER_MAJOR_VERSION == (major) && TRACKER_MINOR_VERSION == (minor) && \
       TRACKER_MICRO_VERSION >= (micro)))
 
+TRACKER_AVAILABLE_IN_ALL
 const gchar * tracker_check_version (guint required_major,
                                      guint required_minor,
                                      guint required_micro);
