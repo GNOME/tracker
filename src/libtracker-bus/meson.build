@@ -4,7 +4,9 @@ libtracker_bus = static_library('tracker-bus',
     'tracker-bus-fd-cursor.vala',
     '../libtracker-common/libtracker-common.vapi',
     tracker_common_enum_header,
-    c_args: tracker_c_args,
+    c_args: tracker_c_args + [
+        '-include', 'libtracker-sparql/tracker-private.h',
+    ],
     vala_args: [
         '--debug',
         '--pkg', 'posix',

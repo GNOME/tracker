@@ -64,40 +64,6 @@ typedef enum {
 	TRACKER_SPARQL_VALUE_TYPE_BOOLEAN,
 } TrackerSparqlValueType;
 
-struct _TrackerSparqlCursorClass
-{
-	GObjectClass parent_class;
-
-	TrackerSparqlValueType (* get_value_type) (TrackerSparqlCursor *cursor,
-	                                           gint                 column);
-        const gchar* (* get_variable_name) (TrackerSparqlCursor *cursor,
-                                            gint                 column);
-	const gchar* (* get_string) (TrackerSparqlCursor *cursor,
-	                             gint                 column,
-	                             glong               *length);
-        gboolean (* next) (TrackerSparqlCursor  *cursor,
-                           GCancellable         *cancellable,
-                           GError              **error);
-        void (* next_async) (TrackerSparqlCursor *cursor,
-                             GCancellable        *cancellable,
-                             GAsyncReadyCallback  callback,
-                             gpointer             user_data);
-        gboolean (* next_finish) (TrackerSparqlCursor  *cursor,
-                                  GAsyncResult         *res,
-                                  GError              **error);
-        void (* rewind) (TrackerSparqlCursor* cursor);
-        void (* close) (TrackerSparqlCursor* cursor);
-        gint64 (* get_integer) (TrackerSparqlCursor *cursor,
-                                gint                 column);
-        gdouble (* get_double) (TrackerSparqlCursor *cursor,
-                                gint                 column);
-        gboolean (* get_boolean) (TrackerSparqlCursor *cursor,
-                                  gint                 column);
-        gboolean (* is_bound) (TrackerSparqlCursor *cursor,
-                               gint                 column);
-        gint (* get_n_columns) (TrackerSparqlCursor *cursor);
-};
-
 TRACKER_AVAILABLE_IN_ALL
 TrackerSparqlConnection * tracker_sparql_cursor_get_connection (TrackerSparqlCursor *cursor);
 TRACKER_AVAILABLE_IN_ALL

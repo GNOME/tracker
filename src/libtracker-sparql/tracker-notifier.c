@@ -68,6 +68,7 @@
 #include "tracker-connection.h"
 #include "tracker-notifier.h"
 #include "tracker-notifier-private.h"
+#include "tracker-private.h"
 #include "tracker-sparql-enum-types.h"
 #include <libtracker-common/tracker-common.h>
 
