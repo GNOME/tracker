@@ -20,14 +20,20 @@
 #define __TRACKER_UTILS_H__
 
 #include <glib.h>
+#include <libtracker-sparql/tracker-version.h>
 
+TRACKER_AVAILABLE_IN_ALL
 gchar * tracker_sparql_escape_uri_vprintf (const gchar *format,
                                            va_list      args);
+TRACKER_AVAILABLE_IN_ALL
 gchar * tracker_sparql_escape_uri_printf  (const gchar* format,
                                            ...);
+TRACKER_AVAILABLE_IN_ALL
 gchar * tracker_sparql_escape_uri         (const gchar *uri);
 
+TRACKER_AVAILABLE_IN_ALL
 gchar* tracker_sparql_escape_string (const gchar* literal);
+TRACKER_AVAILABLE_IN_ALL
 gchar* tracker_sparql_get_uuid_urn (void);
 
 #endif /* __TRACKER_UTILS_H__ */

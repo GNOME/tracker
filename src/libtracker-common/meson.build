@@ -40,6 +40,7 @@ libtracker_common = static_library('tracker-common',
   dependencies: tracker_common_dependencies + [unicode_library],
   c_args: tracker_c_args,
   include_directories: [configinc, srcinc],
+  gnu_symbol_visibility: 'hidden',
 )
 
 commoninc = include_directories('.')

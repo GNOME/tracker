@@ -14,6 +14,7 @@ libtracker_bus = static_library('tracker-bus',
     ],
     dependencies: [tracker_common_dep, tracker_sparql_intermediate_dep],
     include_directories: [commoninc, configinc, srcinc],
+    gnu_symbol_visibility: 'hidden',
 )
 
 tracker_sparql_bus_dep = declare_dependency(

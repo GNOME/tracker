@@ -25,9 +25,11 @@
 #endif
 
 #include <gio/gio.h>
+#include <libtracker-sparql/tracker-version.h>
 
 #define TRACKER_TYPE_NOTIFIER (tracker_notifier_get_type ())
 
+TRACKER_AVAILABLE_IN_ALL
 G_DECLARE_DERIVABLE_TYPE (TrackerNotifier, tracker_notifier, TRACKER, NOTIFIER, GObject)
 
 typedef struct _TrackerNotifierEvent TrackerNotifierEvent;
@@ -68,17 +70,23 @@ typedef enum {
 	TRACKER_NOTIFIER_EVENT_UPDATE
 } TrackerNotifierEventType;
 
+TRACKER_AVAILABLE_IN_ALL
 guint tracker_notifier_signal_subscribe   (TrackerNotifier *notifier,
                                            GDBusConnection *connection,
                                            const gchar     *service,
                                            const gchar     *graph);
+TRACKER_AVAILABLE_IN_ALL
 void  tracker_notifier_signal_unsubscribe (TrackerNotifier *notifier,
                                            guint            handler_id);
 
+TRACKER_AVAILABLE_IN_ALL
 TrackerNotifierEventType
               tracker_notifier_event_get_event_type (TrackerNotifierEvent *event);
+TRACKER_AVAILABLE_IN_ALL
 gint64        tracker_notifier_event_get_id         (TrackerNotifierEvent *event);
+TRACKER_AVAILABLE_IN_ALL
 const gchar * tracker_notifier_event_get_type       (TrackerNotifierEvent *event);
+TRACKER_AVAILABLE_IN_ALL
 const gchar * tracker_notifier_event_get_urn        (TrackerNotifierEvent *event);
 
 #endif /* __TRACKER_NOTIFIER_H__ */
