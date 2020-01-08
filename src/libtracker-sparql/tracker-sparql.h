@@ -22,6 +22,7 @@
 
 #define __LIBTRACKER_SPARQL_INSIDE__
 
+#include <libtracker-sparql/tracker-version.h>
 #include <libtracker-sparql/tracker-connection.h>
 #include <libtracker-sparql/tracker-cursor.h>
 #include <libtracker-sparql/tracker-endpoint.h>
