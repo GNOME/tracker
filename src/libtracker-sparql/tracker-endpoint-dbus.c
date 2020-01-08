@@ -23,6 +23,7 @@
 
 #include "tracker-endpoint-dbus.h"
 #include "tracker-notifier.h"
+#include "tracker-private.h"
 
 #include <gio/gio.h>
 #include <gio/gunixinputstream.h>

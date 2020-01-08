@@ -43,6 +43,7 @@
 #include "config.h"
 
 #include "tracker-statement.h"
+#include "tracker-private.h"
 
 enum {
 	PROP_0,

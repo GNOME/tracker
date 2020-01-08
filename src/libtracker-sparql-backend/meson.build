@@ -12,6 +12,10 @@ libtracker_sparql = library('tracker-sparql-' + tracker_api_version,
     install: true,
     install_rpath: tracker_internal_libs_dir,
 
+    c_args: [
+	'-include', 'libtracker-sparql/tracker-private.h',
+    ],
+
     link_whole: [libtracker_sparql_intermediate],
 
     dependencies: [tracker_common_dep, tracker_sparql_remote_dep, tracker_sparql_bus_dep, tracker_sparql_direct_dep, libtracker_sparql_c_vapi_dep],
