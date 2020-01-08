@@ -26,7 +26,7 @@ tracker_sparql_dep = declare_dependency(
 )
 
 pkg.generate(libtracker_sparql,
-    description: 'Tracker : A library to perform SPARQL queries and updates in the Tracker Store',
+    description: 'Tracker : A SPARQL triple store library',
     requires: [glib, gio, gobject, gmodule],
     subdirs: [
         'tracker-' + tracker_api_version,
