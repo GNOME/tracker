@@ -40,6 +40,7 @@ libtracker_sparql_intermediate = static_library('tracker-sparql-intermediate',
     enum_types,
     libtracker_sparql_c_sources,
     dependencies: [tracker_common_dep, json_glib],
+    gnu_symbol_visibility: 'hidden',
 )
 
 sparqlinc = [include_directories('.'), meson.current_build_dir()]

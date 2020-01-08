@@ -4,6 +4,7 @@ libtracker_direct = static_library('tracker-direct',
     c_args: tracker_c_args,
     dependencies: [ glib, gio, tracker_data_dep, tracker_sparql_intermediate_dep ],
     include_directories: [commoninc, configinc, srcinc],
+    gnu_symbol_visibility: 'hidden',
 )
 
 tracker_sparql_direct_dep = declare_dependency(
