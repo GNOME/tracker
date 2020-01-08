@@ -30,7 +30,7 @@ stages:
       # We limit `meson test` to 4 parallel test processes. The default is to
       # have one test process per CPU, but our tests are mostly IO bound
       # and we get timeouts and failures if we try to run 32 of them at once.
-      su tracker -c 'cd build; env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test --num-processes=4 --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
+      su tracker -c 'cd build; env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test -t 10 --num-processes=4 --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
 
   after_script:
     - |
@@ -59,3 +59,13 @@ test-fedora-latest:
 test-ubuntu-rolling:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/ubuntu:rolling
   <<: *test
+
+test-alpine-rolling:
+  image: alpine:edge
+  before_script:
+    - echo 'https://alpine.global.ssl.fastly.net/alpine/edge/community/' >> /etc/apk/repositories
+    - apk add -U bash-completion dbus-dev glib-dev gobject-introspection-dev icu-dev json-glib-dev libsoup-dev libxml2-dev meson py3-setuptools sqlite-dev networkmanager-dev vala alpine-sdk py3-gobject3
+    - addgroup -S tracker
+    - adduser -D -G tracker -g tracker tracker
+  <<: *test
+
