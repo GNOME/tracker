@@ -28,14 +28,11 @@
 
 #include <glib-object.h>
 #include <libtracker-sparql/tracker-connection.h>
+#include <libtracker-sparql/tracker-version.h>
 
 #define TRACKER_TYPE_ENDPOINT tracker_endpoint_get_type()
 TRACKER_AVAILABLE_IN_ALL
 G_DECLARE_DERIVABLE_TYPE (TrackerEndpoint, tracker_endpoint, TRACKER, ENDPOINT, GObject)
-
-struct _TrackerEndpointClass {
-	GObjectClass parent_class;
-};
 
 TRACKER_AVAILABLE_IN_ALL
 TrackerSparqlConnection * tracker_endpoint_get_sparql_connection (TrackerEndpoint *endpoint);

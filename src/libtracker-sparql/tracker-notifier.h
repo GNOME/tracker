@@ -34,16 +34,6 @@ G_DECLARE_DERIVABLE_TYPE (TrackerNotifier, tracker_notifier, TRACKER, NOTIFIER, 
 
 typedef struct _TrackerNotifierEvent TrackerNotifierEvent;
 
-struct _TrackerNotifierClass {
-	GObjectClass parent_class;
-
-	void (* events) (TrackerNotifier *notifier,
-	                 const GPtrArray *events);
-
-	/* <Private> */
-	gpointer padding[20];
-};
-
 /**
  * TrackerNotifierFlags:
  * @TRACKER_NOTIFIER_FLAG_NONE: No flags
