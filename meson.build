@@ -299,7 +299,6 @@ vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi
 glib_compile_schemas = find_program('glib-compile-schemas')
 glib_mkenums = find_program('glib-mkenums')
 g_ir_compiler = find_program('g-ir-compiler', gobject_introspection.get_pkgconfig_variable('g_ir_compiler'))
-g_ir_merge = find_program('g-ir-merge', join_paths(meson.current_source_dir(), 'utils', 'g-ir-merge', 'g-ir-merge'))
 dbus_run_session = find_program('dbus-run-session')
 
 gir_dir = gobject_introspection.get_pkgconfig_variable('girdir',
