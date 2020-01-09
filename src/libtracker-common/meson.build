@@ -17,7 +17,6 @@ tracker_common_sources = [
   'tracker-file-utils.c',
   'tracker-ioprio.c',
   'tracker-log.c',
-  'tracker-sched.c',
   'tracker-type-utils.c',
   'tracker-utils.c',
   'tracker-locale.c',
