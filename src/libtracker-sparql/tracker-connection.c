@@ -448,6 +448,18 @@ tracker_sparql_connection_query_statement (TrackerSparqlConnection  *connection,
 	                                                                          error);
 }
 
+/**
+ * tracker_sparql_connection_create_notifier:
+ * @connection: a #TrackerSparqlConnection
+ * @flags: flags to modify notifier behavior
+ *
+ * Creates a new #TrackerNotifier to notify about changes in @connection.
+ * See #TrackerNotifier documentation for information about how to use this
+ * object.
+ *
+ * Returns: (transfer full): a newly created notifier. Free with g_object_unref()
+ *          when no longer needed.
+ **/
 TrackerNotifier *
 tracker_sparql_connection_create_notifier (TrackerSparqlConnection *connection,
                                            TrackerNotifierFlags     flags)
