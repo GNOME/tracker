@@ -110,6 +110,14 @@ tracker_endpoint_init (TrackerEndpoint *endpoint)
 {
 }
 
+/**
+ * tracker_endpoint_get_sparql_connection:
+ * @endpoint: a #TrackerEndpoint
+ *
+ * Returns the #TrackerSparqlConnection that this endpoint proxies.
+ *
+ * Returns: (transfer none): The proxied SPARQL connection
+ **/
 TrackerSparqlConnection *
 tracker_endpoint_get_sparql_connection (TrackerEndpoint *endpoint)
 {

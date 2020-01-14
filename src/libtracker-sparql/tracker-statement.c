@@ -158,6 +158,14 @@ tracker_sparql_statement_class_init (TrackerSparqlStatementClass *klass)
 	g_object_class_install_properties (object_class, N_PROPS, props);
 }
 
+/**
+ * tracker_sparql_statement_get_connection:
+ * @stmt: a #TrackerSparqlStatement
+ *
+ * Returns the #TrackerSparqlConnection that this statement was created from.
+ *
+ * Returns: (transfer none): The SPARQL connection of this statement.
+ **/
 TrackerSparqlConnection *
 tracker_sparql_statement_get_connection (TrackerSparqlStatement *stmt)
 {
@@ -168,6 +176,14 @@ tracker_sparql_statement_get_connection (TrackerSparqlStatement *stmt)
 	return priv->connection;
 }
 
+/**
+ * tracker_sparql_statement_get_sparql:
+ * @stmt: a #TrackerSparqlStatement
+ *
+ * Returns the SPARQL string that this prepared statement holds.
+ *
+ * Returns: The contained SPARQL query
+ **/
 const gchar *
 tracker_sparql_statement_get_sparql (TrackerSparqlStatement *stmt)
 {
