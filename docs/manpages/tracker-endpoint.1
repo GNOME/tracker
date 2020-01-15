@@ -1,0 +1,72 @@
+.TH tracker-endpoint 1 "January 2020" GNU "User Commands"
+
+.SH NAME
+tracker-endpoint \- Create a SPARQL endpoint
+
+.SH SYNOPSIS
+.nf
+\fBtracker endpoint\fR [\-\-dbus\-service | \-b] <\fIservice_name\fR>
+                 [\-\-database\-path | \-d] <\fIdatabase_path\fR>
+                 [[\-\-ontology | \-o] <\fIontology_name\fR> |
+                  [\-\-ontology\-path | \-p] <\fIontology_path\fR>]
+                 [[\-\-system | \-\-session]]
+.fi
+
+.SH DESCRIPTION
+This command allows creating SPARQL endpoints. The endpoint will be
+able to handle SPARQL select and update queries, and notify about changes
+in it.
+
+The endpoint is exported via DBus, accessible through the given \fIservice_name\fR, either using it in a \fBSERVICE\fR clause, or by creating a dedicated
+bus-based SPARQL connection.
+
+When creating a database, the \fIontology_name\fR (or alternatively, a \fIontology_path\fR) must be provided in order to generate the database. If \fIontology_name\fR is used, the ontology must exist in \fI$datadir/tracker/ontologies\fR
+
+The database itself will be stored according to \fIdatabase_path\fR.
+
+.SH OPTIONS
+.TP
+.B \-b, \-\-dbus\-service\fR=<\fIservice_name\fR>
+Service name to use on the endpoint.
+.TP
+.B \-d, \-\-database\-path\fR=<\fIdatabase_path\fR>
+The path where the database will be stored.
+.TP
+.B \-o, \-\-ontology
+The name of an ontology in \fI$datadir/tracker/ontologies\fR to use on the
+constructed database.
+.TP
+.B \-p, \-\-ontology\-path
+Full path to an ontology to use on the constructed database.
+.TP
+.B \-\-session
+Use the session bus. This is the default.
+.TP
+.B \-\-system
+Use the system bus.
+
+.SH EXAMPLES
+.TP
+Export a Nepomuk endpoint with the \fIorg.example.Example1\fR bus name.
+
+.BR
+.nf
+$ tracker endpoint -b org.example.Example1 -o nepomuk -d /tmp/example1
+.fi
+
+.TP
+Access this endpoint with the \fBtracker-sparql(1)\fR subcommand.
+
+.BR
+.nf
+$ tracker sparql --dbus-service org.example.Example1 -q "
+  SELECT ?s ?o
+  WHERE {
+    ?u a ?o
+  }"
+.fi
+
+.SH SEE ALSO
+.BR tracker-sparql (1),
+.TP
+.BR https://www.w3.org/TR/sparql11-query/
