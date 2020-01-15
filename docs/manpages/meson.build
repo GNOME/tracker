@@ -1,3 +1,4 @@
+install_man('tracker-endpoint.1')
 install_man('tracker-info.1')
 install_man('tracker-sparql.1')
 install_man('tracker-sql.1')
