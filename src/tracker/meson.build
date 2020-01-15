@@ -1,4 +1,5 @@
 modules = [
+    'endpoint',
     'help',
     'info',
     'sparql',

@@ -28,6 +28,7 @@
 
 #include <libtracker-common/tracker-common.h>
 
+#include "tracker-endpoint.h"
 #include "tracker-help.h"
 #include "tracker-info.h"
 #include "tracker-sparql.h"
@@ -36,7 +37,7 @@
 const char usage_string[] =
 	"tracker [--version] [--help]\n"
 	"               <command> [<args>]";
- 
+
 const char usage_more_info_string[] =
 	N_("See “tracker help <command>” to read about a specific subcommand.");
 
@@ -90,6 +91,7 @@ static struct cmd_struct commands[] = {
 	{ "help", tracker_help, NEED_NOTHING, N_("Get help on how to use Tracker and any of these commands") },
 	{ "info", tracker_info, NEED_WORK_TREE, N_("Show information known about local files or items indexed") },
 	{ "sparql", tracker_sparql, NEED_WORK_TREE, N_("Query and update the index using SPARQL or search, list and tree the ontology") },
+	{ "endpoint", tracker_endpoint, NEED_NOTHING, N_("Create a SPARQL endpoint") },
 	{ "sql", tracker_sql, NEED_WORK_TREE, N_("Query the database at the lowest level using SQL") },
 };
 
