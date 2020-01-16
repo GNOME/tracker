@@ -88,41 +88,6 @@ $ pkg-config --libs tracker-sparql-0.12
 	  </para>
 	</listitem>
 	<listitem>
-	  <emphasis>TRACKER_SPARQL_BACKEND</emphasis>
-	  <para>
-	    Backends for libtracker-sparql are dynamically loaded at
-	    run time. Currently there are only two backends which are
-	    <link linkend="overview-tracker-connection-methods">explained
-	    more closely</link> in the previous chapter. In short,
-	    this environment variable gives the client the ability to
-	    directly mandate which backend they want to use. The
-	    value can be set to either "direct" or "bus". A "direct"
-	    value means the direct access approach will be forced. A
-	    "bus" value means a D-Bus / IPC approach will be forced.
-	  </para>
-	</listitem>
-	<listitem>
-	  <emphasis>TRACKER_SPARQL_CACHE_SIZE</emphasis>
-	  <para>
-	    Tracker caches database statements which occur frequently to make
-	    subsequent repeat queries much faster. The cache size is
-	    set to <emphasis>100</emphasis> by default for each type
-	    (select and update queries). This must be at
-	    least <emphasis>2</emphasis> as a minimum, any less and a
-	    value of <emphasis>3</emphasis> is used instead. The
-	    number represents the number of cached statements to keep
-	    around. This environment variable is used mainly for
-	    testing purposes.
-	  </para>
-	  <para>
-	    Tracker's store also has environment variables to control
-	    this behavior, see the manual pages
-	    for <emphasis>tracker-store</emphasis>
-	    regarding <emphasis>TRACKER_STORE_SELECT_CACHE_SIZE</emphasis>
-	    and <emphasis>TRACKER_STORE_UPDATE_CACHE_SIZE</emphasis>.
-	  </para>
-	</listitem>
-	<listitem>
 	  <emphasis>TRACKER_VERBOSITY</emphasis>
 	  <para>
 	    Historically, all queries would go
