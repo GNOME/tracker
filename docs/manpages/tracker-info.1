@@ -53,25 +53,6 @@ for subjects, predicates and objects; otherwise, shortened URIs are
 used, and all the prefixes Tracker knows about are printed at the top
 of the output.
 
-.SH ENVIRONMENT
-.TP
-.B TRACKER_SPARQL_BACKEND
-This option allows you to choose which backend you use for connecting
-to the database. This choice can limit your functionality. There are
-three settings.
-
-With "\fBdirect\fR" the connection to the database is made directly to
-the file itself on the disk, there is no intermediary daemon or
-process. The "\fBdirect\fR" approach is purely \fIread-only\fR.
-
-With "\fBbus\fR" the \fBtracker-store\fR process is used to liase with
-the database queuing all requests and managing the connections via an
-IPC / D-Bus. This adds a small overhead \fIBUT\fR this is the only
-approach you can use if you want to \fIwrite\fR to the database.
-
-With "\fBauto\fR" the backend is decided for you, much like it would
-be if this environment variable was undefined.
-
 .SH SEE ALSO
 .BR tracker-store (1),
 .BR tracker-sparql (1).
