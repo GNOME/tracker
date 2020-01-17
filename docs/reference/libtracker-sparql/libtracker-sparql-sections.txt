@@ -235,6 +235,26 @@ tracker_notifier_flags_get_type
 </SECTION>
 
 <SECTION>
+<FILE>tracker-endpoint</FILE>
+<TITLE>TrackerEndpoint</TITLE>
+TrackerEndpoint
+TrackerEndpointClass
+TrackerEndpointDBus
+TrackerEndpointDBusClass
+tracker_endpoint_dbus_get_type
+tracker_endpoint_dbus_new
+tracker_endpoint_get_sparql_connection
+<SUBSECTION Standard>
+TRACKER_TYPE_ENDPOINT
+TRACKER_TYPE_ENDPOINT_DBUS
+TRACKER_TYPE_SPARQL_CONNECTION
+TRACKER_TYPE_SPARQL_CONNECTION_FLAGS
+TRACKER_TYPE_SPARQL_CURSOR
+TRACKER_TYPE_SPARQL_ERROR
+TRACKER_TYPE_SPARQL_STATEMENT
+</SECTION>
+
+<SECTION>
 <TITLE>Version Information</TITLE>
 <FILE>tracker-version</FILE>
 tracker_major_version
