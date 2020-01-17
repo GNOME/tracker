@@ -4,10 +4,21 @@
   <title>Overview</title>
   <partintro>
     <para>
-      The libtracker-sparql library is the foundation for Tracker
-      querying and inserting into the data store. The data store
-      allows both querying and inserting using SPARQL based on the
-      Nepomuk ontology.
+      The libtracker-sparql library allows creating and connecting to
+      one or more "triplestore" databases.
+    </para>
+    <para>
+      Data queries and updates are done using the SPARQL graph query
+      language. The <type><link linkend="TrackerResource">TrackerResource</link></type>
+      API provides helpers for updating data.
+    </para>
+    <para>
+      You can share a database over D-Bus using the
+      <type><link linkend="TrackerEndpoint">TrackerEndpoint</link></type> API,
+      allowing other libtracker-sparql users to query from it, either
+      by referencing it in a <userinput>SELECT { SERVICE ... }</userinput>
+      query, or by connecting directly with
+      <function><link linkend="tracker-sparql-connection-bus-new">tracker_sparql_connection_bus_new</link></function>.
     </para>
   </partintro>
 
@@ -16,47 +27,18 @@
     <title>Connection methods</title>
 
     <para>
-        To access the session-wide Tracker store, you should call
-        <function><link linkend="tracker-sparql-connection-get">tracker_sparql_connection_get</link></function>.
-    </para>
-    <para>
         You can create and access a private store using
-        <function><link linkend="tracker-sparql-connection-local-new">tracker_sparql_connection_local_new</link></function>.
-    </para>
-  </chapter>
-
-  <chapter id="tracker-overview-compiling">
-    <title>Compiling applications</title>
-
-    <para>
-      To compile applications using libtracker-sparql, you
-      need to tell the compiler where to find the proper header files
-      and libraries. This is done with the
-      <application>pkg-config</application> utility.
-    </para>
-
-    <para>
-      The following interactive shell session demonstrates how
-      <application>pkg-config</application> is used (the actual output on
-      your system may be different):
-<programlisting>
-$ pkg-config --cflags tracker-sparql-0.12
--pthread -I/usr/include/tracker-0.12 -I/usr/include/tracker-0.12/libtracker-sparql -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
-
-$ pkg-config --libs tracker-sparql-0.12
--Wl,--export-dynamic -pthread -ltracker-sparql-0.12 -lgio-2.0 -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lrt -lglib-2.0
-</programlisting>
+        <function><link linkend="tracker-sparql-connection-new">tracker_sparql_connection_new</link></function>.
     </para>
     <para>
-      The simplest way to compile a program is to use the "backticks"
-      feature of the shell. If you enclose a command in backticks
-      (<emphasis>not single quotes</emphasis>), then its output will be
-      substituted into the command line before execution:
-<programlisting>
- $ cc `pkg-config --cflags --libs tracker-sparql-0.12` hello.c -o hello
-</programlisting>
+        To connect to another database on the same local machine, such as the
+        one exposed by the Tracker filesystem miner, use
+        <function><link linkend="tracker-sparql-connection-bus-new">tracker_sparql_connection_bus_new</link></function>.
     </para>
-
+    <para>
+        To connect to another a database on a remote machine, use
+        <function><link linkend="tracker-sparql-connection-remote-new">tracker_sparql_connection_remote_new</link></function>.
+    </para>
   </chapter>
 
   <chapter id="tracker-overview-environment-variables">
@@ -90,16 +72,7 @@ $ pkg-config --libs tracker-sparql-0.12
 	<listitem>
 	  <emphasis>TRACKER_VERBOSITY</emphasis>
 	  <para>
-	    Historically, all queries would go
-	    through <emphasis>tracker-store</emphasis> and all
-	    requests would be logged according to the verbosity set
-	    in <emphasis>tracker-store.cfg</emphasis> (see manual
-	    pages for <emphasis>tracker-store.cfg</emphasis>). Since
-	    libtracker-sparql may
-	    circumvent <emphasis>tracker-store</emphasis> if using the
-	    direct access backend, this environment variable was added
-	    to let clients choose the log level. The same values apply
-	    to all other processes which have logging and a
+	    Lets you choose the log level for libtracker-sparql.
 	    configuration to control it. Values range
 	    from <emphasis>0</emphasis> to <emphasis>3</emphasis>,
 	    0=errors, 1=minimal, 2=detailed, 3=debug. By default it
@@ -112,4 +85,3 @@ $ pkg-config --libs tracker-sparql-0.12
   </chapter>
 
 </part>
-
