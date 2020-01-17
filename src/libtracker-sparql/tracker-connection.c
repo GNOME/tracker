@@ -36,6 +36,79 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
 {
 }
 
+/* The constructor functions are defined in the libtracker-sparql-backend, but
+ * documented here. */
+
+/**
+ * tracker_sparql_connection_new:
+ * @flags: values from #TrackerSparqlConnectionFlags
+ * @store: the directory that contains the database, as a #GFile
+ * @ontology: the directory that contains the database schemas, as a #GFile
+ * @cancellable: a #GCancellable, or %NULL
+ *
+ * Opens a database. Use this for data managed by the current process.
+ *
+ * To connect to databases managed by other processes, use
+ * tracker_sparql_connection_bus_new().
+ *
+ * Returns: a new #TrackerSparqlConnection. Call g_object_unref() on the
+ * object when no longer used.
+ *
+ * Since: 3.0
+ */
+
+/**
+ * tracker_sparql_connection_new_async:
+ * @flags: values from #TrackerSparqlConnectionFlags
+ * @store: the directory that contains the database, as a #GFile
+ * @ontology: the directory that contains the database schemas, as a #GFile
+ * @cancellable: a #GCancellable, or %NULL
+ * @callback: the #GAsyncReadyCallback called when the operation completes
+ * @user_data: data passed to @callback
+ *
+ * Asynchronous version of tracker_sparql_connection_new().
+ *
+ * Since: 3.0
+ */
+
+/**
+ * tracker_sparql_connection_new_finish:
+ * @result: the #GAsyncResult
+ * @error: pointer to a #GError
+ *
+ * Completion function for tracker_sparql_connection_new_async().
+ *
+ * Since: 3.0
+ */
+
+/**
+ * tracker_sparql_connection_bus_new:
+ * @service: The name of the D-Bus service to connect to.
+ * @object_path: The path to the object, or %NULL to use the default.
+ * @conn: The #GDBusConnection to use, or %NULL to use the session bus.
+ *
+ * Connects to a database owned by another process on the
+ * local machine.
+ *
+ * Returns: a new #TrackerSparqlConnection. Call g_object_unref() on the
+ * object when no longer used.
+ *
+ * Since: 3.0
+ */
+
+/**
+ * tracker_sparql_connection_remote_new:
+ * @uri_base: Base URI of the remote connection
+ *
+ * Connects to a remote SPARQL endpoint. The connection is made using the libsoup
+ * HTTP library. The connection will normally use the http:// or https:// protocol.
+ *
+ * Returns: a new remote #TrackerSparqlConnection. Call g_object_unref() on the
+ * object when no longer used.
+ *
+ * Since: 1.12
+ */
+
 /**
  * tracker_sparql_connection_query:
  * @connection: a #TrackerSparqlConnection
