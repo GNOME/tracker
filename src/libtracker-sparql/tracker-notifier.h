@@ -75,8 +75,6 @@ TrackerNotifierEventType
 TRACKER_AVAILABLE_IN_ALL
 gint64        tracker_notifier_event_get_id         (TrackerNotifierEvent *event);
 TRACKER_AVAILABLE_IN_ALL
-const gchar * tracker_notifier_event_get_type       (TrackerNotifierEvent *event);
-TRACKER_AVAILABLE_IN_ALL
 const gchar * tracker_notifier_event_get_urn        (TrackerNotifierEvent *event);
 
 #endif /* __TRACKER_NOTIFIER_H__ */
