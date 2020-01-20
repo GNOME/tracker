@@ -22,7 +22,11 @@ Stand-alone tests cases for the store, booting it with different ontology
 changes and checking if the data is still there.
 """
 
+import gi
+gi.require_version('Tracker', '3.0')
 from gi.repository import GLib
+from gi.repository import Gio
+from gi.repository import Tracker
 
 import os
 import pathlib
@@ -67,38 +71,33 @@ class OntologyChangeTestTemplate (ut.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
-    def get_ontology_dir(self, param):
-        return str(pathlib.Path(__file__).parent.joinpath('test-ontologies', param))
+    def ontology_path(self, param):
+        return pathlib.Path(__file__).parent.joinpath('test-ontologies', param)
 
     def template_test_ontology_change(self):
         self.set_ontology_dirs()
 
         self.__assert_ontology_dates(self.FIRST_ONTOLOGY_DIR, self.SECOND_ONTOLOGY_DIR)
 
-        extra_env = cfg.test_environment(self.tmpdir)
-        extra_env['LANG'] = 'en_GB.utf8'
-        extra_env['LC_COLLATE'] = 'en_GB.utf8'
-        extra_env['TRACKER_DB_ONTOLOGIES_DIR'] = self.get_ontology_dir(self.FIRST_ONTOLOGY_DIR)
+        # Create a local store with the first set of ontologies.
+        conn1 = Tracker.SparqlConnection.new(
+            Tracker.SparqlConnectionFlags.NONE,
+            Gio.File.new_for_path(self.tmpdir),
+            Gio.File.new_for_path(str(self.ontology_path(self.FIRST_ONTOLOGY_DIR))),
+            None)
 
-        sandbox1 = trackertestutils.helpers.TrackerDBusSandbox(
-            cfg.TEST_DBUS_DAEMON_CONFIG_FILE, extra_env=extra_env)
-        sandbox1.start()
-
-        self.tracker = trackertestutils.helpers.StoreHelper(sandbox1.get_connection())
-        self.tracker.start_and_wait_for_ready()
-
+        self.tracker = trackertestutils.helpers.StoreHelper(conn1)
         self.insert_data()
 
-        sandbox1.stop()
+        conn1.close()
 
-        # Boot the second set of ontologies
-        extra_env['TRACKER_DB_ONTOLOGIES_DIR'] = self.get_ontology_dir(self.SECOND_ONTOLOGY_DIR)
-        sandbox2 = trackertestutils.helpers.TrackerDBusSandbox(
-            cfg.TEST_DBUS_DAEMON_CONFIG_FILE, extra_env=extra_env)
-        sandbox2.start()
-
-        self.tracker = trackertestutils.helpers.StoreHelper(sandbox2.get_connection())
-        self.tracker.start_and_wait_for_ready()
+        # Reopen the local store with the second set of ontologies.
+        conn2 = Tracker.SparqlConnection.new(
+            Tracker.SparqlConnectionFlags.NONE,
+            Gio.File.new_for_path(self.tmpdir),
+            Gio.File.new_for_path(str(self.ontology_path(self.SECOND_ONTOLOGY_DIR))),
+            None)
+        self.tracker = trackertestutils.helpers.StoreHelper(conn2)
 
         self.validate_status()
 
@@ -168,9 +167,9 @@ class OntologyChangeTestTemplate (ut.TestCase):
                         break
 
         first_date = get_ontology_date(
-            os.path.join(self.get_ontology_dir(first), "91-test.ontology"))
+            self.ontology_path(first).joinpath("91-test.ontology"))
         second_date = get_ontology_date(
-            os.path.join(self.get_ontology_dir(second), "91-test.ontology"))
+            self.ontology_path(second).joinpath("91-test.ontology"))
         if first_date >= second_date:
             self.fail("nao:modifiedTime in '%s' is not more recent in the second ontology" % (
                 "91-test.ontology"))

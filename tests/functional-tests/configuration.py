@@ -37,6 +37,10 @@ with open(os.environ['TRACKER_FUNCTIONAL_TEST_CONFIG']) as f:
 TEST_DBUS_DAEMON_CONFIG_FILE = config['TEST_DBUS_DAEMON_CONFIG_FILE']
 
 
+def ontologies_dir():
+    return config['TEST_ONTOLOGIES_DIR']
+
+
 def test_environment(tmpdir):
     return {
         'DCONF_PROFILE': config['TEST_DCONF_PROFILE'],

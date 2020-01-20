@@ -18,6 +18,9 @@
 # 02110-1301, USA.
 #
 
+import gi
+gi.require_version('Tracker', '3.0')
+from gi.repository import Tracker
 from gi.repository import Gio
 from gi.repository import GLib
 
@@ -34,7 +37,7 @@ from . import psutil_mini as psutil
 log = logging.getLogger(__name__)
 
 
-class GraphUpdateTimeoutException(RuntimeError):
+class EventTimeoutException(RuntimeError):
     pass
 
 
@@ -59,115 +62,37 @@ atexit.register(_cleanup_processes)
 
 class StoreHelper():
     """
-    Helper for testing the tracker-store daemon.
+    Helper for testing database access with libtracker-sparql.
     """
 
-    TRACKER_BUSNAME = 'org.freedesktop.Tracker1'
-    TRACKER_OBJ_PATH = '/org/freedesktop/Tracker1/Resources'
-    RESOURCES_IFACE = "org.freedesktop.Tracker1.Resources"
-
-    TRACKER_BACKUP_OBJ_PATH = "/org/freedesktop/Tracker1/Backup"
-    BACKUP_IFACE = "org.freedesktop.Tracker1.Backup"
-
-    TRACKER_STATS_OBJ_PATH = "/org/freedesktop/Tracker1/Statistics"
-    STATS_IFACE = "org.freedesktop.Tracker1.Statistics"
-
-    TRACKER_STATUS_OBJ_PATH = "/org/freedesktop/Tracker1/Status"
-    STATUS_IFACE = "org.freedesktop.Tracker1.Status"
-
-    def __init__(self, dbus_connection):
+    def __init__(self, conn):
         self.log = logging.getLogger(__name__)
         self.loop = mainloop.MainLoop()
 
-        self.bus = dbus_connection
-        self.graph_updated_handler_id = 0
-
-        self.resources = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
-            self.TRACKER_BUSNAME, self.TRACKER_OBJ_PATH, self.RESOURCES_IFACE)
-
-        self.backup_iface = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
-            self.TRACKER_BUSNAME, self.TRACKER_BACKUP_OBJ_PATH, self.BACKUP_IFACE)
-
-        self.stats_iface = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
-            self.TRACKER_BUSNAME, self.TRACKER_STATS_OBJ_PATH, self.STATS_IFACE)
-
-        self.status_iface = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
-            self.TRACKER_BUSNAME, self.TRACKER_STATUS_OBJ_PATH, self.STATUS_IFACE)
-
-    def start_and_wait_for_ready(self):
-        # The daemon is autostarted as soon as a method is called.
-        #
-        # We set a big timeout to avoid interfering when a daemon is being
-        # interactively debugged.
-        self.log.debug("Calling %s.Wait() method", self.STATUS_IFACE)
-        self.status_iface.call_sync('Wait', None, Gio.DBusCallFlags.NONE, 1000000, None)
-        self.log.debug("Ready")
+        self.conn = conn
+        self.notifier = None
 
     def start_watching_updates(self):
-        assert self.graph_updated_handler_id == 0
-
-        self.reset_graph_updates_tracking()
-
-        def signal_handler(proxy, sender_name, signal_name, parameters):
-            if signal_name == 'GraphUpdated':
-                self._graph_updated_cb(*parameters.unpack())
-
-        self.graph_updated_handler_id = self.resources.connect(
-            'g-signal', signal_handler)
-        self.log.debug("Watching for updates from Resources interface")
+        assert self.notifier is None
+        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.NONE)
+        self.notifier.connect('events', self._notifier_events_cb)
+        self.log.debug("Watching for updates from TrackerNotifier interface")
 
     def stop_watching_updates(self):
-        if self.graph_updated_handler_id != 0:
+        if self.notifier:
+            del self.notifier
             self.log.debug("No longer watching for updates from Resources interface")
-            self.resources.disconnect(self.graph_updated_handler_id)
-            self.graph_updated_handler_id = 0
 
-    # A system to follow GraphUpdated and make sure all changes are tracked.
-    # This code saves every change notification received, and exposes methods
-    # to await insertion or deletion of a certain resource which first check
-    # the list of events already received and wait for more if the event has
-    # not yet happened.
+    def _notifier_events_timeout_cb(self):
+        raise EventTimeoutException()
 
-    def reset_graph_updates_tracking(self):
-        self.class_to_track = None
-        self.inserts_list = []
-        self.deletes_list = []
-        self.inserts_match_function = None
-        self.deletes_match_function = None
-
-    def _graph_updated_timeout_cb(self):
-        raise GraphUpdateTimeoutException()
-
-    def _graph_updated_cb(self, class_name, deletes_list, inserts_list):
+    def _notifier_events_cb(self, service, graph, events, user_data):
         """
-        Process notifications from tracker-store on resource changes.
+        Process notifications from store on resource changes.
         """
-        exit_loop = False
 
-        if class_name == self.class_to_track:
-            self.log.debug("GraphUpdated for %s: %i deletes, %i inserts", class_name, len(deletes_list), len(inserts_list))
-
-            if inserts_list is not None:
-                if self.inserts_match_function is not None:
-                    # The match function will remove matched entries from the list
-                    (exit_loop, inserts_list) = self.inserts_match_function(inserts_list)
-                self.inserts_list += inserts_list
-
-            if not exit_loop and deletes_list is not None:
-                if self.deletes_match_function is not None:
-                    (exit_loop, deletes_list) = self.deletes_match_function(deletes_list)
-                self.deletes_list += deletes_list
-
-            if exit_loop:
-                GLib.source_remove(self.graph_updated_timeout_id)
-                self.graph_updated_timeout_id = 0
-                self.loop.quit()
-        else:
-            self.log.debug("Ignoring GraphUpdated for class %s, currently tracking %s", class_name, self.class_to_track)
+        self.log("Got %i events from %s, %s", len(events), service, graph)
+        # FIXME: This needs to change completely.
 
     def _enable_await_timeout(self):
         self.graph_updated_timeout_id = GLib.timeout_add_seconds(REASONABLE_TIMEOUT,
@@ -177,14 +102,6 @@ class StoreHelper():
         """
         Block until a resource matching the parameters becomes available
         """
-        assert (self.inserts_match_function == None)
-        assert (self.class_to_track == None), "Already waiting for resource of type %s" % self.class_to_track
-        assert (self.graph_updated_handler_id != 0), "You must call start_watching_updates() first."
-
-        self.class_to_track = rdf_class
-
-        self.matched_resource_urn = None
-        self.matched_resource_id = None
 
         self.log.debug("Await new %s (%i existing inserts)", rdf_class, len(self.inserts_list))
 
@@ -237,69 +154,12 @@ class StoreHelper():
             matched = matched_creation if required_property is None else matched_required_property
             return matched, remaining_events
 
-        def match_cb(inserts_list):
-            matched, remaining_events = find_resource_insertion(inserts_list)
-            exit_loop = matched
-            return exit_loop, remaining_events
-
-        # Check the list of previously received events for matches
-        (existing_match, self.inserts_list) = find_resource_insertion(self.inserts_list)
-
-        if not existing_match:
-            self._enable_await_timeout()
-            self.inserts_match_function = match_cb
-            # Run the event loop until the correct notification arrives
-            try:
-                self.loop.run_checked()
-            except GraphUpdateTimeoutException:
-                raise GraphUpdateTimeoutException("Timeout waiting for resource: class %s, URL %s, title %s" % (rdf_class, url, title)) from None
-            self.inserts_match_function = None
-
-        self.class_to_track = None
-        return (self.matched_resource_id, self.matched_resource_urn)
+        return (None, None)
 
     def await_resource_deleted(self, rdf_class, id):
         """
         Block until we are notified of a resources deletion
         """
-        assert (self.deletes_match_function == None)
-        assert (self.class_to_track == None)
-        assert (self.graph_updated_handler_id != 0), "You must call start_watching_updates() first."
-
-        def find_resource_deletion(deletes_list):
-            self.log.debug("find_resource_deletion: looking for %i in %s", id, deletes_list)
-
-            matched = False
-            remaining_events = []
-
-            for delete in deletes_list:
-                if delete[1] == id:
-                    matched = True
-                else:
-                    remaining_events += [delete]
-
-            return matched, remaining_events
-
-        def match_cb(deletes_list):
-            matched, remaining_events = find_resource_deletion(deletes_list)
-            exit_loop = matched
-            return exit_loop, remaining_events
-
-        self.log.debug("Await deletion of %i (%i existing)", id, len(self.deletes_list))
-
-        (existing_match, self.deletes_list) = find_resource_deletion(self.deletes_list)
-
-        if not existing_match:
-            self._enable_await_timeout()
-            self.class_to_track = rdf_class
-            self.deletes_match_function = match_cb
-            # Run the event loop until the correct notification arrives
-            try:
-                self.loop.run_checked()
-            except GraphUpdateTimeoutException as e:
-                raise GraphUpdateTimeoutException("Resource %i has not been deleted." % id) from e
-            self.deletes_match_function = None
-            self.class_to_track = None
 
         return
 
@@ -307,64 +167,19 @@ class StoreHelper():
         """
         Block until a property of a resource is updated or inserted.
         """
-        assert (self.inserts_match_function == None)
-        assert (self.deletes_match_function == None)
-        assert (self.class_to_track == None)
-        assert (self.graph_updated_handler_id != 0), "You must call start_watching_updates() first."
 
-        self.log.debug("Await change to %i %s (%i, %i existing)", subject_id, property_uri, len(self.inserts_list), len(self.deletes_list))
+    def query(self, query):
+        cursor = self.conn.query(query, None)
+        result = []
+        while cursor.next():
+            row = []
+            for i in range(0, cursor.get_n_columns()):
+                row.append(cursor.get_string(i)[0])
+            result.append(row)
+        return result
 
-        self.class_to_track = rdf_class
-
-        property_id = self.get_resource_id_by_uri(property_uri)
-
-        def find_property_change(event_list):
-            matched = False
-            remaining_events = []
-
-            for event in event_list:
-                if event[1] == subject_id and event[2] == property_id:
-                    self.log.debug("Matched property change: %s", str(event))
-                    matched = True
-                else:
-                    remaining_events += [event]
-
-            return matched, remaining_events
-
-        def match_cb(event_list):
-            matched, remaining_events = find_property_change(event_list)
-            exit_loop = matched
-            return exit_loop, remaining_events
-
-        # Check the list of previously received events for matches
-        (existing_match, self.inserts_list) = find_property_change(self.inserts_list)
-        if not existing_match:
-            (existing_match, self.deletes_list) = find_property_change(self.deletes_list)
-
-        if not existing_match:
-            self._enable_await_timeout()
-            self.inserts_match_function = match_cb
-            self.deletes_match_function = match_cb
-            # Run the event loop until the correct notification arrives
-            try:
-                self.loop.run_checked()
-            except GraphUpdateTimeoutException:
-                raise GraphUpdateTimeoutException(
-                    "Timeout waiting for property change, subject %i property %s (%i)" % (subject_id, property_uri, property_id))
-
-        self.inserts_match_function = None
-        self.deletes_match_function = None
-        self.class_to_track = None
-
-    # Note: The methods below call the tracker-store D-Bus API directly. This
-    # is useful for testing this API surface, but we recommand that all regular
-    # applications use libtracker-sparql library to talk to the database.
-
-    def query(self, query, **kwargs):
-        return self.resources.SparqlQuery('(s)', query, **kwargs)
-
-    def update(self, update_sparql, **kwargs):
-        return self.resources.SparqlUpdate('(s)', update_sparql, **kwargs)
+    def update(self, update_sparql):
+        self.conn.update(update_sparql, 0, None)
 
     def load(self, ttl_uri, **kwargs):
         return self.resources.Load('(s)', ttl_uri, **kwargs)
