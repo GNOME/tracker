@@ -16,14 +16,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 #
+
 """
-Test tracker:coalesce function in Sparql. Only uses the Store
+Test tracker:coalesce function in SPARQL.
 """
+
 import unittest as ut
-from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+import fixtures
 
 
-class TestCoalesce (CommonTrackerStoreTest):
+class TestCoalesce (fixtures.TrackerSparqlDirectTest):
     """
     Insert and instance with some values, and tracker coalesce of some of them
     with different combinations (first NULL, none NULL, all NULL...)

@@ -18,19 +18,16 @@
 #
 
 """
-Stand-alone tests cases for the store, inserting, removing information
-in pure sparql and checking that the data is really there
+Test that inserting data in a Tracker database works as expected.
 """
-import sys
-import time
+
 import random
-import datetime
-
 import unittest as ut
-from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+
+import fixtures
 
 
-class TrackerStoreInsertionTests (CommonTrackerStoreTest):
+class TrackerStoreInsertionTests (fixtures.TrackerSparqlDirectTest):
     """
     Insert single and multiple-valued properties, dates (ok and broken)
     and check the results
@@ -634,7 +631,7 @@ class TrackerStoreInsertionTests (CommonTrackerStoreTest):
             """DELETE { <test://instance-ds3> a rdfs:Resource. }""")
 
 
-class TrackerStoreDeleteTests (CommonTrackerStoreTest):
+class TrackerStoreDeleteTests (fixtures.TrackerSparqlDirectTest):
     """
     Use DELETE in Sparql and check the information is actually removed
     """
@@ -720,76 +717,7 @@ class TrackerStoreDeleteTests (CommonTrackerStoreTest):
         self.assertEqual(after_removal, initial)
 
 
-class TrackerStoreBatchUpdateTest (CommonTrackerStoreTest):
-    """
-    Insert data using the BatchSparqlUpdate method in the store
-    """
-
-    def test_batch_insert_01(self):
-        """
-        batch insertion of 100 contacts:
-        1. insert 100 contacts.
-        2. delete the inserted contacts.
-        """
-        NUMBER_OF_TEST_CONTACTS = 3
-
-        # query no. of existing contacts. (predefined instances in the DB)
-        count_before_insert = self.tracker.count_instances("nco:PersonContact")
-
-        # insert contacts.
-        CONTACT_TEMPLATE = """
-                   <test://instance-contact-%d> a nco:PersonContact ;
-                      nco:nameGiven 'Contact-name %d';
-                      nco:nameFamily 'Contact-family %d';
-                      nie:generator 'test-instance-to-remove' ;
-                      nco:contactUID '%d';
-                      nco:hasPhoneNumber <tel:%s> .
-                """
-
-        global contact_list
-        contact_list = []
-
-        def complete_contact(contact_template):
-            random_phone = "".join([str(random.randint(0, 9))
-                                    for i in range(0, 9)])
-            contact_counter = random.randint(0, 10000)
-
-            # Avoid duplicates
-            while contact_counter in contact_list:
-                contact_counter = random.randint(0, 10000)
-            contact_list.append(contact_counter)
-
-            return contact_template % (contact_counter,
-                                       contact_counter,
-                                       contact_counter,
-                                       contact_counter,
-                                       random_phone)
-
-        contacts = list(
-            map(complete_contact, [CONTACT_TEMPLATE] * NUMBER_OF_TEST_CONTACTS))
-        INSERT_SPARQL = "\n".join(["INSERT {"] + contacts + ["}"])
-        self.tracker.batch_update(INSERT_SPARQL)
-
-        # Check all instances are in
-        count_after_insert = self.tracker.count_instances("nco:PersonContact")
-        self.assertEqual(count_before_insert +
-                         NUMBER_OF_TEST_CONTACTS, count_after_insert)
-
-        """ Delete the inserted contacts """
-        DELETE_SPARQL = """
-                DELETE {
-                  ?x a rdfs:Resource .
-                } WHERE {
-                  ?x a nco:PersonContact ;
-                      nie:generator 'test-instance-to-remove' .
-                }
-                """
-        self.tracker.update(DELETE_SPARQL)
-        count_final = self.tracker.count_instances("nco:PersonContact")
-        self.assertEqual(count_before_insert, count_final)
-
-
-class TrackerStorePhoneNumberTest (CommonTrackerStoreTest):
+class TrackerStorePhoneNumberTest (fixtures.TrackerSparqlDirectTest):
     """
     Tests around phone numbers (maemo specific). Inserting correct/incorrect ones
     and running query to get the contact from the number.
@@ -801,16 +729,6 @@ class TrackerStorePhoneNumberTest (CommonTrackerStoreTest):
         2. Receiving a message  from a contact whose localPhoneNumber is saved.
         3. Query messages from the local phone number
         """
-        PhoneNumber = str(random.randint(0, sys.maxsize))
-        UUID = str(time.time())
-        UUID1 = str(random.randint(0, sys.maxsize))
-        UUID2 = str(random.randint(0, sys.maxsize))
-        localNumber = PhoneNumber[-7:]
-        d = datetime.datetime.now()
-        Received = d.isoformat()
-        ID = int(time.time()) % 1000
-        Given_Name = 'test_GN_' + repr(ID)
-        Family_Name = 'test_FN_' + repr(ID)
 
         INSERT_CONTACT_PHONE = """
                 INSERT {

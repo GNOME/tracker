@@ -20,17 +20,18 @@
 #
 
 """
-Stand-alone tests cases for the store, checking the collation is working
+Checking the collation is working
 """
+
 import time
 import random
 import locale
 
 import unittest as ut
-from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+import fixtures
 
 
-class TrackerStoreCollationTests (CommonTrackerStoreTest):
+class TrackerStoreCollationTests (fixtures.TrackerSparqlDirectTest):
     """
     Insert few instances with a text field containing collation-problematic words.
     Ask for those instances order by the field and check the results.
@@ -47,7 +48,6 @@ class TrackerStoreCollationTests (CommonTrackerStoreTest):
         for uri in self.clean_up_instances:
             self.tracker.update("DELETE { <%s> a rdfs:Resource. }" % (uri))
         self.clean_up_instances = []
-        time.sleep(1)
 
     def __insert_text(self, text):
         uri = "test://collation-01-%d" % (random.randint(1, 1000))
@@ -124,6 +124,7 @@ class TrackerStoreCollationTests (CommonTrackerStoreTest):
         input_dt = ["ä", "ö", "a", "e", "i", "o", "u"]
         expected = ["a", "ä", "e", "i", "o", "ö", "u"]
         self.__collation_test(input_dt, expected)
+
 
 if __name__ == "__main__":
     print("""

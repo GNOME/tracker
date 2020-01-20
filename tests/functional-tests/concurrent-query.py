@@ -19,22 +19,24 @@
 """
 Send concurrent inserts and queries to the daemon to check the concurrency.
 """
+
 from gi.repository import GLib
 
 import unittest as ut
-from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+
+import fixtures
+
 
 AMOUNT_OF_TEST_INSTANCES = 100
 AMOUNT_OF_QUERIES = 10
 
 
-class TestConcurrentQuery (CommonTrackerStoreTest):
+class ConcurrentQueryTests():
     """
     Send a bunch of queries to the daemon asynchronously, to test the queue
     holding those queries
     """
-
-    def setUp(self):
+    def test_setup(self):
         self.main_loop = GLib.MainLoop()
 
         self.mock_data_insert()
@@ -65,36 +67,42 @@ class TestConcurrentQuery (CommonTrackerStoreTest):
         QUERY = "SELECT ?u WHERE { ?u a nco:PersonContact. FILTER regex (?u, 'test-09:ins')}"
         UPDATE = "INSERT { <test-09:picture-%d> a nmm:Photo. }"
         for i in range(0, AMOUNT_OF_QUERIES):
-            self.tracker.query(
-                QUERY,
-                result_handler=self.reply_cb,
-                error_handler=self.error_handler)
-            self.tracker.update(
-                UPDATE % (i),
-                result_handler=self.update_cb,
-                error_handler=self.error_handler)
+            self.conn.query_async(QUERY, None, self.query_cb)
+            self.conn.update_async(UPDATE % (i), 0, None, self.update_cb)
 
         # Safeguard of 60 seconds. The last reply should quit the loop
         GLib.timeout_add_seconds(60, self.timeout_cb)
         self.main_loop.run()
 
-    def reply_cb(self, obj, results, data):
+    def query_cb(self, obj, result):
+        cursor = self.conn.query_finish(result)
+
+        rows = 0
+        while cursor.next(): rows += 1
+        self.assertEqual(rows, AMOUNT_OF_TEST_INSTANCES)
+
         self.finish_counter += 1
-        self.assertEqual(len(results), AMOUNT_OF_TEST_INSTANCES)
         if (self.finish_counter >= AMOUNT_OF_QUERIES):
             self.timeout_cb()
 
-    def update_cb(self, obj, results, data):
-        self.assertTrue(True)
-
-    def error_handler(self, obj, e, user_data):
-        print("ERROR in DBus call: %s" % e)
-        raise(e)
+    def update_cb(self, obj, result):
+        self.conn.update_finish(result)
 
     def timeout_cb(self):
         self.mock_data_delete()
         self.main_loop.quit()
         return False
+
+
+class TestConcurrentQueryLocal(fixtures.TrackerSparqlDirectTest, ConcurrentQueryTests):
+    def setUp(self):
+        self.test_setup()
+
+
+class TestConcurrentQueryBus(fixtures.TrackerSparqlBusTest, ConcurrentQueryTests):
+    def setUp(self):
+        self.test_setup()
+
 
 if __name__ == "__main__":
     ut.main(verbosity=2)
