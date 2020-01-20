@@ -18,6 +18,11 @@
 # 02110-1301, USA.
 #
 
+import gi
+gi.require_version('Tracker', '3.0')
+from gi.repository import Gio
+from gi.repository import Tracker
+
 import os
 import shutil
 import tempfile
@@ -40,25 +45,16 @@ class CommonTrackerStoreTest (ut.TestCase):
         self.tmpdir = tempfile.mkdtemp(prefix='tracker-test-')
 
         try:
-            extra_env = cfg.test_environment(self.tmpdir)
-            extra_env['LANG'] = 'en_GB.utf8'
-            extra_env['LC_COLLATE'] = 'en_GB.utf8'
+            self.conn = Tracker.SparqlConnection.new(
+                Tracker.SparqlConnectionFlags.NONE,
+                Gio.File.new_for_path(self.tmpdir), None, None)
 
-            self.sandbox = trackertestutils.helpers.TrackerDBusSandbox(
-                dbus_daemon_config_file=cfg.TEST_DBUS_DAEMON_CONFIG_FILE, extra_env=extra_env)
-            self.sandbox.start()
-
-            self.tracker = trackertestutils.helpers.StoreHelper(
-                self.sandbox.get_connection())
-            self.tracker.start_and_wait_for_ready()
-            self.tracker.start_watching_updates()
+            self.tracker = trackertestutils.helpers.StoreHelper(self.conn)
         except Exception as e:
             shutil.rmtree(self.tmpdir, ignore_errors=True)
             raise
 
     @classmethod
     def tearDownClass(self):
-        self.tracker.stop_watching_updates()
-        self.sandbox.stop()
-
+        self.conn.close()
         shutil.rmtree(self.tmpdir, ignore_errors=True)

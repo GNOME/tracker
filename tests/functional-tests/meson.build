@@ -31,7 +31,6 @@ functional_tests = [
   '08-unique-insertions',
   '09-concurrent-query',
   '14-signals',
-  '15-statistics',
   '16-collation',
   '17-ontology-changes',
 ]
@@ -42,6 +41,8 @@ endif
 
 test_env = environment()
 test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
+test_env.prepend('GI_TYPELIB_PATH', tracker_sparql_uninstalled_dir)
+test_env.prepend('LD_LIBRARY_PATH', tracker_sparql_uninstalled_dir)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
 
 foreach t: functional_tests
