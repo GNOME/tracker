@@ -43,16 +43,18 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
  * tracker_sparql_connection_new:
  * @flags: values from #TrackerSparqlConnectionFlags
  * @store: the directory that contains the database, as a #GFile
- * @ontology: the directory that contains the database schemas, as a #GFile
- * @cancellable: a #GCancellable, or %NULL
+ * @ontology: (nullable): the directory that contains the database schemas as
+ *                        a #GFile, or %NULL to use the default schemas.
+ * @cancellable: (nullable): a #GCancellable, or %NULL
+ * @error: pointer to a #GError
  *
  * Opens a database. Use this for data managed by the current process.
  *
  * To connect to databases managed by other processes, use
  * tracker_sparql_connection_bus_new().
  *
- * Returns: a new #TrackerSparqlConnection. Call g_object_unref() on the
- * object when no longer used.
+ * Returns: (transfer full): a new #TrackerSparqlConnection. Call
+ * g_object_unref() on the object when no longer used.
  *
  * Since: 3.0
  */
@@ -61,8 +63,9 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
  * tracker_sparql_connection_new_async:
  * @flags: values from #TrackerSparqlConnectionFlags
  * @store: the directory that contains the database, as a #GFile
- * @ontology: the directory that contains the database schemas, as a #GFile
- * @cancellable: a #GCancellable, or %NULL
+ * @ontology: (nullable): the directory that contains the database schemas as
+ *                        a #GFile, or %NULL to use the default schemas.
+ * @cancellable: (nullable): a #GCancellable, or %NULL
  * @callback: the #GAsyncReadyCallback called when the operation completes
  * @user_data: data passed to @callback
  *
@@ -83,14 +86,15 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
 
 /**
  * tracker_sparql_connection_bus_new:
- * @service: The name of the D-Bus service to connect to.
- * @object_path: The path to the object, or %NULL to use the default.
- * @conn: The #GDBusConnection to use, or %NULL to use the session bus.
+ * @service_name: The name of the D-Bus service to connect to.
+ * @object_path: (nullable): The path to the object, or %NULL to use the default.
+ * @dbus_connection: (nullable): The #GDBusConnection to use, or %NULL to use the session bus.
+ * @error: pointer to a #GError
  *
  * Connects to a database owned by another process on the
  * local machine.
  *
- * Returns: a new #TrackerSparqlConnection. Call g_object_unref() on the
+ * Returns: (transfer full): a new #TrackerSparqlConnection. Call g_object_unref() on the
  * object when no longer used.
  *
  * Since: 3.0
@@ -103,8 +107,8 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
  * Connects to a remote SPARQL endpoint. The connection is made using the libsoup
  * HTTP library. The connection will normally use the http:// or https:// protocol.
  *
- * Returns: a new remote #TrackerSparqlConnection. Call g_object_unref() on the
- * object when no longer used.
+ * Returns: (transfer full): a new remote #TrackerSparqlConnection. Call
+ * g_object_unref() on the object when no longer used.
  *
  * Since: 1.12
  */
@@ -544,7 +548,7 @@ tracker_sparql_connection_create_notifier (TrackerSparqlConnection *connection,
 
 /**
  * tracker_sparql_connection_close:
- * @self: a #TrackerSparqlConnection
+ * @connection: a #TrackerSparqlConnection
  *
  * Closes a SPARQL connection. No other API calls than g_object_unref()
  * should happen after this call.
