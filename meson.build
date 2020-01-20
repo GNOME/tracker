@@ -8,7 +8,7 @@ pkg = import('pkgconfig')
 cc = meson.get_compiler('c')
 
 # This is the X.Y used in -llibtracker-FOO-X.Y
-tracker_api_version = '2.0'
+tracker_api_version = '3.0'
 
 tracker_version = meson.project_version().split('-')[0]
 tracker_major_version = tracker_version.split('.')[0].to_int()
