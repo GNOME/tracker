@@ -18,15 +18,16 @@
 #
 
 """
-Peculiar Sparql behavour reported in bugs
+Peculiar SPARQL behavour reported in bugs
 """
+
 from gi.repository import GLib
 
 import unittest as ut
-from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+import fixtures
 
 
-class TrackerStoreSparqlBugsTests (CommonTrackerStoreTest):
+class TrackerStoreSparqlBugsTests (fixtures.TrackerSparqlDirectTest):
 
     def test_01_NB217566_union_exists_filter(self):
         """

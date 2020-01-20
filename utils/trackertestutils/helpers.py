@@ -18,10 +18,14 @@
 # 02110-1301, USA.
 #
 
-from gi.repository import Gio
+import gi
+gi.require_version('Tracker', '3.0')
+from gi.repository import Tracker
 from gi.repository import GLib
+from gi.repository import GObject
 
 import atexit
+import dataclasses
 import logging
 import os
 import signal
@@ -34,7 +38,11 @@ from . import psutil_mini as psutil
 log = logging.getLogger(__name__)
 
 
-class GraphUpdateTimeoutException(RuntimeError):
+class AwaitException(RuntimeError):
+    pass
+
+
+class AwaitTimeoutException(AwaitException):
     pass
 
 
@@ -42,7 +50,7 @@ class NoMetadataException (Exception):
     pass
 
 
-REASONABLE_TIMEOUT = 30
+DEFAULT_TIMEOUT = 10
 
 
 _process_list = []
@@ -57,335 +65,319 @@ def _cleanup_processes():
 atexit.register(_cleanup_processes)
 
 
+@dataclasses.dataclass
+class InsertedResource():
+    """Wraps the 'urn' value returned by await_insert context manager.
+
+    We can't return the value directly as we don't know it until the context
+    manager exits.
+
+    """
+    urn: str
+    id: int
+
+
+class await_insert():
+    """Context manager to await data insertion by Tracker miners & extractors.
+
+    Use like this:
+
+        expected = 'a nfo:Document; nie:url <test://url>'
+        with self.tracker.await_update(expected) as resource:
+            # Create or update a file that's indexed by tracker-miner-fs.
+            #
+            # The context manager will not exit from the 'with' block until the
+            # data has been inserted in the store.
+
+        print(f"Inserted resource with urn: {resource.urn}")
+
+    The function expects an insertion to happen, and will raise an error if the
+    expected data is already present in the store. You can use
+    ensure_resource() if you just want to ensure that some data is present.
+
+    """
+    def __init__(self, conn, predicates, timeout=DEFAULT_TIMEOUT,
+                 _check_inserted=True):
+        self.conn = conn
+        self.predicates = predicates
+        self.timeout = timeout
+        self._check_inserted = _check_inserted
+
+        self.loop = mainloop.MainLoop()
+        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.NONE)
+
+        self.result = InsertedResource(None, 0)
+
+    def __enter__(self):
+        log.info("Awaiting insertion of resource with data %s", self.predicates)
+
+        if self._check_inserted:
+            query_check = ' '.join([
+                'SELECT ?urn tracker:id(?urn) '
+                ' WHERE { '
+                '   ?urn a rdfs:Resource ; ',
+                self.predicates,
+                '}'
+            ])
+            cursor = self.conn.query(query_check)
+            if cursor.next():
+                raise AwaitException("Expected data is already present in the store.")
+
+        query_filtered = ' '.join([
+            'SELECT ?urn tracker:id(?urn) '
+            ' WHERE { '
+            '   ?urn a rdfs:Resource ; ',
+            self.predicates,
+            #'   FILTER (tracker:id(?urn) = ~id) '
+            '   . FILTER (tracker:id(?urn) = %s) '
+            '}'
+        ])
+
+        # FIXME: doesn't work with bus backend: https://gitlab.gnome.org/GNOME/tracker/issues/179
+        #stmt = self.conn.query_statement(query, None)
+
+        def match_cb(notifier, service, graph, events):
+            for event in events:
+                if event.get_event_type() in [Tracker.NotifierEventType.CREATE,
+                                              Tracker.NotifierEventType.UPDATE]:
+                    log.debug("Processing %s event for id %s", event.get_event_type(), event.get_id())
+                    #stmt.bind_int('~id', event.get_id())
+                    #cursor = stmt.execute(None)
+                    stmt = query_filtered % event.get_id()
+                    log.debug("Running %s", stmt)
+                    cursor = self.conn.query(stmt)
+
+                    if cursor.next():
+                        self.result.urn = cursor.get_string(0)[0]
+                        self.result.id = cursor.get_integer(1)
+                        log.debug("Query matched! Got urn %s", self.result.urn)
+
+                        self.loop.quit()
+
+        def timeout_cb():
+            log.info("Timeout fired after %s seconds", self.timeout)
+            raise AwaitTimeoutException()
+
+        self.signal_id = self.notifier.connect('events', match_cb)
+        self.timeout_id = GLib.timeout_add_seconds(self.timeout, timeout_cb)
+
+        return self.result
+
+    def __exit__(self, etype, evalue, etraceback):
+        if etype is not None:
+            return False
+
+        while self.result.urn is None:
+            self.loop.run_checked()
+            log.debug("Got urn %s", self.result.urn)
+
+        GLib.source_remove(self.timeout_id)
+        GObject.signal_handler_disconnect(self.notifier, self.signal_id)
+
+        return True
+
+
+class await_update():
+    """Context manager to await data updates by Tracker miners & extractors.
+
+    Use like this:
+
+        before = 'nie:url <test://url1>'
+        after = 'nie:url <test://url2>'
+        with self.tracker.await_update(resource_id, before, after):
+            # Trigger an update of the data.
+
+    """
+    def __init__(self, conn, resource_id, before_predicates, after_predicates,
+                 timeout=DEFAULT_TIMEOUT):
+        self.conn = conn
+        self.resource_id = resource_id
+        self.before_predicates = before_predicates
+        self.after_predicates = after_predicates
+        self.timeout = timeout
+
+        self.loop = mainloop.MainLoop()
+        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.NONE)
+        self.matched = False
+
+    def __enter__(self):
+        log.info("Awaiting update of resource id %s", self.resource_id)
+
+        query_before = ' '.join([
+            'SELECT ?urn tracker:id(?urn) '
+            ' WHERE { '
+            '   ?urn a rdfs:Resource ; ',
+            self.before_predicates,
+            '   . FILTER (tracker:id(?urn) = %s) '
+            '}'
+        ]) % self.resource_id
+        cursor = self.conn.query(query_before)
+        if not cursor.next():
+            raise AwaitException("Expected data is not present in the store.")
+
+        query_after = ' '.join([
+            'SELECT ?urn tracker:id(?urn) '
+            ' WHERE { '
+            '   ?urn a rdfs:Resource ; ',
+            self.after_predicates,
+            '   . FILTER (tracker:id(?urn) = %s) '
+            '}'
+        ]) % self.resource_id
+
+        def match_cb(notifier, service, graph, events):
+            for event in events:
+                if event.get_event_type() == Tracker.NotifierEventType.UPDATE and event.get_id() == self.resource_id:
+                    log.debug("Processing %s event for id %s", event.get_event_type(), event.get_id())
+                    log.debug("Running %s", query_after)
+                    cursor = self.conn.query(query_after)
+
+                    if cursor.next():
+                        log.debug("Query matched!")
+                        self.matched = True
+                        self.loop.quit()
+
+        def timeout_cb():
+            log.info("Timeout fired after %s seconds", self.timeout)
+            raise AwaitTimeoutException()
+
+        self.signal_id = self.notifier.connect('events', match_cb)
+        self.timeout_id = GLib.timeout_add_seconds(self.timeout, timeout_cb)
+
+    def __exit__(self, etype, evalue, etraceback):
+        if etype is not None:
+            return False
+
+        while not self.matched:
+            self.loop.run_checked()
+
+        GLib.source_remove(self.timeout_id)
+        GObject.signal_handler_disconnect(self.notifier, self.signal_id)
+
+        return True
+
+
+class await_delete():
+    """Context manager to await removal of a resource."""
+
+    def __init__(self, conn, resource_id, timeout=DEFAULT_TIMEOUT):
+        self.conn = conn
+        self.resource_id = resource_id
+        self.timeout = timeout
+
+        self.loop = mainloop.MainLoop()
+        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.NONE)
+        self.matched = False
+
+    def __enter__(self):
+        log.info("Awaiting deletion of resource id %s", self.resource_id)
+
+        query_check = ' '.join([
+            'SELECT ?urn tracker:id(?urn) '
+            ' WHERE { '
+            '   ?urn a rdfs:Resource ; ',
+            '   . FILTER (tracker:id(?urn) = %s) '
+            '}'
+        ])
+        cursor = self.conn.query(query_check % self.resource_id)
+        if not cursor.next():
+            raise AwaitException(
+                "Resource with id %i isn't present in the store.", self.resource_id)
+
+        def match_cb(notifier, service, graph, events):
+            for event in events:
+                if event.get_event_type() == Tracker.NotifierEventType.DELETE:
+                    log.debug("Received %s event for id %s", event.get_event_type(), event.get_id())
+                    if event.get_id() == self.resource_id:
+                        log.debug("Matched expected id %s", self.resource_id)
+                        self.matched = True
+                        self.loop.quit()
+                else:
+                    log.debug("Received %s event for id %s", event.get_event_type(), event.get_id())
+
+        def timeout_cb():
+            log.info("Timeout fired after %s seconds", self.timeout)
+            raise AwaitTimeoutException()
+
+        self.signal_id = self.notifier.connect('events', match_cb)
+        self.timeout_id = GLib.timeout_add_seconds(self.timeout, timeout_cb)
+
+        return None
+
+    def __exit__(self, etype, evalue, etraceback):
+        if etype is not None:
+            return False
+
+        while not self.matched:
+            self.loop.run_checked()
+
+        GLib.source_remove(self.timeout_id)
+        GObject.signal_handler_disconnect(self.notifier, self.signal_id)
+
+        return True
+
+
 class StoreHelper():
     """
-    Helper for testing the tracker-store daemon.
+    Helper for testing database access with libtracker-sparql.
     """
 
-    TRACKER_BUSNAME = 'org.freedesktop.Tracker1'
-    TRACKER_OBJ_PATH = '/org/freedesktop/Tracker1/Resources'
-    RESOURCES_IFACE = "org.freedesktop.Tracker1.Resources"
-
-    TRACKER_BACKUP_OBJ_PATH = "/org/freedesktop/Tracker1/Backup"
-    BACKUP_IFACE = "org.freedesktop.Tracker1.Backup"
-
-    TRACKER_STATS_OBJ_PATH = "/org/freedesktop/Tracker1/Statistics"
-    STATS_IFACE = "org.freedesktop.Tracker1.Statistics"
-
-    TRACKER_STATUS_OBJ_PATH = "/org/freedesktop/Tracker1/Status"
-    STATUS_IFACE = "org.freedesktop.Tracker1.Status"
-
-    def __init__(self, dbus_connection):
+    def __init__(self, conn):
         self.log = logging.getLogger(__name__)
         self.loop = mainloop.MainLoop()
 
-        self.bus = dbus_connection
-        self.graph_updated_handler_id = 0
+        self.conn = conn
 
-        self.resources = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
-            self.TRACKER_BUSNAME, self.TRACKER_OBJ_PATH, self.RESOURCES_IFACE)
+    def await_insert(self, predicates, timeout=DEFAULT_TIMEOUT):
+        """Context manager that blocks until a resource is inserted."""
+        return await_insert(self.conn, predicates, timeout)
 
-        self.backup_iface = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
-            self.TRACKER_BUSNAME, self.TRACKER_BACKUP_OBJ_PATH, self.BACKUP_IFACE)
+    def await_update(self, resource_id, before_predicates, after_predicates,
+                     timeout=DEFAULT_TIMEOUT):
+        """Context manager that blocks until a resource is updated."""
+        return await_update(self.conn, resource_id, before_predicates,
+                            after_predicates, timeout)
 
-        self.stats_iface = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
-            self.TRACKER_BUSNAME, self.TRACKER_STATS_OBJ_PATH, self.STATS_IFACE)
+    def await_delete(self, resource_id, timeout=DEFAULT_TIMEOUT):
+        """Context manager that blocks until a resource is deleted."""
+        return await_delete(self.conn, resource_id, timeout)
 
-        self.status_iface = Gio.DBusProxy.new_sync(
-            self.bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION, None,
-            self.TRACKER_BUSNAME, self.TRACKER_STATUS_OBJ_PATH, self.STATUS_IFACE)
+    def ensure_resource(self, predicates, timeout=DEFAULT_TIMEOUT):
+        """Ensure that a resource matching 'predicates' exists.
 
-    def start_and_wait_for_ready(self):
-        # The daemon is autostarted as soon as a method is called.
-        #
-        # We set a big timeout to avoid interfering when a daemon is being
-        # interactively debugged.
-        self.log.debug("Calling %s.Wait() method", self.STATUS_IFACE)
-        self.status_iface.call_sync('Wait', None, Gio.DBusCallFlags.NONE, 1000000, None)
-        self.log.debug("Ready")
+        This function will block if the resource is not yet created.
 
-    def start_watching_updates(self):
-        assert self.graph_updated_handler_id == 0
-
-        self.reset_graph_updates_tracking()
-
-        def signal_handler(proxy, sender_name, signal_name, parameters):
-            if signal_name == 'GraphUpdated':
-                self._graph_updated_cb(*parameters.unpack())
-
-        self.graph_updated_handler_id = self.resources.connect(
-            'g-signal', signal_handler)
-        self.log.debug("Watching for updates from Resources interface")
-
-    def stop_watching_updates(self):
-        if self.graph_updated_handler_id != 0:
-            self.log.debug("No longer watching for updates from Resources interface")
-            self.resources.disconnect(self.graph_updated_handler_id)
-            self.graph_updated_handler_id = 0
-
-    # A system to follow GraphUpdated and make sure all changes are tracked.
-    # This code saves every change notification received, and exposes methods
-    # to await insertion or deletion of a certain resource which first check
-    # the list of events already received and wait for more if the event has
-    # not yet happened.
-
-    def reset_graph_updates_tracking(self):
-        self.class_to_track = None
-        self.inserts_list = []
-        self.deletes_list = []
-        self.inserts_match_function = None
-        self.deletes_match_function = None
-
-    def _graph_updated_timeout_cb(self):
-        raise GraphUpdateTimeoutException()
-
-    def _graph_updated_cb(self, class_name, deletes_list, inserts_list):
         """
-        Process notifications from tracker-store on resource changes.
-        """
-        exit_loop = False
+        await_ctx_mgr = await_insert(self.conn, predicates, timeout, _check_inserted=False)
+        with await_ctx_mgr as resource:
+            # Check if the data was committed *before* the function was called.
+            query_initial = ' '.join([
+                'SELECT ?urn tracker:id(?urn) '
+                ' WHERE { '
+                '   ?urn a rdfs:Resource ; ',
+                predicates,
+                '}'
+            ])
 
-        if class_name == self.class_to_track:
-            self.log.debug("GraphUpdated for %s: %i deletes, %i inserts", class_name, len(deletes_list), len(inserts_list))
+            log.debug("Running: %s", query_initial)
+            cursor = self.conn.query(query_initial)
+            if cursor.next():
+                resource.urn = cursor.get_string(0)[0]
+                resource.id = cursor.get_integer(1)
+                return resource
+        return resource
 
-            if inserts_list is not None:
-                if self.inserts_match_function is not None:
-                    # The match function will remove matched entries from the list
-                    (exit_loop, inserts_list) = self.inserts_match_function(inserts_list)
-                self.inserts_list += inserts_list
+    def query(self, query):
+        cursor = self.conn.query(query, None)
+        result = []
+        while cursor.next():
+            row = []
+            for i in range(0, cursor.get_n_columns()):
+                row.append(cursor.get_string(i)[0])
+            result.append(row)
+        return result
 
-            if not exit_loop and deletes_list is not None:
-                if self.deletes_match_function is not None:
-                    (exit_loop, deletes_list) = self.deletes_match_function(deletes_list)
-                self.deletes_list += deletes_list
-
-            if exit_loop:
-                GLib.source_remove(self.graph_updated_timeout_id)
-                self.graph_updated_timeout_id = 0
-                self.loop.quit()
-        else:
-            self.log.debug("Ignoring GraphUpdated for class %s, currently tracking %s", class_name, self.class_to_track)
-
-    def _enable_await_timeout(self):
-        self.graph_updated_timeout_id = GLib.timeout_add_seconds(REASONABLE_TIMEOUT,
-                                                                 self._graph_updated_timeout_cb)
-
-    def await_resource_inserted(self, rdf_class, url=None, title=None, required_property=None):
-        """
-        Block until a resource matching the parameters becomes available
-        """
-        assert (self.inserts_match_function == None)
-        assert (self.class_to_track == None), "Already waiting for resource of type %s" % self.class_to_track
-        assert (self.graph_updated_handler_id != 0), "You must call start_watching_updates() first."
-
-        self.class_to_track = rdf_class
-
-        self.matched_resource_urn = None
-        self.matched_resource_id = None
-
-        self.log.debug("Await new %s (%i existing inserts)", rdf_class, len(self.inserts_list))
-
-        if required_property is not None:
-            required_property_id = self.get_resource_id_by_uri(required_property)
-            self.log.debug("Required property %s id %i", required_property, required_property_id)
-
-        def find_resource_insertion(inserts_list):
-            matched_creation = (self.matched_resource_id is not None)
-            matched_required_property = False
-            remaining_events = []
-
-            # FIXME: this could be done in an easier way: build one query that filters
-            # based on every subject id in inserts_list, and returns the id of the one
-            # that matched :)
-            for insert in inserts_list:
-                id = insert[1]
-
-                if not matched_creation:
-                    where = "  ?urn a <%s> " % rdf_class
-
-                    if url is not None:
-                        where += "; nie:url \"%s\"" % url
-
-                    if title is not None:
-                        where += "; nie:title \"%s\"" % title
-
-                    query = "SELECT ?urn WHERE { %s FILTER (tracker:id(?urn) = %s)}" % (where, insert[1])
-                    result_set = self.query(query)
-
-                    if len(result_set) > 0:
-                        matched_creation = True
-                        self.matched_resource_urn = result_set[0][0]
-                        self.matched_resource_id = insert[1]
-                        self.log.debug("Matched creation of resource %s (%i)",
-                            self.matched_resource_urn,
-                             self.matched_resource_id)
-                        if required_property is not None:
-                            self.log.debug("Waiting for property %s (%i) to be set",
-                                required_property, required_property_id)
-
-                if required_property is not None and matched_creation and not matched_required_property:
-                    if id == self.matched_resource_id and insert[2] == required_property_id:
-                        matched_required_property = True
-                        self.log.debug("Matched %s %s", self.matched_resource_urn, required_property)
-
-                if not matched_creation or id != self.matched_resource_id:
-                    remaining_events += [insert]
-
-            matched = matched_creation if required_property is None else matched_required_property
-            return matched, remaining_events
-
-        def match_cb(inserts_list):
-            matched, remaining_events = find_resource_insertion(inserts_list)
-            exit_loop = matched
-            return exit_loop, remaining_events
-
-        # Check the list of previously received events for matches
-        (existing_match, self.inserts_list) = find_resource_insertion(self.inserts_list)
-
-        if not existing_match:
-            self._enable_await_timeout()
-            self.inserts_match_function = match_cb
-            # Run the event loop until the correct notification arrives
-            try:
-                self.loop.run_checked()
-            except GraphUpdateTimeoutException:
-                raise GraphUpdateTimeoutException("Timeout waiting for resource: class %s, URL %s, title %s" % (rdf_class, url, title)) from None
-            self.inserts_match_function = None
-
-        self.class_to_track = None
-        return (self.matched_resource_id, self.matched_resource_urn)
-
-    def await_resource_deleted(self, rdf_class, id):
-        """
-        Block until we are notified of a resources deletion
-        """
-        assert (self.deletes_match_function == None)
-        assert (self.class_to_track == None)
-        assert (self.graph_updated_handler_id != 0), "You must call start_watching_updates() first."
-
-        def find_resource_deletion(deletes_list):
-            self.log.debug("find_resource_deletion: looking for %i in %s", id, deletes_list)
-
-            matched = False
-            remaining_events = []
-
-            for delete in deletes_list:
-                if delete[1] == id:
-                    matched = True
-                else:
-                    remaining_events += [delete]
-
-            return matched, remaining_events
-
-        def match_cb(deletes_list):
-            matched, remaining_events = find_resource_deletion(deletes_list)
-            exit_loop = matched
-            return exit_loop, remaining_events
-
-        self.log.debug("Await deletion of %i (%i existing)", id, len(self.deletes_list))
-
-        (existing_match, self.deletes_list) = find_resource_deletion(self.deletes_list)
-
-        if not existing_match:
-            self._enable_await_timeout()
-            self.class_to_track = rdf_class
-            self.deletes_match_function = match_cb
-            # Run the event loop until the correct notification arrives
-            try:
-                self.loop.run_checked()
-            except GraphUpdateTimeoutException as e:
-                raise GraphUpdateTimeoutException("Resource %i has not been deleted." % id) from e
-            self.deletes_match_function = None
-            self.class_to_track = None
-
-        return
-
-    def await_property_changed(self, rdf_class, subject_id, property_uri):
-        """
-        Block until a property of a resource is updated or inserted.
-        """
-        assert (self.inserts_match_function == None)
-        assert (self.deletes_match_function == None)
-        assert (self.class_to_track == None)
-        assert (self.graph_updated_handler_id != 0), "You must call start_watching_updates() first."
-
-        self.log.debug("Await change to %i %s (%i, %i existing)", subject_id, property_uri, len(self.inserts_list), len(self.deletes_list))
-
-        self.class_to_track = rdf_class
-
-        property_id = self.get_resource_id_by_uri(property_uri)
-
-        def find_property_change(event_list):
-            matched = False
-            remaining_events = []
-
-            for event in event_list:
-                if event[1] == subject_id and event[2] == property_id:
-                    self.log.debug("Matched property change: %s", str(event))
-                    matched = True
-                else:
-                    remaining_events += [event]
-
-            return matched, remaining_events
-
-        def match_cb(event_list):
-            matched, remaining_events = find_property_change(event_list)
-            exit_loop = matched
-            return exit_loop, remaining_events
-
-        # Check the list of previously received events for matches
-        (existing_match, self.inserts_list) = find_property_change(self.inserts_list)
-        if not existing_match:
-            (existing_match, self.deletes_list) = find_property_change(self.deletes_list)
-
-        if not existing_match:
-            self._enable_await_timeout()
-            self.inserts_match_function = match_cb
-            self.deletes_match_function = match_cb
-            # Run the event loop until the correct notification arrives
-            try:
-                self.loop.run_checked()
-            except GraphUpdateTimeoutException:
-                raise GraphUpdateTimeoutException(
-                    "Timeout waiting for property change, subject %i property %s (%i)" % (subject_id, property_uri, property_id))
-
-        self.inserts_match_function = None
-        self.deletes_match_function = None
-        self.class_to_track = None
-
-    # Note: The methods below call the tracker-store D-Bus API directly. This
-    # is useful for testing this API surface, but we recommand that all regular
-    # applications use libtracker-sparql library to talk to the database.
-
-    def query(self, query, **kwargs):
-        return self.resources.SparqlQuery('(s)', query, **kwargs)
-
-    def update(self, update_sparql, **kwargs):
-        return self.resources.SparqlUpdate('(s)', update_sparql, **kwargs)
-
-    def load(self, ttl_uri, **kwargs):
-        return self.resources.Load('(s)', ttl_uri, **kwargs)
-
-    def batch_update(self, update_sparql, **kwargs):
-        return self.resources.BatchSparqlUpdate('(s)', update_sparql, **kwargs)
-
-    def batch_commit(self, **kwargs):
-        return self.resources.BatchCommit(**kwargs)
-
-    def backup(self, backup_file, **kwargs):
-        return self.backup_iface.Save('(s)', backup_file, **kwargs)
-
-    def restore(self, backup_file, **kwargs):
-        return self.backup_iface.Restore('(s)', backup_file, **kwargs)
-
-    def get_stats(self, **kwargs):
-        return self.stats_iface.Get(**kwargs)
-
-    def get_tracker_iface(self):
-        return self.resources
+    def update(self, update_sparql):
+        self.conn.update(update_sparql, 0, None)
 
     def count_instances(self, ontology_class):
         QUERY = """
@@ -393,7 +385,7 @@ class StoreHelper():
             ?u a %s .
         }
         """
-        result = self.resources.SparqlQuery('(s)', QUERY % (ontology_class))
+        result = self.query(QUERY % ontology_class)
 
         if (len(result) == 1):
             return int(result[0][0])
@@ -405,7 +397,7 @@ class StoreHelper():
         Get the internal ID for a given resource, identified by URI.
         """
         result = self.query(
-            'SELECT tracker:id(%s) WHERE { }' % uri)
+            'SELECT tracker:id(<%s>) WHERE { }' % uri)
         if len(result) == 1:
             return int(result[0][0])
         elif len(result) == 0:
