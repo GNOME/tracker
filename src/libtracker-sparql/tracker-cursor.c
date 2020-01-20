@@ -253,7 +253,7 @@ tracker_sparql_cursor_get_n_columns (TrackerSparqlCursor *cursor)
  * tracker_sparql_cursor_get_string:
  * @cursor: a #TrackerSparqlCursor
  * @column: column number to retrieve (first one is 0)
- * @length: length of the returned string
+ * @length: (out) (nullable): length of the returned string, or %NULL
  *
  * Retrieves a string representation of the data in the current
  * row in @column.
