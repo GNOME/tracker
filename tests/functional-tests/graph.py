@@ -15,15 +15,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
-#
+
 """
-Tests graphs in Sparql. Only requires the store.
+Tests graphs in SPARQL.
 """
+
 import unittest as ut
-from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+import fixtures
 
 
-class TestGraphs (CommonTrackerStoreTest):
+class TestGraphs (fixtures.TrackerSparqlDirectTest):
     """
     Insert triplets in different graphs and check the query results asking in
     one specific graph, in all of them and so on.

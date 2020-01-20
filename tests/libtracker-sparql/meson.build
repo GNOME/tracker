@@ -1,6 +1,5 @@
 libtracker_sparql_test_c_args = tracker_c_args + [
   '-DTEST',
-  '-DTEST_DOMAIN_ONTOLOGY_RULE="@0@"'.format(tracker_uninstalled_domain_rule),
   '-DTEST_ONTOLOGIES_DIR="@0@"'.format(tracker_uninstalled_nepomuk_ontologies_dir),
 ]
 
