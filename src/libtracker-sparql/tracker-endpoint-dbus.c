@@ -637,6 +637,19 @@ tracker_endpoint_dbus_init (TrackerEndpointDBus *endpoint)
 {
 }
 
+/**
+ * tracker_endpoint_dbus_new:
+ * @sparql_connection: a #TrackerSparqlConnection
+ * @dbus_connection: a #GDBusConnection
+ * @object_path: (nullable): the object path to use, or %NULL for the default
+ * @cancellable: (nullable): a #GCancellable, or %NULL
+ * @error: pointer to a #GError
+ *
+ * Registers a Tracker endpoint object at @object_path on @dbus_connection.
+ * The default object path is "/org/freedesktop/Tracker1/Endpoint".
+ *
+ * Returns: (transfer full): a #TrackerEndpointDBus object.
+ */
 TrackerEndpointDBus *
 tracker_endpoint_dbus_new (TrackerSparqlConnection  *sparql_connection,
                            GDBusConnection          *dbus_connection,
