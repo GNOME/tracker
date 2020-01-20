@@ -138,6 +138,12 @@ struct _TrackerSparql
 	gchar *base;
 
 	struct {
+		GPtrArray *graphs;
+		GPtrArray *services;
+		GHashTable *filtered_graphs;
+	} policy;
+
+	struct {
 		TrackerContext *context;
 		TrackerContext *select_context;
 		TrackerStringBuilder *sql;
@@ -183,6 +189,7 @@ tracker_sparql_finalize (GObject *object)
 	g_hash_table_destroy (sparql->parameters);
 	g_hash_table_destroy (sparql->cached_bindings);
 
+
 	if (sparql->sql)
 		tracker_string_builder_free (sparql->sql);
 	if (sparql->tree)
@@ -205,6 +212,10 @@ tracker_sparql_finalize (GObject *object)
 	g_ptr_array_unref (sparql->var_names);
 	g_array_unref (sparql->var_types);
 	g_free (sparql->base);
+
+	g_clear_pointer (&sparql->policy.graphs, g_ptr_array_unref);
+	g_clear_pointer (&sparql->policy.services, g_ptr_array_unref);
+	g_clear_pointer (&sparql->policy.filtered_graphs, g_hash_table_unref);
 
 	if (sparql->blank_nodes)
 		g_variant_builder_unref (sparql->blank_nodes);
@@ -619,6 +630,41 @@ build_properties_string (TrackerSparql   *sparql,
 	}
 }
 
+static GHashTable *
+tracker_sparql_get_effective_graphs (TrackerSparql *sparql)
+{
+	GHashTable *graphs;
+
+	graphs = tracker_data_manager_get_graphs (sparql->data_manager);
+
+	if (graphs && sparql->policy.graphs) {
+		if (!sparql->policy.filtered_graphs) {
+			gint i;
+
+			sparql->policy.filtered_graphs =
+				g_hash_table_new_full (g_str_hash,
+				                       g_str_equal,
+				                       g_free,
+				                       NULL);
+
+			for (i = 0; i < sparql->policy.graphs->len; i++) {
+				gpointer key, value;
+
+				if (g_hash_table_lookup_extended (graphs,
+				                                  g_ptr_array_index (sparql->policy.graphs, i),
+				                                  &key, &value)) {
+					g_hash_table_insert (sparql->policy.filtered_graphs,
+					                     g_strdup (key), value);
+				}
+			}
+		}
+
+		return sparql->policy.filtered_graphs;
+	} else {
+		return graphs;
+	}
+}
+
 static void
 _append_union_graph_with_clause (TrackerSparql *sparql,
                                  const gchar   *table_name,
@@ -628,7 +674,7 @@ _append_union_graph_with_clause (TrackerSparql *sparql,
 	GHashTable *graphs;
 	GHashTableIter iter;
 
-	graphs = tracker_data_manager_get_graphs (sparql->data_manager);
+	graphs = tracker_sparql_get_effective_graphs (sparql);
 
 	_append_string_printf (sparql, "\"unionGraph_%s\"(ID, %s graph) AS (",
 	                       table_name, properties);
@@ -1312,7 +1358,7 @@ tracker_sparql_add_fts_subquery (TrackerSparql         *sparql,
 		                       select_items->str);
 		_append_literal_sql (sparql, binding);
 
-		graphs = tracker_data_manager_get_graphs (sparql->data_manager);
+		graphs = tracker_sparql_get_effective_graphs (sparql);
 		g_hash_table_iter_init (&iter, graphs);
 
 		while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
@@ -3475,7 +3521,7 @@ translate_Clear (TrackerSparql  *sparql,
 			GHashTable *ht;
 			GHashTableIter iter;
 
-			ht = tracker_data_manager_get_graphs (sparql->data_manager);
+			ht = tracker_sparql_get_effective_graphs (sparql);
 			g_hash_table_iter_init (&iter, ht);
 
 			while (g_hash_table_iter_next (&iter, (gpointer *) &graph, NULL))
@@ -3530,7 +3576,7 @@ translate_Drop (TrackerSparql  *sparql,
 			GHashTable *ht;
 			GHashTableIter iter;
 
-			ht = tracker_data_manager_get_graphs (sparql->data_manager);
+			ht = tracker_sparql_get_effective_graphs (sparql);
 			g_hash_table_iter_init (&iter, ht);
 
 			while (g_hash_table_iter_next (&iter, (gpointer *) &graph, NULL))
@@ -4606,6 +4652,24 @@ translate_ServiceGraphPattern (TrackerSparql  *sparql,
 
 	_call_rule (sparql, NAMED_RULE_VarOrIri, error);
 	_init_token (&service, sparql->current_state.prev_node, sparql);
+
+	if (sparql->policy.services &&
+	    tracker_token_get_literal (&service)) {
+		gboolean found = FALSE;
+		gint i;
+
+		for (i = 0; i < sparql->policy.services->len; i++) {
+			if (g_strcmp0 (g_ptr_array_index (sparql->policy.services, i),
+			               tracker_token_get_idstring (&service)) == 0) {
+				found = TRUE;
+				break;
+			}
+		}
+
+		if (!found) {
+			_raise (PARSE, "Access to service is disallowed", "SERVICE");
+		}
+	}
 
 	pattern = _skip_rule (sparql, NAMED_RULE_GroupGraphPattern);
 	_append_string (sparql, "SELECT ");
