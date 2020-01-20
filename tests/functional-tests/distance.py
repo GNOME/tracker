@@ -16,18 +16,20 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 #
+
 """
-Test the distance-calculation functions in Sparql. Only requires the Store
+Test the distance-calculation functions in SPARQL.
 """
+
 import unittest as ut
-from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+import fixtures
 
 POINT_COORDS = [
     (0, 0), (1, 1), (2, 2), (3, 3), (4, 4)
 ]
 
 
-class TestDistanceFunctions (CommonTrackerStoreTest):
+class TestDistanceFunctions (fixtures.TrackerSparqlDirectTest):
     """
     Insert some points and get the distance between them.
     """

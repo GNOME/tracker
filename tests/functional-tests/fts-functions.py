@@ -18,14 +18,14 @@
 #
 
 """
-These tests use only the store. They insert instances with known text
-and run sparql with fts functions to check the results.
+Test the full-text search.
 """
+
 import unittest as ut
-from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+import fixtures
 
 
-class TestFTSFunctions (CommonTrackerStoreTest):
+class TestFTSFunctions (fixtures.TrackerSparqlDirectTest):
     """
     Insert data with text and check the fts:xxxx functions are returning the expected results
     """
