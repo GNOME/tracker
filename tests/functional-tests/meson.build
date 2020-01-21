@@ -30,7 +30,7 @@ functional_tests = [
   '07-graph',
   '08-unique-insertions',
   '09-concurrent-query',
-  '14-signals',
+  '14-notifier',
   '16-collation',
   '17-ontology-changes',
 ]

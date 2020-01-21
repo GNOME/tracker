@@ -16,64 +16,46 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 #
+
 """
-Test that after insertion/remove/updates in the store, the signals
-are emitted. Theses tests are not extensive (only few selected signals
-are tested)
+Test TrackerNotifier.
 """
 
-from gi.repository import Gio
+import gi
+gi.require_version('Tracker', '3.0')
 from gi.repository import GLib
+from gi.repository import Tracker
 
-import time
+import logging
 import unittest as ut
 
-from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+from storetest import CommonTrackerStoreTest
 
-
-GRAPH_UPDATED_SIGNAL = "GraphUpdated"
-
-CONTACT_CLASS_URI = "http://www.semanticdesktop.org/ontologies/2007/03/22/nco#PersonContact"
 
 REASONABLE_TIMEOUT = 10  # Time waiting for the signal to be emitted
 
 
-class TrackerStoreSignalsTests (CommonTrackerStoreTest):
+class TrackerNotifierTestMixin():
     """
-    Insert/update/remove instances from nco:PersonContact
-    and check that the signals are emitted
+    Test cases for TrackerNotifier.
+
+    To allow testing with both local and D-Bus connections, this test suite is
+    a mixin, which is combined with different fixtures below.
     """
 
-    def setUp(self):
-        self.clean_up_list = []
-
-        self.loop = GLib.MainLoop()
+    def base_setup(self):
+        self.loop = GLib.MainLoop.new(None, False)
         self.timeout_id = 0
 
-        self.bus = self.sandbox.get_connection()
+        self.results_deletes = []
+        self.results_inserts = []
+        self.results_updates = []
 
-        self.results_classname = None
-        self.results_deletes = None
-        self.results_inserts = None
+        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.NONE)
+        # FIXME: uncomment this to cause a deadlock in TrackerNotifier.
+        #self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.QUERY_URN)
+        self.notifier.connect('events', self.__signal_received_cb)
 
-    def tearDown(self):
-        for uri in self.clean_up_list:
-            self.tracker.update("DELETE { <%s> a rdfs:Resource }" % uri)
-
-        self.clean_up_list = []
-
-    def __connect_signal(self):
-        """
-        After connecting to the signal, call self.__wait_for_signal.
-        """
-        self.cb_id = self.bus.signal_subscribe(
-            sender=self.tracker.TRACKER_BUSNAME,
-            interface_name=self.tracker.RESOURCES_IFACE,
-            member=GRAPH_UPDATED_SIGNAL,
-            object_path=self.tracker.TRACKER_OBJ_PATH,
-            arg0=CONTACT_CLASS_URI,
-            flags=Gio.DBusSignalFlags.NONE,
-            callback=self.__signal_received_cb)
 
     def __wait_for_signal(self):
         """
@@ -85,32 +67,35 @@ class TrackerStoreSignalsTests (CommonTrackerStoreTest):
 
     def __timeout_on_idle(self):
         self.loop.quit()
-        self.fail("Timeout, the signal never came!")
+        self.fail("Timeout, the signal never came after %i seconds!" % REASONABLE_TIMEOUT)
 
-    def __pretty_print_array(self, array):
-        for g, s, o, p in array:
-            uri, prop, value = self.tracker.query(
-                "SELECT tracker:uri (%s), tracker:uri (%s), tracker:uri (%s) WHERE {}" % (s, o, p))
-            print(" - (", "-".join([g, uri, prop, value]), ")")
-
-    def __signal_received_cb(self, connection, sender_name, object_path, interface_name, signal_name, parameters):
+    def __signal_received_cb(self, notifier, service, graph, events):
         """
         Save the content of the signal and disconnect the callback
         """
-        classname, deletes, inserts = parameters.unpack()
+        logging.debug("Received TrackerNotifier::events signal with %i events", len(events))
+        for event in events:
+            print("Got event in callback: %s", event)
+            if event.get_event_type() == Tracker.NotifierEventType.CREATE:
+                self.results_inserts.append(event)
+            elif event.get_event_type() == Tracker.NotifierEventType.UPDATE:
+                self.results_updates.append(event)
+            elif event.get_event_type() == Tracker.NotifierEventType.DELETE:
+                self.results_deletes.append(event)
 
-        self.results_classname = classname
-        self.results_deletes = deletes
-        self.results_inserts = inserts
-
-        if (self.timeout_id != 0):
-            GLib.source_remove(self.timeout_id)
-            self.timeout_id = 0
-        self.loop.quit()
-        self.bus.signal_unsubscribe(self.cb_id)
+        # FIXME: I don't think this should be needed. Without it, the signal
+        # callback fires *before* the main loop is started, because it's
+        # triggered from TrackerNotifier as soon as the database update
+        # happens.
+        def callback():
+            logging.debug("Main loop processing TrackerNotifier::events signal with %i events", len(events))
+            if self.timeout_id != 0:
+                GLib.source_remove(self.timeout_id)
+                self.timeout_id = 0
+            self.loop.quit()
+        GLib.idle_add(callback)
 
     def test_01_insert_contact(self):
-        self.clean_up_list.append("test://signals-contact-add")
         CONTACT = """
         INSERT {
         <test://signals-contact-add> a nco:PersonContact ;
@@ -121,13 +106,15 @@ class TrackerStoreSignalsTests (CommonTrackerStoreTest):
              nco:hasPhoneNumber <tel:555555555> .
         }
         """
-        self.__connect_signal()
         self.tracker.update(CONTACT)
         self.__wait_for_signal()
 
         # validate results
         self.assertEqual(len(self.results_deletes), 0)
-        self.assertEqual(len(self.results_inserts), 6)
+        self.assertEqual(len(self.results_inserts), 0)
+        self.assertEqual(len(self.results_updates), 1)
+        print(self.results_updates[0])
+        assert self.results_updates[0].get_urn() == 'test://signals-contact-add'
 
     def test_02_remove_contact(self):
         CONTACT = """
@@ -137,45 +124,37 @@ class TrackerStoreSignalsTests (CommonTrackerStoreTest):
              nco:nameFamily 'Contact-family removed'.
         }
         """
-        self.__connect_signal()
         self.tracker.update(CONTACT)
         self.__wait_for_signal()
 
-        self.__connect_signal()
         self.tracker.update ("""
             DELETE { <test://signals-contact-remove> a rdfs:Resource }
             """)
         self.__wait_for_signal()
 
         # Validate results:
-        self.assertEqual(len(self.results_deletes), 1)
+        self.assertEqual(len(self.results_deletes), 0)
         self.assertEqual(len(self.results_inserts), 0)
+        self.assertEqual(len(self.results_updates), 2)
 
     def test_03_update_contact(self):
-        self.clean_up_list.append("test://signals-contact-update")
-
-        self.__connect_signal()
         self.tracker.update(
             "INSERT { <test://signals-contact-update> a nco:PersonContact }")
         self.__wait_for_signal()
 
-        self.__connect_signal()
         self.tracker.update(
             "INSERT { <test://signals-contact-update> nco:fullname 'wohoo'}")
         self.__wait_for_signal()
 
         self.assertEqual(len(self.results_deletes), 0)
-        self.assertEqual(len(self.results_inserts), 1)
+        self.assertEqual(len(self.results_inserts), 0)
+        self.assertEqual(len(self.results_updates), 2)
 
     def test_04_fullupdate_contact(self):
-        self.clean_up_list.append("test://signals-contact-fullupdate")
-
-        self.__connect_signal()
         self.tracker.update(
             "INSERT { <test://signals-contact-fullupdate> a nco:PersonContact; nco:fullname 'first value' }")
         self.__wait_for_signal()
 
-        self.__connect_signal()
         self.tracker.update ("""
                DELETE { <test://signals-contact-fullupdate> nco:fullname ?x }
                WHERE { <test://signals-contact-fullupdate> a nco:PersonContact; nco:fullname ?x }
@@ -184,8 +163,20 @@ class TrackerStoreSignalsTests (CommonTrackerStoreTest):
                """)
         self.__wait_for_signal()
 
-        self.assertEqual(len(self.results_deletes), 1)
-        self.assertEqual(len(self.results_inserts), 1)
+        self.assertEqual(len(self.results_deletes), 0)
+        self.assertEqual(len(self.results_inserts), 0)
+        self.assertEqual(len(self.results_updates), 2)
+
+
+class TrackerLocalNotifierTest (CommonTrackerStoreTest, TrackerNotifierTestMixin):
+    """
+    Insert/update/remove instances from nco:PersonContact
+    and check that the signals are emitted.
+    """
+
+    def setUp(self):
+        self.base_setup()
+
 
 
 if __name__ == "__main__":
