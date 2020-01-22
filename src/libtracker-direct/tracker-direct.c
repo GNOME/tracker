@@ -524,11 +524,6 @@ tracker_direct_connection_dispose (GObject *object)
 		priv->select_pool = NULL;
 	}
 
-	if (priv->data_manager) {
-		tracker_data_manager_shutdown (priv->data_manager);
-		g_clear_object (&priv->data_manager);
-	}
-
 	G_OBJECT_CLASS (tracker_direct_connection_parent_class)->dispose (object);
 }
 
@@ -548,6 +543,11 @@ tracker_direct_connection_finalize (GObject *object)
 		                     weak_ref_notify,
 		                     conn);
 		detach_notifier (conn, notifier);
+	}
+
+	if (priv->data_manager) {
+		tracker_data_manager_shutdown (priv->data_manager);
+		g_clear_object (&priv->data_manager);
 	}
 
 	g_clear_object (&priv->store);
