@@ -22,3 +22,6 @@ subdir('libtracker-sparql-backend')
 
 # Public commandline control tool
 subdir('tracker')
+
+# XDG Portal
+subdir('portal')
