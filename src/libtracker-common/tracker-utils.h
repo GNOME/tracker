@@ -54,6 +54,9 @@ gboolean tracker_util_parse_dbus_uri        (const gchar  *uri,
                                              GBusType     *bus_type,
                                              gchar       **service,
                                              gchar       **path);
+gchar * tracker_util_build_dbus_uri         (GBusType      bus_type,
+                                             const gchar  *service,
+                                             const gchar  *path);
 
 G_END_DECLS
 
