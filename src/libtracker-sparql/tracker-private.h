@@ -153,8 +153,20 @@ struct _TrackerEndpointDBus {
 
 typedef struct _TrackerEndpointDBusClass TrackerEndpointDBusClass;
 
+typedef enum {
+	TRACKER_OPERATION_TYPE_SELECT,
+	TRACKER_OPERATION_TYPE_UPDATE,
+} TrackerOperationType;
+
 struct _TrackerEndpointDBusClass {
 	struct _TrackerEndpointClass parent_class;
+
+	gboolean (* forbid_operation) (TrackerEndpointDBus   *endpoint_dbus,
+	                               GDBusMethodInvocation *invocation,
+	                               TrackerOperationType   operation_type);
+	gboolean (* filter_graph) (TrackerEndpointDBus *endpoint_dbus,
+	                           const gchar         *graph_name);
+	gchar * (* add_prologue) (TrackerEndpointDBus *endpoint_dbus);
 };
 
 typedef struct _TrackerResourceClass TrackerResourceClass;
