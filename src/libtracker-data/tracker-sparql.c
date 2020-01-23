@@ -75,6 +75,11 @@ static inline TrackerVariable * _ensure_variable (TrackerSparql *sparql,
                                                   const gchar   *name);
 static void convert_expression_to_string (TrackerSparql       *sparql,
                                           TrackerPropertyType  type);
+static void _append_graph_checks (TrackerSparql *sparql,
+                                  const gchar   *column_name,
+                                  gboolean       add_unnamed_graph,
+                                  GStrv          graphs,
+                                  gint           len);
 
 #define _raise(v,s,sub)   \
 	G_STMT_START { \
@@ -948,21 +953,29 @@ _prepend_path_element (TrackerSparql      *sparql,
 		_append_string_printf (sparql,
 		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
 		                       "(SELECT subject AS ID, object AS value, graph, %d, object_type "
-		                       "FROM \"tracker_triples\" "
-		                       "WHERE predicate != %d ",
+		                       "FROM \"tracker_triples\" ",
 		                       path_elem->name,
-		                       TRACKER_PROPERTY_TYPE_RESOURCE,
-		                       tracker_property_get_id (path_elem->data.property));
+		                       TRACKER_PROPERTY_TYPE_RESOURCE);
 
-		if (!tracker_token_is_empty (&sparql->current_state.graph)) {
+		if (!tracker_token_is_empty (&sparql->current_state.graph) &&
+		    tracker_sparql_find_graph (sparql, tracker_token_get_idstring (&sparql->current_state.graph))) {
 			const gchar *graph;
 
 			graph = tracker_token_get_idstring (&sparql->current_state.graph);
-			_append_string_printf (sparql,
-					       "AND graph = %d",
-					       tracker_sparql_find_graph (sparql, graph));
+			_append_graph_checks (sparql, "graph", FALSE, (GStrv) &graph, 1);
+			_append_string (sparql, "AND ");
+		} else if (sparql->policy.graphs) {
+			_append_graph_checks (sparql, "graph",
+			                      !sparql->policy.filter_unnamed_graph,
+			                      (GStrv) sparql->policy.graphs->pdata,
+			                      sparql->policy.graphs->len);
+			_append_string (sparql, "AND ");
+		} else {
+			_append_string (sparql, "WHERE ");
 		}
 
+		_append_string_printf (sparql, "predicate != %d ",
+		                       tracker_property_get_id (path_elem->data.property));
 		_append_string (sparql, ") ");
 		break;
 	case TRACKER_PATH_OPERATOR_INTERSECTION:
@@ -2097,29 +2110,39 @@ convert_expression_to_string (TrackerSparql       *sparql,
 static void
 _append_graph_checks (TrackerSparql *sparql,
                       const gchar   *column_name,
+                      gboolean       add_unnamed_graph,
                       GStrv          graphs,
                       gint           len)
 {
+	gboolean first = TRUE;
 	gint i;
 
-	_append_string_printf (sparql,
-	                       "WHERE (SELECT Uri FROM Resource WHERE ID = %s) ",
-	                       column_name);
+	_append_string (sparql, "WHERE ");
 
-	if (len == 1)
-		_append_string (sparql, "= ");
-	else
-		_append_string (sparql, "IN (");
-
-	for (i = 0; i < len; i++) {
-		_append_string_printf (sparql,
-		                       "%c \"%s\" ",
-		                       i == 0 ? ' ' : ',',
-		                       graphs[i]);
+	if (add_unnamed_graph) {
+		_append_string_printf (sparql, "%s = %d OR ", column_name, 0);
 	}
 
-	if (len > 1)
-		_append_string (sparql, ")");
+	_append_string_printf (sparql,
+	                       "(SELECT Uri FROM Resource WHERE ID = %s) ",
+	                       column_name);
+
+	_append_string (sparql, "IN (");
+
+	for (i = 0; i < len; i++) {
+		if (!tracker_sparql_find_graph (sparql, graphs[i]))
+			continue;
+
+		if (!first)
+			_append_string (sparql, ", ");
+
+		_append_string_printf (sparql,
+		                       "\"%s\" ",
+		                       graphs[i]);
+		first = FALSE;
+	}
+
+	_append_string (sparql, ")");
 }
 
 static TrackerContext *
@@ -2216,21 +2239,31 @@ _end_triples_block (TrackerSparql  *sparql,
 			                "object, object_type, graph FROM tracker_triples ");
 
 			if (table->graph) {
-				_append_graph_checks (sparql, "graph",
+				_append_graph_checks (sparql, "graph", FALSE,
 						      &table->graph, 1);
 			} else if (sparql->anon_graphs->len > 0 &&
 				   tracker_token_is_empty (&sparql->current_state.graph)) {
 				_append_graph_checks (sparql, "graph",
+				                      !sparql->policy.filter_unnamed_graph,
 						      (GStrv) sparql->anon_graphs->pdata,
 						      sparql->anon_graphs->len);
 			} else if (tracker_token_get_variable (&sparql->current_state.graph)) {
 				if (sparql->named_graphs->len > 0) {
-					_append_graph_checks (sparql, "graph",
+					_append_graph_checks (sparql, "graph", FALSE,
 					                      (GStrv) sparql->named_graphs->pdata,
 					                      sparql->named_graphs->len);
+				} else if (sparql->policy.graphs) {
+					_append_graph_checks (sparql, "graph", FALSE,
+					                      (GStrv) sparql->policy.graphs->pdata,
+					                      sparql->policy.graphs->len);
 				} else {
 					_append_string (sparql, "WHERE \"graph\" != 0 ");
 				}
+			} else if (sparql->policy.graphs) {
+				_append_graph_checks (sparql, "graph",
+				                      !sparql->policy.filter_unnamed_graph,
+				                      (GStrv) sparql->policy.graphs->pdata,
+				                      sparql->policy.graphs->len);
 			}
 
 			_append_string (sparql, ") ");
@@ -2248,21 +2281,31 @@ _end_triples_block (TrackerSparql  *sparql,
 						       table->sql_db_tablename);
 
 				if (table->graph) {
-					_append_graph_checks (sparql, "graph",
+					_append_graph_checks (sparql, "graph", FALSE,
 					                      &table->graph, 1);
 				} else if (sparql->anon_graphs->len > 0 &&
 				           tracker_token_is_empty (&sparql->current_state.graph)) {
 					_append_graph_checks (sparql, "graph",
+					                      !sparql->policy.filter_unnamed_graph,
 					                      (GStrv) sparql->anon_graphs->pdata,
 					                      sparql->anon_graphs->len);
 				} else if (tracker_token_get_variable (&sparql->current_state.graph)) {
 					if (sparql->named_graphs->len > 0) {
-						_append_graph_checks (sparql, "graph",
+						_append_graph_checks (sparql, "graph", FALSE,
 						                      (GStrv) sparql->named_graphs->pdata,
 						                      sparql->named_graphs->len);
+					} else if (sparql->policy.graphs) {
+						_append_graph_checks (sparql, "graph", FALSE,
+						                      (GStrv) sparql->policy.graphs->pdata,
+						                      sparql->policy.graphs->len);
 					} else {
 						_append_string (sparql, "WHERE \"graph\" != 0 ");
 					}
+				} else if (sparql->policy.graphs) {
+					_append_graph_checks (sparql, "graph",
+					                      !sparql->policy.filter_unnamed_graph,
+					                      (GStrv) sparql->policy.graphs->pdata,
+					                      sparql->policy.graphs->len);
 				}
 
 				_append_string (sparql, ") ");
@@ -3000,8 +3043,19 @@ translate_DescribeQuery (TrackerSparql  *sparql,
 	                "  (SELECT Uri FROM Resource WHERE ID = subject),"
 	                "  (SELECT Uri FROM Resource WHERE ID = predicate),"
 	                "  object "
-	                "FROM tracker_triples "
-	                "WHERE object IS NOT NULL AND subject IN (");
+	                "FROM tracker_triples ");
+
+	if (sparql->policy.graphs) {
+		_append_graph_checks (sparql, "graph",
+		                      !sparql->policy.filter_unnamed_graph,
+		                      (GStrv) sparql->policy.graphs->pdata,
+		                      sparql->policy.graphs->len);
+		_append_string (sparql, "AND ");
+	} else {
+		_append_string (sparql, "WHERE ");
+	}
+	_append_string (sparql,
+	                "object IS NOT NULL AND subject IN (");
 
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GLOB)) {
 		glob = TRUE;
