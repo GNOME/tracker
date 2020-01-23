@@ -477,3 +477,32 @@ tracker_util_parse_dbus_uri (const gchar  *uri,
 
 	return TRUE;
 }
+
+gchar *
+tracker_util_build_dbus_uri (GBusType     bus_type,
+                             const gchar *service,
+                             const gchar *path)
+{
+	GString *str;
+
+	if (!g_dbus_is_name (service))
+		return NULL;
+	if (path && path[0] != '/')
+		return NULL;
+
+	if (bus_type == G_BUS_TYPE_SESSION)
+		str = g_string_new ("dbus:");
+	else if (bus_type == G_BUS_TYPE_SYSTEM)
+		str = g_string_new ("dbus:system:");
+	else
+		return NULL;
+
+	g_string_append (str, service);
+
+	if (path) {
+		g_string_append_c (str, ':');
+		g_string_append (str, path);
+	}
+
+	return g_string_free (str, FALSE);
+}
