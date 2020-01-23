@@ -21,6 +21,7 @@
 #define __TRACKER_PRIVATE_H__
 
 #include "tracker-cursor.h"
+#include "tracker-endpoint-dbus.h"
 
 typedef struct _TrackerSparqlConnectionClass TrackerSparqlConnectionClass;
 
@@ -136,6 +137,18 @@ typedef struct _TrackerEndpointClass TrackerEndpointClass;
 
 struct _TrackerEndpointClass {
 	GObjectClass parent_class;
+};
+
+typedef struct _TrackerEndpointDBus TrackerEndpointDBus;
+
+struct _TrackerEndpointDBus {
+	TrackerEndpoint parent_instance;
+	GDBusConnection *dbus_connection;
+	gchar *object_path;
+	guint register_id;
+	GDBusNodeInfo *node_info;
+	GCancellable *cancellable;
+	TrackerNotifier *notifier;
 };
 
 typedef struct _TrackerEndpointDBusClass TrackerEndpointDBusClass;
