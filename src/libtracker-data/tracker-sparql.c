@@ -587,11 +587,12 @@ _append_variable_sql (TrackerSparql   *sparql,
 
 static gchar *
 build_properties_string_for_class (TrackerSparql *sparql,
-                                   TrackerClass  *class)
+                                   TrackerClass  *class,
+                                   gint          *n_properties_ret)
 {
 	TrackerOntologies *ontologies;
 	TrackerProperty **properties;
-	guint n_properties, i;
+	guint n_properties, i, count = 0;
 	GString *str;
 
 	ontologies = tracker_data_manager_get_ontologies (sparql->data_manager);
@@ -620,14 +621,18 @@ build_properties_string_for_class (TrackerSparql *sparql,
 
 		g_string_append_printf (str, "\"%s\",",
 		                        tracker_property_get_name (properties[i]));
+		count++;
 	}
+
+	*n_properties_ret = count;
 
 	return g_string_free (str, FALSE);
 }
 
 static gchar *
 build_properties_string (TrackerSparql   *sparql,
-                         TrackerProperty *property)
+                         TrackerProperty *property,
+                         gint            *n_properties)
 {
 	if (tracker_property_get_multiple_values (property)) {
 		GString *str;
@@ -635,12 +640,13 @@ build_properties_string (TrackerSparql   *sparql,
 		str = g_string_new (NULL);
 		g_string_append_printf (str, "\"%s\",",
 		                        tracker_property_get_name (property));
+		*n_properties = 1;
 		return g_string_free (str, FALSE);
 	} else {
 		TrackerClass *class;
 
 		class = tracker_property_get_domain (property);
-		return build_properties_string_for_class (sparql, class);
+		return build_properties_string_for_class (sparql, class, n_properties);
 	}
 }
 
@@ -682,7 +688,8 @@ tracker_sparql_get_effective_graphs (TrackerSparql *sparql)
 static void
 _append_union_graph_with_clause (TrackerSparql *sparql,
                                  const gchar   *table_name,
-                                 const gchar   *properties)
+                                 const gchar   *properties,
+                                 gint           n_properties)
 {
 	gpointer graph_name, graph_id;
 	GHashTable *graphs;
@@ -693,9 +700,23 @@ _append_union_graph_with_clause (TrackerSparql *sparql,
 	_append_string_printf (sparql, "\"unionGraph_%s\"(ID, %s graph) AS (",
 	                       table_name, properties);
 
-	_append_string_printf (sparql,
-	                       "SELECT ID, %s 0 AS graph FROM \"main\".\"%s\" ",
-	                       properties, table_name);
+	if (g_hash_table_size (graphs) > 0) {
+		_append_string_printf (sparql,
+		                       "SELECT ID, %s 0 AS graph FROM \"main\".\"%s\" ",
+		                       properties, table_name);
+	} else {
+		gint i;
+
+		_append_string (sparql, "SELECT ");
+
+		for (i = 0; i < n_properties + 2; i++) {
+			if (i > 0)
+				_append_string (sparql, ", ");
+			_append_string (sparql, "NULL ");
+		}
+
+		_append_string (sparql, "WHERE 0 ");
+	}
 
 	g_hash_table_iter_init (&iter, graphs);
 	while (g_hash_table_iter_next (&iter, &graph_name, &graph_id)) {
@@ -717,6 +738,7 @@ tracker_sparql_add_union_graph_subquery (TrackerSparql   *sparql,
 	TrackerStringBuilder *old;
 	const gchar *table_name;
 	gchar *properties;
+	gint n_properties;
 
 	table_name = tracker_property_get_table_name (property);
 
@@ -731,8 +753,8 @@ tracker_sparql_add_union_graph_subquery (TrackerSparql   *sparql,
 	else
 		_append_string (sparql, ", ");
 
-	properties = build_properties_string (sparql, property);
-	_append_union_graph_with_clause (sparql, table_name, properties);
+	properties = build_properties_string (sparql, property, &n_properties);
+	_append_union_graph_with_clause (sparql, table_name, properties, n_properties);
 	g_free (properties);
 
 	tracker_sparql_swap_builder (sparql, old);
@@ -745,6 +767,7 @@ tracker_sparql_add_union_graph_subquery_for_class (TrackerSparql *sparql,
 	TrackerStringBuilder *old;
 	const gchar *table_name;
 	gchar *properties;
+	gint n_properties;
 
 	table_name = tracker_class_get_name (class);
 
@@ -759,8 +782,8 @@ tracker_sparql_add_union_graph_subquery_for_class (TrackerSparql *sparql,
 	else
 		_append_string (sparql, ", ");
 
-	properties = build_properties_string_for_class (sparql, class);
-	_append_union_graph_with_clause (sparql, table_name, properties);
+	properties = build_properties_string_for_class (sparql, class, &n_properties);
+	_append_union_graph_with_clause (sparql, table_name, properties, n_properties);
 	g_free (properties);
 
 	tracker_sparql_swap_builder (sparql, old);
