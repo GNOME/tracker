@@ -1,6 +1,7 @@
 sources = [
     'tracker-main.c',
     'tracker-portal.c',
+    'tracker-portal-endpoint.c',
     'tracker-portal-utils.c',
 ]
 
