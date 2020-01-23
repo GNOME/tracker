@@ -25,6 +25,8 @@
 #include <libtracker-common/tracker-common.h>
 
 #include "tracker-portal.h"
+#include "tracker-portal-endpoint.h"
+#include "tracker-portal-utils.h"
 
 typedef struct _TrackerPortal TrackerPortal;
 typedef struct _TrackerSession TrackerSession;
@@ -60,6 +62,8 @@ static void tracker_portal_initable_iface_init (GInitableIface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (TrackerPortal, tracker_portal, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, tracker_portal_initable_iface_init))
+
+#define TRACKER_GROUP_NAME "Policy Tracker3"
 
 static const gchar portal_xml[] =
 	"<node>"
@@ -168,6 +172,33 @@ tracker_portal_init (TrackerPortal *portal)
 	g_array_set_clear_func (portal->sessions, clear_session);
 }
 
+static GStrv
+load_client_configuration (GDBusMethodInvocation  *invocation,
+                           const gchar            *service_uri,
+                           GError                **error)
+{
+	g_autoptr (GKeyFile) flatpak_info = NULL;
+	GStrv graphs;
+
+	flatpak_info = tracker_invocation_lookup_app_info_sync (invocation,
+	                                                        NULL, error);
+	if (!flatpak_info) {
+		g_debug ("No .flatpak-info found, forbidden access.");
+		return NULL;
+	}
+
+	graphs = g_key_file_get_string_list (flatpak_info,
+	                                     TRACKER_GROUP_NAME,
+	                                     service_uri,
+	                                     NULL, error);
+	if (!graphs) {
+		g_debug ("Service '%s' not found in Tracker policy", service_uri);
+		return NULL;
+	}
+
+	return graphs;
+}
+
 static void
 portal_iface_method_call (GDBusConnection       *connection,
                           const gchar           *sender,
@@ -189,11 +220,20 @@ portal_iface_method_call (GDBusConnection       *connection,
 		g_autoptr(TrackerSparqlConnection) connection = NULL;
 		g_autoptr(TrackerEndpoint) endpoint = NULL;
 		g_autoptr(GError) error = NULL;
+		g_auto(GStrv) graphs = NULL;
+		const gchar *sender;
 		GBusType bus_type;
 		TrackerSession session;
 
 		g_variant_get (parameters, "(s)", &uri);
 		g_debug ("Creating session for service URI '%s'", uri);
+
+		graphs = load_client_configuration (invocation, uri, &error);
+		if (!graphs) {
+			g_debug ("Session rejected by policy");
+			g_dbus_method_invocation_return_gerror (invocation, error);
+			return;
+		}
 
 		if (!tracker_util_parse_dbus_uri (uri,
 		                                  &bus_type,
@@ -224,12 +264,15 @@ portal_iface_method_call (GDBusConnection       *connection,
 
 		session_object_path = g_strdup_printf ("/org/freedesktop/portal/Tracker/Session_%" G_GUINT64_FORMAT,
 		                                       portal->session_ids++);
+		sender = g_dbus_method_invocation_get_sender (invocation);
 
-		endpoint = TRACKER_ENDPOINT (tracker_endpoint_dbus_new (connection,
-		                                                        dbus_connection,
-		                                                        session_object_path,
-		                                                        NULL,
-		                                                        &error));
+		endpoint = tracker_portal_endpoint_new (connection,
+		                                        dbus_connection,
+		                                        session_object_path,
+		                                        sender,
+		                                        (const gchar * const *) graphs,
+		                                        NULL,
+		                                        &error);
 		if (!endpoint) {
 			g_debug ("Could not create endpoint");
 			g_dbus_method_invocation_return_gerror (invocation, error);
