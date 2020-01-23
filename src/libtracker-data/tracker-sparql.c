@@ -787,6 +787,13 @@ tracker_sparql_add_union_graph_subquery_for_class (TrackerSparql *sparql,
 	tracker_sparql_swap_builder (sparql, old);
 }
 
+static gint
+tracker_sparql_find_graph (TrackerSparql *sparql,
+                           const gchar   *name)
+{
+	return tracker_data_manager_find_graph (sparql->data_manager, name);
+}
+
 static void
 _prepend_path_element (TrackerSparql      *sparql,
                        TrackerPathElement *path_elem)
@@ -822,7 +829,7 @@ _prepend_path_element (TrackerSparql      *sparql,
 				table_name = g_strdup_printf ("\"%s\".\"%s\"", graph,
 				                              tracker_property_get_table_name (path_elem->data.property));
 				graph_column = g_strdup_printf ("%d",
-				                                tracker_data_manager_find_graph (sparql->data_manager, graph));
+				                                tracker_sparql_find_graph (sparql, graph));
 			} else {
 				/* Graph does not exist, ensure to come back empty */
 				table_name = g_strdup ("(SELECT 0 AS ID, NULL, NULL, 0, 0 LIMIT 0)");
@@ -945,7 +952,7 @@ _prepend_path_element (TrackerSparql      *sparql,
 			graph = tracker_token_get_idstring (&sparql->current_state.graph);
 			_append_string_printf (sparql,
 					       "AND graph = %d",
-					       tracker_data_manager_find_graph (sparql->data_manager, graph));
+					       tracker_sparql_find_graph (sparql, graph));
 		}
 
 		_append_string (sparql, ") ");
@@ -1516,7 +1523,7 @@ _add_quad (TrackerSparql  *sparql,
 				return FALSE;
 			}
 
-			if (!graph_db || !tracker_data_manager_find_graph (sparql->data_manager, graph_db))
+			if (!graph_db || !tracker_sparql_find_graph (sparql, graph_db))
 				tracker_sparql_add_union_graph_subquery_for_class (sparql, subject_type);
 
 			is_rdf_type = TRUE;
@@ -1575,14 +1582,14 @@ _add_quad (TrackerSparql  *sparql,
 					}
 
 					if (domain_index) {
-						if (!graph_db || !tracker_data_manager_find_graph (sparql->data_manager, graph_db))
+						if (!graph_db || !tracker_sparql_find_graph (sparql, graph_db))
 							tracker_sparql_add_union_graph_subquery_for_class (sparql, domain_index);
 						db_table = tracker_class_get_name (domain_index);
 					}
 				}
 			}
 
-			if (!graph_db || !tracker_data_manager_find_graph (sparql->data_manager, graph_db))
+			if (!graph_db || !tracker_sparql_find_graph (sparql, graph_db))
 				tracker_sparql_add_union_graph_subquery (sparql, property);
 
 			/* We can never share the table with multiple triples for
@@ -2223,7 +2230,7 @@ _end_triples_block (TrackerSparql  *sparql,
 			_append_string_printf (sparql, "\"%s\" ", table->sql_db_tablename);
 		} else {
 			if (table->graph &&
-			    tracker_data_manager_find_graph (sparql->data_manager, table->graph)) {
+			    tracker_sparql_find_graph (sparql, table->graph)) {
 				_append_string_printf (sparql, "\"%s\".\"%s\" ",
 				                       table->graph,
 				                       table->sql_db_tablename);
@@ -3714,7 +3721,7 @@ translate_Clear (TrackerSparql  *sparql,
 	} else {
 		graph = tracker_token_get_idstring (&sparql->current_state.graph);
 
-		if (tracker_data_manager_find_graph (sparql->data_manager, graph) == 0)
+		if (tracker_sparql_find_graph (sparql, graph) == 0)
 			_raise (UNKNOWN_GRAPH, "Unknown graph", graph);
 
 		graphs = g_list_prepend (graphs, (gpointer) graph);
@@ -3802,7 +3809,7 @@ translate_Create (TrackerSparql  *sparql,
 
 	graph_name = tracker_token_get_idstring (&sparql->current_state.graph);
 
-	if (tracker_data_manager_find_graph (sparql->data_manager, graph_name) != 0) {
+	if (tracker_sparql_find_graph (sparql, graph_name) != 0) {
 		inner_error = g_error_new (TRACKER_SPARQL_ERROR,
 		                           TRACKER_SPARQL_ERROR_CONSTRAINT,
 		                           "Graph '%s' already exists",
@@ -3851,7 +3858,7 @@ translate_Add (TrackerSparql  *sparql,
 	}
 
 	if (source &&
-	    !tracker_data_manager_find_graph (sparql->data_manager, source)) {
+	    !tracker_sparql_find_graph (sparql, source)) {
 		g_set_error (&inner_error, TRACKER_SPARQL_ERROR,
 			     TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
 			     "Unknown graph '%s'", source);
@@ -3859,7 +3866,7 @@ translate_Add (TrackerSparql  *sparql,
 	}
 
 	if (destination &&
-	    !tracker_data_manager_find_graph (sparql->data_manager, destination)) {
+	    !tracker_sparql_find_graph (sparql, destination)) {
 		if (!tracker_data_manager_create_graph (sparql->data_manager,
 							destination, &inner_error))
 			goto error;
@@ -3913,7 +3920,7 @@ translate_Move (TrackerSparql  *sparql,
 	}
 
 	if (source &&
-	    !tracker_data_manager_find_graph (sparql->data_manager, source)) {
+	    !tracker_sparql_find_graph (sparql, source)) {
 		g_set_error (&inner_error, TRACKER_SPARQL_ERROR,
 			     TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
 			     "Unknown graph '%s'", source);
@@ -3921,7 +3928,7 @@ translate_Move (TrackerSparql  *sparql,
 	}
 
 	if (destination &&
-	    !tracker_data_manager_find_graph (sparql->data_manager, destination)) {
+	    !tracker_sparql_find_graph (sparql, destination)) {
 		if (!tracker_data_manager_create_graph (sparql->data_manager,
 							destination, &inner_error))
 			goto error;
@@ -3987,7 +3994,7 @@ translate_Copy (TrackerSparql  *sparql,
 	}
 
 	if (source &&
-	    !tracker_data_manager_find_graph (sparql->data_manager, source)) {
+	    !tracker_sparql_find_graph (sparql, source)) {
 		g_set_error (&inner_error, TRACKER_SPARQL_ERROR,
 			     TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
 			     "Unknown graph '%s'", source);
@@ -3995,7 +4002,7 @@ translate_Copy (TrackerSparql  *sparql,
 	}
 
 	if (destination &&
-	    !tracker_data_manager_find_graph (sparql->data_manager, destination)) {
+	    !tracker_sparql_find_graph (sparql, destination)) {
 		if (!tracker_data_manager_create_graph (sparql->data_manager,
 							destination, &inner_error))
 			goto error;
