@@ -61,16 +61,6 @@ enum {
 	N_PROPS
 };
 
-struct _TrackerEndpointDBus {
-	TrackerEndpoint parent_instance;
-	GDBusConnection *dbus_connection;
-	gchar *object_path;
-	guint register_id;
-	GDBusNodeInfo *node_info;
-	GCancellable *cancellable;
-	TrackerNotifier *notifier;
-};
-
 typedef struct {
 	TrackerEndpointDBus *endpoint;
 	GDBusMethodInvocation *invocation;
