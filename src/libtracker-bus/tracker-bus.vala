@@ -22,7 +22,15 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 	string dbus_name;
 	string object_path;
 
+	private const string DBUS_PEER_IFACE = "org.freedesktop.DBus.Peer";
+
+	private const string PORTAL_NAME = "org.freedesktop.portal.Tracker";
+	private const string PORTAL_PATH = "/org/freedesktop/portal/Tracker";
+	private const string PORTAL_IFACE = "org.freedesktop.portal.Tracker";
+
 	private const string ENDPOINT_IFACE = "org.freedesktop.Tracker3.Endpoint";
+
+	private const int timeout = 30000;
 
 	public string bus_name {
 		get { return dbus_name; }
@@ -34,12 +42,41 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 
 	public Connection (string dbus_name, string object_path, DBusConnection? dbus_connection) throws Sparql.Error, IOError, DBusError, GLib.Error {
 		Object ();
-		this.dbus_name = dbus_name;
 		this.bus = dbus_connection;
-		this.object_path = object_path;
 
 		// ensure that error domain is registered with GDBus
 		new Sparql.Error.INTERNAL ("");
+
+		var message = new DBusMessage.method_call (dbus_name, object_path, DBUS_PEER_IFACE, "Ping");
+
+		try {
+			this.bus.send_message_with_reply_sync (message, 0, timeout, null).to_gerror();
+			this.dbus_name = dbus_name;
+			this.object_path = object_path;
+		} catch (GLib.Error e) {
+			if (GLib.FileUtils.test ("/.flatpak-info", GLib.FileTest.EXISTS)) {
+				/* We are in a flatpak sandbox, check going through the portal */
+
+				if (object_path == "/org/freedesktop/Tracker1/Endpoint")
+					object_path = null;
+
+				string uri = Tracker.util_build_dbus_uri (GLib.BusType.SESSION, dbus_name, object_path);
+				message = new DBusMessage.method_call (PORTAL_NAME, PORTAL_PATH, PORTAL_IFACE, "CreateSession");
+				message.set_body (new Variant ("(s)", uri));
+
+				var reply = this.bus.send_message_with_reply_sync (message, 0, timeout, null);
+
+				reply.to_gerror();
+
+				var variant = reply.get_body ();
+				variant.get_child(0, "o", out object_path);
+
+				this.dbus_name = PORTAL_NAME;
+				this.object_path = object_path;
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	static void pipe (out UnixInputStream input, out UnixOutputStream output) throws IOError {
