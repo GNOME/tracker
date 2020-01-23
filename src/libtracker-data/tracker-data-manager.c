@@ -4959,30 +4959,6 @@ tracker_data_manager_find_graph (TrackerDataManager *manager,
 	return GPOINTER_TO_UINT (g_hash_table_lookup (graphs, name));
 }
 
-const gchar *
-tracker_data_manager_find_graph_by_id (TrackerDataManager *manager,
-                                       gint                id)
-{
-	TrackerDBInterface *iface;
-	GHashTableIter iter;
-	GHashTable *graphs;
-	gpointer key, value;
-
-	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
-	graphs = tracker_data_manager_ensure_graphs (manager, iface, NULL);
-
-	if (!graphs)
-		return NULL;
-
-	g_hash_table_iter_init (&iter, graphs);
-	while (g_hash_table_iter_next (&iter, &key, &value)) {
-		if (id == GPOINTER_TO_INT (value))
-			return key;
-	}
-
-	return NULL;
-}
-
 gboolean
 tracker_data_manager_clear_graph (TrackerDataManager  *manager,
                                   const gchar         *graph,
