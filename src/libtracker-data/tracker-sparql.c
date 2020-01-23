@@ -2591,11 +2591,16 @@ translate_Prologue (TrackerSparql  *sparql,
 {
 	TrackerGrammarNamedRule rule;
 
-	/* Prologue ::= ( BaseDecl | PrefixDecl )*
+	/* Prologue ::= ( BaseDecl | PrefixDecl | ConstraintDecl )*
+	 *
+	 * TRACKER EXTENSION:
+	 * ConstraintDecl entirely.
 	 */
 	rule = _current_rule (sparql);
 
-	while (rule == NAMED_RULE_BaseDecl || rule == NAMED_RULE_PrefixDecl) {
+	while (rule == NAMED_RULE_BaseDecl ||
+	       rule == NAMED_RULE_PrefixDecl ||
+	       rule == NAMED_RULE_ConstraintDecl) {
 		_call_rule (sparql, rule, error);
 		rule = _current_rule (sparql);
 	}
@@ -2639,6 +2644,77 @@ translate_PrefixDecl (TrackerSparql  *sparql,
 	uri = _dup_last_string (sparql);
 
 	g_hash_table_insert (sparql->prefix_map, ns, uri);
+
+	return TRUE;
+}
+
+static void
+intersect_set (GPtrArray *array,
+               GPtrArray *set)
+{
+	const gchar *set_graph, *graph;
+	gint i = 0, j;
+	gboolean found;
+
+	while (i < array->len) {
+		graph = g_ptr_array_index (array, i);
+		found = FALSE;
+
+		for (j = 0; j < set->len; j++) {
+			set_graph = g_ptr_array_index (set, j);
+
+			if (g_strcmp0 (set_graph, graph) == 0) {
+				found = TRUE;
+				break;
+			}
+		}
+
+		if (found) {
+			i++;
+		} else {
+			g_ptr_array_remove_index_fast (array, i);
+		}
+	}
+}
+
+static gboolean
+translate_ConstraintDecl (TrackerSparql  *sparql,
+                          GError        **error)
+{
+	GPtrArray **previous_set, *set;
+
+	/* ConstraintDecl ::= 'CONSTRAINT' ( 'GRAPH' | 'SERVICE' ) ( IRIREF (',' IRIREF)* )?
+	 *
+	 * TRACKER EXTENSION
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CONSTRAINT);
+
+	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GRAPH)) {
+		previous_set = &sparql->policy.graphs;
+	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SERVICE)) {
+		previous_set = &sparql->policy.services;
+	} else {
+		g_assert_not_reached ();
+	}
+
+	set = g_ptr_array_new_with_free_func (g_free);
+
+	while (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_IRIREF)) {
+		gchar *elem;
+
+		elem = _dup_last_string (sparql);
+		g_ptr_array_add (set, elem);
+
+		if (!_accept (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA))
+			break;
+	}
+
+	if (*previous_set) {
+		intersect_set (*previous_set, set);
+		g_ptr_array_unref (set);
+	} else {
+		*previous_set = set;
+	}
 
 	return TRUE;
 }
@@ -8637,6 +8713,7 @@ const RuleTranslationFunc rule_translation_funcs[N_NAMED_RULES] = {
 	translate_Prologue,
 	translate_BaseDecl,
 	translate_PrefixDecl,
+	translate_ConstraintDecl,
 	translate_SelectQuery,
 	translate_SubSelect,
 	translate_ConstructQuery,
