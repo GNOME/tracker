@@ -23,6 +23,9 @@ namespace Tracker {
 	[CCode (cheader_filename = "libtracker-common/tracker-date-time.h")]
 	public double string_to_date (string date_string, out int offset) throws DateError;
 
+	[CCode (cheader_filename = "libtracker-common/tracker-utils.h")]
+	public string? util_build_dbus_uri (GLib.BusType bus_type, string service, string? path);
+
 	[CCode (cheader_filename = "libtracker-common/tracker-date-time.h")]
 	public errordomain DateError {
 		OFFSET,
