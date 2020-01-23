@@ -779,6 +779,14 @@ static gint
 tracker_sparql_find_graph (TrackerSparql *sparql,
                            const gchar   *name)
 {
+	GHashTable *effective_graphs;
+
+	effective_graphs = tracker_sparql_get_effective_graphs (sparql);
+	if (!effective_graphs ||
+	    !g_hash_table_contains (effective_graphs, name)) {
+		return 0;
+	}
+
 	return tracker_data_manager_find_graph (sparql->data_manager, name);
 }
 
