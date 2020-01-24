@@ -21,3 +21,13 @@ dbus_service_file = configure_file(
     install: true,
     install_dir: dbus_services_dir,
 )
+
+if install_systemd_user_services
+    configure_file(
+        input: 'xdg-tracker-portal.service.in',
+        output: 'xdg-tracker-portal.service',
+        configuration: conf,
+        install: true,
+        install_dir: systemd_user_services_dir
+    )
+endif
