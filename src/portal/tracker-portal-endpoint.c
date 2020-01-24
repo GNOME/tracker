@@ -38,6 +38,7 @@ struct _TrackerPortalEndpoint
 	gchar *peer;
 	gchar *prologue;
 	GStrv graphs;
+	guint watch_id;
 };
 
 struct _TrackerPortalEndpointClass
@@ -51,7 +52,13 @@ enum {
 	N_PROPS
 };
 
+enum {
+	CLOSED,
+	N_SIGNALS
+};
+
 static GParamSpec *props[N_PROPS] = { 0 };
+static guint signals[N_SIGNALS] = { 0 };
 
 G_DEFINE_TYPE (TrackerPortalEndpoint, tracker_portal_endpoint, TRACKER_TYPE_ENDPOINT_DBUS)
 
@@ -162,10 +169,41 @@ tracker_portal_endpoint_get_property (GObject    *object,
 }
 
 static void
+peer_vanished_cb (GDBusConnection *connection,
+                  const gchar     *name,
+                  gpointer         user_data)
+{
+	TrackerPortalEndpoint *endpoint = user_data;
+
+	g_signal_emit (endpoint, signals[CLOSED], 0);
+}
+
+static void
+tracker_portal_endpoint_constructed (GObject *object)
+{
+	TrackerPortalEndpoint *endpoint = TRACKER_PORTAL_ENDPOINT (object);
+	GDBusConnection *connection;
+
+	g_object_get (object, "dbus-connection", &connection, NULL);
+	endpoint->watch_id = g_bus_watch_name_on_connection (connection,
+	                                                     endpoint->peer,
+	                                                     G_BUS_NAME_WATCHER_FLAGS_NONE,
+	                                                     NULL,
+	                                                     peer_vanished_cb,
+	                                                     object,
+	                                                     NULL);
+	g_object_unref (connection);
+
+	if (G_OBJECT_CLASS (tracker_portal_endpoint_parent_class)->constructed)
+		G_OBJECT_CLASS (tracker_portal_endpoint_parent_class)->constructed (object);
+}
+
+static void
 tracker_portal_endpoint_finalize (GObject *object)
 {
 	TrackerPortalEndpoint *endpoint = TRACKER_PORTAL_ENDPOINT (object);
 
+	g_bus_unwatch_name (endpoint->watch_id);
 	g_strfreev (endpoint->graphs);
 	g_free (endpoint->peer);
 	g_free (endpoint->prologue);
@@ -181,11 +219,18 @@ tracker_portal_endpoint_class_init (TrackerPortalEndpointClass *klass)
 
 	object_class->set_property = tracker_portal_endpoint_set_property;
 	object_class->get_property = tracker_portal_endpoint_get_property;
+	object_class->constructed = tracker_portal_endpoint_constructed;
 	object_class->finalize = tracker_portal_endpoint_finalize;
 
 	endpoint_dbus_class->forbid_operation = tracker_portal_endpoint_forbid_operation;
 	endpoint_dbus_class->filter_graph = tracker_portal_endpoint_filter_graph;
 	endpoint_dbus_class->add_prologue = tracker_portal_endpoint_add_prologue;
+
+	signals[CLOSED] =
+		g_signal_new ("closed",
+		              TRACKER_TYPE_PORTAL_ENDPOINT, 0,
+		              0, NULL, NULL, NULL,
+		              G_TYPE_NONE, 0, G_TYPE_NONE);
 
 	props[PROP_GRAPHS] =
 		g_param_spec_boxed ("graphs",
