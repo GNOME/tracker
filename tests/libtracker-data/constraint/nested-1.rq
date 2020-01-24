@@ -1,0 +1,3 @@
+CONSTRAINT GRAPH
+CONSTRAINT GRAPH <A>
+SELECT ?u { ?u a example:A }
