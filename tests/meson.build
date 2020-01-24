@@ -12,9 +12,7 @@ endif
 
 subdir('libtracker-sparql')
 
-if get_option('functional_tests')
-  subdir('functional-tests')
-endif
+subdir('functional-tests')
 
 foreach t: tests
   test_name = t.get('name')
