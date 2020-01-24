@@ -1,0 +1,2 @@
+CONSTRAINT GRAPH
+SELECT ?u { GRAPH <A> { ?u example:p 42 } }
