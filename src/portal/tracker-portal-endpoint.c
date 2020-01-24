@@ -26,6 +26,9 @@
 
 #include "tracker-portal-endpoint.h"
 
+#define GRAPH_ALL "*"
+#define GRAPH_DEFAULT "default"
+
 typedef struct _TrackerPortalEndpoint TrackerPortalEndpoint;
 typedef struct _TrackerPortalEndpointClass TrackerPortalEndpointClass;
 
@@ -75,7 +78,12 @@ tracker_portal_endpoint_filter_graph (TrackerEndpointDBus *endpoint_dbus,
 	gint i;
 
 	for (i = 0; endpoint->graphs[i]; i++) {
-		if (g_strcmp0 (graph_name, endpoint->graphs[i]) == 0) {
+		if (g_strcmp0 (endpoint->graphs[i], GRAPH_ALL) == 0) {
+			return FALSE;
+		} else if (!graph_name &&
+		           g_strcmp0 (endpoint->graphs[i], GRAPH_DEFAULT) == 0) {
+			return FALSE;
+		} else if (g_strcmp0 (graph_name, endpoint->graphs[i]) == 0) {
 			return FALSE;
 		}
 	}
@@ -99,7 +107,12 @@ tracker_portal_endpoint_add_prologue (TrackerEndpointDBus *endpoint_dbus)
 			if (i != 0)
 				g_string_append (str, ", ");
 
-			g_string_append_printf (str, "<%s>", endpoint->graphs[i]);
+			if (g_strcmp0 (endpoint->graphs[i], GRAPH_ALL) == 0)
+				g_string_append (str, "ALL");
+			else if (g_strcmp0 (endpoint->graphs[i], GRAPH_DEFAULT) == 0)
+				g_string_append (str, "DEFAULT");
+			else
+				g_string_append_printf (str, "<%s>", endpoint->graphs[i]);
 		}
 
 		endpoint->prologue = g_string_free (str, FALSE);
