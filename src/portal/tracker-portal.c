@@ -72,6 +72,9 @@ static const gchar portal_xml[] =
 	"      <arg type='s' name='service' direction='in' />"
 	"      <arg type='o' name='result' direction='out' />"
 	"    </method>"
+	"    <method name='CloseSession'>"
+	"      <arg type='o' name='object_path' direction='in' />"
+	"    </method>"
 	"  </interface>"
 	"</node>";
 
@@ -240,7 +243,6 @@ portal_iface_method_call (GDBusConnection       *connection,
 		g_autoptr(TrackerEndpoint) endpoint = NULL;
 		g_autoptr(GError) error = NULL;
 		g_auto(GStrv) graphs = NULL;
-		const gchar *sender;
 		GBusType bus_type;
 		TrackerSession session;
 
@@ -283,7 +285,6 @@ portal_iface_method_call (GDBusConnection       *connection,
 
 		session_object_path = g_strdup_printf ("/org/freedesktop/portal/Tracker/Session_%" G_GUINT64_FORMAT,
 		                                       portal->session_ids++);
-		sender = g_dbus_method_invocation_get_sender (invocation);
 
 		endpoint = tracker_portal_endpoint_new (connection,
 		                                        dbus_connection,
@@ -313,6 +314,48 @@ portal_iface_method_call (GDBusConnection       *connection,
 		g_debug ("Created session object '%s'", session.object_path);
 		g_dbus_method_invocation_return_value (invocation,
 		                                       g_variant_new ("(o)", session.object_path));
+	} else if (g_strcmp0 (method_name, "CloseSession") == 0) {
+		g_autofree gchar *uri = NULL;
+		g_autofree gchar *object_path = NULL;
+		gboolean found = FALSE;
+		gint i;
+
+		g_variant_get (parameters, "(o)", &object_path);
+		g_debug ("Got request for closing session '%s'", object_path);
+
+		for (i = 0; i < portal->sessions->len; i++) {
+			TrackerSession *session;
+			gchar *peer;
+
+			session = &g_array_index (portal->sessions, TrackerSession, i);
+
+			if (g_strcmp0 (session->object_path, object_path) != 0)
+				continue;
+
+			found = TRUE;
+			g_object_get (session->endpoint, "peer", &peer, NULL);
+
+			if (g_strcmp0 (peer, sender) == 0) {
+				g_array_remove_index_fast (portal->sessions, i);
+				g_dbus_method_invocation_return_value (invocation, NULL);
+			} else {
+				g_dbus_method_invocation_return_error (invocation,
+				                                       G_DBUS_ERROR,
+				                                       G_DBUS_ERROR_AUTH_FAILED,
+				                                       "Sender '%s' is not owner of the session",
+				                                       sender);
+			}
+
+			break;
+		}
+
+		if (!found) {
+			g_dbus_method_invocation_return_error (invocation,
+			                                       G_DBUS_ERROR,
+			                                       G_DBUS_ERROR_INVALID_ARGS,
+			                                       "Object path '%s' not found",
+			                                       object_path);
+		}
 	} else {
 		g_dbus_method_invocation_return_error (invocation,
 		                                       G_DBUS_ERROR,
