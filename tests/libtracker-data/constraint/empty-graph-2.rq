@@ -1,0 +1,2 @@
+CONSTRAINT GRAPH
+SELECT ?u ?p ?o { ?u ?p ?o }
