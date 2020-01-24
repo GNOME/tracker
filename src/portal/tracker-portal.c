@@ -200,13 +200,23 @@ load_client_configuration (GDBusMethodInvocation  *invocation,
                            GError                **error)
 {
 	g_autoptr (GKeyFile) flatpak_info = NULL;
+	GError *inner_error = NULL;
 	GStrv graphs;
 
 	flatpak_info = tracker_invocation_lookup_app_info_sync (invocation,
-	                                                        NULL, error);
+	                                                        NULL, &inner_error);
 	if (!flatpak_info) {
-		g_debug ("No .flatpak-info found, forbidden access.");
-		return NULL;
+		GStrv default_graphs = { NULL };
+
+		if (inner_error) {
+			g_warning ("Error reading .flatpak-info.");
+			g_propagate_error (error, inner_error);
+			return NULL;
+		}
+
+		g_debug ("No .flatpak-info found, peer is not sandboxed");
+		/* Still, fishy. Allow access to no graphs */
+		return g_strdupv (default_graphs);
 	}
 
 	graphs = g_key_file_get_string_list (flatpak_info,
