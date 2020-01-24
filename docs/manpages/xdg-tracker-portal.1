@@ -1,0 +1,47 @@
+.TH xdg-tracker-portal 1 "January 2020" GNU "User Commands"
+
+.SH NAME
+xdg-tracker-portal \- Portal to Tracker endpoints
+
+.SH SYNOPSIS
+.nf
+\fBxdg-tracker-portal\fR [\-\-version | \-v]
+.fi
+
+.SH DESCRIPTION
+This daemon allows access to Tracker endpoints in a controlled manner.
+By default access to every service is disallowed, services may be whitelisted
+through additional policy in the \fI/.flatpak-info\fR file.
+
+When whitelisting services, the policy may define specific graph names to
+allow access to, the \fBdefault\fR keyword to allow access to the default
+unnamed graph, or \fB*\fR keyword to allow access to all graphs.
+
+.SH CONFIGURATION
+.TP
+When interacting with sandboxed clients, the service expects the following format in the \fI/.flatpak-info\fR file:
+.BR
+.nf
+[Policy Tracker3]
+dbus:org.example.SparqlEndpoint1=graphA;graphB;default
+dbus:org.example.SparqlEndpoint2=*
+.fi
+
+.TP
+This will allow access to the endpoints behind the \fIorg.example.SparqlEndpoint1\fR and \fIorg.example.SparqlEndpoint2\fR bus names. Only to the \fBgraphA\fR and \fBgraphB\fR graph IRIs and the default unnamed graph on the first endpoint, and to all graphs in the second.
+
+.TP
+This policy can be set when building or running the sandboxed application through the \-\-add-policy option. This can be set via \fBfinish-args\fR in the flatpak manifest, specified along the build chain in \fBflatpak-build-finish\fR(1), or modified at start time with \fBflatpak-run\fR(1). For example:
+
+.BR
+.nf
+$ flatpak run \\
+  --add-policy=Tracker3.dbus:org.example.SparqlEndpoint1=graphA;graphB;default \\
+  --add-policy=Tracker3.dbus:org.example.SparqlEndpoint2=* \\
+  org.freedesktop.TrackerSandbox
+.fi
+
+.SH SEE ALSO
+.BR flatpak-build-finish (1),
+.TP
+.BR flatpak-run (1),
