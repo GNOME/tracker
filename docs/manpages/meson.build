@@ -4,7 +4,8 @@ manpages = [
     'import',
     'info',
     'sparql',
-    'sql'
+    'sql',
+    'xdg-portal',
 ]
 
 foreach m : manpages
@@ -35,3 +36,4 @@ foreach m : manpages
     install_dir: get_option('mandir') / 'man1',
   )
 endforeach
+

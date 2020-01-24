@@ -1,0 +1,43 @@
+tracker-xdg-portal(1)
+=====================
+
+== NAME
+
+tracker-xdg-portal - Portal to Tracker endpoints
+
+== SYNOPSIS
+
+....
+tracker-xdg-portal [--version | -v]
+....
+
+== DESCRIPTION
+
+This daemon allows access to Tracker endpoints in a controlled manner.
+By default access to every service is disallowed, services may be whitelisted
+through additional policy in the _.flatpak-info_ file.
+
+When whitelisting services, the policy may define specific graph names to
+allow access to, the _default_ keyword to allow access to the default
+unnamed graph, or _*_ keyword to allow access to all graphs.
+
+== CONFIGURATION
+
+When interacting with sandboxed clients, the service expects the following format in the _.flatpak-info_ file:
+
+  [Policy Tracker3]
+  dbus:org.example.SparqlEndpoint1=graphA;graphB;default
+  dbus:org.example.SparqlEndpoint2=*
+
+This will allow access to the endpoints behind the *org.example.SparqlEndpoint1* and *org.example.SparqlEndpoint2* bus names. Only to the *graphA* and *graphB* graph IRIs and the default unnamed graph on the first endpoint, and to all graphs in the second.
+
+This policy can be set when building or running the sandboxed application through the --add-policy option. This can be set via **finish-args** in the flatpak manifest, specified along the build chain in *flatpak-build-finish*(1), or modified at start time with *flatpak-run*(1). For example:
+
+  $ flatpak run \
+    --add-policy=Tracker3.dbus:org.example.SparqlEndpoint1=graphA;graphB;default \
+    --add-policy=Tracker3.dbus:org.example.SparqlEndpoint2=* \
+    org.freedesktop.TrackerSandbox
+
+== SEE ALSO
+
+*flatpak-build-finish*(1), *flatpak-override*(1), *flatpak-run*(1)
