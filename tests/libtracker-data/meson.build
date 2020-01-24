@@ -28,7 +28,6 @@ foreach base_name: libtracker_data_tests
       'name': base_name,
       'exe': binary,
       'suite': ['data'],
-      'requires_dbus': true,
     }
 endforeach
 
@@ -44,7 +43,6 @@ foreach base_name: libtracker_data_slow_tests
         'name': base_name,
         'exe': binary,
         'suite': ['data', 'slow'],
-        'requires_dbus': true,
         'timeout': 280
     }
 endforeach
