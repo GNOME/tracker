@@ -35,3 +35,5 @@ foreach m : manpages
     install_dir: get_option('mandir'),
   )
 endforeach
+
+install_man('xdg-tracker-portal.1')
