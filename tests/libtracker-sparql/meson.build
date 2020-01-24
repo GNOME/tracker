@@ -29,7 +29,6 @@ tests += {
   'exe': tracker_sparql_test,
   'suite': ['sparql'],
   'is_parallel': false,
-  'requires_dbus': true,
 }
 
 tracker_fd_test = executable('tracker-fd-test',
@@ -41,5 +40,4 @@ tests += {
   'name': 'fd',
   'exe': tracker_fd_test,
   'suite': ['sparql'],
-  'requires_dbus': true,
 }
