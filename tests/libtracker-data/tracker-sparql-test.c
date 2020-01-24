@@ -262,6 +262,21 @@ const TestInfo tests[] = {
 	{ "update/delete-insert-where-query-5", "update/delete-insert-where-5", FALSE, FALSE },
 	{ "update/delete-insert-where-query-6", "update/delete-insert-where-6", FALSE, FALSE },
 	{ "update/select-date-with-offset-1", "update/insert-date-with-offset-1", FALSE, FALSE },
+	/* Constraint declarations */
+	{ "constraint/empty-graph-1", "constraint/data", FALSE, FALSE },
+	{ "constraint/empty-graph-2", "constraint/data", FALSE, FALSE },
+	{ "constraint/empty-graph-3", "constraint/data", FALSE, FALSE },
+	{ "constraint/empty-graph-4", "constraint/data", FALSE, FALSE },
+	{ "constraint/nested-1", "constraint/data", FALSE, FALSE },
+	{ "constraint/nested-2", "constraint/data", FALSE, FALSE },
+	{ "constraint/nested-3", "constraint/data", FALSE, FALSE },
+	{ "constraint/nested-4", "constraint/data", FALSE, FALSE },
+	{ "constraint/nested-5", "constraint/data", FALSE, FALSE },
+	{ "constraint/nested-6", "constraint/data", FALSE, FALSE },
+	{ "constraint/coexisting-1", "constraint/data", FALSE, FALSE },
+	{ "constraint/coexisting-2", "constraint/data", FALSE, FALSE },
+	{ "constraint/coexisting-3", "constraint/data", FALSE, FALSE },
+	{ "constraint/coexisting-4", "constraint/data", FALSE, FALSE },
 	{ NULL }
 };
 
