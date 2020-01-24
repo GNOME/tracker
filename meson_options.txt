@@ -2,8 +2,6 @@ option('docs', type: 'boolean', value: false,
        description: 'Generate API documentation with gtk-doc')
 option('fts', type: 'boolean', value: true,
        description: 'Enable the Tracker full-text search feature')
-option('functional_tests', type: 'boolean', value: true,
-       description: 'Enable the Tracker functional test suite')
 option('journal', type: 'boolean', value: true,
        description: 'Enable database journal backup mechanism')
 option('man', type: 'boolean', value: true,
