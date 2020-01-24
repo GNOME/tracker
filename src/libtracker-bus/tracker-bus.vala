@@ -21,6 +21,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 	DBusConnection bus;
 	string dbus_name;
 	string object_path;
+	bool sandboxed;
 
 	private const string DBUS_PEER_IFACE = "org.freedesktop.DBus.Peer";
 
@@ -34,6 +35,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 
 	public Connection (string dbus_name, string object_path, DBusConnection? dbus_connection) throws Sparql.Error, IOError, DBusError, GLib.Error {
 		Object ();
+		this.sandboxed = false;
 		this.bus = dbus_connection;
 
 		// ensure that error domain is registered with GDBus
@@ -65,6 +67,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 
 				this.dbus_name = PORTAL_NAME;
 				this.object_path = object_path;
+				this.sandboxed = true;
 			} else {
 				throw e;
 			}
@@ -316,9 +319,19 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 	}
 
 	public override void close () {
+		if (this.sandboxed) {
+			var message = new DBusMessage.method_call (PORTAL_NAME, PORTAL_PATH, PORTAL_IFACE, "CloseSession");
+			message.set_body (new Variant ("(o)", this.object_path));
+
+			try {
+				this.bus.send_message (message, 0, null);
+			} catch (GLib.Error e) {
+			}
+		}
 	}
 
 	public async override bool close_async () throws GLib.IOError {
+		this.close ();
 		return true;
 	}
 }
