@@ -1,0 +1,7 @@
+[Unit]
+Description=Tracker portal service
+
+[Service]
+Type=dbus
+BusName=org.freedesktop.portal.Tracker
+ExecStart=@libexecdir@/tracker-xdg-portal-3
