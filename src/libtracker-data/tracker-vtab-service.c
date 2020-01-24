@@ -40,13 +40,13 @@ typedef struct {
 typedef struct {
 	struct sqlite3_vtab parent;
 	TrackerServiceModule *module;
+	GHashTable *cached_connections;
 	GList *cursors;
 } TrackerServiceVTab;
 
 typedef struct {
 	struct sqlite3_vtab_cursor parent;
 	TrackerServiceVTab *vtab;
-	TrackerSparqlConnection *conn;
 	TrackerSparqlCursor *sparql_cursor;
 	GHashTable *parameter_columns;
 	gchar *service;
@@ -86,6 +86,7 @@ tracker_service_vtab_free (gpointer data)
 {
 	TrackerServiceVTab *vtab = data;
 
+	g_hash_table_unref (vtab->cached_connections);
 	g_list_free (vtab->cursors);
 	g_free (vtab);
 }
@@ -98,7 +99,6 @@ tracker_service_cursor_free (gpointer data)
 	g_clear_pointer (&cursor->parameter_columns, g_hash_table_unref);
 	g_free (cursor->service);
 	g_free (cursor->query);
-	g_clear_object (&cursor->conn);
 	g_clear_object (&cursor->sparql_cursor);
 
 	g_free (cursor);
@@ -119,6 +119,10 @@ service_create (sqlite3            *db,
 
 	vtab = g_new0 (TrackerServiceVTab, 1);
 	vtab->module = module;
+	vtab->cached_connections = g_hash_table_new_full (g_str_hash,
+	                                                  g_str_equal,
+	                                                  g_free,
+	                                                  g_object_unref);
 
 	str = g_string_new ("CREATE TABLE x(\n");
 
@@ -284,6 +288,7 @@ service_filter (sqlite3_vtab_cursor  *vtab_cursor,
 {
 	TrackerServiceCursor *cursor = (TrackerServiceCursor *) vtab_cursor;
 	const ConstraintData *constraints = (const ConstraintData *) idx_str;
+	TrackerSparqlConnection *connection;
 	TrackerSparqlStatement *statement;
 	GHashTable *names = NULL, *values = NULL;
 	gchar *uri_scheme = NULL;
@@ -335,57 +340,66 @@ service_filter (sqlite3_vtab_cursor  *vtab_cursor,
 	if (!cursor->service || !cursor->query)
 		goto fail;
 
-	uri_scheme = g_uri_parse_scheme (cursor->service);
-	if (g_strcmp0 (uri_scheme, "dbus") == 0) {
-		gchar *bus_name, *object_path;
-		GDBusConnection *dbus_connection;
-		GBusType bus_type;
+	connection = g_hash_table_lookup (cursor->vtab->cached_connections,
+	                                  cursor->service);
 
-		if (!tracker_util_parse_dbus_uri (cursor->service,
-						  &bus_type,
-		                                  &bus_name, &object_path)) {
+	if (!connection) {
+		uri_scheme = g_uri_parse_scheme (cursor->service);
+		if (g_strcmp0 (uri_scheme, "dbus") == 0) {
+			gchar *bus_name, *object_path;
+			GDBusConnection *dbus_connection;
+			GBusType bus_type;
+
+			if (!tracker_util_parse_dbus_uri (cursor->service,
+			                                  &bus_type,
+			                                  &bus_name, &object_path)) {
+				g_set_error (&error,
+					     TRACKER_SPARQL_ERROR,
+					     TRACKER_SPARQL_ERROR_PARSE,
+					     "Failed to parse uri '%s'",
+					     cursor->service);
+				goto fail;
+			}
+
+			if (!g_dbus_is_name (bus_name)) {
+				g_set_error (&error,
+				             TRACKER_SPARQL_ERROR,
+				             TRACKER_SPARQL_ERROR_PARSE,
+				             "Invalid bus name '%s'",
+				             bus_name);
+				goto fail;
+			}
+
+			dbus_connection = g_bus_get_sync (bus_type, NULL, &error);
+			if (!dbus_connection)
+				goto fail;
+
+			connection = tracker_sparql_connection_bus_new (bus_name, object_path,
+			                                                dbus_connection, &error);
+			g_free (bus_name);
+			g_free (object_path);
+
+			if (!connection)
+				goto fail;
+		} else if (g_strcmp0 (uri_scheme, "http") == 0) {
+			connection = tracker_sparql_connection_remote_new (cursor->service);
+		}
+
+		if (!connection) {
 			g_set_error (&error,
 			             TRACKER_SPARQL_ERROR,
-			             TRACKER_SPARQL_ERROR_PARSE,
-			             "Failed to parse uri '%s'",
+			             TRACKER_SPARQL_ERROR_UNSUPPORTED,
+			             "Unsupported uri '%s'",
 			             cursor->service);
 			goto fail;
 		}
 
-		if (!g_dbus_is_name (bus_name)) {
-			g_set_error (&error,
-			             TRACKER_SPARQL_ERROR,
-			             TRACKER_SPARQL_ERROR_PARSE,
-			             "Invalid bus name '%s'",
-			             bus_name);
-			goto fail;
-		}
-
-		dbus_connection = g_bus_get_sync (bus_type, NULL, &error);
-		if (!dbus_connection)
-			goto fail;
-
-		cursor->conn = tracker_sparql_connection_bus_new (bus_name, object_path,
-		                                                  dbus_connection, &error);
-		g_free (bus_name);
-		g_free (object_path);
-
-		if (!cursor->conn)
-			goto fail;
-	} else if (g_strcmp0 (uri_scheme, "http") == 0) {
-		cursor->conn = tracker_sparql_connection_remote_new (cursor->service);
+		g_hash_table_insert (cursor->vtab->cached_connections,
+		                     g_strdup (cursor->service),
+		                     connection);
 	}
 
-	if (!cursor->conn) {
-		g_set_error (&error,
-		             TRACKER_SPARQL_ERROR,
-		             TRACKER_SPARQL_ERROR_UNSUPPORTED,
-		             "Unsupported uri '%s'",
-		             cursor->service);
-		goto fail;
-	}
-
-	statement = tracker_sparql_connection_query_statement (cursor->conn,
+	statement = tracker_sparql_connection_query_statement (connection,
 	                                                       cursor->query,
 	                                                       NULL, &error);
 	if (error)
