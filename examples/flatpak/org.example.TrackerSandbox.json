@@ -1,0 +1,32 @@
+{
+    "app-id" : "org.example.TrackerSandbox",
+    "runtime" : "org.gnome.Platform",
+    "runtime-version" : "master",
+    "sdk" : "org.gnome.Sdk",
+    "command" : "/bin/sh",
+    "tags" : [
+        "nightly"
+    ],
+    "finish-args" : [
+	/* Define policy for the XDG Tracker portal */
+	"--add-policy=Tracker3.dbus:org.freedesktop.Tracker3.Miner.Files=tracker:Audio"
+    ],
+    "modules" : [
+        {
+            "name" : "tracker",
+	    "buildsystem" : "meson",
+            "config-opts": [
+                "-Ddocs=false",
+                "-Dman=false",
+                "-Dsystemd_user_services=false"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/tracker.git",
+                    "branch" : "wip/carlosg/portal"
+                }
+            ]
+        }
+    ]
+}
