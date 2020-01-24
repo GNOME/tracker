@@ -775,7 +775,6 @@ main (gint argc, gchar **argv)
 {
 	g_test_init (&argc, &argv, NULL);
 
-	g_setenv ("TRACKER_TEST_DOMAIN_ONTOLOGY_RULE", TEST_DOMAIN_ONTOLOGY_RULE, TRUE);
 	g_setenv ("TRACKER_DB_ONTOLOGIES_DIR", TEST_ONTOLOGIES_DIR, TRUE);
 
 	connection = create_dbus_connection (NULL);
