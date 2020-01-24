@@ -172,6 +172,25 @@ tracker_portal_init (TrackerPortal *portal)
 	g_array_set_clear_func (portal->sessions, clear_session);
 }
 
+static void
+endpoint_closed_cb (TrackerPortalEndpoint *endpoint,
+                    gpointer               user_data)
+{
+	TrackerPortal *portal = user_data;
+	gint i;
+
+	for (i = 0; i < portal->sessions->len; i++) {
+		TrackerSession *session;
+
+		session = &g_array_index (portal->sessions, TrackerSession, i);
+		if (session->endpoint != TRACKER_ENDPOINT (endpoint))
+			continue;
+
+		g_array_remove_index_fast (portal->sessions, i);
+		break;
+	}
+}
+
 static GStrv
 load_client_configuration (GDBusMethodInvocation  *invocation,
                            const gchar            *service_uri,
@@ -278,6 +297,10 @@ portal_iface_method_call (GDBusConnection       *connection,
 			g_dbus_method_invocation_return_gerror (invocation, error);
 			return;
 		}
+
+		g_signal_connect (endpoint, "closed",
+		                  G_CALLBACK (endpoint_closed_cb),
+		                  portal);
 
 		session = (TrackerSession) {
 			.dbus_connection = g_steal_pointer (&dbus_connection),
