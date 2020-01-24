@@ -1,0 +1,3 @@
+CONSTRAINT GRAPH DEFAULT,<A>
+SELECT ?u { ?u a example:A }
+ORDER BY ?u
