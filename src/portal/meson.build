@@ -13,3 +13,11 @@ executable('tracker-xdg-portal-@0@'.format(tracker_api_major), sources,
     dependencies: [tracker_sparql_dep],
     include_directories: [commoninc, configinc, srcinc],
 )
+
+dbus_service_file = configure_file(
+    input: 'org.freedesktop.portal.Tracker.service.in',
+    output: 'org.freedesktop.portal.Tracker.service',
+    configuration: conf,
+    install: true,
+    install_dir: dbus_services_dir,
+)
