@@ -146,6 +146,7 @@ struct _TrackerSparql
 		GPtrArray *graphs;
 		GPtrArray *services;
 		GHashTable *filtered_graphs;
+		gboolean filter_unnamed_graph;
 	} policy;
 
 	struct {
@@ -691,7 +692,7 @@ _append_union_graph_with_clause (TrackerSparql *sparql,
 	_append_string_printf (sparql, "\"unionGraph_%s\"(ID, %s graph) AS (",
 	                       table_name, properties);
 
-	if (g_hash_table_size (graphs) > 0) {
+	if (!sparql->policy.filter_unnamed_graph) {
 		_append_string_printf (sparql,
 		                       "SELECT ID, %s 0 AS graph FROM \"main\".\"%s\" ",
 		                       properties, table_name);
@@ -2696,8 +2697,10 @@ translate_ConstraintDecl (TrackerSparql  *sparql,
                           GError        **error)
 {
 	GPtrArray **previous_set, *set;
+	gboolean graph = FALSE;
+	gboolean filter_unnamed_graph = TRUE;
 
-	/* ConstraintDecl ::= 'CONSTRAINT' ( 'GRAPH' | 'SERVICE' ) ( IRIREF (',' IRIREF)* )?
+	/* ConstraintDecl ::= 'CONSTRAINT' ( 'GRAPH' | 'SERVICE' ) ( ( IRIREF | 'DEFAULT' | 'ALL' ) ( ',' ( IRIREF | 'DEFAULT' | 'ALL' ) )* )?
 	 *
 	 * TRACKER EXTENSION
 	 */
@@ -2705,6 +2708,7 @@ translate_ConstraintDecl (TrackerSparql  *sparql,
 
 	if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GRAPH)) {
 		previous_set = &sparql->policy.graphs;
+		graph = TRUE;
 	} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SERVICE)) {
 		previous_set = &sparql->policy.services;
 	} else {
@@ -2713,21 +2717,39 @@ translate_ConstraintDecl (TrackerSparql  *sparql,
 
 	set = g_ptr_array_new_with_free_func (g_free);
 
-	while (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_IRIREF)) {
+	do {
 		gchar *elem;
 
-		elem = _dup_last_string (sparql);
-		g_ptr_array_add (set, elem);
-
-		if (!_accept (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA))
+		if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_IRIREF)) {
+			if (set) {
+				elem = _dup_last_string (sparql);
+				g_ptr_array_add (set, elem);
+			}
+		} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DEFAULT)) {
+			if (graph)
+				filter_unnamed_graph = FALSE;
+		} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_ALL)) {
+			if (graph)
+				filter_unnamed_graph = FALSE;
+			g_clear_pointer (&set, g_ptr_array_unref);
+		} else {
 			break;
-	}
+		}
+	} while (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_COMMA));
 
 	if (*previous_set) {
-		intersect_set (*previous_set, set);
-		g_ptr_array_unref (set);
+		if (set) {
+			intersect_set (*previous_set, set);
+			g_ptr_array_unref (set);
+		}
 	} else {
 		*previous_set = set;
+	}
+
+	if (graph) {
+		sparql->policy.filter_unnamed_graph |= filter_unnamed_graph;
+		g_clear_pointer (&sparql->policy.filtered_graphs,
+		                 g_hash_table_unref);
 	}
 
 	return TRUE;
