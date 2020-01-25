@@ -699,6 +699,23 @@ tracker_sparql_get_effective_graphs (TrackerSparql *sparql)
 }
 
 static void
+_append_empty_select (TrackerSparql *sparql,
+                      gint           n_elems)
+{
+	gint i;
+
+	_append_string (sparql, "SELECT ");
+
+	for (i = 0; i < n_elems; i++) {
+		if (i > 0)
+			_append_string (sparql, ", ");
+		_append_string (sparql, "NULL ");
+	}
+
+	_append_string (sparql, "WHERE 0 ");
+}
+
+static void
 _append_union_graph_with_clause (TrackerSparql *sparql,
                                  const gchar   *table_name,
                                  const gchar   *properties,
@@ -718,17 +735,7 @@ _append_union_graph_with_clause (TrackerSparql *sparql,
 		                       "SELECT ID, %s 0 AS graph FROM \"main\".\"%s\" ",
 		                       properties, table_name);
 	} else {
-		gint i;
-
-		_append_string (sparql, "SELECT ");
-
-		for (i = 0; i < n_properties + 2; i++) {
-			if (i > 0)
-				_append_string (sparql, ", ");
-			_append_string (sparql, "NULL ");
-		}
-
-		_append_string (sparql, "WHERE 0 ");
+		_append_empty_select (sparql, n_properties + 2);
 	}
 
 	g_hash_table_iter_init (&iter, graphs);
@@ -1379,6 +1386,7 @@ tracker_sparql_add_fts_subquery (TrackerSparql         *sparql,
 	gchar *snippet_expression = NULL;
 	GString *select_items;
 	gchar *table_name;
+	gint n_properties;
 
 	old = tracker_sparql_swap_builder (sparql, sparql->current_state.with_clauses);
 
@@ -1391,12 +1399,14 @@ tracker_sparql_add_fts_subquery (TrackerSparql         *sparql,
 	                              sparql->current_state.fts_match_idx++);
 	_append_string_printf (sparql, "\"%s\"(ID ", table_name);
 	select_items = g_string_new ("SELECT ROWID");
+	n_properties = 1;
 
 	if (tracker_token_get_variable (subject)) {
 		_append_string (sparql, ",\"ftsRank\", \"ftsOffsets\" ");
 		g_string_append (select_items, ",rank, tracker_offsets(fts5) ");
 
 		_append_string (sparql, ",\"ftsSnippet\" ");
+		n_properties += 3;
 
 		if (introspect_fts_snippet (sparql, tracker_token_get_variable (subject),
 		                            &snippet_expression, NULL)) {
@@ -1408,28 +1418,38 @@ tracker_sparql_add_fts_subquery (TrackerSparql         *sparql,
 		}
 	}
 
-	if (!tracker_token_get_literal (graph))
+	if (!tracker_token_get_literal (graph)) {
 		_append_string (sparql, ", graph");
+		n_properties++;
+	}
 
 	_append_string (sparql, ") AS (");
 
 	if (tracker_token_get_literal (graph)) {
-		_append_string_printf (sparql,
-		                       "%s FROM \"%s\".\"fts5\" "
-		                       "WHERE fts5 = ",
-		                       select_items->str,
-		                       tracker_token_get_idstring (graph));
-		_append_literal_sql (sparql, binding);
+		if (tracker_sparql_find_graph (sparql, tracker_token_get_idstring (graph))) {
+			_append_string_printf (sparql,
+			                       "%s FROM \"%s\".\"fts5\" "
+			                       "WHERE fts5 = ",
+			                       select_items->str,
+			                       tracker_token_get_idstring (graph));
+			_append_literal_sql (sparql, binding);
+		} else {
+			_append_empty_select (sparql, n_properties);
+		}
 	} else {
 		gpointer graph_name, graph_id;
 		GHashTable *graphs;
 		GHashTableIter iter;
 
-		_append_string_printf (sparql,
-		                       "%s, 0 FROM \"main\".\"fts5\" "
-		                       "WHERE fts5 = ",
-		                       select_items->str);
-		_append_literal_sql (sparql, binding);
+		if (!sparql->policy.filter_unnamed_graph) {
+			_append_string_printf (sparql,
+			                       "%s, 0 FROM \"main\".\"fts5\" "
+			                       "WHERE fts5 = ",
+			                       select_items->str);
+			_append_literal_sql (sparql, binding);
+		} else {
+			_append_empty_select (sparql, n_properties);
+		}
 
 		graphs = tracker_sparql_get_effective_graphs (sparql);
 		g_hash_table_iter_init (&iter, graphs);
