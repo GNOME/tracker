@@ -3875,6 +3875,14 @@ translate_Drop (TrackerSparql  *sparql,
 	}
 
 	for (l = graphs; l; l = l->next) {
+		if (!tracker_sparql_graph_is_whitelisted (sparql, l->data)) {
+			inner_error = g_error_new (TRACKER_SPARQL_ERROR,
+			                           TRACKER_SPARQL_ERROR_CONSTRAINT,
+			                           "Graph '%s' disallowed by policy",
+			                           (const gchar *) l->data);
+			break;
+		}
+
 		if (!tracker_data_manager_drop_graph (sparql->data_manager,
 		                                      l->data, &inner_error))
 			break;
@@ -3909,6 +3917,14 @@ translate_Create (TrackerSparql  *sparql,
 		inner_error = g_error_new (TRACKER_SPARQL_ERROR,
 		                           TRACKER_SPARQL_ERROR_CONSTRAINT,
 		                           "Graph '%s' already exists",
+		                           graph_name);
+		goto error;
+	}
+
+	if (!tracker_sparql_graph_is_whitelisted (sparql, graph_name)) {
+		inner_error = g_error_new (TRACKER_SPARQL_ERROR,
+		                           TRACKER_SPARQL_ERROR_CONSTRAINT,
+		                           "Graph '%s' disallowed by policy",
 		                           graph_name);
 		goto error;
 	}
@@ -3958,6 +3974,14 @@ translate_Add (TrackerSparql  *sparql,
 		g_set_error (&inner_error, TRACKER_SPARQL_ERROR,
 			     TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
 			     "Unknown graph '%s'", source);
+		goto error;
+	}
+
+	if (!tracker_sparql_graph_is_whitelisted (sparql, destination)) {
+		inner_error = g_error_new (TRACKER_SPARQL_ERROR,
+		                           TRACKER_SPARQL_ERROR_CONSTRAINT,
+		                           "Graph '%s' disallowed by policy",
+		                           destination);
 		goto error;
 	}
 
@@ -4020,6 +4044,14 @@ translate_Move (TrackerSparql  *sparql,
 		g_set_error (&inner_error, TRACKER_SPARQL_ERROR,
 			     TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
 			     "Unknown graph '%s'", source);
+		goto error;
+	}
+
+	if (!tracker_sparql_graph_is_whitelisted (sparql, destination)) {
+		inner_error = g_error_new (TRACKER_SPARQL_ERROR,
+		                           TRACKER_SPARQL_ERROR_CONSTRAINT,
+		                           "Graph '%s' disallowed by policy",
+		                           destination);
 		goto error;
 	}
 
@@ -4094,6 +4126,14 @@ translate_Copy (TrackerSparql  *sparql,
 		g_set_error (&inner_error, TRACKER_SPARQL_ERROR,
 			     TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
 			     "Unknown graph '%s'", source);
+		goto error;
+	}
+
+	if (!tracker_sparql_graph_is_whitelisted (sparql, destination)) {
+		inner_error = g_error_new (TRACKER_SPARQL_ERROR,
+		                           TRACKER_SPARQL_ERROR_CONSTRAINT,
+		                           "Graph '%s' disallowed by policy",
+		                           destination);
 		goto error;
 	}
 
