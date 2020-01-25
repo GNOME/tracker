@@ -656,6 +656,27 @@ build_properties_string (TrackerSparql   *sparql,
 	}
 }
 
+static gboolean
+tracker_sparql_graph_is_whitelisted (TrackerSparql *sparql,
+                                     const gchar   *graph)
+{
+	gint i;
+
+	if (!sparql->policy.graphs)
+		return TRUE;
+
+	for (i = 0; i < sparql->policy.graphs->len; i++) {
+		const gchar *policy_graph;
+
+		policy_graph = g_ptr_array_index (sparql->policy.graphs, i);
+
+		if (g_strcmp0 (graph, policy_graph) == 0)
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 static GHashTable *
 tracker_sparql_get_effective_graphs (TrackerSparql *sparql)
 {
@@ -1941,6 +1962,15 @@ tracker_sparql_apply_quad (TrackerSparql  *sparql,
                            GError        **error)
 {
 	GError *inner_error = NULL;
+
+	if ((tracker_token_is_empty (&sparql->current_state.graph) &&
+	     sparql->policy.filter_unnamed_graph) ||
+	    (tracker_token_get_literal (&sparql->current_state.graph) &&
+	     !tracker_sparql_graph_is_whitelisted (sparql, tracker_token_get_idstring (&sparql->current_state.graph)))) {
+		_raise (CONSTRAINT, "Access to graph is disallowed",
+		        tracker_token_is_empty (&sparql->current_state.graph) ? "DEFAULT" :
+		        tracker_token_get_idstring (&sparql->current_state.graph));
+	}
 
 	switch (sparql->current_state.type) {
 	case TRACKER_SPARQL_TYPE_SELECT:
