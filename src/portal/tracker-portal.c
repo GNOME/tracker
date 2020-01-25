@@ -64,6 +64,7 @@ G_DEFINE_TYPE_WITH_CODE (TrackerPortal, tracker_portal, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, tracker_portal_initable_iface_init))
 
 #define TRACKER_GROUP_NAME "Policy Tracker3"
+#define DEFAULT_URI_SUFFIX ":/org/freedesktop/Tracker3/Endpoint"
 
 static const gchar portal_xml[] =
 	"<node>"
@@ -222,7 +223,22 @@ load_client_configuration (GDBusMethodInvocation  *invocation,
 	graphs = g_key_file_get_string_list (flatpak_info,
 	                                     TRACKER_GROUP_NAME,
 	                                     service_uri,
-	                                     NULL, error);
+	                                     NULL, NULL);
+
+	if (!graphs && g_str_has_suffix (service_uri, DEFAULT_URI_SUFFIX)) {
+		gchar *default_service_uri;
+
+		default_service_uri = g_strndup (service_uri,
+		                                 strlen (service_uri) -
+		                                 strlen (DEFAULT_URI_SUFFIX));
+
+		graphs = g_key_file_get_string_list (flatpak_info,
+		                                     TRACKER_GROUP_NAME,
+		                                     default_service_uri,
+		                                     NULL, error);
+		g_free (default_service_uri);
+	}
+
 	if (!graphs) {
 		g_debug ("Service '%s' not found in Tracker policy", service_uri);
 		return NULL;
