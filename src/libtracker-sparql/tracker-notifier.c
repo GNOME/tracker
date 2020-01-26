@@ -168,6 +168,11 @@ tracker_notifier_event_unref (TrackerNotifierEvent *event)
 	}
 }
 
+G_DEFINE_BOXED_TYPE (TrackerNotifierEvent,
+                     tracker_notifier_event,
+                     tracker_notifier_event_ref,
+                     tracker_notifier_event_unref)
+
 static gint
 compare_event_cb (gconstpointer a,
                   gconstpointer b,
