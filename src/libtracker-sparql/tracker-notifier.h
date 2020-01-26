@@ -28,6 +28,7 @@
 #include <libtracker-sparql/tracker-version.h>
 
 #define TRACKER_TYPE_NOTIFIER (tracker_notifier_get_type ())
+#define TRACKER_TYPE_NOTIFIER_EVENT (tracker_notifier_event_get_type ())
 
 TRACKER_AVAILABLE_IN_ALL
 G_DECLARE_DERIVABLE_TYPE (TrackerNotifier, tracker_notifier, TRACKER, NOTIFIER, GObject)
@@ -68,6 +69,9 @@ guint tracker_notifier_signal_subscribe   (TrackerNotifier *notifier,
 TRACKER_AVAILABLE_IN_ALL
 void  tracker_notifier_signal_unsubscribe (TrackerNotifier *notifier,
                                            guint            handler_id);
+
+TRACKER_AVAILABLE_IN_ALL
+GType tracker_notifier_event_get_type (void) G_GNUC_CONST;
 
 TRACKER_AVAILABLE_IN_ALL
 TrackerNotifierEventType
