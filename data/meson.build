@@ -1,7 +1,6 @@
 tracker_gsettings_schemas = files([
   'org.freedesktop.Tracker.FTS.gschema.xml',
   'org.freedesktop.Tracker.gschema.xml',
-  'org.freedesktop.Tracker.Store.gschema.xml'
 ])
 
 foreach schema : tracker_gsettings_schemas
