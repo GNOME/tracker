@@ -50,7 +50,6 @@ tracker_resource_print_sparql_update
 tracker_resource_print_turtle
 tracker_resource_print_jsonld
 TRACKER_OWN_GRAPH_URN
-TRACKER_PREFIX_DATASOURCE_URN
 TRACKER_PREFIX_DC
 TRACKER_PREFIX_MFO
 TRACKER_PREFIX_MLO
