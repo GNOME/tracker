@@ -1,5 +1,4 @@
 tracker_gsettings_schemas = files([
-  'org.freedesktop.Tracker.DB.gschema.xml',
   'org.freedesktop.Tracker.FTS.gschema.xml',
   'org.freedesktop.Tracker.gschema.xml',
   'org.freedesktop.Tracker.Store.gschema.xml'
