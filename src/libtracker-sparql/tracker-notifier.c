@@ -342,25 +342,22 @@ create_extra_info_query (TrackerNotifier           *notifier,
 }
 
 static void
-tracker_notifier_query_extra_info (TrackerNotifier           *notifier,
-                                   TrackerNotifierEventCache *cache)
+query_extra_info_cb (GObject      *object,
+                     GAsyncResult *res,
+                     gpointer      user_data)
 {
+	TrackerNotifierEventCache *cache = user_data;
+	TrackerSparqlConnection *conn;
 	TrackerNotifierPrivate *priv;
 	TrackerSparqlCursor *cursor;
 	TrackerNotifierEvent *event;
 	GSequenceIter *iter;
-	gchar *sparql;
 	gint col;
 	gint64 id;
 
-	sparql = create_extra_info_query (notifier, cache);
-	if (!sparql)
-		return;
-
-	priv = tracker_notifier_get_instance_private (notifier);
-	cursor = tracker_sparql_connection_query (priv->connection, sparql,
-	                                          NULL, NULL);
-	g_free (sparql);
+	priv = tracker_notifier_get_instance_private (cache->notifier);
+	conn = TRACKER_SPARQL_CONNECTION (object);
+	cursor = tracker_sparql_connection_query_finish (conn, res, NULL);
 
 	iter = g_sequence_get_begin_iter (cache->sequence);
 
@@ -386,6 +383,28 @@ tracker_notifier_query_extra_info (TrackerNotifier           *notifier,
 	}
 
 	g_object_unref (cursor);
+
+	tracker_notifier_emit_events (cache);
+	_tracker_notifier_event_cache_free (cache);
+}
+
+static void
+tracker_notifier_query_extra_info (TrackerNotifier           *notifier,
+                                   TrackerNotifierEventCache *cache)
+{
+	TrackerNotifierPrivate *priv;
+	gchar *sparql;
+
+	sparql = create_extra_info_query (notifier, cache);
+	if (!sparql)
+		return;
+
+	priv = tracker_notifier_get_instance_private (notifier);
+	tracker_sparql_connection_query_async (priv->connection, sparql,
+	                                       NULL,
+	                                       query_extra_info_cb,
+	                                       cache);
+	g_free (sparql);
 }
 
 void
@@ -397,11 +416,12 @@ _tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
 	if (g_sequence_is_empty (cache->sequence))
 		_tracker_notifier_event_cache_free (cache);
 
-	if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
+	if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN) {
 		tracker_notifier_query_extra_info (notifier, cache);
-
-	tracker_notifier_emit_events (cache);
-	_tracker_notifier_event_cache_free (cache);
+	} else {
+		tracker_notifier_emit_events (cache);
+		_tracker_notifier_event_cache_free (cache);
+	}
 }
 
 static void
