@@ -284,39 +284,37 @@ tracker_notifier_event_cache_take_events (TrackerNotifierEventCache *cache)
 	return events;
 }
 
-static TrackerNotifierEvent *
-find_event_in_array (GPtrArray *events,
-                     gint64     id,
-                     gint      *idx)
+static void
+tracker_notifier_emit_events (TrackerNotifierEventCache *cache)
 {
-	TrackerNotifierEvent *event;
+	GPtrArray *events;
 
-	while (*idx < events->len) {
-		event = g_ptr_array_index (events, *idx);
-		(*idx)++;
-		if (event->id == id)
-			return event;
+	events = tracker_notifier_event_cache_take_events (cache);
+
+	if (events) {
+		g_signal_emit (cache->notifier, signals[EVENTS], 0, cache->service, cache->graph, events);
+		g_ptr_array_unref (events);
 	}
-
-	return NULL;
 }
 
 static gchar *
-create_extra_info_query (TrackerNotifier *notifier,
-                         GPtrArray       *events)
+create_extra_info_query (TrackerNotifier           *notifier,
+                         TrackerNotifierEventCache *cache)
 {
 	TrackerNotifierPrivate *priv;
 	GString *sparql, *filter;
 	gboolean has_elements = FALSE;
-	gint idx;
+	GSequenceIter *iter;
 
 	priv = tracker_notifier_get_instance_private (notifier);
 	filter = g_string_new (NULL);
 
-	for (idx = 0; idx < events->len; idx++) {
+	for (iter = g_sequence_get_begin_iter (cache->sequence);
+	     !g_sequence_iter_is_end (iter);
+	     iter = g_sequence_iter_next (iter)) {
 		TrackerNotifierEvent *event;
 
-		event = g_ptr_array_index (events, idx);
+		event = g_sequence_get (iter);
 
 		if (has_elements)
 			g_string_append_c (filter, ' ');
@@ -344,17 +342,18 @@ create_extra_info_query (TrackerNotifier *notifier,
 }
 
 static void
-tracker_notifier_query_extra_info (TrackerNotifier *notifier,
-                                   GPtrArray       *events)
+tracker_notifier_query_extra_info (TrackerNotifier           *notifier,
+                                   TrackerNotifierEventCache *cache)
 {
 	TrackerNotifierPrivate *priv;
 	TrackerSparqlCursor *cursor;
 	TrackerNotifierEvent *event;
+	GSequenceIter *iter;
 	gchar *sparql;
-	gint idx = 0, col;
+	gint col;
 	gint64 id;
 
-	sparql = create_extra_info_query (notifier, events);
+	sparql = create_extra_info_query (notifier, cache);
 	if (!sparql)
 		return;
 
@@ -362,6 +361,8 @@ tracker_notifier_query_extra_info (TrackerNotifier *notifier,
 	cursor = tracker_sparql_connection_query (priv->connection, sparql,
 	                                          NULL, NULL);
 	g_free (sparql);
+
+	iter = g_sequence_get_begin_iter (cache->sequence);
 
 	/* We rely here in both the GPtrArray and the query items being
 	 * sorted by tracker:id, the former will be so because the way it's
@@ -371,9 +372,10 @@ tracker_notifier_query_extra_info (TrackerNotifier *notifier,
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 		col = 0;
 		id = tracker_sparql_cursor_get_integer (cursor, col++);
-		event = find_event_in_array (events, id, &idx);
+		event = g_sequence_get (iter);
+		iter = g_sequence_iter_next (iter);
 
-		if (!event) {
+		if (!event || event->id != id) {
 			g_critical ("Queried for id %" G_GINT64_FORMAT " but it is not "
 			            "found, bailing out", id);
 			break;
@@ -391,17 +393,15 @@ _tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
 {
 	TrackerNotifier *notifier = cache->notifier;
 	TrackerNotifierPrivate *priv = tracker_notifier_get_instance_private (notifier);
-	GPtrArray *events;
 
-	events = tracker_notifier_event_cache_take_events (cache);
+	if (g_sequence_is_empty (cache->sequence))
+		_tracker_notifier_event_cache_free (cache);
 
-	if (events) {
-		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
-			tracker_notifier_query_extra_info (notifier, events);
+	if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
+		tracker_notifier_query_extra_info (notifier, cache);
 
-		g_signal_emit (notifier, signals[EVENTS], 0, cache->service, cache->graph, events);
-		g_ptr_array_unref (events);
-	}
+	tracker_notifier_emit_events (cache);
+	_tracker_notifier_event_cache_free (cache);
 }
 
 static void
@@ -429,7 +429,6 @@ graph_updated_cb (GDBusConnection *connection,
 	g_variant_iter_free (events);
 
 	_tracker_notifier_event_cache_flush_events (cache);
-	_tracker_notifier_event_cache_free (cache);
 }
 
 static void

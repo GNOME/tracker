@@ -457,7 +457,6 @@ commit_statement_cb (gpointer user_data)
 	while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &cache)) {
 		g_hash_table_iter_steal (&iter);
 		_tracker_notifier_event_cache_flush_events (cache);
-		_tracker_notifier_event_cache_free (cache);
 	}
 }
 
