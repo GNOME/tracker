@@ -545,9 +545,9 @@ tracker_notifier_class_init (TrackerNotifierClass *klass)
 		              G_TYPE_PTR_ARRAY | G_SIGNAL_TYPE_STATIC_SCOPE);
 
 	/**
-	 * TrackerNotifier:classes:
+	 * TrackerNotifier:connection:
 	 *
-	 * RDF classes to listen notifications about.
+	 * SPARQL connection to listen to.
 	 */
 	pspecs[PROP_CONNECTION] =
 		g_param_spec_object ("connection",
