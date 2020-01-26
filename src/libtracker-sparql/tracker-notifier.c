@@ -271,14 +271,8 @@ tracker_notifier_event_cache_take_events (TrackerNotifierEventCache *cache)
 		next = g_sequence_iter_next (iter);
 		event = g_sequence_get (iter);
 
-		if (event->type == -1) {
-			/* This event turned out a NO-OP, just remove it */
-			g_sequence_remove (iter);
-		} else {
-			g_ptr_array_add (events, tracker_notifier_event_ref (event));
-			g_sequence_remove (iter);
-		}
-
+		g_ptr_array_add (events, tracker_notifier_event_ref (event));
+		g_sequence_remove (iter);
 		iter = next;
 	}
 
