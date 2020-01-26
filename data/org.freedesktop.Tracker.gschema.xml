@@ -19,7 +19,6 @@ Boston, MA  02110-1301, USA.
 -->
 <schemalist>
   <schema id="org.freedesktop.Tracker" path="/org/freedesktop/tracker/">
-    <child name="db" schema="org.freedesktop.Tracker.DB"/>
     <child name="fts" schema="org.freedesktop.Tracker.FTS"/>
     <child name="store" schema="org.freedesktop.Tracker.Store"/>
   </schema>
