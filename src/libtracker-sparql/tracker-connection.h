@@ -27,6 +27,13 @@
 #include <libtracker-sparql/tracker-version.h>
 #include <gio/gio.h>
 
+/**
+ * TrackerSparqlConnectionFlags:
+ * @TRACKER_SPARQL_CONNECTION_FLAGS_NONE: No flags.
+ * @TRACKER_SPARQL_CONNECTION_FLAGS_READONLY: Connection is readonly.
+ *
+ * Connection flags to modify #TrackerSparqlConnection behavior.
+ */
 typedef enum {
 	TRACKER_SPARQL_CONNECTION_FLAGS_NONE     = 0,
 	TRACKER_SPARQL_CONNECTION_FLAGS_READONLY = 1 << 0,

@@ -359,7 +359,7 @@ tracker_sparql_statement_execute_finish (TrackerSparqlStatement  *stmt,
 
 /**
  * tracker_sparql_statement_clear_bindings:
- * @self: a #TrackerSparqlStatement
+ * @stmt: a #TrackerSparqlStatement
  *
  * Clears all boolean/string/integer/double bindings.
  *
