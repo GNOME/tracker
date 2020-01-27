@@ -1026,6 +1026,11 @@ is_builtin_class (const gchar             *uri_or_curie,
 	gchar *prefix = NULL;
 	gboolean has_prefix;
 
+	// blank nodes should be processed as nested resource
+	// g_uri_parse_scheme returns NULL for blank nodes, i.e. _:1
+	if (is_blank_node (uri_or_curie))
+		return FALSE;
+
 	prefix = g_uri_parse_scheme (uri_or_curie);
 
 	if (!prefix)
