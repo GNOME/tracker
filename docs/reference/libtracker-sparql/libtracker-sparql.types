@@ -1,0 +1,15 @@
+#include <libtracker-sparql/tracker-sparql.h>
+
+tracker_endpoint_get_type
+tracker_endpoint_dbus_get_type
+tracker_namespace_manager_get_type
+tracker_notifier_get_type
+tracker_notifier_event_get_type
+tracker_notifier_event_type_get_type
+tracker_notifier_flags_get_type
+tracker_resource_get_type
+tracker_sparql_connection_get_type
+tracker_sparql_connection_flags_get_type
+tracker_sparql_cursor_get_type
+tracker_sparql_error_get_type
+tracker_sparql_statement_get_type
