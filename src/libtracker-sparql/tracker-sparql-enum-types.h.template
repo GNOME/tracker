@@ -4,6 +4,7 @@
 #define __TRACKER_NOTIFY_ENUM_TYPES_H__
 
 #include <glib-object.h>
+#include <libtracker-sparql/tracker-version.h>
 
 G_BEGIN_DECLS
 /*** END file-header ***/
@@ -14,6 +15,7 @@ G_BEGIN_DECLS
 /*** END file-production ***/
 
 /*** BEGIN value-header ***/
+TRACKER_AVAILABLE_IN_ALL
 GType @enum_name@_get_type (void) G_GNUC_CONST;
 #define TRACKER_TYPE_@ENUMSHORT@ (@enum_name@_get_type ())
 /*** END value-header ***/
