@@ -32,7 +32,7 @@ import unittest as ut
 import fixtures
 
 
-REASONABLE_TIMEOUT = 10  # Time waiting for the signal to be emitted
+REASONABLE_TIMEOUT = 10000  # Time waiting for the signal to be emitted
 
 
 class TrackerNotifierTests():
@@ -51,11 +51,8 @@ class TrackerNotifierTests():
         self.results_inserts = []
         self.results_updates = []
 
-        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.NONE)
-        # FIXME: uncomment this to cause a deadlock in TrackerNotifier.
-        #self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.QUERY_URN)
+        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.QUERY_URN)
         self.notifier.connect('events', self.__signal_received_cb)
-
 
     def __wait_for_signal(self):
         """
@@ -73,9 +70,7 @@ class TrackerNotifierTests():
         """
         Save the content of the signal and disconnect the callback
         """
-        logging.debug("Received TrackerNotifier::events signal with %i events", len(events))
         for event in events:
-            print("Got event in callback: %s", event)
             if event.get_event_type() == Tracker.NotifierEventType.CREATE:
                 self.results_inserts.append(event)
             elif event.get_event_type() == Tracker.NotifierEventType.UPDATE:
@@ -83,17 +78,10 @@ class TrackerNotifierTests():
             elif event.get_event_type() == Tracker.NotifierEventType.DELETE:
                 self.results_deletes.append(event)
 
-        # FIXME: I don't think this should be needed. Without it, the signal
-        # callback fires *before* the main loop is started, because it's
-        # triggered from TrackerNotifier as soon as the database update
-        # happens.
-        def callback():
-            logging.debug("Main loop processing TrackerNotifier::events signal with %i events", len(events))
-            if self.timeout_id != 0:
-                GLib.source_remove(self.timeout_id)
-                self.timeout_id = 0
-            self.loop.quit()
-        GLib.idle_add(callback)
+        if self.timeout_id != 0:
+            GLib.source_remove(self.timeout_id)
+            self.timeout_id = 0
+        self.loop.quit()
 
     def test_01_insert_contact(self):
         CONTACT = """

@@ -14,6 +14,7 @@ config_json = configure_file(
 
 functional_tests = [
   'insertion',
+  'query',
   'sparql-bugs',
   'group-concat',
   'coalesce',
