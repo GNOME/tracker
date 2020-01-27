@@ -127,11 +127,14 @@ TRACKER_SPARQL_CONNECTION_CLASS
 TRACKER_SPARQL_CONNECTION_GET_CLASS
 TRACKER_SPARQL_IS_CONNECTION
 TRACKER_SPARQL_IS_CONNECTION_CLASS
+TRACKER_TYPE_SPARQL_CONNECTION
 TRACKER_SPARQL_TYPE_CONNECTION
-TRACKER_SPARQL_TYPE_VALUE_TYPE
+TRACKER_TYPE_SPARQL_VALUE_TYPE
 tracker_sparql_connection_get_type
-TRACKER_SPARQL_TYPE_CONNECTION_FLAGS
+TRACKER_TYPE_SPARQL_CONNECTION_FLAGS
 tracker_sparql_connection_flags_get_type
+TRACKER_TYPE_SPARQL_ERROR
+tracker_sparql_error_get_type
 <SUBSECTION Private>
 TrackerSparqlConnectionPrivate
 tracker_sparql_error_quark
@@ -159,6 +162,7 @@ TRACKER_SPARQL_STATEMENT_CLASS
 TRACKER_SPARQL_STATEMENT_GET_CLASS
 TRACKER_SPARQL_IS_STATEMENT
 TRACKER_SPARQL_IS_STATEMENT_CLASS
+TRACKER_TYPE_SPARQL_STATEMENT
 TRACKER_SPARQL_TYPE_STATEMENT
 tracker_sparql_statement_get_type
 <SUBSECTION Private>
@@ -193,6 +197,7 @@ TRACKER_SPARQL_CURSOR_GET_CLASS
 TRACKER_SPARQL_ERROR
 TRACKER_SPARQL_IS_CURSOR
 TRACKER_SPARQL_IS_CURSOR_CLASS
+TRACKER_TYPE_SPARQL_CURSOR
 TRACKER_SPARQL_TYPE_CURSOR
 tracker_sparql_cursor_get_type
 tracker_sparql_value_type_get_type
@@ -207,12 +212,13 @@ tracker_sparql_cursor_set_connection
 <TITLE>TrackerNotifier</TITLE>
 TrackerNotifierFlags
 TrackerNotifier
-TrackerNotifierClass
 TrackerNotifierEventType
 TrackerNotifierEvent
 tracker_notifier_event_get_event_type
 tracker_notifier_event_get_id
 tracker_notifier_event_get_urn
+tracker_notifier_signal_subscribe
+tracker_notifier_signal_unsubscribe
 <SUBSECTION Standard>
 TRACKER_IS_NOTIFIER
 TRACKER_IS_NOTIFIER_CLASS
@@ -227,26 +233,27 @@ TRACKER_TYPE_NOTIFIER_EVENT_TYPE
 tracker_notifier_event_type_get_type
 TRACKER_TYPE_NOTIFIER_FLAGS
 tracker_notifier_flags_get_type
+TrackerNotifierClass
 </SECTION>
 
 <SECTION>
 <FILE>tracker-endpoint</FILE>
 <TITLE>TrackerEndpoint</TITLE>
 TrackerEndpoint
-TrackerEndpointClass
 TrackerEndpointDBus
-TrackerEndpointDBusClass
 tracker_endpoint_dbus_get_type
 tracker_endpoint_dbus_new
 tracker_endpoint_get_sparql_connection
 <SUBSECTION Standard>
 TRACKER_TYPE_ENDPOINT
 TRACKER_TYPE_ENDPOINT_DBUS
-TRACKER_TYPE_SPARQL_CONNECTION
-TRACKER_TYPE_SPARQL_CONNECTION_FLAGS
-TRACKER_TYPE_SPARQL_CURSOR
-TRACKER_TYPE_SPARQL_ERROR
-TRACKER_TYPE_SPARQL_STATEMENT
+TRACKER_ENDPOINT_DBUS
+TRACKER_ENDPOINT_DBUS_CLASS
+TRACKER_ENDPOINT_DBUS_GET_CLASS
+TRACKER_IS_ENDPOINT_DBUS
+TRACKER_IS_ENDPOINT_DBUS_CLASS
+TrackerEndpointClass
+TrackerEndpointDBusClass
 </SECTION>
 
 <SECTION>
@@ -261,4 +268,6 @@ tracker_check_version
 
 <SUBSECTION>
 TRACKER_CHECK_VERSION
+<SUBSECTION Private>
+TRACKER_AVAILABLE_IN_ALL
 </SECTION>
