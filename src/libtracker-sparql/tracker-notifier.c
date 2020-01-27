@@ -289,7 +289,7 @@ tracker_notifier_event_cache_take_events (TrackerNotifierEventCache *cache)
 	return events;
 }
 
-static void
+static gboolean
 tracker_notifier_emit_events (TrackerNotifierEventCache *cache)
 {
 	GPtrArray *events;
@@ -300,6 +300,17 @@ tracker_notifier_emit_events (TrackerNotifierEventCache *cache)
 		g_signal_emit (cache->notifier, signals[EVENTS], 0, cache->service, cache->graph, events);
 		g_ptr_array_unref (events);
 	}
+
+	return G_SOURCE_REMOVE;
+}
+
+static void
+tracker_notifier_emit_events_in_idle (TrackerNotifierEventCache *cache)
+{
+	g_idle_add_full (G_PRIORITY_DEFAULT,
+	                 (GSourceFunc) tracker_notifier_emit_events,
+	                 cache,
+	                 (GDestroyNotify) _tracker_notifier_event_cache_free);
 }
 
 static gchar *
@@ -389,8 +400,7 @@ query_extra_info_cb (GObject      *object,
 
 	g_object_unref (cursor);
 
-	tracker_notifier_emit_events (cache);
-	_tracker_notifier_event_cache_free (cache);
+	tracker_notifier_emit_events_in_idle (cache);
 }
 
 static void
@@ -418,14 +428,15 @@ _tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
 	TrackerNotifier *notifier = cache->notifier;
 	TrackerNotifierPrivate *priv = tracker_notifier_get_instance_private (notifier);
 
-	if (g_sequence_is_empty (cache->sequence))
+	if (g_sequence_is_empty (cache->sequence)) {
 		_tracker_notifier_event_cache_free (cache);
+		return;
+	}
 
 	if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN) {
 		tracker_notifier_query_extra_info (notifier, cache);
 	} else {
-		tracker_notifier_emit_events (cache);
-		_tracker_notifier_event_cache_free (cache);
+		tracker_notifier_emit_events_in_idle (cache);
 	}
 }
 
