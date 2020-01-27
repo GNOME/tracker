@@ -28,9 +28,14 @@ example_files = [
     'examples/writeonly-with-blank-nodes-example.c',
 ]
 
+private_headers = [
+    'tracker-notifier-private.h',
+]
+
 gnome.gtkdoc('libtracker-sparql',
     src_dir: sparqlinc,
     main_xml: 'libtracker-sparql-docs.xml',
+    scan_args: ['--ignore-headers=' + ' '.join(private_headers)],
     content_files: ['overview.xml', 'examples.xml', 'ontologies.xml', 'private-store.xml', 'migrating-1to2.xml', example_files],
     gobject_typesfile: 'libtracker-sparql.types',
     dependencies: tracker_sparql_dep,
