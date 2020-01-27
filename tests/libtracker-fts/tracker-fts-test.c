@@ -188,6 +188,14 @@ main (int argc, char **argv)
 
 	g_test_init (&argc, &argv, NULL);
 
+	/* g_test_init() enables verbose logging by default, but Tracker is too
+	 * verbose. To make the logs managable, we hide DEBUG and INFO messages
+	 * unless TRACKER_TESTS_VERBOSE is set.
+	 */
+	if (! g_getenv ("TRACKER_TESTS_VERBOSE")) {
+		g_log_set_handler ("Tracker", G_LOG_LEVEL_DEBUG | G_LOG_LEVEL_INFO, g_log_default_handler, NULL);
+	}
+
 	current_dir = g_get_current_dir ();
 	g_setenv ("TRACKER_LANGUAGE_STOP_WORDS_DIR", current_dir, TRUE);
 	g_free (current_dir);
