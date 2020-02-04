@@ -11,7 +11,6 @@ test_dbus_config = join_paths(build_root, 'tests', 'test-bus.conf')
 testconf.set('TEST_DBUS_DAEMON_CONFIG_FILE', test_dbus_config)
 testconf.set('TEST_DCONF_PROFILE', dconf_profile_full_path)
 testconf.set('TEST_DOMAIN_ONTOLOGY_RULE', tracker_uninstalled_domain_rule)
-testconf.set('TEST_GSETTINGS_SCHEMA_DIR', tracker_uninstalled_gsettings_schema_dir)
 testconf.set('TEST_ONTOLOGIES_DIR', tracker_uninstalled_nepomuk_ontologies_dir)
 testconf.set('TEST_LANGUAGE_STOP_WORDS_DIR', tracker_uninstalled_stop_words_dir)
 
