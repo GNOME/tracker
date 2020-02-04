@@ -307,7 +307,6 @@ typelib_dir = gobject_introspection.get_pkgconfig_variable('typelibdir',
                                                            define_variable:  [ 'libdir', libdir ])
 
 subdir('src')
-subdir('data')
 subdir('docs')
 subdir('examples')
 subdir('utils')
@@ -347,8 +346,6 @@ if not get_option('override_sqlite_version_check')
                               'https://gitlab.gnome.org/GNOME/tracker/merge_requests/160#note_664713'))
     endif
 endif
-
-meson.add_install_script('meson_integration_commands.sh', glib_compile_schemas.path(), gsettings_schema_dir)
 
 summary = [
   '\nBuild Configuration:',

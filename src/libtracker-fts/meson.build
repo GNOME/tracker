@@ -8,7 +8,6 @@ libtracker_fts_dependencies = [sqlite]
 
 libtracker_fts = static_library('tracker-fts',
     'tracker-fts.c',
-    'tracker-fts-config.c',
     'tracker-fts-tokenizer.c',
     libtracker_fts_fts5,
     dependencies: [tracker_common_dep],
