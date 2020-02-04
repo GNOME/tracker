@@ -297,6 +297,8 @@ async_initable_thread_func (GTask        *task,
 		g_task_return_error (task, error);
 	else
 		g_task_return_boolean (task, TRUE);
+
+	g_object_unref (task);
 }
 
 static void
@@ -643,8 +645,10 @@ tracker_direct_connection_query_async (TrackerSparqlConnection *self,
 	                      task_data_query_new (TASK_TYPE_QUERY, sparql),
 	                      (GDestroyNotify) task_data_free);
 
-	if (!g_thread_pool_push (priv->select_pool, task, &error))
+	if (!g_thread_pool_push (priv->select_pool, task, &error)) {
 		g_task_return_error (task, error);
+		g_object_unref (task);
+	}
 }
 
 static TrackerSparqlCursor *
