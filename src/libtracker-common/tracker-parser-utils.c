@@ -35,6 +35,9 @@ typedef struct {
 } TrackerParserReservedWord;
 
 static const TrackerParserReservedWord reserved_words[] = {
+	{ "and", 3 },
+	{ "near", 4 },
+	{ "not", 3 },
 	{ "or", 2 },
 	{ NULL, 0 }
 };
