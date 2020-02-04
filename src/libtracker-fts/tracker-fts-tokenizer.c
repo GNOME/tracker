@@ -31,7 +31,6 @@
 #include <libtracker-data/tracker-ontologies.h>
 
 #include "tracker-fts-tokenizer.h"
-#include "tracker-fts-config.h"
 #include "fts5.h"
 
 typedef struct TrackerTokenizerData TrackerTokenizerData;
