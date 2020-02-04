@@ -200,7 +200,7 @@ copy_values_deep (GHashTable *values)
 
 		copy_value = g_new0 (GValue, 1);
 		g_value_init (copy_value, G_VALUE_TYPE (val));
-		g_value_copy (copy_value, val);
+		g_value_copy (val, copy_value);
 
 		g_hash_table_insert (copy, g_strdup (key), copy_value);
 	}
