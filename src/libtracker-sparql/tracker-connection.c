@@ -32,8 +32,19 @@ tracker_sparql_connection_init (TrackerSparqlConnection *connection)
 }
 
 static void
+tracker_sparql_connection_dispose (GObject *object)
+{
+	tracker_sparql_connection_close (TRACKER_SPARQL_CONNECTION (object));
+
+	G_OBJECT_CLASS (tracker_sparql_connection_parent_class)->dispose (object);
+}
+
+static void
 tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
 {
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+	object_class->dispose = tracker_sparql_connection_dispose;
 }
 
 /* The constructor functions are defined in the libtracker-sparql-backend, but
@@ -555,7 +566,7 @@ tracker_sparql_connection_create_notifier (TrackerSparqlConnection *connection,
  *
  * This call is blocking. All pending updates will be flushed, and the
  * store databases will be closed orderly. All ongoing SELECT queries
- * will be cancelled.
+ * will be cancelled. Notifiers will no longer emit events.
  *
  * Since: 3.0
  */
