@@ -45,6 +45,7 @@ struct _TrackerDirectConnectionPrivate
 	GList *notifiers;
 
 	guint initialized : 1;
+	guint closing     : 1;
 };
 
 enum {
@@ -148,12 +149,26 @@ static void
 query_thread_pool_func (gpointer data,
                         gpointer user_data)
 {
+	TrackerDirectConnection *conn = user_data;
+	TrackerDirectConnectionPrivate *priv;
 	TrackerSparqlCursor *cursor;
 	GTask *task = data;
 	TaskData *task_data = g_task_get_task_data (task);
 	GError *error = NULL;
 
 	g_assert (task_data->type == TASK_TYPE_QUERY);
+
+	priv = tracker_direct_connection_get_instance_private (conn);
+
+	if (priv->closing) {
+		g_task_return_new_error (task,
+		                         G_IO_ERROR,
+		                         G_IO_ERROR_CONNECTION_CLOSED,
+		                         "Connection is closed");
+		g_object_unref (task);
+		return;
+	}
+
 	cursor = tracker_sparql_connection_query (TRACKER_SPARQL_CONNECTION (g_task_get_source_object (task)),
 	                                          task_data->query,
 	                                          g_task_get_cancellable (task),
@@ -898,6 +913,7 @@ tracker_direct_connection_close (TrackerSparqlConnection *self)
 
 	conn = TRACKER_DIRECT_CONNECTION (self);
 	priv = tracker_direct_connection_get_instance_private (conn);
+	priv->closing = TRUE;
 
 	if (priv->update_thread) {
 		g_thread_pool_free (priv->update_thread, TRUE, TRUE);
