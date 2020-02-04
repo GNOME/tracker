@@ -526,33 +526,6 @@ weak_ref_notify (gpointer  data,
 }
 
 static void
-tracker_direct_connection_dispose (GObject *object)
-{
-	TrackerDirectConnectionPrivate *priv;
-	TrackerDirectConnection *conn;
-
-	conn = TRACKER_DIRECT_CONNECTION (object);
-	priv = tracker_direct_connection_get_instance_private (conn);
-
-	if (priv->update_thread) {
-		g_thread_pool_free (priv->update_thread, TRUE, TRUE);
-		priv->update_thread = NULL;
-	}
-
-	if (priv->select_pool) {
-		g_thread_pool_free (priv->select_pool, TRUE, FALSE);
-		priv->select_pool = NULL;
-	}
-
-	if (priv->data_manager) {
-		tracker_data_manager_shutdown (priv->data_manager);
-		g_clear_object (&priv->data_manager);
-	}
-
-	G_OBJECT_CLASS (tracker_direct_connection_parent_class)->dispose (object);
-}
-
-static void
 tracker_direct_connection_finalize (GObject *object)
 {
 	TrackerDirectConnectionPrivate *priv;
@@ -560,15 +533,6 @@ tracker_direct_connection_finalize (GObject *object)
 
 	conn = TRACKER_DIRECT_CONNECTION (object);
 	priv = tracker_direct_connection_get_instance_private (conn);
-
-	while (priv->notifiers) {
-		TrackerNotifier *notifier = priv->notifiers->data;
-
-		g_object_weak_unref (G_OBJECT (notifier),
-		                     weak_ref_notify,
-		                     conn);
-		detach_notifier (conn, notifier);
-	}
 
 	g_clear_object (&priv->store);
 	g_clear_object (&priv->ontology);
@@ -925,7 +889,35 @@ tracker_direct_connection_create_notifier (TrackerSparqlConnection *self,
 static void
 tracker_direct_connection_close (TrackerSparqlConnection *self)
 {
-	g_object_run_dispose (G_OBJECT (self));
+	TrackerDirectConnectionPrivate *priv;
+	TrackerDirectConnection *conn;
+
+	conn = TRACKER_DIRECT_CONNECTION (self);
+	priv = tracker_direct_connection_get_instance_private (conn);
+
+	if (priv->update_thread) {
+		g_thread_pool_free (priv->update_thread, TRUE, TRUE);
+		priv->update_thread = NULL;
+	}
+
+	if (priv->select_pool) {
+		g_thread_pool_free (priv->select_pool, TRUE, FALSE);
+		priv->select_pool = NULL;
+	}
+
+	while (priv->notifiers) {
+		TrackerNotifier *notifier = priv->notifiers->data;
+
+		g_object_weak_unref (G_OBJECT (notifier),
+		                     weak_ref_notify,
+		                     conn);
+		detach_notifier (conn, notifier);
+	}
+
+	if (priv->data_manager) {
+		tracker_data_manager_shutdown (priv->data_manager);
+		g_clear_object (&priv->data_manager);
+	}
 }
 
 static void
@@ -938,7 +930,6 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 	sparql_connection_class = TRACKER_SPARQL_CONNECTION_CLASS (klass);
 
 	object_class->finalize = tracker_direct_connection_finalize;
-	object_class->dispose = tracker_direct_connection_dispose;
 	object_class->set_property = tracker_direct_connection_set_property;
 	object_class->get_property = tracker_direct_connection_get_property;
 
