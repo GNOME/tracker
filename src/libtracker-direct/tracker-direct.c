@@ -201,6 +201,25 @@ set_up_thread_pools (TrackerDirectConnection  *conn,
 	return TRUE;
 }
 
+static TrackerDBManagerFlags
+translate_flags (TrackerSparqlConnectionFlags flags)
+{
+	TrackerDBManagerFlags db_flags = TRACKER_DB_MANAGER_ENABLE_MUTEXES;
+
+	if ((flags & TRACKER_SPARQL_CONNECTION_FLAGS_READONLY) != 0)
+		db_flags |= TRACKER_DB_MANAGER_READONLY;
+	if ((flags & TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER) != 0)
+		db_flags |= TRACKER_DB_MANAGER_FTS_ENABLE_STEMMER;
+	if ((flags & TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT) != 0)
+		db_flags |= TRACKER_DB_MANAGER_FTS_ENABLE_UNACCENT;
+	if ((flags & TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STOP_WORDS) != 0)
+		db_flags |= TRACKER_DB_MANAGER_FTS_ENABLE_STOP_WORDS;
+	if ((flags & TRACKER_SPARQL_CONNECTION_FLAGS_FTS_IGNORE_NUMBERS) != 0)
+		db_flags |= TRACKER_DB_MANAGER_FTS_IGNORE_NUMBERS;
+
+	return db_flags;
+}
+
 static gboolean
 tracker_direct_connection_initable_init (GInitable     *initable,
                                          GCancellable  *cancellable,
@@ -208,7 +227,7 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 {
 	TrackerDirectConnectionPrivate *priv;
 	TrackerDirectConnection *conn;
-	TrackerDBManagerFlags db_flags = TRACKER_DB_MANAGER_ENABLE_MUTEXES;
+	TrackerDBManagerFlags db_flags;
 	GHashTable *namespaces;
 	GHashTableIter iter;
 	gchar *prefix, *ns;
@@ -221,10 +240,11 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 	if (!set_up_thread_pools (conn, error))
 		return FALSE;
 
+	db_flags = translate_flags (priv->flags);
+
 	/* Init data manager */
-	if (priv->flags & TRACKER_SPARQL_CONNECTION_FLAGS_READONLY) {
-		db_flags |= TRACKER_DB_MANAGER_READONLY;
-	} else if (!priv->ontology) {
+	if (!priv->ontology &&
+	    (db_flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 		gchar *filename;
 
 		/* If the connection is read/write, and no ontology is specified,
