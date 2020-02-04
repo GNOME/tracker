@@ -21,13 +21,14 @@
 
 #include <sqlite3.h>
 #include <glib.h>
-#include <libtracker-data/tracker-db-interface.h>
+#include <libtracker-data/tracker-db-manager.h>
 
 #ifndef __TRACKER_FTS_TOKENIZER_H__
 #define __TRACKER_FTS_TOKENIZER_H__
 
-gboolean tracker_tokenizer_initialize (sqlite3             *db,
-                                       TrackerDBInterface  *interface,
-                                       const gchar        **property_names);
+gboolean tracker_tokenizer_initialize (sqlite3                *db,
+                                       TrackerDBInterface     *interface,
+                                       TrackerDBManagerFlags   flags,
+                                       const gchar           **property_names);
 
 #endif /* __TRACKER_FTS_TOKENIZER_H__ */

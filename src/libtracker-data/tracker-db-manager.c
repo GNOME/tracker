@@ -70,6 +70,11 @@
 #define TOSTRING(x) TOSTRING1(x)
 #define TRACKER_PARSER_VERSION_STRING TOSTRING(TRACKER_PARSER_VERSION)
 
+#define FTS_FLAGS (TRACKER_DB_MANAGER_FTS_ENABLE_STEMMER |	  \
+                   TRACKER_DB_MANAGER_FTS_ENABLE_UNACCENT |	  \
+                   TRACKER_DB_MANAGER_FTS_ENABLE_STOP_WORDS |	  \
+                   TRACKER_DB_MANAGER_FTS_IGNORE_NUMBERS)
+
 typedef enum {
 	TRACKER_DB_VERSION_UNKNOWN, /* Unknown */
 	TRACKER_DB_VERSION_0_6_6,   /* before indexer-split */
@@ -674,6 +679,19 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		if ((flags & TRACKER_DB_MANAGER_REMOVE_ALL) != 0) {
 			return db_manager;
 		}
+	} else {
+		GValue value = G_VALUE_INIT;
+		TrackerDBManagerFlags fts_flags = 0;
+
+		if (tracker_db_manager_get_metadata (db_manager, "fts-flags", &value)) {
+			fts_flags = g_ascii_strtoll (g_value_get_string (&value), NULL, 10);
+			g_value_unset (&value);
+		}
+
+		/* Readonly connections should go with the FTS flags as stored
+		 * in metadata.
+		 */
+		db_manager->flags = (db_manager->flags & ~(FTS_FLAGS)) | fts_flags;
 	}
 
 	/* Set general database options */
@@ -1217,7 +1235,19 @@ tracker_db_manager_get_tokenizer_changed (TrackerDBManager *db_manager)
 {
 	GValue value = G_VALUE_INIT;
 	const gchar *version;
+	TrackerDBManagerFlags flags;
 	gboolean changed;
+
+	if (!tracker_db_manager_get_metadata (db_manager, "fts-flags", &value))
+		return TRUE;
+
+	flags = g_ascii_strtoll (g_value_get_string (&value), NULL, 10);
+	g_value_unset (&value);
+
+	if ((db_manager->flags & TRACKER_DB_MANAGER_READONLY) == 0 &&
+	    flags != (db_manager->flags & FTS_FLAGS)) {
+		return TRUE;
+	}
 
 	if (!tracker_db_manager_get_metadata (db_manager, "parser-version", &value))
 		return TRUE;
@@ -1236,8 +1266,12 @@ tracker_db_manager_tokenizer_update (TrackerDBManager *db_manager)
 
 	g_value_init (&value, G_TYPE_STRING);
 	g_value_set_string (&value, TRACKER_PARSER_VERSION_STRING);
-
 	tracker_db_manager_set_metadata (db_manager, "parser-version", &value);
+	g_value_unset (&value);
+
+	g_value_init (&value, G_TYPE_INT64);
+	g_value_set_int64 (&value, (db_manager->flags & FTS_FLAGS));
+	tracker_db_manager_set_metadata (db_manager, "fts-flags", &value);
 	g_value_unset (&value);
 }
 
