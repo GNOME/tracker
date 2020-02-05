@@ -4822,6 +4822,8 @@ translate_InlineDataOneVar (TrackerSparql  *sparql,
 
 	if (n_values == 0)
 		_append_string (sparql, "SELECT NULL WHERE FALSE");
+	else
+		tracker_binding_set_data_type (binding, sparql->current_state.expression_type);
 
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_BRACE);
 	_append_string (sparql, ") ");
