@@ -59,42 +59,30 @@ static gint64
 tracker_sparql_cursor_real_get_integer (TrackerSparqlCursor *cursor,
                                         gint                 column)
 {
-	if (tracker_sparql_cursor_get_value_type (cursor, column) == TRACKER_SPARQL_VALUE_TYPE_INTEGER) {
-		const gchar *text;
+	const gchar *text;
 
-		text = tracker_sparql_cursor_get_string (cursor, column, NULL);
-		return g_ascii_strtoll (text, NULL, 10);
-	}
-
-	return 0;
+	text = tracker_sparql_cursor_get_string (cursor, column, NULL);
+	return g_ascii_strtoll (text, NULL, 10);
 }
 
 static gdouble
 tracker_sparql_cursor_real_get_double (TrackerSparqlCursor *cursor,
                                        gint                 column)
 {
-	if (tracker_sparql_cursor_get_value_type (cursor, column) == TRACKER_SPARQL_VALUE_TYPE_DOUBLE) {
-		const gchar *text;
+	const gchar *text;
 
-		text = tracker_sparql_cursor_get_string (cursor, column, NULL);
-		return g_ascii_strtod (text, NULL);
-	}
-
-	return 0.0;
+	text = tracker_sparql_cursor_get_string (cursor, column, NULL);
+	return g_ascii_strtod (text, NULL);
 }
 
 static gboolean
 tracker_sparql_cursor_real_get_boolean (TrackerSparqlCursor *cursor,
                                         gint                 column)
 {
-	if (tracker_sparql_cursor_get_value_type (cursor, column) == TRACKER_SPARQL_VALUE_TYPE_BOOLEAN) {
-		const gchar *text;
+	const gchar *text;
 
-		text = tracker_sparql_cursor_get_string (cursor, column, NULL);
-		return g_ascii_strcasecmp (text, "true") == 0;
-	}
-
-	return FALSE;
+	text = tracker_sparql_cursor_get_string (cursor, column, NULL);
+	return g_ascii_strcasecmp (text, "true") == 0;
 }
 
 static gboolean
