@@ -149,6 +149,7 @@ class TrackerStoreSignalsTests (CommonTrackerStoreTest):
 
         # Validate results:
         self.assertEqual(len(self.results_deletes), 1)
+        self.assertEqual(len(self.results_updates), 1)
         self.assertEqual(len(self.results_inserts), 0)
 
     def test_03_update_contact(self):
@@ -164,8 +165,9 @@ class TrackerStoreSignalsTests (CommonTrackerStoreTest):
             "INSERT { <test://signals-contact-update> nco:fullname 'wohoo'}")
         self.__wait_for_signal()
 
+        self.assertEqual(len(self.results_updates), 2)
+        self.assertEqual(len(self.results_inserts), 0)
         self.assertEqual(len(self.results_deletes), 0)
-        self.assertEqual(len(self.results_inserts), 1)
 
     def test_04_fullupdate_contact(self):
         self.clean_up_list.append("test://signals-contact-fullupdate")

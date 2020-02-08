@@ -452,16 +452,13 @@ delete_statement_cb (gint         graph_id,
 	TrackerOntologies *ontologies = tracker_data_manager_get_ontologies (priv->data_manager);
 	TrackerProperty *rdf_type = tracker_ontologies_get_rdf_type (ontologies);
 	TrackerNotifierEventCache *cache;
-	TrackerClass *new_class = NULL;
+	TrackerClass *class_being_removed = NULL;
 	gint i;
 
 	cache = lookup_event_cache (notifier, graph_id, graph);
 
 	if (predicate_id == tracker_property_get_id (rdf_type)) {
-		const gchar *uri;
-
-		uri = tracker_ontologies_get_uri_by_id (ontologies, predicate_id);
-		new_class = tracker_ontologies_get_class_by_uri (ontologies, uri);
+		class_being_removed = tracker_ontologies_get_class_by_uri (ontologies, object);
 	}
 
 	for (i = 0; i < rdf_types->len; i++) {
@@ -471,10 +468,11 @@ delete_statement_cb (gint         graph_id,
 		if (!tracker_class_get_notify (class))
 			continue;
 
-		if (class == new_class)
+		if (class_being_removed && class == class_being_removed) {
 			event_type = TRACKER_NOTIFIER_EVENT_DELETE;
-		else
+		} else {
 			event_type = TRACKER_NOTIFIER_EVENT_UPDATE;
+		}
 
 		_tracker_notifier_event_cache_push_event (cache, subject_id, event_type);
 	}
