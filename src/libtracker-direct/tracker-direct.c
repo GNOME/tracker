@@ -919,7 +919,7 @@ tracker_direct_connection_close (TrackerSparqlConnection *self)
 	}
 
 	if (priv->select_pool) {
-		g_thread_pool_free (priv->select_pool, TRUE, FALSE);
+		g_thread_pool_free (priv->select_pool, TRUE, TRUE);
 		priv->select_pool = NULL;
 	}
 
