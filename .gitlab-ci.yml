@@ -30,7 +30,7 @@ stages:
       # We limit `meson test` to 4 parallel test processes. The default is to
       # have one test process per CPU, but our tests are mostly IO bound
       # and we get timeouts and failures if we try to run 32 of them at once.
-      su tracker -c 'cd build; env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test --num-processes=4 --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
+      su tracker -c 'cd build; env LANG=C.UTF-8 LC_ALL=C.UTF-8 eatmydata meson test --num-processes=4 --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
 
   after_script:
     - |
@@ -54,10 +54,21 @@ stages:
 
 test-fedora-latest:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
+  before_script:
+    - |
+      curl --get 'https://www.flamingspork.com/projects/libeatmydata/libeatmydata-105.tar.gz' --output libeatmydata-105.tar.gz
+      tar -x -f ./libeatmydata-105.tar.gz
+      cd libeatmydata-105
+      ./configure --prefix=/usr
+      make install
+      cd ..
   <<: *test
 
 test-ubuntu-rolling:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/ubuntu:rolling
+  before_script:
+    - apt-get update
+    - apt-get install -y eatmydata
   <<: *test
 
 test-alpine-rolling:
