@@ -85,6 +85,7 @@ struct _TrackerNotifierPrivate {
 	TrackerSparqlConnection *connection;
 	TrackerNotifierFlags flags;
 	GHashTable *subscriptions; /* guint -> TrackerNotifierSubscription */
+	GCancellable *cancellable;
 };
 
 struct _TrackerNotifierEventCache {
@@ -368,12 +369,25 @@ query_extra_info_cb (GObject      *object,
 	TrackerSparqlCursor *cursor;
 	TrackerNotifierEvent *event;
 	GSequenceIter *iter;
+	GError *error = NULL;
 	gint col;
 	gint64 id;
 
 	priv = tracker_notifier_get_instance_private (cache->notifier);
 	conn = TRACKER_SPARQL_CONNECTION (object);
-	cursor = tracker_sparql_connection_query_finish (conn, res, NULL);
+	cursor = tracker_sparql_connection_query_finish (conn, res, &error);
+
+	if (!cursor) {
+		if (!g_error_matches (error,
+				      G_IO_ERROR,
+				      G_IO_ERROR_CANCELLED)) {
+			g_critical ("Could not get cursor: %s\n", error->message);
+		}
+
+		_tracker_notifier_event_cache_free (cache);
+		g_clear_error (&error);
+		return;
+	}
 
 	iter = g_sequence_get_begin_iter (cache->sequence);
 
@@ -416,7 +430,7 @@ tracker_notifier_query_extra_info (TrackerNotifier           *notifier,
 
 	priv = tracker_notifier_get_instance_private (notifier);
 	tracker_sparql_connection_query_async (priv->connection, sparql,
-	                                       NULL,
+					       priv->cancellable,
 	                                       query_extra_info_cb,
 	                                       cache);
 	g_free (sparql);
@@ -518,6 +532,9 @@ tracker_notifier_finalize (GObject *object)
 
 	priv = tracker_notifier_get_instance_private (TRACKER_NOTIFIER (object));
 
+	g_cancellable_cancel (priv->cancellable);
+	g_clear_object (&priv->cancellable);
+
 	if (priv->connection)
 		g_object_unref (priv->connection);
 
@@ -594,6 +611,7 @@ tracker_notifier_init (TrackerNotifier *notifier)
 	priv = tracker_notifier_get_instance_private (notifier);
 	priv->subscriptions = g_hash_table_new_full (NULL, NULL, NULL,
 	                                             (GDestroyNotify) tracker_notifier_subscription_free);
+	priv->cancellable = g_cancellable_new ();
 }
 
 guint
