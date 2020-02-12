@@ -917,11 +917,11 @@ tracker_db_manager_finalize (GObject *object)
 	TrackerDBManager *db_manager = TRACKER_DB_MANAGER (object);
 	gboolean readonly = (db_manager->flags & TRACKER_DB_MANAGER_READONLY) != 0;
 
-	g_async_queue_unref (db_manager->interfaces);
-	g_free (db_manager->db.abs_filename);
-
 	if (db_manager->wal_thread)
 		g_thread_join (db_manager->wal_thread);
+
+	g_async_queue_unref (db_manager->interfaces);
+	g_free (db_manager->db.abs_filename);
 
 	g_clear_object (&db_manager->db.wal_iface);
 
