@@ -90,6 +90,7 @@ namespace Tracker {
 
                 public virtual Notifier? create_notifier (NotifierFlags flags);
                 public virtual void close ();
+                public async virtual bool close_async () throws GLib.IOError;
 	}
 
 	[CCode (cheader_filename = "libtracker-sparql/tracker-statement.h")]

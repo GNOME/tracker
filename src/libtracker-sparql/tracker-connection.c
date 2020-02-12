@@ -577,3 +577,54 @@ tracker_sparql_connection_close (TrackerSparqlConnection *connection)
 
 	TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->close (connection);
 }
+
+/**
+ * tracker_sparql_connection_close_async:
+ * @connection: a #TrackerSparqlConnection
+ * @cancellable: a #GCancellable, or %NULL
+ * @callback: user-defined #GAsyncReadyCallback to be called when
+ *            asynchronous operation is finished.
+ * @user_data: user-defined data to be passed to @callback
+ *
+ * Closes a connection asynchronously. No other API calls than g_object_unref()
+ * should happen after this call. See tracker_sparql_connection_close() for more
+ * information.
+ *
+ * Since: 3.0
+ **/
+void
+tracker_sparql_connection_close_async (TrackerSparqlConnection *connection,
+                                       GCancellable            *cancellable,
+                                       GAsyncReadyCallback      callback,
+                                       gpointer                 user_data)
+{
+	g_return_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection));
+
+	TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->close_async (connection,
+	                                                               cancellable,
+	                                                               callback,
+	                                                               user_data);
+}
+
+/**
+ * tracker_sparql_connection_close_finish:
+ * @connection: a #TrackerSparqlConnection
+ * @result: the #GAsyncResult
+ * @error: pointer to a #GError
+ *
+ * Finishes the asynchronous connection close.
+ *
+ * Returns: %FALSE if some error occurred, %TRUE otherwise
+ *
+ * Since: 3.0
+ **/
+gboolean
+tracker_sparql_connection_close_finish (TrackerSparqlConnection  *connection,
+                                        GAsyncResult             *res,
+                                        GError                  **error)
+{
+	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), FALSE);
+
+	return TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->close_finish (connection,
+	                                                                       res, error);
+}

@@ -87,6 +87,13 @@ struct _TrackerSparqlConnectionClass
 	                                       TrackerNotifierFlags     flags);
 
 	void (* close) (TrackerSparqlConnection *connection);
+        void (* close_async) (TrackerSparqlConnection *connection,
+                              GCancellable            *cancellable,
+                              GAsyncReadyCallback      callback,
+                              gpointer                 user_data);
+        gboolean (* close_finish) (TrackerSparqlConnection  *connection,
+                                   GAsyncResult             *res,
+                                   GError                  **error);
 };
 
 typedef struct _TrackerSparqlCursorClass TrackerSparqlCursorClass;
