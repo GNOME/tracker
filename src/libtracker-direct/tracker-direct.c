@@ -940,6 +940,40 @@ tracker_direct_connection_close (TrackerSparqlConnection *self)
 	}
 }
 
+void
+async_close_thread_func (GTask        *task,
+                         gpointer      source_object,
+                         gpointer      task_data,
+                         GCancellable *cancellable)
+{
+	if (g_task_return_error_if_cancelled (task))
+		return;
+
+	tracker_sparql_connection_close (source_object);
+	g_task_return_boolean (task, TRUE);
+}
+
+void
+tracker_direct_connection_close_async (TrackerSparqlConnection *connection,
+                                       GCancellable            *cancellable,
+                                       GAsyncReadyCallback      callback,
+                                       gpointer                 user_data)
+{
+	GTask *task;
+
+	task = g_task_new (connection, cancellable, callback, user_data);
+	g_task_run_in_thread (task, async_close_thread_func);
+	g_object_unref (task);
+}
+
+gboolean
+tracker_direct_connection_close_finish (TrackerSparqlConnection  *connection,
+                                        GAsyncResult             *res,
+                                        GError                  **error)
+{
+	return g_task_propagate_boolean (G_TASK (res), error);
+}
+
 static void
 tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 {
@@ -968,6 +1002,8 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 	sparql_connection_class->get_namespace_manager = tracker_direct_connection_get_namespace_manager;
 	sparql_connection_class->create_notifier = tracker_direct_connection_create_notifier;
 	sparql_connection_class->close = tracker_direct_connection_close;
+	sparql_connection_class->close_async = tracker_direct_connection_close_async;
+	sparql_connection_class->close_finish = tracker_direct_connection_close_finish;
 
 	props[PROP_FLAGS] =
 		g_param_spec_flags ("flags",

@@ -205,4 +205,15 @@ TrackerNotifier * tracker_sparql_connection_create_notifier (TrackerSparqlConnec
 TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_connection_close (TrackerSparqlConnection *connection);
 
+TRACKER_AVAILABLE_IN_ALL
+void tracker_sparql_connection_close_async (TrackerSparqlConnection *connection,
+                                            GCancellable            *cancellable,
+                                            GAsyncReadyCallback      callback,
+                                            gpointer                 user_data);
+
+TRACKER_AVAILABLE_IN_ALL
+gboolean tracker_sparql_connection_close_finish (TrackerSparqlConnection  *connection,
+                                                 GAsyncResult             *res,
+                                                 GError                  **error);
+
 #endif /* __TRACKER_SPARQL_CONNECTION_H__ */

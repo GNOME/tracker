@@ -272,4 +272,8 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 
 	public override void close () {
 	}
+
+	public async override bool close_async () throws GLib.IOError {
+		return true;
+	}
 }
