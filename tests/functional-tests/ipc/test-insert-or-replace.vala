@@ -119,7 +119,7 @@ INSERT { GRAPH <urn:uuid:08070f5c-a334-4d19-a8b0-12a3071bfab9> {
 
 int main (string[] args) {
 	try {
-		uint i, y = 100;
+		uint i, y = 10;
 		Timer timer = new Timer ();
 		Connection c;
 		c = Connection.get ();
