@@ -79,5 +79,14 @@ test-alpine-rolling:
     - apk add -U bash-completion dbus-dev glib-dev gobject-introspection-dev icu-dev json-glib-dev libsoup-dev libxml2-dev meson py3-setuptools sqlite-dev networkmanager-dev vala alpine-sdk py3-gobject3
     - addgroup -S tracker
     - adduser -D -G tracker -g tracker tracker
+    - |
+      apk add -U git gcc autoconf automake libtool
+      git clone https://github.com/ssssam/libeatmydata --branch sam/musl-open64-fix
+      cd libeatmydata
+      autoreconf -ivf
+      ./configure
+      make
+      make install
+      cd ..
   <<: *test
 
