@@ -52,6 +52,10 @@ stages:
     - build/meson-logs/testlog.txt
 
 
+test-alpine-edge:
+  image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/alpine:edge
+  <<: *test
+
 test-fedora-latest:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
   <<: *test
@@ -59,13 +63,3 @@ test-fedora-latest:
 test-ubuntu-rolling:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/ubuntu:rolling
   <<: *test
-
-test-alpine-rolling:
-  image: alpine:edge
-  before_script:
-    - echo 'https://alpine.global.ssl.fastly.net/alpine/edge/community/' >> /etc/apk/repositories
-    - apk add -U bash-completion dbus-dev glib-dev gobject-introspection-dev icu-dev json-glib-dev libsoup-dev libxml2-dev meson py3-setuptools sqlite-dev networkmanager-dev vala alpine-sdk py3-gobject3
-    - addgroup -S tracker
-    - adduser -D -G tracker -g tracker tracker
-  <<: *test
-
