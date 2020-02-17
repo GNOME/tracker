@@ -1,6 +1,5 @@
 libtracker_sparql_test_c_args = tracker_c_args + [
   '-DTEST',
-  '-DTEST_DOMAIN_ONTOLOGY_RULE="@0@"'.format(tracker_uninstalled_domain_rule),
   '-DTEST_ONTOLOGIES_DIR="@0@"'.format(tracker_uninstalled_nepomuk_ontologies_dir),
 ]
 
@@ -29,7 +28,6 @@ tests += {
   'exe': tracker_sparql_test,
   'suite': ['sparql'],
   'is_parallel': false,
-  'requires_dbus': true,
 }
 
 tracker_fd_test = executable('tracker-fd-test',
@@ -41,5 +39,4 @@ tests += {
   'name': 'fd',
   'exe': tracker_fd_test,
   'suite': ['sparql'],
-  'requires_dbus': true,
 }

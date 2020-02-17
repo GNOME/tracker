@@ -37,6 +37,9 @@ class MainLoop():
     def quit(self):
         self._loop.quit()
 
+    def run(self):
+        raise NotImplemented("Use .run_checked() to ensure correct exception handling.")
+
     def run_checked(self):
         '''Run the loop until quit(), then raise any unhandled exception.'''
         self._exception = None

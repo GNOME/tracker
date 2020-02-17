@@ -16,14 +16,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 #
+
 """
-Test the GROUP_CONCAT function in Sparql. Only requires the store.
+Test the GROUP_CONCAT function in SPARQL.
 """
+
 import unittest as ut
-from storetest import CommonTrackerStoreTest as CommonTrackerStoreTest
+import fixtures
 
 
-class TestGroupConcat (CommonTrackerStoreTest):
+class TestGroupConcat (fixtures.TrackerSparqlDirectTest):
     """
     Insert a multivalued property and request the results in GROUP_CONCAT
     """
