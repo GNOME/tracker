@@ -70,6 +70,11 @@
 #define TOSTRING(x) TOSTRING1(x)
 #define TRACKER_PARSER_VERSION_STRING TOSTRING(TRACKER_PARSER_VERSION)
 
+#define FTS_FLAGS (TRACKER_DB_MANAGER_FTS_ENABLE_STEMMER |	  \
+                   TRACKER_DB_MANAGER_FTS_ENABLE_UNACCENT |	  \
+                   TRACKER_DB_MANAGER_FTS_ENABLE_STOP_WORDS |	  \
+                   TRACKER_DB_MANAGER_FTS_IGNORE_NUMBERS)
+
 typedef enum {
 	TRACKER_DB_VERSION_UNKNOWN, /* Unknown */
 	TRACKER_DB_VERSION_0_6_6,   /* before indexer-split */
@@ -107,9 +112,6 @@ typedef struct {
 	gchar              *abs_filename;
 	gint                cache_size;
 	gint                page_size;
-	gboolean            attached;
-	gboolean            is_index;
-	guint64             mtime;
 } TrackerDBDefinition;
 
 static TrackerDBDefinition db_base = {
@@ -119,9 +121,6 @@ static TrackerDBDefinition db_base = {
 	NULL,
 	TRACKER_DB_CACHE_SIZE_DEFAULT,
 	8192,
-	FALSE,
-	FALSE,
-	0
 };
 
 struct _TrackerDBManager {
@@ -132,7 +131,6 @@ struct _TrackerDBManager {
 	gchar *user_data_dir;
 	gchar *in_use_filename;
 	GFile *cache_location;
-	GFile *data_location;
 	TrackerDBManagerFlags flags;
 	guint s_cache_size;
 	guint u_cache_size;
@@ -155,28 +153,11 @@ static guint signals[N_SIGNALS] = { 0 };
 
 G_DEFINE_TYPE (TrackerDBManager, tracker_db_manager, G_TYPE_OBJECT)
 
-static gboolean            db_exec_no_reply                        (TrackerDBInterface   *iface,
-                                                                    const gchar          *query,
-                                                                    ...);
 static TrackerDBInterface *tracker_db_manager_create_db_interface   (TrackerDBManager    *db_manager,
                                                                      gboolean             readonly,
                                                                      GError             **error);
 
 static TrackerDBInterface * init_writable_db_interface              (TrackerDBManager *db_manager);
-
-static gboolean
-db_exec_no_reply (TrackerDBInterface *iface,
-                  const gchar        *query,
-                  ...)
-{
-	va_list                     args;
-
-	va_start (args, query);
-	tracker_db_interface_execute_vquery (iface, NULL, query, args);
-	va_end (args);
-
-	return TRUE;
-}
 
 TrackerDBManagerFlags
 tracker_db_manager_get_flags (TrackerDBManager *db_manager,
@@ -260,7 +241,7 @@ db_set_params (TrackerDBInterface   *iface,
 	g_debug ("  Setting cache size to %d", cache_size);
 }
 
-void
+static void
 tracker_db_manager_remove_all (TrackerDBManager *db_manager)
 {
 	gchar *filename;
@@ -365,7 +346,7 @@ db_get_version (TrackerDBManager *db_manager)
 	return version;
 }
 
-void
+static void
 tracker_db_manager_update_version (TrackerDBManager *db_manager)
 {
 	TrackerDBInterface *iface;
@@ -423,12 +404,6 @@ tracker_db_manager_locale_changed (TrackerDBManager  *db_manager,
 	gchar *current_locale;
 	gboolean changed;
 
-	/* As a special case, we allow calling this API function before
-	 * tracker_data_manager_init() has been called, so it can be used
-	 * to check for locale mismatches for initializing the database.
-	 */
-	tracker_db_manager_ensure_locations (db_manager, db_manager->cache_location, db_manager->data_location);
-
 	/* Get current collation locale */
 	current_locale = tracker_locale_get (TRACKER_LOCALE_COLLATE);
 
@@ -470,25 +445,6 @@ tracker_db_manager_set_current_locale (TrackerDBManager *db_manager)
 }
 
 static void
-db_manager_analyze (TrackerDBManager   *db_manager,
-                    TrackerDBInterface *iface)
-{
-	guint64             current_mtime;
-
-	current_mtime = tracker_file_get_mtime (db_manager->db.abs_filename);
-
-	if (current_mtime > db_manager->db.mtime) {
-		g_info ("  Analyzing DB:'%s'", db_manager->db.name);
-		db_exec_no_reply (iface, "ANALYZE %s.Services", db_manager->db.name);
-
-		/* Remember current mtime for future */
-		db_manager->db.mtime = current_mtime;
-	} else {
-		g_info ("  Not updating DB:'%s', no changes since last optimize", db_manager->db.name);
-	}
-}
-
-static void
 db_recreate_all (TrackerDBManager  *db_manager,
 		 GError           **error)
 {
@@ -515,10 +471,9 @@ db_recreate_all (TrackerDBManager  *db_manager,
 	g_clear_object (&db_manager->db.wal_iface);
 }
 
-void
-tracker_db_manager_ensure_locations (TrackerDBManager *db_manager,
-                                     GFile            *cache_location,
-                                     GFile            *data_location)
+static void
+tracker_db_manager_ensure_location (TrackerDBManager *db_manager,
+				    GFile            *cache_location)
 {
 	gchar *dir;
 
@@ -528,8 +483,6 @@ tracker_db_manager_ensure_locations (TrackerDBManager *db_manager,
 
 	db_manager->locations_initialized = TRUE;
 	db_manager->data_dir = g_file_get_path (cache_location);
-
-	db_manager->user_data_dir = g_file_get_path (data_location);
 
 	db_manager->db = db_base;
 
@@ -570,7 +523,6 @@ perform_recreate (TrackerDBManager  *db_manager,
 TrackerDBManager *
 tracker_db_manager_new (TrackerDBManagerFlags   flags,
 			GFile                  *cache_location,
-			GFile                  *data_location,
 			gboolean               *first_time,
 			gboolean                restoring_backup,
 			gboolean                shared_cache,
@@ -591,7 +543,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	TrackerDBInterface *resources_iface;
 	GError *internal_error = NULL;
 
-	if (!cache_location || !data_location) {
+	if (!cache_location) {
 		g_set_error (error,
 		             TRACKER_DATA_ONTOLOGY_ERROR,
 		             TRACKER_DATA_UNSUPPORTED_LOCATION,
@@ -618,11 +570,10 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	db_manager->interfaces = g_async_queue_new_full (g_object_unref);
 
 	g_set_object (&db_manager->cache_location, cache_location);
-	g_set_object (&db_manager->data_location, data_location);
 	g_weak_ref_init (&db_manager->iface_data, iface_data);
 
-	tracker_db_manager_ensure_locations (db_manager, cache_location, data_location);
-	db_manager->in_use_filename = g_build_filename (db_manager->user_data_dir,
+	tracker_db_manager_ensure_location (db_manager, cache_location);
+	db_manager->in_use_filename = g_build_filename (db_manager->data_dir,
 							IN_USE_FILENAME,
 							NULL);
 
@@ -633,7 +584,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		g_debug ("Checking database directories exist");
 
 		g_mkdir_with_parents (db_manager->data_dir, 00755);
-		g_mkdir_with_parents (db_manager->user_data_dir, 00755);
 	}
 
 	g_debug ("Checking whether database files exist");
@@ -680,6 +630,19 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		if ((flags & TRACKER_DB_MANAGER_REMOVE_ALL) != 0) {
 			return db_manager;
 		}
+	} else {
+		GValue value = G_VALUE_INIT;
+		TrackerDBManagerFlags fts_flags = 0;
+
+		if (tracker_db_manager_get_metadata (db_manager, "fts-flags", &value)) {
+			fts_flags = g_ascii_strtoll (g_value_get_string (&value), NULL, 10);
+			g_value_unset (&value);
+		}
+
+		/* Readonly connections should go with the FTS flags as stored
+		 * in metadata.
+		 */
+		db_manager->flags = (db_manager->flags & ~(FTS_FLAGS)) | fts_flags;
 	}
 
 	/* Set general database options */
@@ -773,8 +736,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 			if (!must_recreate) {
 				gchar *busy_status;
 
-				db_manager->db.mtime = tracker_file_get_mtime (db_manager->db.abs_filename);
-
 				loaded = TRUE;
 
 				/* Report OPERATION - STATUS */
@@ -853,10 +814,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		}
 	}
 
-	if (!loaded) {
-		db_manager->db.mtime = tracker_file_get_mtime (db_manager->db.abs_filename);
-	}
-
 	if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 		/* do not create in-use file for read-only mode (direct access) */
 		in_use_file = g_open (db_manager->in_use_filename,
@@ -905,11 +862,11 @@ tracker_db_manager_finalize (GObject *object)
 	TrackerDBManager *db_manager = TRACKER_DB_MANAGER (object);
 	gboolean readonly = (db_manager->flags & TRACKER_DB_MANAGER_READONLY) != 0;
 
-	g_async_queue_unref (db_manager->interfaces);
-	g_free (db_manager->db.abs_filename);
-
 	if (db_manager->wal_thread)
 		g_thread_join (db_manager->wal_thread);
+
+	g_async_queue_unref (db_manager->interfaces);
+	g_free (db_manager->db.abs_filename);
 
 	g_clear_object (&db_manager->db.wal_iface);
 
@@ -922,7 +879,6 @@ tracker_db_manager_finalize (GObject *object)
 	g_weak_ref_clear (&db_manager->iface_data);
 
 	g_free (db_manager->data_dir);
-	g_free (db_manager->user_data_dir);
 
 	if (!readonly) {
 		/* do not delete in-use file for read-only mode (direct access) */
@@ -932,41 +888,6 @@ tracker_db_manager_finalize (GObject *object)
 	g_free (db_manager->in_use_filename);
 
 	G_OBJECT_CLASS (tracker_db_manager_parent_class)->finalize (object);
-}
-
-void
-tracker_db_manager_optimize (TrackerDBManager *db_manager)
-{
-	gboolean dbs_are_open = FALSE;
-	TrackerDBInterface *iface;
-
-	g_info ("Optimizing database...");
-
-	g_info ("  Checking database is not in use");
-
-	iface = tracker_db_manager_get_writable_db_interface (db_manager);
-
-	/* Check if any connections are open? */
-	if (G_OBJECT (iface)->ref_count > 1) {
-		g_info ("  database is still in use with %d references!",
-		        G_OBJECT (iface)->ref_count);
-
-		dbs_are_open = TRUE;
-	}
-
-	if (dbs_are_open) {
-		g_info ("  Not optimizing database, still in use with > 1 reference");
-		return;
-	}
-
-	/* Optimize the metadata database */
-	db_manager_analyze (db_manager, iface);
-}
-
-const gchar *
-tracker_db_manager_get_file (TrackerDBManager *db_manager)
-{
-	return db_manager->db.abs_filename;
 }
 
 static TrackerDBInterface *
@@ -1223,7 +1144,19 @@ tracker_db_manager_get_tokenizer_changed (TrackerDBManager *db_manager)
 {
 	GValue value = G_VALUE_INIT;
 	const gchar *version;
+	TrackerDBManagerFlags flags;
 	gboolean changed;
+
+	if (!tracker_db_manager_get_metadata (db_manager, "fts-flags", &value))
+		return TRUE;
+
+	flags = g_ascii_strtoll (g_value_get_string (&value), NULL, 10);
+	g_value_unset (&value);
+
+	if ((db_manager->flags & TRACKER_DB_MANAGER_READONLY) == 0 &&
+	    flags != (db_manager->flags & FTS_FLAGS)) {
+		return TRUE;
+	}
 
 	if (!tracker_db_manager_get_metadata (db_manager, "parser-version", &value))
 		return TRUE;
@@ -1242,8 +1175,12 @@ tracker_db_manager_tokenizer_update (TrackerDBManager *db_manager)
 
 	g_value_init (&value, G_TYPE_STRING);
 	g_value_set_string (&value, TRACKER_PARSER_VERSION_STRING);
-
 	tracker_db_manager_set_metadata (db_manager, "parser-version", &value);
+	g_value_unset (&value);
+
+	g_value_init (&value, G_TYPE_INT64);
+	g_value_set_int64 (&value, (db_manager->flags & FTS_FLAGS));
+	tracker_db_manager_set_metadata (db_manager, "fts-flags", &value);
 	g_value_unset (&value);
 }
 

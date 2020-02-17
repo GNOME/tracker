@@ -23,15 +23,21 @@ example_files = [
     'examples/ontologies/defining-properties-3.txt', 'examples/ontologies/defining-properties-4.rq',
     'examples/ontologies/defining-uniqueness-1.txt', 'examples/ontologies/defining-uniqueness-2.rq',
     'examples/ontologies/example.description', 'examples/ontologies/predefined-elements-1.txt',
-    'examples/ontologies/predefined-elements-2.rq', 'examples/builder-example.c',
+    'examples/ontologies/predefined-elements-2.rq',
     'examples/readonly-example.c', 'examples/writeonly-example.c',
     'examples/writeonly-with-blank-nodes-example.c',
+]
+
+private_headers = [
+    'tracker-notifier-private.h',
 ]
 
 gnome.gtkdoc('libtracker-sparql',
     src_dir: sparqlinc,
     main_xml: 'libtracker-sparql-docs.xml',
+    scan_args: ['--ignore-headers=' + ' '.join(private_headers)],
     content_files: ['overview.xml', 'examples.xml', 'ontologies.xml', 'private-store.xml', 'migrating-1to2.xml', example_files],
+    gobject_typesfile: 'libtracker-sparql.types',
     dependencies: tracker_sparql_dep,
     fixxref_args: fixxref_args,
     install: true)

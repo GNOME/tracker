@@ -50,15 +50,6 @@ G_BEGIN_DECLS
 #define TRACKER_PREFIX_MLO      "http://www.tracker-project.org/temp/mlo#"
 #define TRACKER_PREFIX_MFO      "http://www.tracker-project.org/temp/mfo#"
 
-/* RDF/SPARQL consistency */
-#define TRACKER_PREFIX_DATASOURCE_URN \
-	"urn:nepomuk:datasource:"
-
-#define TRACKER_DATASOURCE_URN_NON_REMOVABLE_MEDIA \
-	TRACKER_PREFIX_DATASOURCE_URN "9291a450-1d49-11de-8c30-0800200c9a66"
-
-#define TRACKER_OWN_GRAPH_URN "urn:uuid:472ed0cc-40ff-4e37-9c0c-062d78656540"
-
 G_END_DECLS
 
 #endif /* __LIBTRACKER_SPARQL_ONTOLOGY_H__ */

@@ -31,11 +31,11 @@
 
     <xi:include href="xml/tracker-resource.xml"/>
     <xi:include href="xml/tracker-namespace-manager.xml"/>
-    <xi:include href="xml/tracker-sparql-builder.xml"/>
     <xi:include href="xml/tracker-sparql-connection.xml"/>
     <xi:include href="xml/tracker-sparql-statement.xml"/>
     <xi:include href="xml/tracker-sparql-cursor.xml"/>
     <xi:include href="xml/tracker-notifier.xml"/>
+    <xi:include href="xml/tracker-endpoint.xml"/>
     <xi:include href="xml/tracker-misc.xml"/>
     <xi:include href="xml/tracker-version.xml"/>
   </part>

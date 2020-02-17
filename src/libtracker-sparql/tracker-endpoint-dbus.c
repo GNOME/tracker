@@ -22,6 +22,8 @@
 #include "config.h"
 
 #include "tracker-endpoint-dbus.h"
+#include "tracker-notifier.h"
+#include "tracker-private.h"
 
 #include <gio/gio.h>
 #include <gio/gunixinputstream.h>
@@ -32,30 +34,22 @@ static const gchar introspection_xml[] =
 	"<node>"
 	"  <interface name='org.freedesktop.Tracker1.Endpoint'>"
 	"    <method name='Query'>"
-	"      <arg type='as' name='anon_graphs' direction='in' />"
-	"      <arg type='as' name='named_graphs' direction='in' />"
 	"      <arg type='s' name='query' direction='in' />"
 	"      <arg type='h' name='output_stream' direction='in' />"
 	"      <arg type='as' name='result' direction='out' />"
 	"    </method>"
 	"    <method name='Update'>"
-	"      <arg type='as' name='anon_graphs' direction='in' />"
-	"      <arg type='as' name='named_graphs' direction='in' />"
 	"      <arg type='h' name='input_stream' direction='in' />"
 	"    </method>"
 	"    <method name='UpdateArray'>"
-	"      <arg type='as' name='anon_graphs' direction='in' />"
-	"      <arg type='as' name='named_graphs' direction='in' />"
 	"      <arg type='h' name='input_stream' direction='in' />"
 	"    </method>"
 	"    <method name='UpdateBlank'>"
-	"      <arg type='as' name='anon_graphs' direction='in' />"
-	"      <arg type='as' name='named_graphs' direction='in' />"
 	"      <arg type='h' name='input_stream' direction='in' />"
 	"      <arg type='aaa{ss}' name='result' direction='out' />"
 	"    </method>"
-	"    <signal name='GraphUpdate'>"
-	"      <arg type='a(ii)' name='updates' />"
+	"    <signal name='GraphUpdated'>"
+	"      <arg type='sa{ii}' name='updates' />"
 	"    </signal>"
 	"  </interface>"
 	"</node>";
@@ -74,6 +68,7 @@ struct _TrackerEndpointDBus {
 	guint register_id;
 	GDBusNodeInfo *node_info;
 	GCancellable *cancellable;
+	TrackerNotifier *notifier;
 };
 
 typedef struct {
@@ -339,10 +334,16 @@ update_blank_cb (GObject      *object,
 
 	results = tracker_sparql_connection_update_blank_finish (TRACKER_SPARQL_CONNECTION (object),
 	                                                         res, &error);
-	if (results)
-		g_dbus_method_invocation_return_value (request->invocation, results);
-	else
+	if (results) {
+		GVariantBuilder builder;
+
+		g_variant_builder_init (&builder, G_VARIANT_TYPE ("(aaa{ss})"));
+		g_variant_builder_add_value (&builder, results);
+		g_dbus_method_invocation_return_value (request->invocation,
+		                                       g_variant_builder_end (&builder));
+	} else {
 		g_dbus_method_invocation_return_gerror (request->invocation, error);
+	}
 
 	update_request_free (request);
 }
@@ -393,8 +394,7 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 	fd_list = g_dbus_message_get_unix_fd_list (g_dbus_method_invocation_get_message (invocation));
 
 	if (g_strcmp0 (method_name, "Query") == 0) {
-		/* FIXME: Anon/named graphs are ignored ATM */
-		g_variant_get (parameters, "(asassh)", NULL, NULL, &query, &handle);
+		g_variant_get (parameters, "(sh)", &query, &handle);
 
 		if (fd_list)
 			fd = g_unix_fd_list_get (fd_list, handle, &error);
@@ -418,8 +418,7 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 		g_free (query);
 	} else if (g_strcmp0 (method_name, "Update") == 0 ||
 	           g_strcmp0 (method_name, "UpdateArray") == 0) {
-		/* FIXME: Anon/named graphs are ignored ATM */
-		g_variant_get (parameters, "(asash)", NULL, NULL, &handle);
+		g_variant_get (parameters, "(h)", &handle);
 
 		if (fd_list)
 			fd = g_unix_fd_list_get (fd_list, handle, &error);
@@ -438,8 +437,7 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 			update_request_read_next (request, read_update_cb);
 		}
 	} else if (g_strcmp0 (method_name, "UpdateBlank") == 0) {
-		/* FIXME: Anon/named graphs are ignored ATM */
-		g_variant_get (parameters, "(asash)", NULL, NULL, &handle);
+		g_variant_get (parameters, "(h)", &handle);
 
 		if (fd_list)
 			fd = g_unix_fd_list_get (fd_list, handle, &error);
@@ -463,12 +461,54 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 	}
 }
 
+static void
+notifier_events_cb (TrackerNotifier *notifier,
+                    const gchar     *service,
+                    const gchar     *graph,
+                    GPtrArray       *events,
+                    gpointer         user_data)
+{
+	TrackerEndpointDBus *endpoint_dbus = user_data;
+	GVariantBuilder builder;
+	GError *error = NULL;
+	gint i;
+
+	g_variant_builder_init (&builder, G_VARIANT_TYPE ("(sa{ii})"));
+	g_variant_builder_add (&builder, "s", graph ? graph : "");
+	g_variant_builder_open (&builder, G_VARIANT_TYPE ("a{ii}"));
+
+	for (i = 0; i < events->len; i++) {
+		TrackerNotifierEvent *event;
+		gint event_type, id;
+
+		event = g_ptr_array_index (events, i);
+		event_type = tracker_notifier_event_get_event_type (event);
+		id = tracker_notifier_event_get_id (event);
+		g_variant_builder_add (&builder, "{ii}", event_type, id);
+	}
+
+	g_variant_builder_close (&builder);
+
+	if (!g_dbus_connection_emit_signal (endpoint_dbus->dbus_connection,
+	                                    NULL,
+	                                    endpoint_dbus->object_path,
+	                                    "org.freedesktop.Tracker1.Endpoint",
+	                                    "GraphUpdated",
+	                                    g_variant_builder_end (&builder),
+	                                    &error)) {
+		g_warning ("Could not emit GraphUpdated signal: %s", error->message);
+		g_error_free (error);
+	}
+}
+
 static gboolean
 tracker_endpoint_dbus_initable_init (GInitable     *initable,
                                      GCancellable  *cancellable,
                                      GError       **error)
 {
-	TrackerEndpointDBus *endpoint_dbus = TRACKER_ENDPOINT_DBUS (initable);
+	TrackerEndpoint *endpoint = TRACKER_ENDPOINT (initable);
+	TrackerEndpointDBus *endpoint_dbus = TRACKER_ENDPOINT_DBUS (endpoint);
+	TrackerSparqlConnection *conn;
 
 	endpoint_dbus->node_info = g_dbus_node_info_new_for_xml (introspection_xml,
 	                                                         error);
@@ -487,6 +527,12 @@ tracker_endpoint_dbus_initable_init (GInitable     *initable,
 		                                   endpoint_dbus,
 		                                   NULL,
 		                                   error);
+
+	conn = tracker_endpoint_get_sparql_connection (endpoint);
+	endpoint_dbus->notifier = tracker_sparql_connection_create_notifier (conn, 0);
+	g_signal_connect (endpoint_dbus->notifier, "events",
+	                  G_CALLBACK (notifier_events_cb), endpoint);
+
 	return TRUE;
 }
 
@@ -509,6 +555,7 @@ tracker_endpoint_dbus_finalize (GObject *object)
 		endpoint_dbus->register_id = 0;
 	}
 
+	g_clear_object (&endpoint_dbus->notifier);
 	g_clear_object (&endpoint_dbus->cancellable);
 	g_clear_object (&endpoint_dbus->dbus_connection);
 	g_clear_pointer (&endpoint_dbus->object_path, g_free);
@@ -590,6 +637,19 @@ tracker_endpoint_dbus_init (TrackerEndpointDBus *endpoint)
 {
 }
 
+/**
+ * tracker_endpoint_dbus_new:
+ * @sparql_connection: a #TrackerSparqlConnection
+ * @dbus_connection: a #GDBusConnection
+ * @object_path: (nullable): the object path to use, or %NULL for the default
+ * @cancellable: (nullable): a #GCancellable, or %NULL
+ * @error: pointer to a #GError
+ *
+ * Registers a Tracker endpoint object at @object_path on @dbus_connection.
+ * The default object path is "/org/freedesktop/Tracker1/Endpoint".
+ *
+ * Returns: (transfer full): a #TrackerEndpointDBus object.
+ */
 TrackerEndpointDBus *
 tracker_endpoint_dbus_new (TrackerSparqlConnection  *sparql_connection,
                            GDBusConnection          *dbus_connection,
@@ -597,10 +657,13 @@ tracker_endpoint_dbus_new (TrackerSparqlConnection  *sparql_connection,
                            GCancellable             *cancellable,
                            GError                  **error)
 {
-	g_return_val_if_fail (TRACKER_SPARQL_IS_CONNECTION (sparql_connection), NULL);
+	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (sparql_connection), NULL);
 	g_return_val_if_fail (G_IS_DBUS_CONNECTION (dbus_connection), NULL);
 	g_return_val_if_fail (!cancellable || G_IS_CANCELLABLE (cancellable), NULL);
 	g_return_val_if_fail (!error || !*error, NULL);
+
+	if (!object_path)
+		object_path = "/org/freedesktop/Tracker1/Endpoint";
 
 	return g_initable_new (TRACKER_TYPE_ENDPOINT_DBUS, cancellable, error,
 	                       "dbus-connection", dbus_connection,

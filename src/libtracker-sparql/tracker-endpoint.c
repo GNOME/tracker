@@ -22,6 +22,7 @@
 #include "config.h"
 
 #include "tracker-endpoint.h"
+#include "tracker-private.h"
 
 enum {
 	PROP_0,
@@ -36,6 +37,25 @@ typedef struct {
 } TrackerEndpointPrivate;
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (TrackerEndpoint, tracker_endpoint, G_TYPE_OBJECT)
+
+/**
+ * SECTION: tracker-endpoint
+ * @short_description: Expose a database to other processes
+ * @title: TrackerEndpoint
+ * @stability: Stable
+ * @include: tracker-endpoint.h
+ *
+ * <para>
+ * #TrackerEndpoint allows sharing data with other processes on the system,
+ * using a Tracker-specific D-Bus API.
+ * </para>
+ * <para>
+ * When it is shared in this way, processes can connect to your database using
+ * tracker_sparql_connection_bus_new() and can also fetch data directly from
+ * SPARQL queries using the <userinput>SELECT { SERVICE ... }</userinput>
+ * syntax.
+ * </para>
+ */
 
 static void
 tracker_endpoint_finalize (GObject *object)
@@ -109,6 +129,14 @@ tracker_endpoint_init (TrackerEndpoint *endpoint)
 {
 }
 
+/**
+ * tracker_endpoint_get_sparql_connection:
+ * @endpoint: a #TrackerEndpoint
+ *
+ * Returns the #TrackerSparqlConnection that this endpoint proxies.
+ *
+ * Returns: (transfer none): The proxied SPARQL connection
+ **/
 TrackerSparqlConnection *
 tracker_endpoint_get_sparql_connection (TrackerEndpoint *endpoint)
 {

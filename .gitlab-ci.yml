@@ -26,8 +26,7 @@ stages:
       # whole environment for every failed test, and that gives a whole
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
-
-      su tracker -c 'cd build; env LANG=C.UTF-8 LC_ALL=C.UTF-8 eatmydata meson test --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
+      su tracker -c 'cd build; env LANG=C.UTF-8 LC_ALL=C.UTF-8 dbus-run-session eatmydata meson test --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
 
   after_script:
     - |

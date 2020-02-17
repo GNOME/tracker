@@ -31,6 +31,7 @@ public class Tracker.Remote.Connection : Tracker.Sparql.Connection {
 	const string USER_AGENT = "Tracker/" + PACKAGE_VERSION + " (https://gitlab.gnome.org/GNOME/tracker/issues/; tracker-list@lists.gnome.org) Tracker/" + PACKAGE_VERSION;
 
 	public Connection (string base_uri) {
+		Object ();
 		_base_uri = base_uri;
 		_session = new Soup.Session ();
 	}
@@ -85,5 +86,12 @@ public class Tracker.Remote.Connection : Tracker.Sparql.Connection {
 		yield _session.send_async (message, cancellable);
 
 		return create_cursor (message);
+	}
+
+	public override void close () {
+	}
+
+	public async override bool close_async () throws GLib.IOError {
+		return true;
 	}
 }

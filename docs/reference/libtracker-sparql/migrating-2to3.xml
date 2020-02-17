@@ -86,4 +86,108 @@ SELECT ?s { ?s a nfo:FileDataObject }
       no provided migration path, use TrackerSparqlConnection directly.
     </para>
   </section>
+  <section>
+    <title>No tracker_sparql_connection_load()/load_async()/load_finish()</title>
+    <para>
+      This is superseded by the "LOAD &lt;url&gt;" SPARQL syntax.
+    </para>
+  </section>
+  <section>
+    <title>No tracker_sparql_connection_statistics()/statistics_async()/statistics_finish()</title>
+    <para>
+      It is possible to query statistics through SPARQL. This query would
+      provide a similar return value than the statistics API:
+    </para>
+    <programlisting>
+SELECT
+  ?class
+  (COUNT(?resource) AS ?count)
+{
+  ?class a rdfs:Class .
+  ?resource a ?class
+}
+GROUP BY ?class
+ORDER BY DESC ?count
+    </programlisting>
+    <para>
+      But of course, other more detailed statistics may be obtained.
+    </para>
+  </section>
+  <section>
+    <title>No TRACKER_NOTIFIER_FLAG_NOTIFY_UNEXTRACTED</title>
+    <para>
+      There is no replacement. If metadata about resources is added in several steps.
+      TrackerNotifier will inform of each.
+    </para>
+  </section>
+  <section>
+    <title>No TRACKER_NOTIFIER_FLAG_QUERY_LOCATION</title>
+    <para>
+      If using the Nepomuk ontology, It is possible to query for the "nie:url" of
+      those elements in place. Other ontologies might have similar concepts.
+    </para>
+  </section>
+  <section>
+    <title>No tracker_notifier_new()</title>
+    <para>
+      Notifiers are now created through tracker_sparql_connection_create_notifier().
+    </para>
+  </section>
+  <section>
+    <title>Different signature of TrackerNotifier::events signal</title>
+    <para>
+      A TrackerNotifier may hint changes across multiple endpoints (local or remote),
+      in consequence the signal additionally contains 2 string arguments, notifying
+      about the SPARQL endpoint the changes came from, and the SPARQL graph the changes
+      apply to.
+    </para>
+  </section>
+  <section>
+    <title>Return value change in tracker_sparql_connection_update_array()</title>
+    <para>
+      This function changed to handle all changes within a single transaction. Returning
+      an array of errors for each individual update is no longer necessary, so it now
+      simply returns a boolean return value.
+    </para>
+  </section>
+  <section>
+    <title>No tracker_sparql_connection_get()/get_async()</title>
+    <para>
+      There is no longer a singleton SPARQL connection. If you are only interested in
+      tracker-miner-fs data, you can create a dedicated DBus connection to it through:
+    </para>
+    <programlisting>
+      conn = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker1.Miner.Files", ...);
+    </programlisting>
+    <para>
+      If you are interested in storing your own data, you can do it through:
+    </para>
+    <programlisting>
+      conn = tracker_sparql_connection_new (...);
+    </programlisting>
+    <para>
+      Note that you still may access other endpoints in SELECT queries, eg. for
+      tracker-miner-fs:
+    </para>
+    <programlisting>
+SELECT ?url ?tag {
+  SERVICE &lt;dbus:org.freedesktop.Tracker1.Miner.Files&gt; {
+    ?a a rdfs:Resource;
+       nie:url ?url .
+  }
+  ?b nie:url ?url;
+     nao:hasTag ?tag
+}
+    </programlisting>
+    <para>
+      This SELECT query merges together data from the tracker-miner-fs endpoint
+      with data from the local endpoint.
+    </para>
+  </section>
+  <section>
+    <title>No tracker_sparql_connection_set_domain</title>
+    <para>
+      Use a dedicated DBus TrackerSparqlConnection to the specific domain.
+    </para>
+  </section>
 </chapter>

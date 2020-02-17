@@ -31,7 +31,7 @@ struct _TrackerDirectStatementPrivate
 
 G_DEFINE_TYPE_WITH_PRIVATE (TrackerDirectStatement,
                             tracker_direct_statement,
-                            TRACKER_SPARQL_TYPE_STATEMENT)
+                            TRACKER_TYPE_SPARQL_STATEMENT)
 
 static void
 tracker_direct_statement_finalize (GObject *object)
@@ -128,6 +128,15 @@ tracker_direct_statement_bind_string (TrackerSparqlStatement *stmt,
 	g_value_set_string (gvalue, value);
 }
 
+static void
+tracker_direct_statement_clear_bindings (TrackerSparqlStatement *stmt)
+{
+	TrackerDirectStatementPrivate *priv;
+
+	priv = tracker_direct_statement_get_instance_private (TRACKER_DIRECT_STATEMENT (stmt));
+	g_hash_table_remove_all (priv->values);
+}
+
 static TrackerSparqlCursor *
 tracker_direct_statement_execute (TrackerSparqlStatement  *stmt,
                                   GCancellable            *cancellable,
@@ -191,7 +200,7 @@ copy_values_deep (GHashTable *values)
 
 		copy_value = g_new0 (GValue, 1);
 		g_value_init (copy_value, G_VALUE_TYPE (val));
-		g_value_copy (copy_value, val);
+		g_value_copy (val, copy_value);
 
 		g_hash_table_insert (copy, g_strdup (key), copy_value);
 	}
@@ -239,6 +248,7 @@ tracker_direct_statement_class_init (TrackerDirectStatementClass *klass)
 	stmt_class->bind_boolean = tracker_direct_statement_bind_boolean;
 	stmt_class->bind_double = tracker_direct_statement_bind_double;
 	stmt_class->bind_string = tracker_direct_statement_bind_string;
+	stmt_class->clear_bindings = tracker_direct_statement_clear_bindings;
 	stmt_class->execute = tracker_direct_statement_execute;
 	stmt_class->execute_async = tracker_direct_statement_execute_async;
 	stmt_class->execute_finish = tracker_direct_statement_execute_finish;

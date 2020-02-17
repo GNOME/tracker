@@ -10,7 +10,8 @@ sources = [
 libtracker_remote = static_library('tracker-remote', sources,
     dependencies: tracker_remote_dependencies + [tracker_common_dep, tracker_sparql_intermediate_dep],
     c_args: tracker_c_args + [
-        '-include', 'config.h'
+        '-include', 'config.h',
+        '-include', 'libtracker-sparql/tracker-private.h',
     ],
     vala_args: [
         '--debug',
@@ -19,6 +20,7 @@ libtracker_remote = static_library('tracker-remote', sources,
         # doesn't seem to work here.
         '--target-glib', glib_required,
     ],
+    gnu_symbol_visibility: 'hidden',
 )
 
 tracker_sparql_remote_dep = declare_dependency(

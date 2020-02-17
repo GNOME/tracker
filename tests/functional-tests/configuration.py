@@ -25,6 +25,9 @@ import pathlib
 import sys
 
 
+DEFAULT_TIMEOUT = 10
+
+
 if 'TRACKER_FUNCTIONAL_TEST_CONFIG' not in os.environ:
     raise RuntimeError("The TRACKER_FUNCTIONAL_TEST_CONFIG environment "
                        "variable must be set to point to the location of "
@@ -34,21 +37,8 @@ with open(os.environ['TRACKER_FUNCTIONAL_TEST_CONFIG']) as f:
     config = json.load(f)
 
 
-TEST_DBUS_DAEMON_CONFIG_FILE = config['TEST_DBUS_DAEMON_CONFIG_FILE']
-
-
-def test_environment(tmpdir):
-    return {
-        'DCONF_PROFILE': config['TEST_DCONF_PROFILE'],
-        'GSETTINGS_SCHEMA_DIR': config['TEST_GSETTINGS_SCHEMA_DIR'],
-        'TRACKER_DB_ONTOLOGIES_DIR': config['TEST_ONTOLOGIES_DIR'],
-        'TRACKER_LANGUAGE_STOP_WORDS_DIR': config['TEST_LANGUAGE_STOP_WORDS_DIR'],
-        'TRACKER_TEST_DOMAIN_ONTOLOGY_RULE': config['TEST_DOMAIN_ONTOLOGY_RULE'],
-        'XDG_CACHE_HOME': os.path.join(tmpdir, 'cache'),
-        'XDG_CONFIG_HOME': os.path.join(tmpdir, 'config'),
-        'XDG_DATA_HOME': os.path.join(tmpdir, 'data'),
-        'XDG_RUNTIME_DIR': os.path.join(tmpdir, 'run'),
-    }
+def ontologies_dir():
+    return config['TEST_ONTOLOGIES_DIR']
 
 
 def get_environment_boolean(variable):

@@ -8,7 +8,7 @@ pkg = import('pkgconfig')
 cc = meson.get_compiler('c')
 
 # This is the X.Y used in -llibtracker-FOO-X.Y
-tracker_api_version = '2.0'
+tracker_api_version = '3.0'
 
 tracker_version = meson.project_version().split('-')[0]
 tracker_major_version = tracker_version.split('.')[0].to_int()
@@ -299,7 +299,6 @@ vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi
 glib_compile_schemas = find_program('glib-compile-schemas')
 glib_mkenums = find_program('glib-mkenums')
 g_ir_compiler = find_program('g-ir-compiler', gobject_introspection.get_pkgconfig_variable('g_ir_compiler'))
-g_ir_merge = find_program('g-ir-merge', join_paths(meson.current_source_dir(), 'utils', 'g-ir-merge', 'g-ir-merge'))
 dbus_run_session = find_program('dbus-run-session')
 
 gir_dir = gobject_introspection.get_pkgconfig_variable('girdir',
@@ -308,7 +307,6 @@ typelib_dir = gobject_introspection.get_pkgconfig_variable('typelibdir',
                                                            define_variable:  [ 'libdir', libdir ])
 
 subdir('src')
-subdir('data')
 subdir('docs')
 subdir('examples')
 subdir('utils')
@@ -319,7 +317,6 @@ test_c_args = tracker_c_args + [
 ]
 
 tracker_uninstalled_cli_dir = join_paths(meson.current_build_dir(), 'src', 'tracker')
-tracker_uninstalled_domain_rule = join_paths(meson.current_source_dir(), 'src', 'tracker-store', 'default.rule')
 tracker_uninstalled_nepomuk_ontologies_dir = join_paths(meson.current_source_dir(), 'src', 'ontologies', 'nepomuk')
 tracker_uninstalled_stop_words_dir = join_paths(meson.current_source_dir(), 'src', 'libtracker-common', 'stop-words')
 tracker_uninstalled_testutils_dir = join_paths(meson.current_source_dir(), 'utils')
@@ -348,8 +345,6 @@ if not get_option('override_sqlite_version_check')
                               'https://gitlab.gnome.org/GNOME/tracker/merge_requests/160#note_664713'))
     endif
 endif
-
-meson.add_install_script('meson_integration_commands.sh', glib_compile_schemas.path(), gsettings_schema_dir)
 
 summary = [
   '\nBuild Configuration:',

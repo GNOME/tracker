@@ -70,7 +70,6 @@ struct _TrackerDataManager {
 
 	GFile *ontology_location;
 	GFile *cache_location;
-	GFile *data_location;
 	guint initialized      : 1;
 	guint restoring_backup : 1;
 	guint first_time_index : 1;
@@ -3910,16 +3909,9 @@ tracker_data_manager_get_cache_location (TrackerDataManager *manager)
 	return manager->cache_location ? g_object_ref (manager->cache_location) : NULL;
 }
 
-GFile *
-tracker_data_manager_get_data_location (TrackerDataManager *manager)
-{
-	return manager->data_location ? g_object_ref (manager->data_location) : NULL;
-}
-
 TrackerDataManager *
 tracker_data_manager_new (TrackerDBManagerFlags   flags,
                           GFile                  *cache_location,
-                          GFile                  *data_location,
                           GFile                  *ontology_location,
                           gboolean                restoring_backup,
                           guint                   select_cache_size,
@@ -3927,8 +3919,13 @@ tracker_data_manager_new (TrackerDBManagerFlags   flags,
 {
 	TrackerDataManager *manager;
 
-	if (!cache_location || !data_location || !ontology_location) {
-		g_warning ("All data storage and ontology locations must be provided");
+	if (!cache_location) {
+		g_warning ("Data storage location must be provided");
+		return NULL;
+	}
+
+	if ((flags & TRACKER_DB_MANAGER_READONLY) == 0 && !ontology_location) {
+		g_warning ("Ontology location must be provided");
 		return NULL;
 	}
 
@@ -3937,7 +3934,6 @@ tracker_data_manager_new (TrackerDBManagerFlags   flags,
 	/* TODO: Make these properties */
 	g_set_object (&manager->cache_location, cache_location);
 	g_set_object (&manager->ontology_location, ontology_location);
-	g_set_object (&manager->data_location, data_location);
 	manager->flags = flags;
 	manager->restoring_backup = restoring_backup;
 	manager->select_cache_size = select_cache_size;
@@ -4126,32 +4122,6 @@ update_interface_cb (TrackerDBManager   *db_manager,
 }
 
 static gboolean
-check_db_consistency (TrackerDBInterface *iface)
-{
-	TrackerDBStatement *stmt;
-	TrackerDBCursor *cursor = NULL;
-	gboolean is_inconsistent = FALSE;
-
-	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, NULL,
-						      "SELECT ID FROM \"rdfs:Resource\" "
-						      "EXCEPT "
-	                                              "SELECT ID FROM Resource "
-	                                              "LIMIT 1");
-
-	if (stmt) {
-		cursor = tracker_db_statement_start_cursor (stmt, NULL);
-		g_object_unref (stmt);
-	}
-
-	if (cursor) {
-		is_inconsistent = tracker_db_cursor_iter_next (cursor, NULL, NULL);
-		g_object_unref (cursor);
-	}
-
-	return !is_inconsistent;
-}
-
-static gboolean
 tracker_data_manager_initable_init (GInitable     *initable,
                                     GCancellable  *cancellable,
                                     GError       **error)
@@ -4173,8 +4143,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		return TRUE;
 	}
 
-	if (!g_file_is_native (manager->cache_location) ||
-	    !g_file_is_native (manager->data_location)) {
+	if (!g_file_is_native (manager->cache_location)) {
 		g_set_error (error,
 		             TRACKER_DATA_ONTOLOGY_ERROR,
 		             TRACKER_DATA_UNSUPPORTED_LOCATION,
@@ -4190,7 +4159,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 	manager->db_manager = tracker_db_manager_new (manager->flags,
 	                                              manager->cache_location,
-	                                              manager->data_location,
 	                                              &is_first_time_index,
 	                                              manager->restoring_backup,
 	                                              FALSE,
@@ -4216,17 +4184,8 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 	iface = tracker_db_manager_get_writable_db_interface (manager->db_manager);
 
-	if (!read_only && !check_db_consistency (iface)) {
-		g_set_error (error,
-		             TRACKER_DATA_ONTOLOGY_ERROR,
-		             TRACKER_DATA_UNSUPPORTED_LOCATION,
-			     "Database is inconsistent, reindexing from scratch");
-
-		tracker_db_manager_remove_all (manager->db_manager);
-		return FALSE;
-	}
-
-	if (g_file_query_file_type (manager->ontology_location, G_FILE_QUERY_INFO_NONE, NULL) != G_FILE_TYPE_DIRECTORY) {
+	if (manager->ontology_location &&
+	    g_file_query_file_type (manager->ontology_location, G_FILE_QUERY_INFO_NONE, NULL) != G_FILE_TYPE_DIRECTORY) {
 		gchar *uri;
 
 		uri = g_file_get_uri (manager->ontology_location);

@@ -1,11 +1,12 @@
 libtracker_bus = static_library('tracker-bus',
     'tracker-bus.vala',
     'tracker-namespace.vala',
-    'tracker-array-cursor.vala',
     'tracker-bus-fd-cursor.vala',
     '../libtracker-common/libtracker-common.vapi',
     tracker_common_enum_header,
-    c_args: tracker_c_args,
+    c_args: tracker_c_args + [
+        '-include', 'libtracker-sparql/tracker-private.h',
+    ],
     vala_args: [
         '--debug',
         '--pkg', 'posix',
@@ -15,6 +16,7 @@ libtracker_bus = static_library('tracker-bus',
     ],
     dependencies: [tracker_common_dep, tracker_sparql_intermediate_dep],
     include_directories: [commoninc, configinc, srcinc],
+    gnu_symbol_visibility: 'hidden',
 )
 
 tracker_sparql_bus_dep = declare_dependency(

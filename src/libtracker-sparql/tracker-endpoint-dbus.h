@@ -27,10 +27,21 @@
 #endif
 
 #include <libtracker-sparql/tracker-endpoint.h>
+#include <libtracker-sparql/tracker-version.h>
 
-#define TRACKER_TYPE_ENDPOINT_DBUS tracker_endpoint_dbus_get_type()
-G_DECLARE_FINAL_TYPE (TrackerEndpointDBus, tracker_endpoint_dbus, TRACKER, ENDPOINT_DBUS, TrackerEndpoint)
+#define TRACKER_TYPE_ENDPOINT_DBUS         (tracker_endpoint_dbus_get_type())
+#define TRACKER_ENDPOINT_DBUS(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_ENDPOINT_DBUS, TrackerEndpointDBus))
+#define TRACKER_ENDPOINT_DBUS_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c), TRACKER_TYPE_ENDPOINT_DBUS, TrackerEndpointDBusClass))
+#define TRACKER_IS_ENDPOINT_DBUS(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_ENDPOINT_DBUS))
+#define TRACKER_IS_ENDPOINT_DBUS_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c),  TRACKER_TYPE_ENDPOINT_DBUS))
+#define TRACKER_ENDPOINT_DBUS_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_ENDPOINT_DBUS, TrackerEndpointDBusClass))
 
+typedef struct _TrackerEndpointDBus TrackerEndpointDBus;
+
+TRACKER_AVAILABLE_IN_ALL
+GType tracker_endpoint_dbus_get_type (void) G_GNUC_CONST;
+
+TRACKER_AVAILABLE_IN_ALL
 TrackerEndpointDBus *
 tracker_endpoint_dbus_new (TrackerSparqlConnection  *sparql_connection,
                            GDBusConnection          *dbus_connection,

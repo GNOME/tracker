@@ -22,10 +22,10 @@
 
 #include "tracker-direct.h"
 #include "tracker-direct-statement.h"
+#include "libtracker-sparql/tracker-private.h"
 #include <libtracker-data/tracker-data.h>
 #include <libtracker-data/tracker-sparql.h>
-
-static TrackerDBManagerFlags default_flags = 0;
+#include <libtracker-sparql/tracker-notifier-private.h>
 
 typedef struct _TrackerDirectConnectionPrivate TrackerDirectConnectionPrivate;
 
@@ -33,7 +33,6 @@ struct _TrackerDirectConnectionPrivate
 {
 	TrackerSparqlConnectionFlags flags;
 	GFile *store;
-	GFile *journal;
 	GFile *ontology;
 
 	TrackerNamespaceManager *namespace_manager;
@@ -43,14 +42,16 @@ struct _TrackerDirectConnectionPrivate
 	GThreadPool *update_thread; /* Contains 1 exclusive thread */
 	GThreadPool *select_pool;
 
+	GList *notifiers;
+
 	guint initialized : 1;
+	guint closing     : 1;
 };
 
 enum {
 	PROP_0,
 	PROP_FLAGS,
 	PROP_STORE_LOCATION,
-	PROP_JOURNAL_LOCATION,
 	PROP_ONTOLOGY_LOCATION,
 	N_PROPS
 };
@@ -61,22 +62,20 @@ typedef enum {
 	TASK_TYPE_QUERY,
 	TASK_TYPE_UPDATE,
 	TASK_TYPE_UPDATE_BLANK,
-	TASK_TYPE_TURTLE
 } TaskType;
 
 typedef struct {
 	TaskType type;
-	union {
-		gchar *query;
-		GFile *turtle_file;
-	} data;
+	gchar *query;
 } TaskData;
 
 static void tracker_direct_connection_initable_iface_init (GInitableIface *iface);
 static void tracker_direct_connection_async_initable_iface_init (GAsyncInitableIface *iface);
 
+G_DEFINE_QUARK (TrackerDirectNotifier, tracker_direct_notifier)
+
 G_DEFINE_TYPE_WITH_CODE (TrackerDirectConnection, tracker_direct_connection,
-                         TRACKER_SPARQL_TYPE_CONNECTION,
+                         TRACKER_TYPE_SPARQL_CONNECTION,
                          G_ADD_PRIVATE (TrackerDirectConnection)
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 tracker_direct_connection_initable_iface_init)
@@ -89,22 +88,9 @@ task_data_query_new (TaskType     type,
 {
 	TaskData *data;
 
-	g_assert (type != TASK_TYPE_TURTLE);
 	data = g_new0 (TaskData, 1);
 	data->type = type;
-	data->data.query = g_strdup (sparql);
-
-	return data;
-}
-
-static TaskData *
-task_data_turtle_new (GFile *file)
-{
-	TaskData *data;
-
-	data = g_new0 (TaskData, 1);
-	data->type = TASK_TYPE_TURTLE;
-	g_set_object (&data->data.turtle_file, file);
+	data->query = g_strdup (sparql);
 
 	return data;
 }
@@ -112,11 +98,7 @@ task_data_turtle_new (GFile *file)
 static void
 task_data_free (TaskData *task)
 {
-	if (task->type == TASK_TYPE_TURTLE)
-		g_object_unref (task->data.turtle_file);
-	else
-		g_free (task->data.query);
-
+	g_free (task->query);
 	g_free (task);
 }
 
@@ -144,14 +126,11 @@ update_thread_func (gpointer data,
 		g_warning ("Queries don't go through this thread");
 		break;
 	case TASK_TYPE_UPDATE:
-		tracker_data_update_sparql (tracker_data, task_data->data.query, &error);
+		tracker_data_update_sparql (tracker_data, task_data->query, &error);
 		break;
 	case TASK_TYPE_UPDATE_BLANK:
-		retval = tracker_data_update_sparql_blank (tracker_data, task_data->data.query, &error);
+		retval = tracker_data_update_sparql_blank (tracker_data, task_data->query, &error);
 		destroy_notify = (GDestroyNotify) g_variant_unref;
-		break;
-	case TASK_TYPE_TURTLE:
-		tracker_data_load_turtle_file (tracker_data, task_data->data.turtle_file, NULL, &error);
 		break;
 	}
 
@@ -170,14 +149,28 @@ static void
 query_thread_pool_func (gpointer data,
                         gpointer user_data)
 {
+	TrackerDirectConnection *conn = user_data;
+	TrackerDirectConnectionPrivate *priv;
 	TrackerSparqlCursor *cursor;
 	GTask *task = data;
 	TaskData *task_data = g_task_get_task_data (task);
 	GError *error = NULL;
 
 	g_assert (task_data->type == TASK_TYPE_QUERY);
+
+	priv = tracker_direct_connection_get_instance_private (conn);
+
+	if (priv->closing) {
+		g_task_return_new_error (task,
+		                         G_IO_ERROR,
+		                         G_IO_ERROR_CONNECTION_CLOSED,
+		                         "Connection is closed");
+		g_object_unref (task);
+		return;
+	}
+
 	cursor = tracker_sparql_connection_query (TRACKER_SPARQL_CONNECTION (g_task_get_source_object (task)),
-	                                          task_data->data.query,
+	                                          task_data->query,
 	                                          g_task_get_cancellable (task),
 	                                          &error);
 	if (cursor)
@@ -223,6 +216,25 @@ set_up_thread_pools (TrackerDirectConnection  *conn,
 	return TRUE;
 }
 
+static TrackerDBManagerFlags
+translate_flags (TrackerSparqlConnectionFlags flags)
+{
+	TrackerDBManagerFlags db_flags = TRACKER_DB_MANAGER_ENABLE_MUTEXES;
+
+	if ((flags & TRACKER_SPARQL_CONNECTION_FLAGS_READONLY) != 0)
+		db_flags |= TRACKER_DB_MANAGER_READONLY;
+	if ((flags & TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER) != 0)
+		db_flags |= TRACKER_DB_MANAGER_FTS_ENABLE_STEMMER;
+	if ((flags & TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT) != 0)
+		db_flags |= TRACKER_DB_MANAGER_FTS_ENABLE_UNACCENT;
+	if ((flags & TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STOP_WORDS) != 0)
+		db_flags |= TRACKER_DB_MANAGER_FTS_ENABLE_STOP_WORDS;
+	if ((flags & TRACKER_SPARQL_CONNECTION_FLAGS_FTS_IGNORE_NUMBERS) != 0)
+		db_flags |= TRACKER_DB_MANAGER_FTS_IGNORE_NUMBERS;
+
+	return db_flags;
+}
+
 static gboolean
 tracker_direct_connection_initable_init (GInitable     *initable,
                                          GCancellable  *cancellable,
@@ -230,7 +242,7 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 {
 	TrackerDirectConnectionPrivate *priv;
 	TrackerDirectConnection *conn;
-	TrackerDBManagerFlags db_flags = TRACKER_DB_MANAGER_ENABLE_MUTEXES;
+	TrackerDBManagerFlags db_flags;
 	GHashTable *namespaces;
 	GHashTableIter iter;
 	gchar *prefix, *ns;
@@ -243,24 +255,24 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 	if (!set_up_thread_pools (conn, error))
 		return FALSE;
 
+	db_flags = translate_flags (priv->flags);
+
 	/* Init data manager */
-	if (priv->flags & TRACKER_SPARQL_CONNECTION_FLAGS_READONLY)
-		db_flags |= TRACKER_DB_MANAGER_READONLY;
-
-	if (!priv->journal)
-		priv->journal = g_object_ref (priv->store);
-
-	if (!priv->ontology) {
+	if (!priv->ontology &&
+	    (db_flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 		gchar *filename;
 
+		/* If the connection is read/write, and no ontology is specified,
+		 * we use the Nepomuk one.
+		 */
 		filename = g_build_filename (SHAREDIR, "tracker", "ontologies",
 		                             "nepomuk", NULL);
 		priv->ontology = g_file_new_for_path (filename);
 		g_free (filename);
 	}
 
-	priv->data_manager = tracker_data_manager_new (db_flags | default_flags, priv->store,
-	                                               priv->journal, priv->ontology,
+	priv->data_manager = tracker_data_manager_new (db_flags, priv->store,
+	                                               priv->ontology,
 	                                               FALSE, 100, 100);
 	if (!g_initable_init (G_INITABLE (priv->data_manager), cancellable, error)) {
 		g_clear_object (&priv->data_manager);
@@ -300,6 +312,8 @@ async_initable_thread_func (GTask        *task,
 		g_task_return_error (task, error);
 	else
 		g_task_return_boolean (task, TRUE);
+
+	g_object_unref (task);
 }
 
 static void
@@ -336,6 +350,196 @@ tracker_direct_connection_init (TrackerDirectConnection *conn)
 {
 }
 
+static GHashTable *
+get_event_cache_ht (TrackerNotifier *notifier)
+{
+	GHashTable *events;
+
+	events = g_object_get_qdata (G_OBJECT (notifier), tracker_direct_notifier_quark ());
+	if (!events) {
+		events = g_hash_table_new_full (NULL, NULL, NULL,
+		                                (GDestroyNotify) _tracker_notifier_event_cache_free);
+		g_object_set_qdata_full (G_OBJECT (notifier), tracker_direct_notifier_quark (),
+		                         events, (GDestroyNotify) g_hash_table_unref);
+	}
+
+	return events;
+}
+
+static TrackerNotifierEventCache *
+lookup_event_cache (TrackerNotifier *notifier,
+                    gint             graph_id,
+                    const gchar     *graph)
+{
+	TrackerNotifierEventCache *cache;
+	GHashTable *events;
+
+	events = get_event_cache_ht (notifier);
+	cache = g_hash_table_lookup (events, GINT_TO_POINTER (graph_id));
+
+	if (!cache) {
+		cache = _tracker_notifier_event_cache_new (notifier, NULL, graph);
+		g_hash_table_insert (events, GINT_TO_POINTER (graph_id), cache);
+	}
+
+	return cache;
+}
+
+/* These callbacks will be called from a different thread
+ * (always the same one though), handle with care.
+ */
+static void
+insert_statement_cb (gint         graph_id,
+                     const gchar *graph,
+                     gint         subject_id,
+                     const gchar *subject,
+                     gint         predicate_id,
+                     gint         object_id,
+                     const gchar *object,
+                     GPtrArray   *rdf_types,
+                     gpointer     user_data)
+{
+	TrackerNotifier *notifier = user_data;
+	TrackerSparqlConnection *conn = _tracker_notifier_get_connection (notifier);
+	TrackerDirectConnection *direct = TRACKER_DIRECT_CONNECTION (conn);
+	TrackerDirectConnectionPrivate *priv = tracker_direct_connection_get_instance_private (direct);
+	TrackerOntologies *ontologies = tracker_data_manager_get_ontologies (priv->data_manager);
+	TrackerProperty *rdf_type = tracker_ontologies_get_rdf_type (ontologies);
+	TrackerNotifierEventCache *cache;
+	TrackerClass *new_class = NULL;
+	gint i;
+
+	cache = lookup_event_cache (notifier, graph_id, graph);
+
+	if (predicate_id == tracker_property_get_id (rdf_type)) {
+		const gchar *uri;
+
+		uri = tracker_ontologies_get_uri_by_id (ontologies, predicate_id);
+		new_class = tracker_ontologies_get_class_by_uri (ontologies, uri);
+	}
+
+	for (i = 0; i < rdf_types->len; i++) {
+		TrackerClass *class = g_ptr_array_index (rdf_types, i);
+		TrackerNotifierEventType event_type;
+
+		if (!tracker_class_get_notify (class))
+			continue;
+
+		if (class == new_class)
+			event_type = TRACKER_NOTIFIER_EVENT_CREATE;
+		else
+			event_type = TRACKER_NOTIFIER_EVENT_UPDATE;
+
+		_tracker_notifier_event_cache_push_event (cache, subject_id, event_type);
+	}
+}
+
+static void
+delete_statement_cb (gint         graph_id,
+                     const gchar *graph,
+                     gint         subject_id,
+                     const gchar *subject,
+                     gint         predicate_id,
+                     gint         object_id,
+                     const gchar *object,
+                     GPtrArray   *rdf_types,
+                     gpointer     user_data)
+{
+	TrackerNotifier *notifier = user_data;
+	TrackerSparqlConnection *conn = _tracker_notifier_get_connection (notifier);
+	TrackerDirectConnection *direct = TRACKER_DIRECT_CONNECTION (conn);
+	TrackerDirectConnectionPrivate *priv = tracker_direct_connection_get_instance_private (direct);
+	TrackerOntologies *ontologies = tracker_data_manager_get_ontologies (priv->data_manager);
+	TrackerProperty *rdf_type = tracker_ontologies_get_rdf_type (ontologies);
+	TrackerNotifierEventCache *cache;
+	TrackerClass *class_being_removed = NULL;
+	gint i;
+
+	cache = lookup_event_cache (notifier, graph_id, graph);
+
+	if (predicate_id == tracker_property_get_id (rdf_type)) {
+		class_being_removed = tracker_ontologies_get_class_by_uri (ontologies, object);
+	}
+
+	for (i = 0; i < rdf_types->len; i++) {
+		TrackerClass *class = g_ptr_array_index (rdf_types, i);
+		TrackerNotifierEventType event_type;
+
+		if (!tracker_class_get_notify (class))
+			continue;
+
+		if (class_being_removed && class == class_being_removed) {
+			event_type = TRACKER_NOTIFIER_EVENT_DELETE;
+		} else {
+			event_type = TRACKER_NOTIFIER_EVENT_UPDATE;
+		}
+
+		_tracker_notifier_event_cache_push_event (cache, subject_id, event_type);
+	}
+}
+
+static void
+commit_statement_cb (gpointer user_data)
+{
+	TrackerNotifierEventCache *cache;
+	TrackerNotifier *notifier = user_data;
+	GHashTable *events;
+	GHashTableIter iter;
+
+	events = get_event_cache_ht (notifier);
+	g_hash_table_iter_init (&iter, events);
+
+	while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &cache)) {
+		g_hash_table_iter_steal (&iter);
+		_tracker_notifier_event_cache_flush_events (cache);
+	}
+}
+
+static void
+rollback_statement_cb (gpointer user_data)
+{
+	TrackerNotifier *notifier = user_data;
+	GHashTable *events;
+
+	events = get_event_cache_ht (notifier);
+	g_hash_table_remove_all (events);
+}
+
+static void
+detach_notifier (TrackerDirectConnection *conn,
+                 TrackerNotifier         *notifier)
+{
+	TrackerDirectConnectionPrivate *priv;
+	TrackerData *tracker_data;
+
+	priv = tracker_direct_connection_get_instance_private (conn);
+
+	priv->notifiers = g_list_remove (priv->notifiers, notifier);
+
+	tracker_data = tracker_data_manager_get_data (priv->data_manager);
+	tracker_data_remove_insert_statement_callback (tracker_data,
+	                                               insert_statement_cb,
+	                                               notifier);
+	tracker_data_remove_delete_statement_callback (tracker_data,
+	                                               delete_statement_cb,
+	                                               notifier);
+	tracker_data_remove_commit_statement_callback (tracker_data,
+	                                               commit_statement_cb,
+	                                               notifier);
+	tracker_data_remove_rollback_statement_callback (tracker_data,
+	                                                 rollback_statement_cb,
+	                                                 notifier);
+}
+
+static void
+weak_ref_notify (gpointer  data,
+                 GObject  *prev_location)
+{
+	TrackerDirectConnection *conn = data;
+
+	detach_notifier (conn, (TrackerNotifier *) prev_location);
+}
+
 static void
 tracker_direct_connection_finalize (GObject *object)
 {
@@ -345,18 +549,7 @@ tracker_direct_connection_finalize (GObject *object)
 	conn = TRACKER_DIRECT_CONNECTION (object);
 	priv = tracker_direct_connection_get_instance_private (conn);
 
-	if (priv->update_thread)
-		g_thread_pool_free (priv->update_thread, TRUE, TRUE);
-	if (priv->select_pool)
-		g_thread_pool_free (priv->select_pool, TRUE, FALSE);
-
-	if (priv->data_manager) {
-		tracker_data_manager_shutdown (priv->data_manager);
-		g_clear_object (&priv->data_manager);
-	}
-
 	g_clear_object (&priv->store);
-	g_clear_object (&priv->journal);
 	g_clear_object (&priv->ontology);
 	g_clear_object (&priv->namespace_manager);
 
@@ -377,13 +570,10 @@ tracker_direct_connection_set_property (GObject      *object,
 
 	switch (prop_id) {
 	case PROP_FLAGS:
-		priv->flags = g_value_get_enum (value);
+		priv->flags = g_value_get_flags (value);
 		break;
 	case PROP_STORE_LOCATION:
 		priv->store = g_value_dup_object (value);
-		break;
-	case PROP_JOURNAL_LOCATION:
-		priv->journal = g_value_dup_object (value);
 		break;
 	case PROP_ONTOLOGY_LOCATION:
 		priv->ontology = g_value_dup_object (value);
@@ -408,13 +598,10 @@ tracker_direct_connection_get_property (GObject    *object,
 
 	switch (prop_id) {
 	case PROP_FLAGS:
-		g_value_set_enum (value, priv->flags);
+		g_value_set_flags (value, priv->flags);
 		break;
 	case PROP_STORE_LOCATION:
 		g_value_set_object (value, priv->store);
-		break;
-	case PROP_JOURNAL_LOCATION:
-		g_value_set_object (value, priv->journal);
 		break;
 	case PROP_ONTOLOGY_LOCATION:
 		g_value_set_object (value, priv->ontology);
@@ -471,8 +658,10 @@ tracker_direct_connection_query_async (TrackerSparqlConnection *self,
 	                      task_data_query_new (TASK_TYPE_QUERY, sparql),
 	                      (GDestroyNotify) task_data_free);
 
-	if (!g_thread_pool_push (priv->select_pool, task, &error))
+	if (!g_thread_pool_push (priv->select_pool, task, &error)) {
 		g_task_return_error (task, error);
+		g_object_unref (task);
+	}
 }
 
 static TrackerSparqlCursor *
@@ -561,39 +750,21 @@ update_array_async_thread_func (GTask        *task,
 	gchar *concatenated;
 	GPtrArray *errors;
 	GError *error = NULL;
-	gint i;
 
 	errors = g_ptr_array_new_with_free_func ((GDestroyNotify) error_free);
 	g_ptr_array_set_size (errors, g_strv_length (updates));
 
-	/* Fast path, perform everything as a single update */
-	concatenated = g_strjoinv ("; ", updates);
+	concatenated = g_strjoinv ("\n", updates);
 	tracker_sparql_connection_update (source_object, concatenated,
 	                                  g_task_get_priority (task),
 	                                  cancellable, &error);
 	g_free (concatenated);
 
-	if (!error) {
-		g_task_return_pointer (task, errors,
-		                       (GDestroyNotify) g_ptr_array_unref);
-		g_object_unref (task);
-		return;
-	}
+	if (error)
+		g_task_return_error (task, error);
+	else
+		g_task_return_boolean (task, TRUE);
 
-	g_error_free (error);
-
-	/* Slow path, perform updates one by one */
-	for (i = 0; updates[i]; i++) {
-		GError **err = NULL;
-
-		err = (GError **) &g_ptr_array_index (errors, i);
-		tracker_sparql_connection_update (source_object, updates[i],
-		                                  g_task_get_priority (task),
-		                                  cancellable, err);
-	}
-
-	g_task_return_pointer (task, errors,
-	                       (GDestroyNotify) g_ptr_array_unref);
 	g_object_unref (task);
 }
 
@@ -624,12 +795,12 @@ tracker_direct_connection_update_array_async (TrackerSparqlConnection  *self,
 	g_task_run_in_thread (task, update_array_async_thread_func);
 }
 
-static GPtrArray *
+static gboolean
 tracker_direct_connection_update_array_finish (TrackerSparqlConnection  *self,
                                                GAsyncResult             *res,
                                                GError                  **error)
 {
-	return g_task_propagate_pointer (G_TASK (res), error);
+	return g_task_propagate_boolean (G_TASK (res), error);
 }
 
 static GVariant *
@@ -687,55 +858,6 @@ tracker_direct_connection_update_blank_finish (TrackerSparqlConnection  *self,
 	return g_task_propagate_pointer (G_TASK (res), error);
 }
 
-static void
-tracker_direct_connection_load (TrackerSparqlConnection  *self,
-                                GFile                    *file,
-                                GCancellable             *cancellable,
-                                GError                  **error)
-{
-	TrackerDirectConnectionPrivate *priv;
-	TrackerDirectConnection *conn;
-	TrackerData *data;
-
-	conn = TRACKER_DIRECT_CONNECTION (self);
-	priv = tracker_direct_connection_get_instance_private (conn);
-
-	g_mutex_lock (&priv->mutex);
-	data = tracker_data_manager_get_data (priv->data_manager);
-	tracker_data_load_turtle_file (data, file, NULL, error);
-	g_mutex_unlock (&priv->mutex);
-}
-
-static void
-tracker_direct_connection_load_async (TrackerSparqlConnection *self,
-                                      GFile                   *file,
-                                      GCancellable            *cancellable,
-                                      GAsyncReadyCallback      callback,
-                                      gpointer                 user_data)
-{
-	TrackerDirectConnectionPrivate *priv;
-	TrackerDirectConnection *conn;
-	GTask *task;
-
-	conn = TRACKER_DIRECT_CONNECTION (self);
-	priv = tracker_direct_connection_get_instance_private (conn);
-
-	task = g_task_new (self, cancellable, callback, user_data);
-	g_task_set_task_data (task,
-	                      task_data_turtle_new (file),
-	                      (GDestroyNotify) task_data_free);
-
-	g_thread_pool_push (priv->update_thread, task, NULL);
-}
-
-static void
-tracker_direct_connection_load_finish (TrackerSparqlConnection  *self,
-                                       GAsyncResult             *res,
-                                       GError                  **error)
-{
-	g_task_propagate_pointer (G_TASK (res), error);
-}
-
 static TrackerNamespaceManager *
 tracker_direct_connection_get_namespace_manager (TrackerSparqlConnection *self)
 {
@@ -744,6 +866,110 @@ tracker_direct_connection_get_namespace_manager (TrackerSparqlConnection *self)
 	priv = tracker_direct_connection_get_instance_private (TRACKER_DIRECT_CONNECTION (self));
 
 	return priv->namespace_manager;
+}
+
+static TrackerNotifier *
+tracker_direct_connection_create_notifier (TrackerSparqlConnection *self,
+					   TrackerNotifierFlags     flags)
+{
+	TrackerDirectConnectionPrivate *priv;
+	TrackerNotifier *notifier;
+	TrackerData *tracker_data;
+
+	priv = tracker_direct_connection_get_instance_private (TRACKER_DIRECT_CONNECTION (self));
+
+	notifier = g_object_new (TRACKER_TYPE_NOTIFIER,
+	                         "connection", self,
+				 "flags", flags,
+				 NULL);
+
+	tracker_data = tracker_data_manager_get_data (priv->data_manager);
+	tracker_data_add_insert_statement_callback (tracker_data,
+						    insert_statement_cb,
+						    notifier);
+	tracker_data_add_delete_statement_callback (tracker_data,
+						    delete_statement_cb,
+						    notifier);
+	tracker_data_add_commit_statement_callback (tracker_data,
+						    commit_statement_cb,
+						    notifier);
+	tracker_data_add_rollback_statement_callback (tracker_data,
+						      rollback_statement_cb,
+						      notifier);
+
+	g_object_weak_ref (G_OBJECT (notifier), weak_ref_notify, self);
+	priv->notifiers = g_list_prepend (priv->notifiers, notifier);
+
+	return notifier;
+}
+
+static void
+tracker_direct_connection_close (TrackerSparqlConnection *self)
+{
+	TrackerDirectConnectionPrivate *priv;
+	TrackerDirectConnection *conn;
+
+	conn = TRACKER_DIRECT_CONNECTION (self);
+	priv = tracker_direct_connection_get_instance_private (conn);
+	priv->closing = TRUE;
+
+	if (priv->update_thread) {
+		g_thread_pool_free (priv->update_thread, TRUE, TRUE);
+		priv->update_thread = NULL;
+	}
+
+	if (priv->select_pool) {
+		g_thread_pool_free (priv->select_pool, TRUE, TRUE);
+		priv->select_pool = NULL;
+	}
+
+	while (priv->notifiers) {
+		TrackerNotifier *notifier = priv->notifiers->data;
+
+		g_object_weak_unref (G_OBJECT (notifier),
+		                     weak_ref_notify,
+		                     conn);
+		detach_notifier (conn, notifier);
+	}
+
+	if (priv->data_manager) {
+		tracker_data_manager_shutdown (priv->data_manager);
+		g_clear_object (&priv->data_manager);
+	}
+}
+
+void
+async_close_thread_func (GTask        *task,
+                         gpointer      source_object,
+                         gpointer      task_data,
+                         GCancellable *cancellable)
+{
+	if (g_task_return_error_if_cancelled (task))
+		return;
+
+	tracker_sparql_connection_close (source_object);
+	g_task_return_boolean (task, TRUE);
+}
+
+void
+tracker_direct_connection_close_async (TrackerSparqlConnection *connection,
+                                       GCancellable            *cancellable,
+                                       GAsyncReadyCallback      callback,
+                                       gpointer                 user_data)
+{
+	GTask *task;
+
+	task = g_task_new (connection, cancellable, callback, user_data);
+	g_task_run_in_thread (task, async_close_thread_func);
+	g_object_unref (task);
+}
+
+gboolean
+tracker_direct_connection_close_finish (TrackerSparqlConnection  *connection,
+                                        GAsyncResult             *res,
+                                        GError                  **error)
+{
+	return g_task_propagate_boolean (G_TASK (res), error);
 }
 
 static void
@@ -771,30 +997,24 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 	sparql_connection_class->update_blank = tracker_direct_connection_update_blank;
 	sparql_connection_class->update_blank_async = tracker_direct_connection_update_blank_async;
 	sparql_connection_class->update_blank_finish = tracker_direct_connection_update_blank_finish;
-	sparql_connection_class->load = tracker_direct_connection_load;
-	sparql_connection_class->load_async = tracker_direct_connection_load_async;
-	sparql_connection_class->load_finish = tracker_direct_connection_load_finish;
 	sparql_connection_class->get_namespace_manager = tracker_direct_connection_get_namespace_manager;
+	sparql_connection_class->create_notifier = tracker_direct_connection_create_notifier;
+	sparql_connection_class->close = tracker_direct_connection_close;
+	sparql_connection_class->close_async = tracker_direct_connection_close_async;
+	sparql_connection_class->close_finish = tracker_direct_connection_close_finish;
 
 	props[PROP_FLAGS] =
-		g_param_spec_enum ("flags",
-		                   "Flags",
-		                   "Flags",
-		                   TRACKER_SPARQL_TYPE_CONNECTION_FLAGS,
-		                   TRACKER_SPARQL_CONNECTION_FLAGS_NONE,
-		                   G_PARAM_READWRITE |
-		                   G_PARAM_CONSTRUCT_ONLY);
+		g_param_spec_flags ("flags",
+		                    "Flags",
+		                    "Flags",
+		                    TRACKER_TYPE_SPARQL_CONNECTION_FLAGS,
+		                    TRACKER_SPARQL_CONNECTION_FLAGS_NONE,
+		                    G_PARAM_READWRITE |
+		                    G_PARAM_CONSTRUCT_ONLY);
 	props[PROP_STORE_LOCATION] =
 		g_param_spec_object ("store-location",
 		                     "Store location",
 		                     "Store location",
-		                     G_TYPE_FILE,
-		                     G_PARAM_READWRITE |
-		                     G_PARAM_CONSTRUCT_ONLY);
-	props[PROP_JOURNAL_LOCATION] =
-		g_param_spec_object ("journal-location",
-		                     "Journal location",
-		                     "Journal location",
 		                     G_TYPE_FILE,
 		                     G_PARAM_READWRITE |
 		                     G_PARAM_CONSTRUCT_ONLY);
@@ -812,19 +1032,16 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 TrackerDirectConnection *
 tracker_direct_connection_new (TrackerSparqlConnectionFlags   flags,
 			       GFile                         *store,
-			       GFile                         *journal,
                                GFile                         *ontology,
                                GError                       **error)
 {
 	g_return_val_if_fail (G_IS_FILE (store), NULL);
-	g_return_val_if_fail (!journal || G_IS_FILE (journal), NULL);
 	g_return_val_if_fail (!ontology || G_IS_FILE (ontology), NULL);
 	g_return_val_if_fail (!error || !*error, NULL);
 
 	return g_object_new (TRACKER_TYPE_DIRECT_CONNECTION,
 	                     "flags", flags,
 	                     "store-location", store,
-	                     "journal-location", journal,
 	                     "ontology-location", ontology,
 	                     NULL);
 }
@@ -836,30 +1053,4 @@ tracker_direct_connection_get_data_manager (TrackerDirectConnection *conn)
 
 	priv = tracker_direct_connection_get_instance_private (conn);
 	return priv->data_manager;
-}
-
-void
-tracker_direct_connection_set_default_flags (TrackerDBManagerFlags flags)
-{
-	default_flags = flags;
-}
-
-void
-tracker_direct_connection_sync (TrackerDirectConnection *conn)
-{
-	TrackerDirectConnectionPrivate *priv;
-
-	priv = tracker_direct_connection_get_instance_private (conn);
-
-	if (!priv->data_manager)
-		return;
-
-	/* Wait for pending updates. */
-	if (priv->update_thread)
-		g_thread_pool_free (priv->update_thread, TRUE, TRUE);
-	/* Selects are less important, readonly interfaces won't be bothersome */
-	if (priv->select_pool)
-		g_thread_pool_free (priv->select_pool, TRUE, FALSE);
-
-	set_up_thread_pools (conn, NULL);
 }

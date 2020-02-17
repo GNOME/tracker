@@ -31,7 +31,6 @@
 #include <libtracker-data/tracker-ontologies.h>
 
 #include "tracker-fts-tokenizer.h"
-#include "tracker-fts-config.h"
 #include "fts5.h"
 
 typedef struct TrackerTokenizerData TrackerTokenizerData;
@@ -40,12 +39,7 @@ typedef struct TrackerTokenizerFunctionData TrackerTokenizerFunctionData;
 
 struct TrackerTokenizerData {
 	TrackerLanguage *language;
-	int max_word_length;
-	int max_words;
-	gboolean enable_stemmer;
-	gboolean enable_unaccent;
-	gboolean ignore_numbers;
-	gboolean ignore_stop_words;
+	TrackerDBManagerFlags flags;
 };
 
 struct TrackerTokenizer {
@@ -57,6 +51,9 @@ struct TrackerTokenizerFunctionData {
 	TrackerDBInterface *interface;
 	gchar **property_names;
 };
+
+#define MAX_WORD_LENGTH 200
+#define MAX_WORDS 10000
 
 static int
 tracker_tokenizer_create (void           *data,
@@ -113,14 +110,14 @@ tracker_tokenizer_tokenize (Fts5Tokenizer *fts5_tokenizer,
 	                   (FTS5_TOKENIZE_QUERY | FTS5_TOKENIZE_PREFIX));
 
 	tracker_parser_reset (tokenizer->parser, text, length,
-	                      data->max_word_length,
-	                      data->enable_stemmer,
-	                      data->enable_unaccent,
-	                      data->ignore_stop_words,
-	                      TRUE,
-	                      data->ignore_numbers);
+			      MAX_WORD_LENGTH,
+			      !!(data->flags & TRACKER_DB_MANAGER_FTS_ENABLE_STEMMER),
+			      !!(data->flags & TRACKER_DB_MANAGER_FTS_ENABLE_UNACCENT),
+			      !!(data->flags & TRACKER_DB_MANAGER_FTS_ENABLE_STOP_WORDS),
+			      TRUE,
+			      !!(data->flags & TRACKER_DB_MANAGER_FTS_IGNORE_NUMBERS));
 
-	while (n_tokens < data->max_words) {
+	while (n_tokens < MAX_WORDS) {
 		token = tracker_parser_next (tokenizer->parser,
 		                             &pos,
 		                             &start, &end,
@@ -157,23 +154,13 @@ static const fts5_tokenizer tracker_tokenizer_module = {
 };
 
 static TrackerTokenizerData *
-tracker_tokenizer_data_new (void)
+tracker_tokenizer_data_new (TrackerDBManagerFlags flags)
 {
 	TrackerTokenizerData *p;
-	TrackerFTSConfig *config;
-
-	config = tracker_fts_config_new ();
 
 	p = g_new0 (TrackerTokenizerData, 1);
 	p->language = tracker_language_new (NULL);
-	p->max_word_length = tracker_fts_config_get_max_word_length (config);
-	p->enable_stemmer = tracker_fts_config_get_enable_stemmer (config);
-	p->enable_unaccent = tracker_fts_config_get_enable_unaccent (config);
-	p->ignore_numbers = tracker_fts_config_get_ignore_numbers (config);
-	p->max_words = tracker_fts_config_get_max_words_to_index (config);
-	p->ignore_stop_words = tracker_fts_config_get_ignore_stop_words (config);
-
-	g_object_unref (config);
+	p->flags = flags;
 
 	return p;
 }
@@ -440,9 +427,10 @@ tracker_tokenizer_function_data_free (TrackerTokenizerFunctionData *data)
 }
 
 gboolean
-tracker_tokenizer_initialize (sqlite3             *db,
-                              TrackerDBInterface  *interface,
-                              const gchar        **property_names)
+tracker_tokenizer_initialize (sqlite3                *db,
+                              TrackerDBInterface     *interface,
+                              TrackerDBManagerFlags   flags,
+                              const gchar           **property_names)
 {
 	TrackerTokenizerData *data;
 	TrackerTokenizerFunctionData *func_data;
@@ -454,7 +442,7 @@ tracker_tokenizer_initialize (sqlite3             *db,
 	if (!api)
 		return FALSE;
 
-	data = tracker_tokenizer_data_new ();
+	data = tracker_tokenizer_data_new (flags);
 	tokenizer = (fts5_tokenizer *) &tracker_tokenizer_module;
 	api->xCreateTokenizer (api, "TrackerTokenizer", data, tokenizer,
 	                       tracker_tokenizer_data_free);

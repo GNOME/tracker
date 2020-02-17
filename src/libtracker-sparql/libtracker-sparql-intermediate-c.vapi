@@ -18,6 +18,122 @@
  */
 
 namespace Tracker {
+	[CCode (cheader_filename = "libtracker-sparql/tracker-connection.h")]
+	public errordomain Sparql.Error {
+		PARSE,
+		UNKNOWN_CLASS,
+		UNKNOWN_PROPERTY,
+		TYPE,
+		CONSTRAINT,
+		NO_SPACE,
+		INTERNAL,
+		UNSUPPORTED,
+		UNKNOWN_GRAPH
+	}
+
+	[CCode (cheader_filename = "libtracker-sparql/tracker-connection.h")]
+	public enum Sparql.ConnectionFlags {
+		NONE     = 0,
+		READONLY = 1 << 0,
+	}
+
+	[CCode (cheader_filename = "libtracker-sparql/tracker-cursor.h")]
+	public enum Sparql.ValueType {
+		UNBOUND,
+		URI,
+		STRING,
+		INTEGER,
+		DOUBLE,
+		DATETIME,
+		BLANK_NODE,
+		BOOLEAN
+	}
+
+	namespace Sparql {
+		[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
+		public static string escape_string (string literal);
+		[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
+		public static string escape_uri (string uri);
+		[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
+		public static string escape_uri_printf (string format, ...);
+		[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
+		public static string escape_uri_vprintf (string format, va_list args);
+		[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
+		public static string get_uuid_urn ();
+	}
+
+	[CCode (cheader_filename = "libtracker-sparql/tracker-connection.h")]
+        public abstract class Sparql.Connection : GLib.Object {
+		public extern static new Connection remote_new (string uri_base);
+		public extern static new Connection new (Sparql.ConnectionFlags flags, GLib.File store, GLib.File? ontology, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.IOError;
+		public extern async static new Connection new_async (Sparql.ConnectionFlags flags, GLib.File store, GLib.File? ontology, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.IOError;
+		public extern static new Connection bus_new (string service_name, string? object_path, GLib.DBusConnection? dbus_connection = null) throws Sparql.Error, GLib.IOError, GLib.DBusError, GLib.Error;
+
+		public abstract Cursor query (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public async abstract Cursor query_async (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+
+		public virtual void update (string sparql, int priority = GLib.Priority.DEFAULT, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public async virtual void update_async (string sparql, int priority = GLib.Priority.DEFAULT, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public async virtual bool update_array_async (string[] sparql, int priority = GLib.Priority.DEFAULT, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public virtual GLib.Variant? update_blank (string sparql, int priority = GLib.Priority.DEFAULT, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public async virtual GLib.Variant? update_blank_async (string sparql, int priority = GLib.Priority.DEFAULT, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+
+		public virtual NamespaceManager? get_namespace_manager ();
+
+		public extern static void set_domain (string? domain);
+		public extern static string? get_domain ();
+
+		public extern static void set_dbus_connection (GLib.DBusConnection dbus_connection);
+		public extern static GLib.DBusConnection? get_dbus_connection ();
+
+		public virtual Statement? query_statement (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error;
+
+                public virtual Notifier? create_notifier (NotifierFlags flags);
+                public virtual void close ();
+                public async virtual bool close_async () throws GLib.IOError;
+	}
+
+	[CCode (cheader_filename = "libtracker-sparql/tracker-statement.h")]
+	public abstract class Sparql.Statement : GLib.Object {
+		public string sparql { get; construct set; }
+		public Connection connection { get; construct set; }
+
+		public abstract void bind_int (string name, int64 value);
+		public abstract void bind_boolean (string name, bool value);
+		public abstract void bind_string (string name, string value);
+		public abstract void bind_double (string name, double value);
+
+		public abstract Cursor execute (GLib.Cancellable? cancellable) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public async abstract Cursor execute_async (GLib.Cancellable? cancellable) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+	}
+
+	[CCode (cheader_filename = "libtracker-sparql/tracker-cursor.h")]
+	public abstract class Sparql.Cursor : GLib.Object {
+		public Connection connection {
+			get;
+			set;
+		}
+
+		public abstract int n_columns {
+			get;
+		}
+
+		public abstract Sparql.ValueType get_value_type (int column);
+
+		public abstract unowned string? get_variable_name (int column);
+		public abstract unowned string? get_string (int column, out long length = null);
+
+		public abstract bool next (GLib.Cancellable? cancellable = null) throws GLib.Error;
+		public async abstract bool next_async (GLib.Cancellable? cancellable = null) throws GLib.Error;
+		public abstract void rewind ();
+		public virtual void close ();
+
+		public virtual int64 get_integer (int column);
+		public virtual double get_double (int column);
+		public virtual bool get_boolean (int column);
+		public virtual bool is_bound (int column);
+	}
+
 	[CCode (cheader_filename = "libtracker-sparql/tracker-namespace-manager.h")]
 	public class NamespaceManager : GLib.Object {
 		public NamespaceManager ();
@@ -84,9 +200,7 @@ namespace Tracker {
 	}
 
 	[CCode (cheader_filename = "libtracker-sparql/tracker-notifier.h")]
-	public class Notifier : GLib.Object, GLib.Initable {
-		public Notifier (string[] classes, NotifierFlags flags, GLib.Cancellable? cancellable) throws GLib.Error;
-
+	public class Notifier : GLib.Object {
 		public class NotifierEvent {
 			public enum Type {
 				CREATE,
@@ -99,6 +213,9 @@ namespace Tracker {
 			public string get_urn ();
 			public string get_location ();
 		}
+
+		public uint signal_subscribe (GLib.DBusConnection dbus_conn, string dbus_name, string? graph);
+		public void signal_unsubscribe (uint handler_id);
 	}
 
 	[CCode (cheader_filename = "libtracker-sparql/tracker-endpoint.h")]
