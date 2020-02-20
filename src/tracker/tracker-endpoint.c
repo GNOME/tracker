@@ -84,7 +84,8 @@ sanity_check (void)
 	}
 
 	if (!!ontology_path == !!ontology_name) {
-		g_print ("%s\n", _("One “ontology” or “ontology path” option should be provided"));
+		/* TRANSLATORS: those are commandline arguments */
+		g_print ("%s\n", _("One “ontology” or “ontology-path” option should be provided"));
 		return FALSE;
 	}
 
