@@ -3746,6 +3746,11 @@ write_ontologies_gvdb (TrackerDataManager  *manager,
 	gchar *filename;
 	GFile *child;
 
+	if ((manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) != 0)
+		return TRUE;
+	if (!manager->cache_location)
+		return TRUE;
+
 	child = g_file_get_child (manager->cache_location, "ontologies.gvdb");
 	filename = g_file_get_path (child);
 	g_object_unref (child);
@@ -3919,7 +3924,7 @@ tracker_data_manager_new (TrackerDBManagerFlags   flags,
 {
 	TrackerDataManager *manager;
 
-	if (!cache_location) {
+	if ((flags & TRACKER_DB_MANAGER_IN_MEMORY) == 0 && !cache_location) {
 		g_warning ("Data storage location must be provided");
 		return NULL;
 	}
@@ -4143,7 +4148,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		return TRUE;
 	}
 
-	if (!g_file_is_native (manager->cache_location)) {
+	if (manager->cache_location && !g_file_is_native (manager->cache_location)) {
 		g_set_error (error,
 		             TRACKER_DATA_ONTOLOGY_ERROR,
 		             TRACKER_DATA_UNSUPPORTED_LOCATION,

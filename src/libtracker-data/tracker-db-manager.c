@@ -44,6 +44,7 @@
 #include "tracker-db-interface-sqlite.h"
 #include "tracker-db-interface.h"
 #include "tracker-data-manager.h"
+#include "tracker-uuid.h"
 
 #define UNKNOWN_STATUS 0.5
 
@@ -131,6 +132,7 @@ struct _TrackerDBManager {
 	gchar *user_data_dir;
 	gchar *in_use_filename;
 	GFile *cache_location;
+	gchar *shared_cache_key;
 	TrackerDBManagerFlags flags;
 	guint s_cache_size;
 	guint u_cache_size;
@@ -192,6 +194,7 @@ db_set_params (TrackerDBInterface   *iface,
                const gchar          *database,
                gint                  cache_size,
                gint                  page_size,
+               gboolean              enable_wal,
                GError              **error)
 {
 	GError *internal_error = NULL;
@@ -200,31 +203,31 @@ db_set_params (TrackerDBInterface   *iface,
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".synchronous = NORMAL", database);
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".auto_vacuum = 0", database);
 
-	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
-	                                              &internal_error,
-	                                              "PRAGMA \"%s\".journal_mode = WAL", database);
+	if (enable_wal) {
+		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
+		                                              &internal_error,
+		                                              "PRAGMA \"%s\".journal_mode = WAL", database);
 
-	if (internal_error) {
-		g_info ("Can't set journal mode to WAL: '%s'",
-		        internal_error->message);
-		g_propagate_error (error, internal_error);
-	} else {
-		TrackerDBCursor *cursor;
+		if (internal_error) {
+			g_info ("Can't set journal mode to WAL: '%s'",
+			        internal_error->message);
+			g_propagate_error (error, internal_error);
+		} else {
+			TrackerDBCursor *cursor;
 
-		cursor = tracker_db_statement_start_cursor (stmt, NULL);
-		if (tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
-			if (g_ascii_strcasecmp (tracker_db_cursor_get_string (cursor, 0, NULL), "WAL") != 0) {
-				g_set_error (error,
-				             TRACKER_DB_INTERFACE_ERROR,
-				             TRACKER_DB_OPEN_ERROR,
-				             "Can't set journal mode to WAL");
+			cursor = tracker_db_statement_start_cursor (stmt, NULL);
+			if (tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
+				if (g_ascii_strcasecmp (tracker_db_cursor_get_string (cursor, 0, NULL), "WAL") != 0) {
+					g_set_error (error,
+					             TRACKER_DB_INTERFACE_ERROR,
+					             TRACKER_DB_OPEN_ERROR,
+					             "Can't set journal mode to WAL");
+				}
 			}
+			g_object_unref (cursor);
 		}
-		g_object_unref (cursor);
-	}
 
-	if (stmt) {
-		g_object_unref (stmt);
+		g_clear_object (&stmt);
 	}
 
 	/* disable autocheckpoint */
@@ -245,6 +248,9 @@ static void
 tracker_db_manager_remove_all (TrackerDBManager *db_manager)
 {
 	gchar *filename;
+
+	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) != 0)
+		return;
 
 	g_info ("Removing all files for database %s", db_manager->db.abs_filename);
 
@@ -477,6 +483,10 @@ tracker_db_manager_ensure_location (TrackerDBManager *db_manager,
 {
 	gchar *dir;
 
+	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) != 0) {
+		return;
+	}
+
 	if (db_manager->locations_initialized) {
 		return;
 	}
@@ -505,7 +515,8 @@ perform_recreate (TrackerDBManager  *db_manager,
 	g_clear_object (&db_manager->db.iface);
 	g_clear_object (&db_manager->db.wal_iface);
 
-	if (!tracker_file_system_has_enough_space (db_manager->data_dir, TRACKER_DB_MIN_REQUIRED_SPACE, TRUE)) {
+	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) == 0 &&
+	    !tracker_file_system_has_enough_space (db_manager->data_dir, TRACKER_DB_MIN_REQUIRED_SPACE, TRUE)) {
 		g_set_error (error,
 		             TRACKER_DB_INTERFACE_ERROR,
 		             TRACKER_DB_OPEN_ERROR,
@@ -539,17 +550,8 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	TrackerDBVersion version;
 	gboolean need_reindex;
 	int in_use_file;
-	gboolean loaded = FALSE;
 	TrackerDBInterface *resources_iface;
 	GError *internal_error = NULL;
-
-	if (!cache_location) {
-		g_set_error (error,
-		             TRACKER_DATA_ONTOLOGY_ERROR,
-		             TRACKER_DATA_UNSUPPORTED_LOCATION,
-		             "All data storage and ontology locations must be provided");
-		return NULL;
-	}
 
 	db_manager = g_object_new (TRACKER_TYPE_DB_MANAGER, NULL);
 	db_manager->vtab_data = vtab_data;
@@ -572,18 +574,22 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	g_set_object (&db_manager->cache_location, cache_location);
 	g_weak_ref_init (&db_manager->iface_data, iface_data);
 
-	tracker_db_manager_ensure_location (db_manager, cache_location);
-	db_manager->in_use_filename = g_build_filename (db_manager->data_dir,
-							IN_USE_FILENAME,
-							NULL);
+	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) == 0) {
+		tracker_db_manager_ensure_location (db_manager, cache_location);
+		db_manager->in_use_filename = g_build_filename (db_manager->data_dir,
+		                                                IN_USE_FILENAME,
+		                                                NULL);
 
-	/* Don't do need_reindex checks for readonly (direct-access) */
-	if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
+		/* Don't do need_reindex checks for readonly (direct-access) */
+		if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 
-		/* Make sure the directories exist */
-		g_debug ("Checking database directories exist");
+			/* Make sure the directories exist */
+			g_debug ("Checking database directories exist");
 
-		g_mkdir_with_parents (db_manager->data_dir, 00755);
+			g_mkdir_with_parents (db_manager->data_dir, 00755);
+		}
+	} else {
+		db_manager->shared_cache_key = tracker_generate_uuid (NULL);
 	}
 
 	g_debug ("Checking whether database files exist");
@@ -594,7 +600,9 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	 * There's no need to check for files not existing (for
 	 * reindex) if reindexing is already needed.
 	 */
-	if (!g_file_test (db_manager->db.abs_filename, G_FILE_TEST_EXISTS)) {
+	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) != 0) {
+		need_reindex = TRUE;
+	} else if (!g_file_test (db_manager->db.abs_filename, G_FILE_TEST_EXISTS)) {
 		if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 			g_info ("Could not find database file:'%s', reindex will be forced", db_manager->db.abs_filename);
 			need_reindex = TRUE;
@@ -678,10 +686,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		}
 
 		tracker_db_manager_update_version (db_manager);
-
-		/* Load databases */
-		g_info ("Loading files for database %s...", db_manager->db.abs_filename);
-
 	} else if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 		/* do not do shutdown check for read-only mode (direct access) */
 		gboolean must_recreate = FALSE;
@@ -735,8 +739,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 
 			if (!must_recreate) {
 				gchar *busy_status;
-
-				loaded = TRUE;
 
 				/* Report OPERATION - STATUS */
 				busy_status = g_strdup_printf ("%s - %s",
@@ -805,7 +807,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 				g_propagate_error (error, internal_error);
 				return FALSE;
 			}
-			loaded = FALSE;
 		} else {
 			if (internal_error) {
 				g_propagate_error (error, internal_error);
@@ -814,7 +815,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		}
 	}
 
-	if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
+	if ((flags & (TRACKER_DB_MANAGER_READONLY | TRACKER_DB_MANAGER_IN_MEMORY)) == 0) {
 		/* do not create in-use file for read-only mode (direct access) */
 		in_use_file = g_open (db_manager->in_use_filename,
 			              O_WRONLY | O_APPEND | O_CREAT | O_SYNC,
@@ -880,12 +881,13 @@ tracker_db_manager_finalize (GObject *object)
 
 	g_free (db_manager->data_dir);
 
-	if (!readonly) {
+	if (db_manager->in_use_filename && !readonly) {
 		/* do not delete in-use file for read-only mode (direct access) */
 		g_unlink (db_manager->in_use_filename);
 	}
 
 	g_free (db_manager->in_use_filename);
+	g_free (db_manager->shared_cache_key);
 
 	G_OBJECT_CLASS (tracker_db_manager_parent_class)->finalize (object);
 }
@@ -903,8 +905,11 @@ tracker_db_manager_create_db_interface (TrackerDBManager  *db_manager,
 		flags |= TRACKER_DB_INTERFACE_READONLY;
 	if (db_manager->flags & TRACKER_DB_MANAGER_ENABLE_MUTEXES)
 		flags |= TRACKER_DB_INTERFACE_USE_MUTEX;
+	if (db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY)
+		flags |= TRACKER_DB_INTERFACE_IN_MEMORY;
 
 	connection = tracker_db_interface_sqlite_new (db_manager->db.abs_filename,
+	                                              db_manager->shared_cache_key,
 	                                              flags,
 	                                              &internal_error);
 	if (internal_error) {
@@ -924,6 +929,7 @@ tracker_db_manager_create_db_interface (TrackerDBManager  *db_manager,
 	db_set_params (connection, "main",
 	               db_manager->db.cache_size,
 	               db_manager->db.page_size,
+	               !(db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY),
 	               &internal_error);
 
 	if (internal_error) {
@@ -1136,6 +1142,8 @@ tracker_db_manager_get_writable_db_interface (TrackerDBManager *db_manager)
 gboolean
 tracker_db_manager_has_enough_space (TrackerDBManager *db_manager)
 {
+	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) != 0)
+		return TRUE;
 	return tracker_file_system_has_enough_space (db_manager->data_dir, TRACKER_DB_MIN_REQUIRED_SPACE, FALSE);
 }
 
@@ -1189,6 +1197,8 @@ tracker_db_manager_check_perform_vacuum (TrackerDBManager *db_manager)
 {
 	TrackerDBInterface *iface;
 
+	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) != 0)
+		return;
 	if (tracker_file_get_size (db_manager->db.abs_filename) < TRACKER_VACUUM_CHECK_SIZE)
 		return;
 
@@ -1204,23 +1214,25 @@ tracker_db_manager_attach_database (TrackerDBManager    *db_manager,
                                     GError             **error)
 {
 	gchar *filename, *escaped;
-	GFile *file;
+	GFile *file = NULL;
 
-	filename = g_strdup_printf ("%s.db", name);
-	escaped = g_uri_escape_string (filename, NULL, FALSE);
-	file = g_file_get_child (db_manager->cache_location, escaped);
-	g_free (filename);
-	g_free (escaped);
+	if (db_manager->cache_location) {
+		filename = g_strdup_printf ("%s.db", name);
+		escaped = g_uri_escape_string (filename, NULL, FALSE);
+		file = g_file_get_child (db_manager->cache_location, escaped);
+		g_free (filename);
+		g_free (escaped);
 
-	if (create) {
-		GError *inner_error = NULL;
+		if (create) {
+			GError *inner_error = NULL;
 
-		/* Create the database from scratch */
-		if (!g_file_delete (file, NULL, &inner_error)) {
-			if (!g_error_matches (inner_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
-				g_object_unref (file);
-				g_propagate_error (error, inner_error);
-				return FALSE;
+			/* Create the database from scratch */
+			if (!g_file_delete (file, NULL, &inner_error)) {
+				if (!g_error_matches (inner_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
+					g_object_unref (file);
+					g_propagate_error (error, inner_error);
+					return FALSE;
+				}
 			}
 		}
 	}
@@ -1230,10 +1242,11 @@ tracker_db_manager_attach_database (TrackerDBManager    *db_manager,
 		return FALSE;
 	}
 
-	g_object_unref (file);
+	g_clear_object (&file);
 	db_set_params (iface, name,
 	               db_manager->db.cache_size,
 	               db_manager->db.page_size,
+	               !(db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY),
 	               error);
 	return TRUE;
 }

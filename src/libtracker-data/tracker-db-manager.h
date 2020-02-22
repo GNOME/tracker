@@ -47,6 +47,7 @@ typedef enum {
 	TRACKER_DB_MANAGER_FTS_ENABLE_UNACCENT   = 1 << 7,
 	TRACKER_DB_MANAGER_FTS_ENABLE_STOP_WORDS = 1 << 8,
 	TRACKER_DB_MANAGER_FTS_IGNORE_NUMBERS    = 1 << 9,
+	TRACKER_DB_MANAGER_IN_MEMORY             = 1 << 10,
 } TrackerDBManagerFlags;
 
 typedef struct _TrackerDBManager TrackerDBManager;

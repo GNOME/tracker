@@ -38,7 +38,6 @@ struct _TestInfo {
 	const gchar *data;
 	gboolean expect_query_error;
 	gboolean expect_update_error;
-	gchar *data_location;
 };
 
 const TestInfo tests[] = {
@@ -360,7 +359,7 @@ test_sparql_query (TestInfo      *test_info,
 	gchar *query, *query_filename;
 	gchar *results_filename;
 	gchar *prefix, *data_prefix, *test_prefix;
-	GFile *file, *test_schemas, *data_location;
+	GFile *file, *test_schemas;
 	TrackerDataManager *manager;
 	TrackerData *data_update;
 
@@ -374,10 +373,9 @@ test_sparql_query (TestInfo      *test_info,
 	test_schemas = g_file_get_parent (file);
 	g_object_unref (file);
 
-	data_location = g_file_new_for_path (test_info->data_location);
-
-	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
-	                                    data_location, test_schemas, /* loc, domain and ontology_name */
+	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX |
+	                                    TRACKER_DB_MANAGER_IN_MEMORY,
+	                                    NULL, test_schemas, /* loc, domain and ontology_name */
 	                                    FALSE, 100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
@@ -453,7 +451,6 @@ test_sparql_query (TestInfo      *test_info,
 	g_free (query);
 	g_free (results_filename);
 	g_object_unref (test_schemas);
-	g_object_unref (data_location);
 
 	tracker_data_manager_shutdown (manager);
 	g_object_unref (manager);
@@ -464,28 +461,14 @@ setup (TestInfo      *info,
        gconstpointer  context)
 {
 	const TestInfo *test = context;
-	gchar *basename;
 
 	*info = *test;
-
-	/* NOTE: g_test_build_filename() doesn't work env vars G_TEST_* are not defined?? */
-	basename = g_strdup_printf ("%d", g_test_rand_int_range (0, G_MAXINT));
-	info->data_location = g_build_path (G_DIR_SEPARATOR_S, tests_data_dir, basename, NULL);
-	g_free (basename);
 }
 
 static void
 teardown (TestInfo      *info,
           gconstpointer  context)
 {
-	gchar *cleanup_command;
-
-	/* clean up */
-	cleanup_command = g_strdup_printf ("rm -Rf %s/", info->data_location);
-	g_spawn_command_line_sync (cleanup_command, NULL, NULL, NULL, NULL);
-	g_free (cleanup_command);
-
-	g_free (info->data_location);
 }
 
 int

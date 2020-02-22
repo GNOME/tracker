@@ -38,7 +38,7 @@ public static Tracker.Sparql.Connection tracker_sparql_connection_bus_new (strin
 	return new Tracker.Bus.Connection (service, path, dbus_conn);
 }
 
-public static Tracker.Sparql.Connection tracker_sparql_connection_new (Tracker.Sparql.ConnectionFlags flags, File store, File? ontology, Cancellable? cancellable = null) throws GLib.Error, Tracker.Sparql.Error, IOError {
+public static Tracker.Sparql.Connection tracker_sparql_connection_new (Tracker.Sparql.ConnectionFlags flags, File? store, File? ontology, Cancellable? cancellable = null) throws GLib.Error, Tracker.Sparql.Error, IOError {
 	var conn = new Tracker.Direct.Connection (flags, store, ontology);
 	conn.init (cancellable);
 	return conn;
