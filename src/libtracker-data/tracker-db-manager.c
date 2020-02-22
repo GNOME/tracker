@@ -905,6 +905,7 @@ tracker_db_manager_create_db_interface (TrackerDBManager  *db_manager,
 		flags |= TRACKER_DB_INTERFACE_USE_MUTEX;
 
 	connection = tracker_db_interface_sqlite_new (db_manager->db.abs_filename,
+	                                              NULL,
 	                                              flags,
 	                                              &internal_error);
 	if (internal_error) {

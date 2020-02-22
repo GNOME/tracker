@@ -77,6 +77,7 @@ struct TrackerDBInterface {
 	GObject parent_instance;
 
 	gchar *filename;
+	gchar *shared_cache_key;
 	sqlite3 *db;
 
 	GHashTable *dynamic_statements;
@@ -157,7 +158,8 @@ static gboolean            db_cursor_iter_next                      (TrackerDBCu
 enum {
 	PROP_0,
 	PROP_FILENAME,
-	PROP_FLAGS
+	PROP_FLAGS,
+	PROP_SHARED_CACHE_KEY,
 };
 
 enum {
@@ -1914,8 +1916,9 @@ open_database (TrackerDBInterface  *db_interface,
 {
 	int mode;
 	int result;
+	gchar *uri;
 
-	g_assert (db_interface->filename != NULL);
+	g_assert (db_interface->filename != NULL || db_interface->shared_cache_key != NULL);
 
 	if ((db_interface->flags & TRACKER_DB_INTERFACE_READONLY) == 0) {
 		mode = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
@@ -1923,7 +1926,16 @@ open_database (TrackerDBInterface  *db_interface,
 		mode = SQLITE_OPEN_READONLY;
 	}
 
-	result = sqlite3_open_v2 (db_interface->filename, &db_interface->db, mode | SQLITE_OPEN_NOMUTEX, NULL);
+	if ((db_interface->flags & TRACKER_DB_INTERFACE_IN_MEMORY) != 0) {
+		mode |= SQLITE_OPEN_MEMORY | SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_URI;
+		uri = g_strdup_printf ("file:%s", db_interface->shared_cache_key);
+	} else {
+		uri = g_strdup (db_interface->filename);
+	}
+
+	result = sqlite3_open_v2 (uri, &db_interface->db, mode | SQLITE_OPEN_NOMUTEX, NULL);
+	g_free (uri);
+
 	if (result != SQLITE_OK) {
 		const gchar *str;
 
@@ -1931,10 +1943,13 @@ open_database (TrackerDBInterface  *db_interface,
 		g_set_error (error,
 		             TRACKER_DB_INTERFACE_ERROR,
 		             TRACKER_DB_OPEN_ERROR,
-		             "Could not open sqlite3 database:'%s': %s", db_interface->filename, str);
+		             "Could not open sqlite3 database:'%s': %s",
+		             db_interface->filename ? db_interface->filename : "memory",
+		             str);
 		return;
 	} else {
-		g_debug ("Opened sqlite3 database:'%s'", db_interface->filename);
+		g_debug ("Opened sqlite3 database:'%s'",
+		         db_interface->filename? db_interface->filename : "memory");
 	}
 
 	/* Set our unicode collation function */
@@ -1999,6 +2014,9 @@ tracker_db_interface_sqlite_set_property (GObject       *object,
 	case PROP_FILENAME:
 		db_iface->filename = g_value_dup_string (value);
 		break;
+	case PROP_SHARED_CACHE_KEY:
+		db_iface->shared_cache_key = g_value_dup_string (value);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 	}
@@ -2020,6 +2038,9 @@ tracker_db_interface_sqlite_get_property (GObject    *object,
 		break;
 	case PROP_FILENAME:
 		g_value_set_string (value, db_iface->filename);
+		break;
+	case PROP_SHARED_CACHE_KEY:
+		g_value_set_string (value, db_iface->shared_cache_key);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -2419,6 +2440,7 @@ tracker_db_interface_sqlite_finalize (GObject *object)
 	g_debug ("Closed sqlite3 database:'%s'", db_interface->filename);
 
 	g_free (db_interface->filename);
+	g_free (db_interface->shared_cache_key);
 
 	if (db_interface->user_data && db_interface->user_data_destroy_notify)
 		db_interface->user_data_destroy_notify (db_interface->user_data);
@@ -2450,6 +2472,14 @@ tracker_db_interface_class_init (TrackerDBInterfaceClass *class)
 	                                                     "Interface flags",
 	                                                     TRACKER_TYPE_DB_INTERFACE_FLAGS, 0,
 	                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+	g_object_class_install_property (object_class,
+	                                 PROP_SHARED_CACHE_KEY,
+	                                 g_param_spec_string ("shared-cache-key",
+	                                                      "Shared cache key",
+	                                                      "Shared cache key",
+	                                                      NULL,
+	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 }
 
 static void
@@ -2822,6 +2852,7 @@ tracker_db_interface_execute_vquery (TrackerDBInterface  *db_interface,
 
 TrackerDBInterface *
 tracker_db_interface_sqlite_new (const gchar              *filename,
+                                 const gchar              *shared_cache_key,
                                  TrackerDBInterfaceFlags   flags,
                                  GError                  **error)
 {
@@ -2833,6 +2864,7 @@ tracker_db_interface_sqlite_new (const gchar              *filename,
 	                         &internal_error,
 	                         "filename", filename,
 	                         "flags", flags,
+	                         "shared-cache-key", shared_cache_key,
 	                         NULL);
 
 	if (internal_error) {
@@ -3545,13 +3577,24 @@ tracker_db_interface_attach_database (TrackerDBInterface  *db_interface,
                                       const gchar         *name,
                                       GError             **error)
 {
-	gchar *sql, *path;
+	gchar *sql, *uri = NULL;
 	sqlite3_stmt *stmt;
 	gboolean retval;
 
-	path = g_file_get_path (file);
-	sql = g_strdup_printf ("ATTACH DATABASE \"%s\" AS \"%s\"", path, name);
-	g_free (path);
+	g_return_val_if_fail (file || db_interface->shared_cache_key, FALSE);
+
+	if (file) {
+		uri = g_file_get_uri (file);
+	} else if (db_interface->shared_cache_key &&
+	           (db_interface->flags & TRACKER_DB_INTERFACE_IN_MEMORY) != 0) {
+		uri = g_strdup_printf ("file:%s-%s?mode=memory&cache=shared",
+					db_interface->shared_cache_key,
+					name);
+	}
+
+	sql = g_strdup_printf ("ATTACH DATABASE \"%s\" AS \"%s\"",
+	                       uri, name);
+	g_free (uri);
 
 	stmt = tracker_db_interface_prepare_stmt (db_interface, sql, error);
 	g_free (sql);
