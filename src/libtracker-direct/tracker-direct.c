@@ -257,6 +257,9 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 
 	db_flags = translate_flags (priv->flags);
 
+	if (!priv->store)
+		db_flags |= TRACKER_DB_MANAGER_IN_MEMORY;
+
 	/* Init data manager */
 	if (!priv->ontology &&
 	    (db_flags & TRACKER_DB_MANAGER_READONLY) == 0) {
@@ -1035,7 +1038,7 @@ tracker_direct_connection_new (TrackerSparqlConnectionFlags   flags,
                                GFile                         *ontology,
                                GError                       **error)
 {
-	g_return_val_if_fail (G_IS_FILE (store), NULL);
+	g_return_val_if_fail (!store || G_IS_FILE (store), NULL);
 	g_return_val_if_fail (!ontology || G_IS_FILE (ontology), NULL);
 	g_return_val_if_fail (!error || !*error, NULL);
 

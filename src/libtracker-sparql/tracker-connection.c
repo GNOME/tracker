@@ -53,7 +53,7 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
 /**
  * tracker_sparql_connection_new:
  * @flags: values from #TrackerSparqlConnectionFlags
- * @store: the directory that contains the database, as a #GFile
+ * @store: the directory that contains the database as a #GFile, or %NULL
  * @ontology: (nullable): the directory that contains the database schemas as
  *                        a #GFile, or %NULL to use the default schemas.
  * @cancellable: (nullable): a #GCancellable, or %NULL
@@ -64,6 +64,8 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
  * To connect to databases managed by other processes, use
  * tracker_sparql_connection_bus_new().
  *
+ * If @store is %NULL, the database will be created in memory.
+ *
  * Returns: (transfer full): a new #TrackerSparqlConnection. Call
  * g_object_unref() on the object when no longer used.
  *
@@ -73,7 +75,7 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
 /**
  * tracker_sparql_connection_new_async:
  * @flags: values from #TrackerSparqlConnectionFlags
- * @store: the directory that contains the database, as a #GFile
+ * @store: the directory that contains the database as a #GFile, or %NULL
  * @ontology: (nullable): the directory that contains the database schemas as
  *                        a #GFile, or %NULL to use the default schemas.
  * @cancellable: (nullable): a #GCancellable, or %NULL
