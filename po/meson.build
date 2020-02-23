@@ -1,1 +1,1 @@
-i18n.gettext('tracker', preset: 'glib')
+i18n.gettext(tracker_versioned_name, preset: 'glib')

@@ -203,7 +203,7 @@ conf.set('LOCALEDIR', '"@0@/@1@"'.format(get_option('prefix'), get_option('local
 conf.set('SHAREDIR', '"@0@/@1@"'.format(get_option('prefix'), get_option('datadir')))
 conf.set('TRACKER_MINERS_DIR', '"@0@/@1@/tracker/miners"'.format(get_option('prefix'), get_option('datadir')))
 
-conf.set('GETTEXT_PACKAGE', '"tracker"')
+conf.set('GETTEXT_PACKAGE', '"@0@"'.format(tracker_versioned_name))
 conf.set('PACKAGE_VERSION', '"@0@"'.format(meson.project_version()))
 conf.set('TRACKER_VERSION', '"@0@"'.format(meson.project_version()))
 conf.set('TRACKER_MAJOR_VERSION', tracker_major_version)
