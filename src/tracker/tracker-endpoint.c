@@ -226,7 +226,7 @@ tracker_endpoint (int argc, const char **argv)
 	if (ontology_path) {
 		ontology = g_file_new_for_commandline_arg (ontology_path);
 	} else if (ontology_name) {
-		gchar *path = g_build_filename (SHAREDIR, "tracker", "ontologies", ontology_name, NULL);
+		gchar *path = g_build_filename (SHAREDIR, "tracker-3", "ontologies", ontology_name, NULL);
 		ontology = g_file_new_for_path (path);
 		g_free (path);
 	}

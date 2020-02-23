@@ -255,7 +255,7 @@ tracker_install_rpath = ':'.join([tracker_internal_libs_dir, libdir])
 
 # NOTE: We don't use ${TRACKER_API_VERSION} because other content like
 # the ontology is installed to the same location.
-tracker_ontologies_dir = join_paths(get_option('prefix'), get_option('datadir'), 'tracker/ontologies')
+tracker_ontologies_dir = join_paths(get_option('prefix'), get_option('datadir'), tracker_versioned_name, 'ontologies')
 
 vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi')
 
