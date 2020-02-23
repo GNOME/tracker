@@ -40,6 +40,7 @@ gnome.gtkdoc('libtracker-sparql',
     gobject_typesfile: 'libtracker-sparql.types',
     dependencies: tracker_sparql_dep,
     fixxref_args: fixxref_args,
+    install_dir: 'libtracker-sparql@0@'.format(tracker_api_major),
     install: true)
 
 subdir('examples')
