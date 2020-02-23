@@ -67,9 +67,6 @@ add_project_arguments(['-D', 'TRACKER_COMPILATION'],
                       ['-D', 'G_LOG_DOMAIN="Tracker"'],
                       language: 'vala')
 
-network_manager = dependency('libnm', required: get_option('network_manager'))
-have_network_manager = network_manager.found()
-
 ##################################################################
 # Check for libtracker-common, make sure libstemmer exists
 ##################################################################
@@ -192,7 +189,6 @@ conf.set('HAVE_BUILTIN_FTS', sqlite3_has_builtin_fts5)
 conf.set('HAVE_LIBICU', unicode_library_name == 'icu')
 conf.set('HAVE_LIBSTEMMER', have_libstemmer)
 conf.set('HAVE_LIBUNISTRING', unicode_library_name == 'unistring')
-conf.set('HAVE_NETWORK_MANAGER', have_network_manager)
 
 conf.set('HAVE_GETLINE', cc.has_function('getline', prefix : '#include <stdio.h>'))
 conf.set('HAVE_POSIX_FADVISE', cc.has_function('posix_fadvise', prefix : '#include <fcntl.h>'))
@@ -304,7 +300,6 @@ summary = [
   '    Source code location:                   ' + meson.current_source_dir(),
   '    Compiler:                               ' + cc.get_id(),
   '\nFeature Support:',
-  '    Support for network status detection:   ' + have_network_manager.to_string(),
   '    Unicode support library:                ' + unicode_library_name,
   '    Use external FTS module:                ' + (not sqlite3_has_builtin_fts5).to_string(),
   '    Build with Stemming support:            ' + have_libstemmer.to_string(),
