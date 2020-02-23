@@ -3,62 +3,15 @@
 /* Extras added manually */
 #mesondefine LOCALEDIR
 #mesondefine SHAREDIR
-#mesondefine TRACKER_MINERS_DIR
-#mesondefine TRACKER_UI_DIR
-
-/* Define if we disable the journal */
-#mesondefine DISABLE_JOURNAL
-
-/* Include functional tests in the installation */
-#mesondefine DIST_FUNCTIONAL_TESTS
-
-/* Use new evolution-shell API */
-#mesondefine EVOLUTION_SHELL_2_91
-
-/* Use new evolution-shell API */
-#mesondefine EVOLUTION_SHELL_3_2
-
-/* Use new evolution-shell API */
-#mesondefine EVOLUTION_SHELL_3_3_5
 
 /* Define the gettext package to be used */
 #mesondefine GETTEXT_PACKAGE
 
-/* Define that GStreamer Discoverer should be used */
-#mesondefine GSTREAMER_BACKEND_DISCOVERER
-
-/* Define that GUPnP-DLNA should be used */
-#mesondefine GSTREAMER_BACKEND_GUPNP_DLNA
-
-/* Guarantee existence of some metadata */
-#mesondefine GUARANTEE_METADATA
-
 /* Defined if Sqlite has FTS5 compiled in */
 #mesondefine HAVE_BUILTIN_FTS
 
-/* Define if we have exempi */
-#mesondefine HAVE_EXEMPI
-
-/* Define to 1 if you have the `getline' function. */
-#mesondefine HAVE_GETLINE
-
-/* Define if we have GStreamer */
-#mesondefine HAVE_GSTREAMER
-
-/* Define if we have libcue */
-#mesondefine HAVE_LIBCUE
-
-/* Define if we have libcue 2 or up */
-#mesondefine HAVE_LIBCUE2
-
-/* Define if we have libexif */
-#mesondefine HAVE_LIBEXIF
-
 /* libicu Unicode support library */
 #mesondefine HAVE_LIBICU
-
-/* Define if we have libiptcdata */
-#mesondefine HAVE_LIBIPTCDATA
 
 /* Define if we have libstemmer */
 #mesondefine HAVE_LIBSTEMMER
@@ -66,26 +19,14 @@
 /* libunistring Unicode support library */
 #mesondefine HAVE_LIBUNISTRING
 
-/* Define if we have NetworkManager for network status detection */
-#mesondefine HAVE_NETWORK_MANAGER
-
 /* Define to 1 if you have the `posix_fadvise' function. */
 #mesondefine HAVE_POSIX_FADVISE
 
 /* Define to 1 if you have the `statvfs64' function. */
 #mesondefine HAVE_STATVFS64
 
-/* Define to 1 if you have the `strnlen' function. */
-#mesondefine HAVE_STRNLEN
-
 /* Define to 0 if tracker FTS is not compiled */
 #mesondefine HAVE_TRACKER_FTS
-
-/* Define if we have UPOWER */
-#mesondefine HAVE_UPOWER
-
-/* Define to 1 if you have the `up_client_get_on_low_battery' function. */
-#mesondefine HAVE_UP_CLIENT_GET_ON_LOW_BATTERY
 
 /* Define to the address where bug reports for this package should be sent. */
 #mesondefine PACKAGE_BUGREPORT
@@ -119,6 +60,3 @@
 
 /* Define to the Tracker minor version */
 #mesondefine TRACKER_MINOR_VERSION
-
-/* Unzip ps.gz files */
-#mesondefine USING_UNZIPPSFILES
