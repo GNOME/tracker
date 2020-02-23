@@ -15,7 +15,7 @@ stopwords_files = [
 ]
 
 stopwords_install_dir = join_paths(
-  get_option('datadir'), 'tracker', 'stop-words')
+  get_option('datadir'), tracker_versioned_name, 'stop-words')
 
 install_data(stopwords_files,
   install_dir: stopwords_install_dir)
