@@ -190,14 +190,11 @@ conf.set('HAVE_LIBICU', unicode_library_name == 'icu')
 conf.set('HAVE_LIBSTEMMER', have_libstemmer)
 conf.set('HAVE_LIBUNISTRING', unicode_library_name == 'unistring')
 
-conf.set('HAVE_GETLINE', cc.has_function('getline', prefix : '#include <stdio.h>'))
 conf.set('HAVE_POSIX_FADVISE', cc.has_function('posix_fadvise', prefix : '#include <fcntl.h>'))
 conf.set('HAVE_STATVFS64', cc.has_header_symbol('sys/statvfs.h', 'statvfs64', args: '-D_LARGEFILE64_SOURCE'))
-conf.set('HAVE_STRNLEN', cc.has_function('strnlen', prefix : '#include <string.h>'))
 
 conf.set('LOCALEDIR', '"@0@/@1@"'.format(get_option('prefix'), get_option('localedir')))
 conf.set('SHAREDIR', '"@0@/@1@"'.format(get_option('prefix'), get_option('datadir')))
-conf.set('TRACKER_MINERS_DIR', '"@0@/@1@/tracker/miners"'.format(get_option('prefix'), get_option('datadir')))
 
 conf.set('GETTEXT_PACKAGE', '"@0@"'.format(tracker_versioned_name))
 conf.set('PACKAGE_VERSION', '"@0@"'.format(meson.project_version()))
