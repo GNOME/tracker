@@ -166,7 +166,7 @@ print_usage_list_cmds (void)
 
 	subcommands_dir = g_getenv ("TRACKER_CLI_SUBCOMMANDS_DIR");
 	if (!subcommands_dir) {
-		subcommands_dir = LIBEXECDIR "/tracker/";
+		subcommands_dir = SUBCOMMANDSDIR;
 	}
 
 	for (i = 0; i < G_N_ELEMENTS(commands); i++) {
@@ -244,12 +244,12 @@ main (int argc, char *argv[])
 	textdomain (GETTEXT_PACKAGE);
 
 	command_basename = g_path_get_basename (argv[0]);
-	basename_is_bin = g_strcmp0 (command_basename, "tracker") == 0;
+	basename_is_bin = g_strcmp0 (command_basename, COMMANDNAME) == 0;
 	g_free (command_basename);
 
 	subcommands_dir = g_getenv ("TRACKER_CLI_SUBCOMMANDS_DIR");
 	if (!subcommands_dir) {
-		subcommands_dir = LIBEXECDIR "/tracker/";
+		subcommands_dir = SUBCOMMANDSDIR;
 	}
 
 	if (g_path_is_absolute (argv[0]) &&
