@@ -33,7 +33,7 @@ public static Tracker.Sparql.Connection tracker_sparql_connection_bus_new (strin
 	if (object_path != null)
 		path = object_path;
 	else
-		path = "/org/freedesktop/Tracker1/Endpoint";
+		path = "/org/freedesktop/Tracker3/Endpoint";
 
 	return new Tracker.Bus.Connection (service, path, dbus_conn);
 }
