@@ -32,7 +32,7 @@
 
 static const gchar introspection_xml[] =
 	"<node>"
-	"  <interface name='org.freedesktop.Tracker1.Endpoint'>"
+	"  <interface name='org.freedesktop.Tracker3.Endpoint'>"
 	"    <method name='Query'>"
 	"      <arg type='s' name='query' direction='in' />"
 	"      <arg type='h' name='output_stream' direction='in' />"
@@ -597,7 +597,7 @@ notifier_events_cb (TrackerNotifier *notifier,
 	if (!g_dbus_connection_emit_signal (endpoint_dbus->dbus_connection,
 	                                    NULL,
 	                                    endpoint_dbus->object_path,
-	                                    "org.freedesktop.Tracker1.Endpoint",
+	                                    "org.freedesktop.Tracker3.Endpoint",
 	                                    "GraphUpdated",
 	                                    g_variant_builder_end (&builder),
 	                                    &error)) {
@@ -751,7 +751,7 @@ tracker_endpoint_dbus_init (TrackerEndpointDBus *endpoint)
  * @error: pointer to a #GError
  *
  * Registers a Tracker endpoint object at @object_path on @dbus_connection.
- * The default object path is "/org/freedesktop/Tracker1/Endpoint".
+ * The default object path is "/org/freedesktop/Tracker3/Endpoint".
  *
  * Returns: (transfer full): a #TrackerEndpointDBus object.
  */
@@ -768,7 +768,7 @@ tracker_endpoint_dbus_new (TrackerSparqlConnection  *sparql_connection,
 	g_return_val_if_fail (!error || !*error, NULL);
 
 	if (!object_path)
-		object_path = "/org/freedesktop/Tracker1/Endpoint";
+		object_path = "/org/freedesktop/Tracker3/Endpoint";
 
 	return g_initable_new (TRACKER_TYPE_ENDPOINT_DBUS, cancellable, error,
 	                       "dbus-connection", dbus_connection,
