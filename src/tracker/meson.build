@@ -35,3 +35,5 @@ if install_bash_completion
         sources: 'bash-completion/tracker',
         install_dir: bash_completion_dir)
 endif
+
+run_command('make-uninstalled-subcommand-links.sh', modules)
