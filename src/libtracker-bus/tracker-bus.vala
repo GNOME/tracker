@@ -22,7 +22,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 	string dbus_name;
 	string object_path;
 
-	private const string ENDPOINT_IFACE = "org.freedesktop.Tracker1.Endpoint";
+	private const string ENDPOINT_IFACE = "org.freedesktop.Tracker3.Endpoint";
 
 	public Connection (string dbus_name, string object_path, DBusConnection? dbus_connection) throws Sparql.Error, IOError, DBusError, GLib.Error {
 		Object ();
