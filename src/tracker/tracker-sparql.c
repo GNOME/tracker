@@ -193,23 +193,12 @@ create_connection (GError **error)
 }
 
 GHashTable *
-tracker_sparql_get_prefixes (void)
+tracker_sparql_get_prefixes (TrackerSparqlConnection *connection)
 {
-	TrackerSparqlConnection *connection;
 	TrackerSparqlCursor *cursor;
 	GError *error = NULL;
 	GHashTable *retval;
 	const gchar *query;
-
-	connection = create_connection (&error);
-
-	if (!connection) {
-		g_printerr ("%s: %s\n",
-		            _("Could not establish a connection to Tracker"),
-		            error ? error->message : _("No error given"));
-		g_clear_error (&error);
-		return NULL;
-	}
 
 	retval = g_hash_table_new_full (g_str_hash,
 	                                g_str_equal,
@@ -228,8 +217,6 @@ tracker_sparql_get_prefixes (void)
 	        "}";
 
 	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-
-	g_object_unref (connection);
 
 	if (error) {
 		g_printerr ("%s, %s\n",
@@ -981,7 +968,7 @@ tree_get (TrackerSparqlConnection *connection,
 	root = tree_new ();
 
 	/* Get shorthand prefixes for printing / filtering */
-	prefixes = tracker_sparql_get_prefixes ();
+	prefixes = tracker_sparql_get_prefixes (connection);
 
 	/* Is class_lookup a shothand string, e.g. nfo:FileDataObject? */
 	if (class_lookup && *class_lookup && strchr (class_lookup, ':')) {
@@ -1355,7 +1342,7 @@ sparql_run (void)
 	}
 
 	if (get_shorthand) {
-		GHashTable *prefixes = tracker_sparql_get_prefixes ();
+		GHashTable *prefixes = tracker_sparql_get_prefixes (connection);
 		gchar *result;
 
 		result = tracker_sparql_get_shorthand (prefixes, get_shorthand);
@@ -1368,7 +1355,7 @@ sparql_run (void)
 	}
 
 	if (get_longhand) {
-		GHashTable *prefixes = tracker_sparql_get_prefixes ();
+		GHashTable *prefixes = tracker_sparql_get_prefixes (connection);
 		gchar *result;
 
 		result = tracker_sparql_get_longhand (prefixes, get_longhand);
@@ -1459,7 +1446,7 @@ sparql_run (void)
 			GHashTable *prefixes = NULL;
 
 			if (strstr (query, "fts:offsets")) {
-				prefixes = tracker_sparql_get_prefixes ();
+				prefixes = tracker_sparql_get_prefixes (connection);
 			}
 
 			cursor = tracker_sparql_connection_query (connection, query, NULL, &error);

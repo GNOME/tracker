@@ -312,7 +312,7 @@ info_run (void)
 		return EXIT_FAILURE;
 	}
 
-	prefixes = tracker_sparql_get_prefixes ();
+	prefixes = tracker_sparql_get_prefixes (connection);
 
 	/* print all prefixes if using turtle format and not showing full namespaces */
 	if (turtle && !full_namespaces) {

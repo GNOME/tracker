@@ -27,7 +27,7 @@
 int         tracker_sparql               (int                       argc,
                                           const char              **argv);
 
-GHashTable *tracker_sparql_get_prefixes  (void);
+GHashTable *tracker_sparql_get_prefixes  (TrackerSparqlConnection  *connection);
 gchar *     tracker_sparql_get_longhand  (GHashTable               *prefixes,
                                           const gchar              *shorthand);
 gchar *     tracker_sparql_get_shorthand (GHashTable               *prefixes,
