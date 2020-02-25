@@ -41,7 +41,6 @@ pkg.generate(libtracker_sparql,
         'tracker_datadir=${datadir}' / 'tracker',
         'ontologies_dir=' + tracker_ontologies_dir,
         'domain_ontologies_dir=${tracker_datadir}' / 'domain-ontologies',
-        'dbus_services_dir=' + dbus_services_dir,
     ],
 )
 

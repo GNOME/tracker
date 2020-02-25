@@ -175,60 +175,21 @@ if unicode_library_name == ''
 endif
 
 ####################################################################
-# D-Bus service files
-####################################################################
-
-if get_option('dbus_services') == ''
-  dbus_services_dir = dbus.get_pkgconfig_variable('session_bus_services_dir',
-                                                  define_variable: [ 'datadir', datadir ])
-else
-  dbus_services_dir = get_option('dbus_services')
-endif
-
-####################################################################
-# systemd user services
-####################################################################
-
-install_systemd_user_services = false
-if get_option('systemd_user_services') == 'yes' or get_option('systemd_user_services') == 'auto'
-  systemd = dependency('systemd', required: false)
-  if systemd.found()
-    # FIXME: this would ideally use the systemduserunitdir pkgconfig variable, but
-    # it does not depend on variables we can override to install within prefix.
-    install_systemd_user_services = true
-    systemd_user_services_dir = join_paths(libdir, 'systemd', 'user')
-  else
-    install_systemd_user_services = false
-    systemd_user_services_dir = '(not found)'
-  endif
-elif get_option('systemd_user_services') == 'no' or get_option('systemd_user_services') == ''
-  install_systemd_user_services = false
-  systemd_user_services_dir = '(disabled)'
-else
-  install_systemd_user_services = true
-  systemd_user_services_dir = get_option('systemd_user_services')
-endif
-
-####################################################################
 # bash-completion
 ####################################################################
 
-install_bash_completion = false
-if get_option('bash_completion') == 'yes' or get_option('bash_completion') == 'auto'
-  bash_completion_package = dependency('bash-completion', required: false)
-  if bash_completion_package.found()
-    bash_completion_dir = bash_completion_package.get_pkgconfig_variable('completionsdir',
-                                                                         define_variable:  [ 'prefix', get_option('prefix') ])
-  else
-    bash_completion_dir = join_paths(datadir, 'bash-completion', 'completions')
+if get_option('bash_completion')
+  bash_completion_dir = get_option('bash_completion_dir')
+
+  if bash_completion_dir == ''
+    bash_completion_package = dependency('bash-completion', required: false)
+    if bash_completion_package.found()
+      bash_completion_dir = bash_completion_package.get_pkgconfig_variable('completionsdir',
+                                                                           define_variable: [ 'prefix', get_option('prefix') ])
+    else
+      bash_completion_dir = join_paths(datadir, 'bash-completion', 'completions')
+    endif
   endif
-  install_bash_completion = true
-elif get_option('bash_completion') == 'no' or get_option('bash_completion') == ''
-  install_bash_completion = false
-  bash_completion_dir = '(disabled)'
-else
-  install_bash_completion = true
-  bash_completion_dir = get_option('bash_completion')
 endif
 
 conf = configuration_data()
@@ -354,7 +315,6 @@ summary = [
   '\nFeature Support:',
   '    Support for network status detection:   ' + have_network_manager.to_string(),
   '    Unicode support library:                ' + unicode_library_name,
-  '    Build with Journal support:             ' + get_option('journal').to_string(),
   '    Build with SQLite FTS support:          @0@ (built-in FTS: @1@)'.format(
      get_option('fts'), sqlite3_has_builtin_fts5),
   '    Build with Stemming support:            ' + have_libstemmer.to_string(),
