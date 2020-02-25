@@ -37,8 +37,16 @@ with open(os.environ['TRACKER_FUNCTIONAL_TEST_CONFIG']) as f:
     config = json.load(f)
 
 
+def cli_dir():
+    return config['TEST_CLI_DIR']
+
+
 def ontologies_dir():
     return config['TEST_ONTOLOGIES_DIR']
+
+
+def tracker_version():
+    return config['TRACKER_VERSION']
 
 
 def get_environment_boolean(variable):

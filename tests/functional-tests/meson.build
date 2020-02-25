@@ -4,7 +4,9 @@ testconf = configuration_data()
 
 config_json_full_path = join_paths(meson.current_build_dir(), 'configuration.json')
 
+testconf.set('TEST_CLI_DIR', tracker_uninstalled_cli_dir)
 testconf.set('TEST_ONTOLOGIES_DIR', tracker_uninstalled_nepomuk_ontologies_dir)
+testconf.set('TRACKER_VERSION', meson.project_version())
 
 config_json = configure_file(
   input: 'configuration.json.in',
@@ -24,6 +26,7 @@ functional_tests = [
   'notifier',
   'collation',
   'ontology-changes',
+  'cli',
 ]
 
 if get_option('fts')
