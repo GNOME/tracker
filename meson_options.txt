@@ -1,10 +1,8 @@
-option('docs', type: 'boolean', value: false,
+option('docs', type: 'boolean', value: false, yield: true,
        description: 'Generate API documentation with gtk-doc')
 option('fts', type: 'boolean', value: true,
        description: 'Enable the Tracker full-text search feature')
-option('journal', type: 'boolean', value: true,
-       description: 'Enable database journal backup mechanism')
-option('man', type: 'boolean', value: true,
+option('man', type: 'boolean', value: true, yield: true,
        description: 'Install man pages')
 option('override_sqlite_version_check', type: 'boolean', value: false,
        description: 'Override checks for broken sqlite versions')
@@ -16,12 +14,10 @@ option('stemmer', type: 'feature', value: 'auto',
 option('unicode_support', type: 'combo', choices: ['icu', 'unistring', 'auto'], value: 'auto',
        description: 'Unicode support library to use')
 
-option('bash_completion', type: 'string', value: 'yes',
-       description: 'Directory to install Bash completion files (or "yes" for default directory, "no" to disable installation')
-option('dbus_services', type: 'string', value: '',
-       description: 'Directory to install D-Bus .service files (leave blank to use the value from dbus-1.pc)')
-option('systemd_user_services', type: 'string', value: 'yes',
-       description: 'Directory to install systemd user .service files (or "yes" for default directory, "no" to disable installation)')
+option('bash_completion', type: 'boolean', value: true,
+       description: 'Whether to install Bash completion files')
+option('bash_completion_dir', type: 'string',
+       description: 'Directory to install Bash completion files')
 option('test_utils', type: 'boolean', value: true,
        description: 'Whether to install the trackertestutils Python package')
 option('test_utils_dir', type: 'string', value: '',

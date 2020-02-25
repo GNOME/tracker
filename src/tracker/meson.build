@@ -30,7 +30,7 @@ executable('tracker', sources,
 
 meson.add_install_script('make-subcommand-links.sh', modules)
 
-if install_bash_completion
+if get_option('bash_completion')
     install_data(
         sources: 'bash-completion/tracker',
         install_dir: bash_completion_dir)
