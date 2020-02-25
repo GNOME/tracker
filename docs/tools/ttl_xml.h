@@ -17,8 +17,8 @@
  * 02110-1301, USA.
  */
 
-#ifndef __TTL_SGML_H__
-#define __TTL_SGML_H__
+#ifndef __TTL_XML_H__
+#define __TTL_XML_H__
 
 #include <gio/gio.h>
 #include "ttl_model.h"
@@ -26,10 +26,10 @@
 
 G_BEGIN_DECLS
 
-void ttl_sgml_print (OntologyDescription *description,
-                     Ontology            *ontology,
-                     GFile               *file,
-                     const gchar         *description_dir);
+void ttl_xml_print (OntologyDescription *description,
+                    Ontology            *ontology,
+                    GFile               *file,
+                    const gchar         *description_dir);
 
 G_END_DECLS
 

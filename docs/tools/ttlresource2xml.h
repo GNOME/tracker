@@ -19,8 +19,8 @@
  * Author: Carlos Garnacho <carlosg@gnome.org>
  */
 
-#ifndef __TTLRESOURCE2SGML_H__
-#define __TTLRESOURCE2SGML_H__
+#ifndef __TTLRESOURCE2XML_H__
+#define __TTLRESOURCE2XML_H__
 
 #include <glib.h>
 #include "ttl_model.h"
@@ -32,4 +32,4 @@ void generate_ontology_class_docs (Ontology *ontology,
 
 G_END_DECLS
 
-#endif /* __TTLRESOURCE2SGML__ */
+#endif /* __TTLRESOURCE2XML__ */

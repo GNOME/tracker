@@ -19,7 +19,7 @@
 
 #include <glib/gprintf.h>
 
-#include "ttl_sgml.h"
+#include "ttl_xml.h"
 
 typedef struct {
 	Ontology *ontology;
@@ -87,17 +87,17 @@ print_deprecated_message (FILE *f)
 #endif
 
 static void
-print_sgml_header (FILE *f, OntologyDescription *desc)
+print_xml_header (FILE *f, OntologyDescription *desc)
 {
         gchar *upper_name;
 
         g_fprintf (f, "<?xml version='1.0' encoding='UTF-8'?>\n");
-	g_fprintf (f, "<!DOCTYPE book PUBLIC \"-//OASIS//DTD DocBook XML V4.1.2//EN\"\n"
-		   "        \"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd\" [\n");
+	g_fprintf (f, "<!DOCTYPE book PUBLIC \"-//OASIS//DTD DocBook XML V4.5//EN\"\n"
+		   "        \"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd\" [\n");
 	g_fprintf (f, "<!ENTITY %% local.common.attrib \"xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'\">\n");
 	g_fprintf (f, "]>");
 
-        g_fprintf (f, "<chapter id='%s-ontology'>\n", desc->localPrefix);
+        g_fprintf (f, "<chapter id='%s-ontology' xmlns:xi=\"http://www.w3.org/2003/XInclude\">\n", desc->localPrefix);
 
         upper_name = g_ascii_strup (desc->localPrefix, -1);
         g_fprintf (f, "<title>%s: %s</title>\n", desc->title, desc->description ? desc->description : "");
@@ -121,7 +121,7 @@ print_sgml_header (FILE *f, OntologyDescription *desc)
 }
 
 static void
-print_sgml_footer (FILE *f)
+print_xml_footer (FILE *f)
 {
 	g_fprintf (f,"</chapter>\n");
 }
@@ -144,7 +144,7 @@ print_ontology_class (Ontology      *ontology,
 }
 
 void
-ttl_sgml_print (OntologyDescription *description,
+ttl_xml_print (OntologyDescription *description,
                 Ontology            *ontology,
                 GFile               *file,
                 const gchar         *description_dir)
@@ -160,7 +160,7 @@ ttl_sgml_print (OntologyDescription *description,
 	g_free (path);
 
         upper_name = g_ascii_strup (description->localPrefix, -1);
-	print_sgml_header (f, description);
+	print_xml_header (f, description);
 
 	basename = g_strdup_printf ("%s-introduction.xml", description->localPrefix);
 	introduction = g_build_filename (description_dir, basename, NULL);
@@ -180,7 +180,7 @@ ttl_sgml_print (OntologyDescription *description,
 	}
 
         g_fprintf (f, "</section>\n");
-	print_sgml_footer (f);
+	print_xml_footer (f);
 
 	g_free (upper_name);
 	g_free (introduction);

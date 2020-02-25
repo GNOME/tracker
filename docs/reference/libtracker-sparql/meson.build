@@ -4,11 +4,11 @@ version_xml = configure_file(input: 'version.xml.in',
 
 generated = custom_target('base-ontology-doc-generated',
     output: 'gen-doc.stamp',
-    command: [ttl2sgml,
+    command: [ttl2xml,
               '-d', join_paths(source_root, 'src/ontologies/'),
               '-o', join_paths(meson.current_build_dir(), 'xml/'),
               '-e', meson.current_source_dir()],
-    depends: ttl2sgml,
+    depends: ttl2xml,
     depend_files: base_ontology,
     build_by_default: true,
 )

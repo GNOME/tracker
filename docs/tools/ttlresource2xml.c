@@ -24,8 +24,8 @@
 #include <gio/gio.h>
 #include "ttl_loader.h"
 #include "ttl_model.h"
-#include "ttl_sgml.h"
-#include "ttlresource2sgml.h"
+#include "ttl_xml.h"
+#include "ttlresource2xml.h"
 
 #define TRACKER_ONTOLOGY_CLASS "http://www.tracker-project.org/ontologies/tracker#Ontology"
 
@@ -75,7 +75,7 @@ class_get_hierarchy (Ontology      *ontology,
 }
 
 static void
-print_sgml_header (FILE          *f,
+print_xml_header (FILE          *f,
                    OntologyClass *klass,
                    Ontology      *ontology)
 {
@@ -111,7 +111,7 @@ print_sgml_header (FILE          *f,
 }
 
 static void
-print_sgml_footer (FILE *f)
+print_xml_footer (FILE *f)
 {
 	g_fprintf (f, "</refentry>\n");
 }
@@ -667,12 +667,12 @@ generate_class_docs (OntologyClass *klass,
                      Ontology      *ontology,
                      FILE          *f)
 {
-	print_sgml_header (f, klass, ontology);
+	print_xml_header (f, klass, ontology);
 	print_class_hierarchy (f, klass, ontology);
 	print_predefined_instances (f, klass, ontology);
 	print_fts_properties (f, klass, ontology);
 	print_properties (f, klass, ontology);
-	print_sgml_footer (f);
+	print_xml_footer (f);
 }
 
 void

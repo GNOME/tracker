@@ -23,8 +23,8 @@
 #include <stdio.h>
 #include "ttl_loader.h"
 #include "ttl_model.h"
-#include "ttl_sgml.h"
-#include "ttlresource2sgml.h"
+#include "ttl_xml.h"
+#include "ttlresource2xml.h"
 
 static gchar *ontology_dir = NULL;
 static gchar *output_dir = NULL;
@@ -166,7 +166,7 @@ main (gint argc, gchar **argv)
 		ttl_loader_load_ontology (file_ontology, ttl_file);
 		ttl_loader_load_prefix_from_description (ontology, description);
 
-		ttl_sgml_print (description, file_ontology, ttl_output_file, description_dir);
+		ttl_xml_print (description, file_ontology, ttl_output_file, description_dir);
 
 		ttl_loader_free_ontology (file_ontology);
 		ttl_loader_free_description (description);
