@@ -318,7 +318,13 @@ summary = [
   '    Build with SQLite FTS support:          @0@ (built-in FTS: @1@)'.format(
      get_option('fts'), sqlite3_has_builtin_fts5),
   '    Build with Stemming support:            ' + have_libstemmer.to_string(),
-  '    Bash completion support:                ' + bash_completion_dir,
 ]
+
+if get_option('bash_completion')
+  summary += [
+    '    Bash completion support:                ' + bash_completion_dir,
+  ]
+endif
+
 
 message('\n'.join(summary))
