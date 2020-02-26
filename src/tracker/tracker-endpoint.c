@@ -70,22 +70,26 @@ static GOptionEntry entries[] = {
 	{ NULL }
 };
 
+#define TRACKER_ENDPOINT_ERROR tracker_endpoint_error_quark ()
+
+G_DEFINE_QUARK (tracker-endpoint-error-quark, tracker_endpoint_error)
+
+typedef enum _TrackerEndpointError {
+	TRACKER_ENDPOINT_ERROR_COULD_NOT_OWN_NAME,
+	TRACKER_ENDPOINT_ERROR_NAME_LOST,
+} TrackerEndpointError;
+
 static gboolean
 sanity_check (void)
 {
 	if (!database_path) {
-		g_print ("%s\n", _("No database path was provided"));
-		return FALSE;
-	}
-
-	if (!dbus_service) {
-		g_print ("%s\n", _("No endpoint information was provided"));
+		g_printerr ("%s\n", _("No database path was provided"));
 		return FALSE;
 	}
 
 	if (!!ontology_path == !!ontology_name) {
 		/* TRANSLATORS: those are commandline arguments */
-		g_print ("%s\n", _("One “ontology” or “ontology-path” option should be provided"));
+		g_printerr ("%s\n", _("One “ontology” or “ontology-path” option should be provided"));
 		return FALSE;
 	}
 
@@ -118,13 +122,80 @@ name_lost_cb (GDBusConnection *connection,
 	g_main_loop_quit (user_data);
 }
 
+static gboolean
+run_endpoint (TrackerSparqlConnection  *connection,
+              GError                  **error)
+{
+	TrackerEndpoint *endpoint = NULL;
+	GDBusConnection *dbus_connection;
+	g_autoptr(GMainLoop) main_loop;
+	GError *inner_error = NULL;
+
+	g_print (_("Creating endpoint at %s…"), dbus_service);
+	g_print ("\n");
+
+	if (system_bus) {
+		dbus_connection = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &inner_error);
+	} else {
+		dbus_connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &inner_error);
+	}
+
+	if (dbus_connection) {
+		endpoint = TRACKER_ENDPOINT (tracker_endpoint_dbus_new (connection,
+		                                                        dbus_connection,
+		                                                        NULL, NULL, &inner_error));
+	}
+
+	main_loop = g_main_loop_new (NULL, FALSE);
+
+	if (endpoint) {
+		g_bus_own_name_on_connection (dbus_connection,
+		                              dbus_service,
+		                              G_BUS_NAME_OWNER_FLAGS_NONE,
+		                              name_acquired_cb,
+		                              name_lost_cb,
+		                              main_loop, NULL);
+
+		g_main_loop_run (main_loop);
+	}
+
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
+
+	if (!name_owned) {
+		g_set_error_literal (error, TRACKER_ENDPOINT_ERROR,
+		                     TRACKER_ENDPOINT_ERROR_COULD_NOT_OWN_NAME,
+		                     _("Could not own DBus name"));
+		return FALSE;
+	}
+
+	g_print ("%s\n", _("Listening to SPARQL commands. Press Ctrl-C to stop."));
+
+	g_unix_signal_add (SIGINT, sigterm_cb, main_loop);
+	g_unix_signal_add (SIGTERM, sigterm_cb, main_loop);
+
+	g_main_loop_run (main_loop);
+
+	if (!name_owned) {
+		g_set_error_literal (error, TRACKER_ENDPOINT_ERROR,
+		                     TRACKER_ENDPOINT_ERROR_COULD_NOT_OWN_NAME,
+		                     _("DBus name lost"));
+		return FALSE;
+	}
+
+	/* Carriage return, so we paper over the ^C */
+	g_print ("\r%s\n", _("Closing connection…"));
+	g_clear_object (&endpoint);
+
+	return TRUE;
+}
+
 int
 tracker_endpoint (int argc, const char **argv)
 {
 	TrackerSparqlConnection *connection;
-	TrackerEndpoint *endpoint = NULL;
-	GDBusConnection *dbus_connection;
-	GMainLoop *main_loop;
 	GOptionContext *context;
 	GError *error = NULL;
 	GFile *database, *ontology = NULL;
@@ -172,66 +243,17 @@ tracker_endpoint (int argc, const char **argv)
 		return EXIT_FAILURE;
 	}
 
-	g_print (_("Creating endpoint at %s…"), dbus_service);
-	g_print ("\n");
+	if (dbus_service) {
+		run_endpoint (connection, &error);
 
-	if (system_bus) {
-		dbus_connection = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &error);
+		if (error) {
+			g_printerr ("%s\n", error->message);
+			g_error_free (error);
+		}
 	} else {
-		dbus_connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
+		g_print (_("New database created. Use the --dbus-service option to "
+		           "share this database on a message bus."));
 	}
-
-	if (dbus_connection) {
-		endpoint = TRACKER_ENDPOINT (tracker_endpoint_dbus_new (connection,
-		                                                        dbus_connection,
-		                                                        NULL, NULL, &error));
-	}
-
-	main_loop = g_main_loop_new (NULL, FALSE);
-
-	if (endpoint) {
-		g_bus_own_name_on_connection (dbus_connection,
-		                              dbus_service,
-		                              G_BUS_NAME_OWNER_FLAGS_NONE,
-		                              name_acquired_cb,
-		                              name_lost_cb,
-		                              main_loop, NULL);
-
-		g_main_loop_run (main_loop);
-	}
-
-	if (error) {
-		g_printerr ("%s\n", error->message);
-		g_error_free (error);
-		g_option_context_free (context);
-		g_main_loop_unref (main_loop);
-		return EXIT_FAILURE;
-	}
-
-	if (!name_owned) {
-		g_printerr ("%s\n", _("Could not own DBus name"));
-		g_option_context_free (context);
-		g_main_loop_unref (main_loop);
-		return EXIT_FAILURE;
-	}
-
-	g_print ("%s\n", _("Listening to SPARQL commands. Press Ctrl-C to stop."));
-
-	g_unix_signal_add (SIGINT, sigterm_cb, main_loop);
-	g_unix_signal_add (SIGTERM, sigterm_cb, main_loop);
-
-	g_main_loop_run (main_loop);
-
-	if (!name_owned) {
-		g_printerr ("%s\n", _("DBus name lost"));
-		g_option_context_free (context);
-		g_main_loop_unref (main_loop);
-		return EXIT_FAILURE;
-	}
-
-	/* Carriage return, so we paper over the ^C */
-	g_print ("\r%s\n", _("Closing connection…"));
-	g_clear_object (&endpoint);
 
 	if (connection) {
 		tracker_sparql_connection_close (connection);
@@ -239,7 +261,6 @@ tracker_endpoint (int argc, const char **argv)
 	}
 
 	g_option_context_free (context);
-	g_main_loop_unref (main_loop);
 
 	return EXIT_SUCCESS;
 }
