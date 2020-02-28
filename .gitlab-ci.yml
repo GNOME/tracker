@@ -12,7 +12,7 @@ variables:
 
 stages:
   - test
-
+  - analysis
 
 .test_template: &test
   stage: test
@@ -59,3 +59,19 @@ test-fedora-latest:
 test-ubuntu-rolling:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/ubuntu:rolling
   <<: *test
+
+coverity:
+  stage: analysis
+  image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
+  allow_failure: true
+  script:
+    - su tracker -c 'curl https://scan.coverity.com/download/linux64 --data "token=$COVERITY_TOKEN&project=Tracker" --output /tmp/coverity_tool.tgz'
+    - su tracker -c 'tar zxf /tmp/coverity_tool.tgz'
+    - su tracker -c 'mkdir coverity-build'
+    - su tracker -c 'cd coverity-build; meson .. -Db_lto=true'
+    - su tracker -c 'cd coverity-build; ../cov-analysis-linux64-*/bin/cov-build --dir cov-int ninja'
+    - su tracker -c 'tar czf cov-int.tar.gz cov-int'
+    - su tracker -c 'curl https://scan.coverity.com/builds?project=Tracker
+      --form token=$COVERITY_TOKEN --form email=carlosg@gnome.org
+      --form file=@cov-int.tar.gz --form version="`git describe --tags`"
+      --form description="gitlab CI build"'
