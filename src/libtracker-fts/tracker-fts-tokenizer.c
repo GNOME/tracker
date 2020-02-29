@@ -220,6 +220,8 @@ tracker_offsets_function (const Fts5ExtensionApi  *api,
 		int phrase, col, n_token;
 
 		rc = api->xInst (fts_ctx, i, &phrase, &col, &n_token);
+		if (rc != SQLITE_OK)
+			break;
 
 		if (first || cur_col != col) {
 			const char *text;
@@ -229,9 +231,15 @@ tracker_offsets_function (const Fts5ExtensionApi  *api,
 				g_array_free (offsets, TRUE);
 
 			offsets = g_array_new (FALSE, FALSE, sizeof (gint));
-			api->xColumnText (fts_ctx, col, &text, &length);
-			api->xTokenize (fts_ctx, text, length,
-			                offsets, &offsets_tokenizer_func);
+			rc = api->xColumnText (fts_ctx, col, &text, &length);
+			if (rc != SQLITE_OK)
+				break;
+
+			rc = api->xTokenize (fts_ctx, text, length,
+					     offsets, &offsets_tokenizer_func);
+			if (rc != SQLITE_OK)
+				break;
+
 			cur_col = col;
 		}
 
