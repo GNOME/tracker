@@ -102,6 +102,7 @@ namespace Tracker {
 		public abstract void bind_boolean (string name, bool value);
 		public abstract void bind_string (string name, string value);
 		public abstract void bind_double (string name, double value);
+		public abstract void clear_bindings ();
 
 		public abstract Cursor execute (GLib.Cancellable? cancellable) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
 		public async abstract Cursor execute_async (GLib.Cancellable? cancellable) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
