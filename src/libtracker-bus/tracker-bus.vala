@@ -60,7 +60,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 	void send_query (string sparql, UnixOutputStream output, Cancellable? cancellable, AsyncReadyCallback? callback) throws GLib.IOError, GLib.Error {
 		var message = new DBusMessage.method_call (dbus_name, object_path, ENDPOINT_IFACE, "Query");
 		var fd_list = new UnixFDList ();
-		message.set_body (new Variant ("(sh)", sparql, fd_list.append (output.fd)));
+		message.set_body (new Variant ("(sha{sv})", sparql, fd_list.append (output.fd), null));
 		message.set_unix_fd_list (fd_list);
 
 		bus.send_message_with_reply.begin (message, DBusSendMessageFlags.NONE, int.MAX, null, cancellable, callback);
