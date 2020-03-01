@@ -206,33 +206,21 @@ update_request_free (UpdateRequest *request)
 	g_free (request);
 }
 
-static void
-query_cb (GObject      *object,
-          GAsyncResult *res,
-          gpointer      user_data)
+static gboolean
+write_cursor (QueryRequest          *request,
+              TrackerSparqlCursor   *cursor,
+              GError               **error)
 {
-	QueryRequest *request = user_data;
-	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
 	const gchar **values = NULL;
-	const gchar **variable_names = NULL;
 	glong *offsets = NULL;
 	gint i, n_columns = 0;
-
-	cursor = tracker_sparql_connection_query_finish (TRACKER_SPARQL_CONNECTION (object),
-	                                                 res, &error);
-	if (!cursor)
-		goto error;
+	GError *inner_error = NULL;
 
 	n_columns = tracker_sparql_cursor_get_n_columns (cursor);
-	variable_names = g_new0 (const gchar *, n_columns + 1);
 	values = g_new0 (const char *, n_columns);
 	offsets = g_new0 (glong, n_columns);
 
-	for (i = 0; i < n_columns; i++)
-		variable_names[i] = tracker_sparql_cursor_get_variable_name (cursor, i);
-
-	while (tracker_sparql_cursor_next (cursor, NULL, &error)) {
+	while (tracker_sparql_cursor_next (cursor, NULL, &inner_error)) {
 		glong cur_offset = -1;
 
 		g_data_output_stream_put_int32 (request->data_stream, n_columns, NULL, NULL);
@@ -262,17 +250,56 @@ query_cb (GObject      *object,
 		}
 	}
 
-error:
+	g_free (values);
+	g_free (offsets);
+
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	} else {
+		return TRUE;
+	}
+}
+
+/* Takes ownership on both cursor and error */
+static void
+handle_cursor_reply (QueryRequest        *request,
+                     TrackerSparqlCursor *cursor,
+                     GError              *error)
+{
+	const gchar **variable_names = NULL;
+	gint i, n_columns;
+
+	if (!error) {
+		n_columns = tracker_sparql_cursor_get_n_columns (cursor);
+		variable_names = g_new0 (const gchar *, n_columns + 1);
+		for (i = 0; i < n_columns; i++)
+			variable_names[i] = tracker_sparql_cursor_get_variable_name (cursor, i);
+
+		write_cursor (request, cursor, &error);
+	}
+
 	if (error)
 		g_dbus_method_invocation_return_gerror (request->invocation, error);
 	else
 		g_dbus_method_invocation_return_value (request->invocation, g_variant_new ("(^as)", variable_names));
 
 	g_free (variable_names);
-	g_free (values);
-	g_free (offsets);
 	g_clear_object (&cursor);
+}
 
+static void
+query_cb (GObject      *object,
+          GAsyncResult *res,
+          gpointer      user_data)
+{
+	QueryRequest *request = user_data;
+	TrackerSparqlCursor *cursor;
+	GError *error = NULL;
+
+	cursor = tracker_sparql_connection_query_finish (TRACKER_SPARQL_CONNECTION (object),
+	                                                 res, &error);
+	handle_cursor_reply (request, cursor, error);
 	query_request_free (request);
 }
 
