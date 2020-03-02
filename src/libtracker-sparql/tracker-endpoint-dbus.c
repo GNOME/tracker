@@ -442,11 +442,11 @@ create_statement (TrackerSparqlConnection  *conn,
 			tracker_sparql_statement_bind_double (stmt, arg,
 			                                      g_variant_get_double (value));
 		} else if (g_variant_is_of_type (value, G_VARIANT_TYPE_INT64)) {
-			tracker_sparql_statement_bind_double (stmt, arg,
-			                                      g_variant_get_int64 (value));
+			tracker_sparql_statement_bind_int (stmt, arg,
+			                                   g_variant_get_int64 (value));
 		} else if (g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN)) {
-			tracker_sparql_statement_bind_double (stmt, arg,
-			                                      g_variant_get_boolean (value));
+			tracker_sparql_statement_bind_boolean (stmt, arg,
+			                                       g_variant_get_boolean (value));
 		} else {
 			g_warning ("Unhandled type '%s' for argument %s",
 			           g_variant_get_type_string (value),
