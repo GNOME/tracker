@@ -1,0 +1,5 @@
+ASK {
+  ~arg1 a rdfs:Class ;
+        rdfs:label ?label .
+  FILTER (?label = ~arg2)
+}

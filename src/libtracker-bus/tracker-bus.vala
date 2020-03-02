@@ -34,7 +34,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		new Sparql.Error.INTERNAL ("");
 	}
 
-	void pipe (out UnixInputStream input, out UnixOutputStream output) throws IOError {
+	static void pipe (out UnixInputStream input, out UnixOutputStream output) throws IOError {
 		int pipefd[2];
 		if (Posix.pipe (pipefd) < 0) {
 			throw new IOError.FAILED ("Pipe creation failed");
@@ -43,7 +43,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		output = new UnixOutputStream (pipefd[1], true);
 	}
 
-	void handle_error_reply (DBusMessage message) throws Sparql.Error, IOError, DBusError {
+	static void handle_error_reply (DBusMessage message) throws Sparql.Error, IOError, DBusError {
 		try {
 			message.to_gerror ();
 		} catch (IOError e_io) {
@@ -57,31 +57,16 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		}
 	}
 
-	void send_query (string sparql, UnixOutputStream output, Cancellable? cancellable, AsyncReadyCallback? callback) throws GLib.IOError, GLib.Error {
+	static void send_query (DBusConnection bus, string dbus_name, string object_path, string sparql, VariantBuilder? arguments, UnixOutputStream output, Cancellable? cancellable, AsyncReadyCallback? callback) throws GLib.IOError, GLib.Error {
 		var message = new DBusMessage.method_call (dbus_name, object_path, ENDPOINT_IFACE, "Query");
 		var fd_list = new UnixFDList ();
-		message.set_body (new Variant ("(sh)", sparql, fd_list.append (output.fd)));
+		message.set_body (new Variant ("(sha{sv})", sparql, fd_list.append (output.fd), arguments));
 		message.set_unix_fd_list (fd_list);
 
 		bus.send_message_with_reply.begin (message, DBusSendMessageFlags.NONE, int.MAX, null, cancellable, callback);
 	}
 
-	public override Sparql.Cursor query (string sparql, Cancellable? cancellable) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
-		// use separate main context for sync operation
-		var context = new MainContext ();
-		var loop = new MainLoop (context, false);
-		context.push_thread_default ();
-		AsyncResult async_res = null;
-		query_async.begin (sparql, cancellable, (o, res) => {
-			async_res = res;
-			loop.quit ();
-		});
-		loop.run ();
-		context.pop_thread_default ();
-		return query_async.end (async_res);
-	}
-
-	public async override Sparql.Cursor query_async (string sparql, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public static async Sparql.Cursor perform_query_call (DBusConnection bus, string dbus_name, string object_path, string sparql, VariantBuilder? arguments, Cancellable? cancellable) throws GLib.IOError, GLib.Error {
 		UnixInputStream input;
 		UnixOutputStream output;
 		pipe (out input, out output);
@@ -89,10 +74,10 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		// send D-Bus request
 		AsyncResult dbus_res = null;
 		bool received_result = false;
-		send_query (sparql, output, cancellable, (o, res) => {
+		send_query (bus, dbus_name, object_path, sparql, arguments, output, cancellable, (o, res) => {
 			dbus_res = res;
 			if (received_result) {
-				query_async.callback ();
+				perform_query_call.callback ();
 			}
 		});
 
@@ -117,6 +102,29 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		string[] variable_names = (string[]) reply.get_body ().get_child_value (0);
 		mem_stream.close ();
 		return new FDCursor (mem_stream.steal_data (), mem_stream.data_size, variable_names);
+	}
+
+	public override Sparql.Cursor query (string sparql, Cancellable? cancellable) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+		// use separate main context for sync operation
+		var context = new MainContext ();
+		var loop = new MainLoop (context, false);
+		context.push_thread_default ();
+		AsyncResult async_res = null;
+		query_async.begin (sparql, cancellable, (o, res) => {
+			async_res = res;
+			loop.quit ();
+		});
+		loop.run ();
+		context.pop_thread_default ();
+		return query_async.end (async_res);
+	}
+
+	public async override Sparql.Cursor query_async (string sparql, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+		return yield perform_query_call (bus, dbus_name, object_path, sparql, null, cancellable);
+	}
+
+	public override Sparql.Statement? query_statement (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error {
+		return new Bus.Statement (bus, dbus_name, object_path, sparql);
 	}
 
 	void send_update (string method, UnixInputStream input, Cancellable? cancellable, AsyncReadyCallback? callback) throws GLib.Error, GLib.IOError {

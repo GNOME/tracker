@@ -36,6 +36,7 @@ static const gchar introspection_xml[] =
 	"    <method name='Query'>"
 	"      <arg type='s' name='query' direction='in' />"
 	"      <arg type='h' name='output_stream' direction='in' />"
+	"      <arg type='a{sv}' name='arguments' direction='in' />"
 	"      <arg type='as' name='result' direction='out' />"
 	"    </method>"
 	"    <method name='Update'>"
@@ -206,33 +207,21 @@ update_request_free (UpdateRequest *request)
 	g_free (request);
 }
 
-static void
-query_cb (GObject      *object,
-          GAsyncResult *res,
-          gpointer      user_data)
+static gboolean
+write_cursor (QueryRequest          *request,
+              TrackerSparqlCursor   *cursor,
+              GError               **error)
 {
-	QueryRequest *request = user_data;
-	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
 	const gchar **values = NULL;
-	const gchar **variable_names = NULL;
 	glong *offsets = NULL;
 	gint i, n_columns = 0;
-
-	cursor = tracker_sparql_connection_query_finish (TRACKER_SPARQL_CONNECTION (object),
-	                                                 res, &error);
-	if (!cursor)
-		goto error;
+	GError *inner_error = NULL;
 
 	n_columns = tracker_sparql_cursor_get_n_columns (cursor);
-	variable_names = g_new0 (const gchar *, n_columns + 1);
 	values = g_new0 (const char *, n_columns);
 	offsets = g_new0 (glong, n_columns);
 
-	for (i = 0; i < n_columns; i++)
-		variable_names[i] = tracker_sparql_cursor_get_variable_name (cursor, i);
-
-	while (tracker_sparql_cursor_next (cursor, NULL, &error)) {
+	while (tracker_sparql_cursor_next (cursor, NULL, &inner_error)) {
 		glong cur_offset = -1;
 
 		g_data_output_stream_put_int32 (request->data_stream, n_columns, NULL, NULL);
@@ -262,17 +251,71 @@ query_cb (GObject      *object,
 		}
 	}
 
-error:
+	g_free (values);
+	g_free (offsets);
+
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	} else {
+		return TRUE;
+	}
+}
+
+/* Takes ownership on both cursor and error */
+static void
+handle_cursor_reply (QueryRequest        *request,
+                     TrackerSparqlCursor *cursor,
+                     GError              *error)
+{
+	const gchar **variable_names = NULL;
+	gint i, n_columns;
+
+	if (!error) {
+		n_columns = tracker_sparql_cursor_get_n_columns (cursor);
+		variable_names = g_new0 (const gchar *, n_columns + 1);
+		for (i = 0; i < n_columns; i++)
+			variable_names[i] = tracker_sparql_cursor_get_variable_name (cursor, i);
+
+		write_cursor (request, cursor, &error);
+	}
+
 	if (error)
 		g_dbus_method_invocation_return_gerror (request->invocation, error);
 	else
 		g_dbus_method_invocation_return_value (request->invocation, g_variant_new ("(^as)", variable_names));
 
 	g_free (variable_names);
-	g_free (values);
-	g_free (offsets);
 	g_clear_object (&cursor);
+}
 
+static void
+query_cb (GObject      *object,
+          GAsyncResult *res,
+          gpointer      user_data)
+{
+	QueryRequest *request = user_data;
+	TrackerSparqlCursor *cursor;
+	GError *error = NULL;
+
+	cursor = tracker_sparql_connection_query_finish (TRACKER_SPARQL_CONNECTION (object),
+	                                                 res, &error);
+	handle_cursor_reply (request, cursor, error);
+	query_request_free (request);
+}
+
+static void
+stmt_execute_cb (GObject      *object,
+                 GAsyncResult *res,
+                 gpointer      user_data)
+{
+	QueryRequest *request = user_data;
+	TrackerSparqlCursor *cursor;
+	GError *error = NULL;
+
+	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
+	                                                  res, &error);
+	handle_cursor_reply (request, cursor, error);
 	query_request_free (request);
 }
 
@@ -373,6 +416,47 @@ read_update_blank_cb (GObject      *object,
 	                                              request);
 }
 
+static TrackerSparqlStatement *
+create_statement (TrackerSparqlConnection  *conn,
+                  const gchar              *query,
+                  GVariantIter             *arguments,
+                  GCancellable             *cancellable,
+                  GError                  **error)
+{
+	TrackerSparqlStatement *stmt;
+	GVariant *value;
+	const gchar *arg;
+
+	stmt = tracker_sparql_connection_query_statement (conn,
+	                                                  query,
+	                                                  cancellable,
+	                                                  error);
+	if (!stmt)
+		return NULL;
+
+	while (g_variant_iter_loop (arguments, "{sv}", &arg, &value)) {
+		if (g_variant_is_of_type (value, G_VARIANT_TYPE_STRING)) {
+			tracker_sparql_statement_bind_string (stmt, arg,
+			                                      g_variant_get_string (value, NULL));
+		} else if (g_variant_is_of_type (value, G_VARIANT_TYPE_DOUBLE)) {
+			tracker_sparql_statement_bind_double (stmt, arg,
+			                                      g_variant_get_double (value));
+		} else if (g_variant_is_of_type (value, G_VARIANT_TYPE_INT64)) {
+			tracker_sparql_statement_bind_double (stmt, arg,
+			                                      g_variant_get_int64 (value));
+		} else if (g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN)) {
+			tracker_sparql_statement_bind_double (stmt, arg,
+			                                      g_variant_get_boolean (value));
+		} else {
+			g_warning ("Unhandled type '%s' for argument %s",
+			           g_variant_get_type_string (value),
+			           arg);
+		}
+	}
+
+	return stmt;
+}
+
 static void
 endpoint_dbus_iface_method_call (GDBusConnection       *connection,
                                  const gchar           *sender,
@@ -387,6 +471,7 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 	TrackerSparqlConnection *conn;
 	GUnixFDList *fd_list;
 	GError *error = NULL;
+	GVariantIter *arguments;
 	gchar *query;
 	gint handle, fd = -1;
 
@@ -394,7 +479,7 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 	fd_list = g_dbus_message_get_unix_fd_list (g_dbus_method_invocation_get_message (invocation));
 
 	if (g_strcmp0 (method_name, "Query") == 0) {
-		g_variant_get (parameters, "(sh)", &query, &handle);
+		g_variant_get (parameters, "(sha{sv})", &query, &handle, &arguments);
 
 		if (fd_list)
 			fd = g_unix_fd_list_get (fd_list, handle, &error);
@@ -408,11 +493,31 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 			QueryRequest *request;
 
 			request = query_request_new (endpoint_dbus, invocation, fd);
-			tracker_sparql_connection_query_async (conn,
-			                                       query,
-			                                       endpoint_dbus->cancellable,
-			                                       query_cb,
-			                                       request);
+
+			if (arguments) {
+				TrackerSparqlStatement *stmt;
+
+				stmt = create_statement (conn, query, arguments,
+				                         endpoint_dbus->cancellable,
+				                         &error);
+				if (stmt) {
+					tracker_sparql_statement_execute_async (stmt,
+					                                        endpoint_dbus->cancellable,
+					                                        stmt_execute_cb,
+					                                        request);
+					/* Statements are single use here... */
+					g_object_unref (stmt);
+				} else {
+					g_dbus_method_invocation_return_gerror (invocation,
+					                                        error);
+				}
+			} else {
+				tracker_sparql_connection_query_async (conn,
+								       query,
+								       endpoint_dbus->cancellable,
+								       query_cb,
+								       request);
+			}
 		}
 
 		g_free (query);
