@@ -8076,9 +8076,8 @@ translate_RDFLiteral (TrackerSparql  *sparql,
 	sparql->current_state.expression_type = type;
 	tracker_binding_set_data_type (binding, type);
 
-	if (!is_parameter &&
-	    (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT ||
-	     sparql->current_state.type == TRACKER_SPARQL_TYPE_CONSTRUCT)) {
+	if (sparql->current_state.type == TRACKER_SPARQL_TYPE_SELECT ||
+	    sparql->current_state.type == TRACKER_SPARQL_TYPE_CONSTRUCT) {
 		tracker_select_context_add_literal_binding (TRACKER_SELECT_CONTEXT (sparql->context),
 		                                            TRACKER_LITERAL_BINDING (binding));
 	}
