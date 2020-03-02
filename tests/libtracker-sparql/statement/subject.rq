@@ -1,0 +1,3 @@
+ASK {
+  ~arg1 a rdfs:Class .
+}

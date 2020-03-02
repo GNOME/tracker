@@ -1,0 +1,3 @@
+ASK {
+  nmm:MusicAlbum rdfs:label ~arg1 .
+}

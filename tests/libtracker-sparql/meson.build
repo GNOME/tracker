@@ -40,3 +40,14 @@ tests += {
   'exe': tracker_fd_test,
   'suite': ['sparql'],
 }
+
+tracker_statement_test = executable('tracker-statement-test',
+  'tracker-statement-test.c',
+  dependencies: [tracker_common_dep, tracker_sparql_dep],
+  c_args: libtracker_sparql_test_c_args + test_c_args)
+
+tests += {
+  'name': 'statement',
+  'exe': tracker_statement_test,
+  'suite': ['sparql'],
+}
