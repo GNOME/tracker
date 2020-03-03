@@ -161,6 +161,13 @@ print_usage_list_cmds (void)
 	GFileEnumerator *enumerator;
 	GFileInfo *info;
 	GFile *dir;
+	GError *error = NULL;
+	const gchar *subcommands_dir;
+
+	subcommands_dir = g_getenv ("TRACKER_CLI_SUBCOMMANDS_DIR");
+	if (!subcommands_dir) {
+		subcommands_dir = LIBEXECDIR "/tracker/";
+	}
 
 	for (i = 0; i < G_N_ELEMENTS(commands); i++) {
 		if (longest < strlen (commands[i].cmd))
@@ -175,27 +182,31 @@ print_usage_list_cmds (void)
 		puts (_(commands[i].help));
 	}
 
-	dir = g_file_new_for_path (LIBEXECDIR "/tracker/");
+	dir = g_file_new_for_path (subcommands_dir);
 	enumerator = g_file_enumerate_children (dir,
 	                                        G_FILE_ATTRIBUTE_STANDARD_NAME ","
 	                                        G_FILE_ATTRIBUTE_STANDARD_IS_SYMLINK ","
 	                                        G_FILE_ATTRIBUTE_STANDARD_SYMLINK_TARGET,
 	                                        G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                                        NULL, NULL);
+	                                        NULL, &error);
 	g_object_unref (dir);
 
-	while ((info = g_file_enumerator_next_file (enumerator, NULL, NULL)) != NULL) {
-		/* Filter builtin commands */
-		if (g_file_info_get_is_symlink (info) &&
-		    g_strcmp0 (g_file_info_get_symlink_target (info), BINDIR "/tracker") == 0)
-			continue;
+	if (enumerator) {
+		while ((info = g_file_enumerator_next_file (enumerator, NULL, NULL)) != NULL) {
+			/* Filter builtin commands */
+			if (g_file_info_get_is_symlink (info) &&
+			    g_strcmp0 (g_file_info_get_symlink_target (info), BINDIR "/tracker") == 0)
+				continue;
 
-		extra_commands = g_list_prepend (extra_commands,
-		                                 g_strdup (g_file_info_get_name (info)));
-		g_object_unref (info);
+			extra_commands = g_list_prepend (extra_commands,
+			                                 g_strdup (g_file_info_get_name (info)));
+			g_object_unref (info);
+		}
+
+		g_object_unref (enumerator);
+	} else {
+		g_warning ("Failed to list extra commands: %s", error->message);
 	}
-
-	g_object_unref (enumerator);
 
 	if (extra_commands) {
 		extra_commands = g_list_sort (extra_commands, (GCompareFunc) g_strcmp0);
@@ -224,6 +235,7 @@ main (int argc, char *argv[])
 {
 	gboolean basename_is_bin = FALSE;
 	gchar *command_basename;
+	const gchar *subcommands_dir;
 
 	setlocale (LC_ALL, "");
 
@@ -235,8 +247,13 @@ main (int argc, char *argv[])
 	basename_is_bin = g_strcmp0 (command_basename, "tracker") == 0;
 	g_free (command_basename);
 
+	subcommands_dir = g_getenv ("TRACKER_CLI_SUBCOMMANDS_DIR");
+	if (!subcommands_dir) {
+		subcommands_dir = LIBEXECDIR "/tracker/";
+	}
+
 	if (g_path_is_absolute (argv[0]) &&
-	    g_str_has_prefix (argv[0], LIBEXECDIR "/tracker/")) {
+	    g_str_has_prefix (argv[0], subcommands_dir)) {
 		/* This is a subcommand call */
 		handle_command (argc, (const gchar **) argv);
 		exit (EXIT_FAILURE);
@@ -255,7 +272,7 @@ main (int argc, char *argv[])
 				subcommand = "help";
 			}
 
-			path = g_build_filename (LIBEXECDIR, "tracker", subcommand, NULL);
+			path = g_build_filename (subcommands_dir, subcommand, NULL);
 
 			if (g_file_test (path, G_FILE_TEST_EXISTS)) {
 				/* Manipulate argv in place, in order to launch subcommand */
