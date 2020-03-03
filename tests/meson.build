@@ -26,7 +26,6 @@ foreach t: tests
 
   test_env = environment()
   test_env.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', join_paths(source_root, 'src', 'libtracker-common', 'stop-words'))
-  test_env.set('TRACKER_TEST_DOMAIN_ONTOLOGY_RULE', join_paths(source_root, 'src', 'tracker-store', 'default.rule'))
   test_env.set('TRACKER_DB_ONTOLOGIES_DIR', join_paths(source_root, 'src', 'ontologies', 'nepomuk'))
   test_env.set('LANG', 'en_US.UTF8')
 
