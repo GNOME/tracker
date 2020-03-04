@@ -594,7 +594,6 @@ tracker_parser_state_iterate (TrackerParserState   *state,
 
 	if (try_children) {
 		/* Try iterating into children first */
-		tracker_parser_state_peek_current_rule (state);
 		child = tracker_parser_state_lookup_child (state);
 
 		if (child) {
