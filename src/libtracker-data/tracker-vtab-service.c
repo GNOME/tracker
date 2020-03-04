@@ -235,8 +235,14 @@ service_filter (sqlite3_vtab_cursor  *vtab_cursor,
 
 		if (!tracker_util_parse_dbus_uri (cursor->service,
 						  &bus_type,
-						  &bus_name, &object_path))
+		                                  &bus_name, &object_path)) {
+			g_set_error (&error,
+			             TRACKER_SPARQL_ERROR,
+			             TRACKER_SPARQL_ERROR_UNSUPPORTED,
+			             "Failed to parse uri '%s'",
+			             cursor->service);
 			goto fail;
+		}
 
 		dbus_connection = g_bus_get_sync (bus_type, NULL, &error);
 		if (!dbus_connection)

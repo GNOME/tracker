@@ -166,10 +166,11 @@ static gboolean     delete_metadata_decomposed (TrackerData      *data,
                                                 TrackerProperty  *property,
                                                 GValue           *gvalue,
                                                 GError          **error);
-static void         resource_buffer_switch     (TrackerData *data,
-                                                const gchar *graph,
-                                                const gchar *subject,
-                                                gint         subject_id);
+static gboolean     resource_buffer_switch     (TrackerData  *data,
+                                                const gchar  *graph,
+                                                const gchar  *subject,
+                                                gint          subject_id,
+                                                GError      **error);
 
 void
 tracker_data_add_commit_statement_callback (TrackerData             *data,
@@ -1783,7 +1784,11 @@ cache_update_metadata_decomposed (TrackerData      *data,
 			}
 
 			/* After flush we need to switch the resource_buffer */
-			resource_buffer_switch (data, graph, subject, subject_id);
+			if (!resource_buffer_switch (data, graph, subject, subject_id, &new_error)) {
+				g_propagate_error (error, new_error);
+				g_free (subject);
+				return FALSE;
+			}
 
 			g_free (subject);
 		}
@@ -2115,9 +2120,10 @@ cache_delete_resource_type (TrackerData  *data,
 }
 
 static TrackerDataUpdateBufferGraph *
-ensure_graph_buffer (TrackerDataUpdateBuffer *buffer,
-                     TrackerData             *data,
-                     const gchar             *name)
+ensure_graph_buffer (TrackerDataUpdateBuffer  *buffer,
+                     TrackerData              *data,
+                     const gchar              *name,
+                     GError                  **error)
 {
 	TrackerDataUpdateBufferGraph *graph_buffer;
 	gint i;
@@ -2129,7 +2135,8 @@ ensure_graph_buffer (TrackerDataUpdateBuffer *buffer,
 	}
 
 	if (name && !tracker_data_manager_find_graph (data->manager, name)) {
-		tracker_data_manager_create_graph (data->manager, name, NULL);
+		if (!tracker_data_manager_create_graph (data->manager, name, error))
+			return NULL;
 	}
 
 	graph_buffer = g_slice_new0 (TrackerDataUpdateBufferGraph);
@@ -2147,11 +2154,12 @@ ensure_graph_buffer (TrackerDataUpdateBuffer *buffer,
 	return graph_buffer;
 }
 
-static void
-resource_buffer_switch (TrackerData *data,
-                        const gchar *graph,
-                        const gchar *subject,
-                        gint         subject_id)
+static gboolean
+resource_buffer_switch (TrackerData  *data,
+                        const gchar  *graph,
+                        const gchar  *subject,
+                        gint          subject_id,
+                        GError      **error)
 {
 	TrackerDataUpdateBufferGraph *graph_buffer;
 
@@ -2159,7 +2167,7 @@ resource_buffer_switch (TrackerData *data,
 	    g_strcmp0 (data->resource_buffer->graph->graph, graph) == 0 &&
 	    strcmp (data->resource_buffer->subject, subject) == 0) {
 		/* Resource buffer stays the same */
-		return;
+		return TRUE;
 	}
 
 	/* large INSERTs with thousands of resources could lead to
@@ -2169,7 +2177,10 @@ resource_buffer_switch (TrackerData *data,
 
 	data->resource_buffer = NULL;
 
-	graph_buffer = ensure_graph_buffer (&data->update_buffer, data, graph);
+	graph_buffer = ensure_graph_buffer (&data->update_buffer, data, graph, error);
+	if (!graph_buffer)
+		return FALSE;
+
 	data->resource_buffer =
 		g_hash_table_lookup (graph_buffer->resources, subject);
 
@@ -2204,6 +2215,8 @@ resource_buffer_switch (TrackerData *data,
 
 		data->resource_buffer = resource_buffer;
 	}
+
+	return TRUE;
 }
 
 void
@@ -2232,7 +2245,9 @@ tracker_data_delete_statement (TrackerData  *data,
 		return;
 	}
 
-	resource_buffer_switch (data, graph, subject, subject_id);
+	if (!resource_buffer_switch (data, graph, subject, subject_id, error))
+		return;
+
 	ontologies = tracker_data_manager_get_ontologies (data->manager);
 
 	if (graph)
@@ -2315,7 +2330,9 @@ delete_all_objects (TrackerData  *data,
 		return;
 	}
 
-	resource_buffer_switch (data, graph, subject, subject_id);
+	if (!resource_buffer_switch (data, graph, subject, subject_id, error))
+		return;
+
 	ontologies = tracker_data_manager_get_ontologies (data->manager);
 
 	field = tracker_ontologies_get_property_by_uri (ontologies, predicate);
@@ -2418,7 +2435,8 @@ tracker_data_insert_statement_with_uri (TrackerData  *data,
 
 	data->has_persistent = TRUE;
 
-	resource_buffer_switch (data, graph, subject, 0);
+	if (!resource_buffer_switch (data, graph, subject, 0, error))
+		return;
 
 	if (graph)
 		graph_id = tracker_data_manager_find_graph (data->manager, graph);
@@ -2521,7 +2539,8 @@ tracker_data_insert_statement_with_string (TrackerData  *data,
 
 	data->has_persistent = TRUE;
 
-	resource_buffer_switch (data, graph, subject, 0);
+	if (!resource_buffer_switch (data, graph, subject, 0, error))
+		return;
 
 	if (graph)
 		graph_id = tracker_data_manager_find_graph (data->manager, graph);
@@ -2601,7 +2620,8 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 
 	data->has_persistent = TRUE;
 
-	resource_buffer_switch (data, graph, subject, 0);
+	if (!resource_buffer_switch (data, graph, subject, 0, error))
+		return;
 
 	if (graph)
 		graph_id = tracker_data_manager_find_graph (data->manager, graph);
@@ -2792,7 +2812,8 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 
 	data->has_persistent = TRUE;
 
-	resource_buffer_switch (data, graph, subject, 0);
+	if (!resource_buffer_switch (data, graph, subject, 0, error))
+		return;
 
 #if HAVE_TRACKER_FTS
 	/* This is unavoidable with FTS */

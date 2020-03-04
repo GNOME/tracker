@@ -706,7 +706,6 @@ fix_indexed (TrackerDataManager  *manager,
 static void
 tracker_data_ontology_load_statement (TrackerDataManager  *manager,
                                       const gchar         *ontology_path,
-                                      gint                 subject_id,
                                       const gchar         *subject,
                                       const gchar         *predicate,
                                       const gchar         *object,
@@ -721,6 +720,8 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 	if (g_strcmp0 (predicate, RDF_TYPE) == 0) {
 		if (g_strcmp0 (object, RDFS_CLASS) == 0) {
 			TrackerClass *class;
+			gint subject_id;
+
 			class = tracker_ontologies_get_class_by_uri (manager->ontologies, subject);
 
 			if (class != NULL) {
@@ -737,9 +738,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 				return;
 			}
 
-			if (subject_id == 0) {
-				subject_id = ++(*max_id);
-			}
+			subject_id = ++(*max_id);
 
 			class = tracker_class_new (FALSE);
 			tracker_class_set_ontologies (class, manager->ontologies);
@@ -760,6 +759,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 
 		} else if (g_strcmp0 (object, RDF_PROPERTY) == 0) {
 			TrackerProperty *property;
+			gint subject_id;
 
 			property = tracker_ontologies_get_property_by_uri (manager->ontologies, subject);
 			if (property != NULL) {
@@ -784,9 +784,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 				return;
 			}
 
-			if (subject_id == 0) {
-				subject_id = ++(*max_id);
-			}
+			subject_id = ++(*max_id);
 
 			property = tracker_property_new (FALSE);
 			tracker_property_set_ontologies (property, manager->ontologies);
@@ -1820,7 +1818,6 @@ load_ontology_file (TrackerDataManager  *manager,
                     gboolean             in_update,
                     GPtrArray           *seen_classes,
                     GPtrArray           *seen_properties,
-                    GHashTable          *uri_id_map,
                     GError             **error)
 {
 	TrackerTurtleReader *reader;
@@ -1841,19 +1838,14 @@ load_ontology_file (TrackerDataManager  *manager,
 
 	while (ttl_error == NULL && tracker_turtle_reader_next (reader, &ttl_error)) {
 		const gchar *subject, *predicate, *object;
-		gint subject_id = 0;
 		GError *ontology_error = NULL;
 
 		subject = tracker_turtle_reader_get_subject (reader);
 		predicate = tracker_turtle_reader_get_predicate (reader);
 		object = tracker_turtle_reader_get_object (reader);
 
-		if (uri_id_map) {
-			subject_id = GPOINTER_TO_INT (g_hash_table_lookup (uri_id_map, subject));
-		}
-
 		tracker_data_ontology_load_statement (manager, ontology_uri,
-		                                      subject_id, subject, predicate, object,
+		                                      subject, predicate, object,
 		                                      max_id, in_update, NULL, NULL,
 		                                      seen_classes, seen_properties, &ontology_error);
 
@@ -4141,7 +4133,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 	GList *sorted = NULL, *l;
 	gint max_id = 0;
 	gboolean read_only;
-	GHashTable *uri_id_map = NULL;
 	GError *internal_error = NULL;
 
 	if (manager->initialized) {
@@ -4223,7 +4214,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			                    FALSE,
 			                    NULL,
 			                    NULL,
-			                    uri_id_map,
 			                    &ontology_error);
 			if (ontology_error) {
 				g_error ("Error loading ontology (%s): %s",
@@ -4473,7 +4463,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 					                    TRUE,
 					                    seen_classes,
 					                    seen_properties,
-					                    uri_id_map,
 					                    &ontology_error);
 
 					if (g_error_matches (ontology_error,
@@ -4497,9 +4486,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 							g_list_free_full (ontos, g_object_unref);
 						}
 						g_object_unref (manager->ontology_location);
-						if (uri_id_map) {
-							g_hash_table_unref (uri_id_map);
-						}
 
 						goto skip_ontology_check;
 					}
@@ -4539,7 +4525,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 				                    TRUE,
 				                    seen_classes,
 				                    seen_properties,
-				                    uri_id_map,
 				                    &ontology_error);
 
 				if (g_error_matches (ontology_error,
@@ -4561,9 +4546,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 					}
 					if (ontos) {
 						g_list_free_full (ontos, g_object_unref);
-					}
-					if (uri_id_map) {
-						g_hash_table_unref (uri_id_map);
 					}
 
 					goto skip_ontology_check;
@@ -4683,9 +4665,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 				}
 				if (ontos) {
 					g_list_free_full (ontos, g_object_unref);
-				}
-				if (uri_id_map) {
-					g_hash_table_unref (uri_id_map);
 				}
 
 				goto skip_ontology_check;

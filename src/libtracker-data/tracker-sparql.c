@@ -417,6 +417,14 @@ _expect (TrackerSparql          *sparql,
 }
 
 static inline void
+_optional (TrackerSparql          *sparql,
+           TrackerGrammarRuleType  type,
+           guint                   value)
+{
+	(void) _accept (sparql, type, value);
+}
+
+static inline void
 _step (TrackerSparql *sparql)
 {
 	tracker_sparql_iter_next (sparql);
@@ -2295,7 +2303,7 @@ translate_Update (TrackerSparql  *sparql,
 		if (sparql->blank_nodes)
 			g_variant_builder_close (sparql->blank_nodes);
 
-		_accept (sparql, RULE_TYPE_LITERAL, LITERAL_SEMICOLON);
+		_optional (sparql, RULE_TYPE_LITERAL, LITERAL_SEMICOLON);
 
 		if (_check_in_rule (sparql, NAMED_RULE_Update))
 			_call_rule (sparql, NAMED_RULE_Update, error);
@@ -2438,8 +2446,14 @@ translate_SelectClause (TrackerSparql  *sparql,
 				}
 
 				tracker_sparql_swap_builder (sparql, old);
-			} else if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS) ||
-			           _check_in_rule (sparql, NAMED_RULE_Expression)) {
+			} else {
+				gboolean parens = FALSE;
+
+				if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_OPEN_PARENS))
+					parens = TRUE;
+				else if (!_check_in_rule (sparql, NAMED_RULE_Expression))
+					break;
+
 				if (!first)
 					_append_string (sparql, ", ");
 
@@ -2460,9 +2474,9 @@ translate_SelectClause (TrackerSparql  *sparql,
 				}
 
 				tracker_sparql_swap_builder (sparql, old);
-				_accept (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
-			} else {
-				break;
+
+				if (parens)
+					_expect (sparql, RULE_TYPE_LITERAL, LITERAL_CLOSE_PARENS);
 			}
 
 			first = FALSE;
@@ -2972,7 +2986,7 @@ translate_WhereClause (TrackerSparql  *sparql,
 	 */
 	child = _append_placeholder (sparql);
 	old = tracker_sparql_swap_builder (sparql, child);
-	_accept (sparql, RULE_TYPE_LITERAL, LITERAL_WHERE);
+	_optional (sparql, RULE_TYPE_LITERAL, LITERAL_WHERE);
 	_call_rule (sparql, NAMED_RULE_GroupGraphPattern, error);
 
 	if (!tracker_string_builder_is_empty (child)) {
@@ -4222,7 +4236,7 @@ translate_GraphOrDefault (TrackerSparql  *sparql,
 		tracker_token_unset (&sparql->current_state.graph);
 		sparql->current_state.graph_op = GRAPH_OP_DEFAULT;
 	} else {
-		_accept (sparql, RULE_TYPE_LITERAL, LITERAL_GRAPH);
+		_optional (sparql, RULE_TYPE_LITERAL, LITERAL_GRAPH);
 		_call_rule (sparql, NAMED_RULE_iri, error);
 		_init_token (&sparql->current_state.graph,
 		             sparql->current_state.prev_node, sparql);
@@ -4303,7 +4317,7 @@ translate_Quads (TrackerSparql  *sparql,
 	while (_check_in_rule (sparql, NAMED_RULE_QuadsNotTriples)) {
 		_call_rule (sparql, NAMED_RULE_QuadsNotTriples, error);
 
-		_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DOT);
+		_optional (sparql, RULE_TYPE_LITERAL, LITERAL_DOT);
 
 		if (_check_in_rule (sparql, NAMED_RULE_TriplesTemplate)) {
 			_call_rule (sparql, NAMED_RULE_TriplesTemplate, error);
@@ -4406,7 +4420,7 @@ translate_GroupGraphPatternSub (TrackerSparql  *sparql,
 		 *    query preparation, so they have been left out at the moment.
 		 */
 		_call_rule (sparql, NAMED_RULE_GraphPatternNotTriples, error);
-		_accept (sparql, RULE_TYPE_LITERAL, LITERAL_DOT);
+		_optional (sparql, RULE_TYPE_LITERAL, LITERAL_DOT);
 
 		if (_check_in_rule (sparql, NAMED_RULE_TriplesBlock)) {
 			gboolean do_join;
@@ -6260,18 +6274,16 @@ translate_GraphNode (TrackerSparql  *sparql,
 	     sparql->current_state.type != TRACKER_SPARQL_TYPE_UPDATE))
 		return TRUE;
 
-	if (!tracker_sparql_apply_quad (sparql, error))
-		return FALSE;
+	if (!tracker_sparql_apply_quad (sparql, &inner_error)) {
+		if (inner_error && !sparql->silent) {
+			g_propagate_error (error, inner_error);
+			return FALSE;
+		}
+	}
 
 	tracker_token_unset (&sparql->current_state.object);
 
-	if (inner_error && !sparql->silent) {
-		g_propagate_error (error, inner_error);
-		return FALSE;
-	} else {
-		g_clear_error (&inner_error);
-		return TRUE;
-	}
+	return TRUE;
 }
 
 static gboolean
