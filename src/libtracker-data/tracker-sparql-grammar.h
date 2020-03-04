@@ -1656,7 +1656,7 @@ terminal_IRIREF (const gchar  *str,
 				  ch != '"' && ch != '{' &&
 				  ch != '}' && ch != '|' &&
 				  ch != '^' && ch != '`' &&
-				  ch != '\\' && !(ch >= 0x00 && ch <= 0x20)));
+				  ch != '\\' && ch > 0x20));
 	ACCEPT_CHAR ((ch == '>'));
 	*str_out = str;
 	return TRUE;
