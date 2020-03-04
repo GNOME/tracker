@@ -248,9 +248,6 @@ tracker_offsets_function (const Fts5ExtensionApi  *api,
 		if (str->len != 0)
 			g_string_append_c (str, ',');
 
-		if (rc != SQLITE_OK)
-			break;
-
 		g_string_append_printf (str, "%s,%d",
 		                        data->property_names[col],
 		                        g_array_index (offsets, gint, n_token));
