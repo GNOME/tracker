@@ -368,12 +368,12 @@ License which can be viewed at:
 
 		message ("Cleaning up");
 
+		data_manager = null;
+		connection = null;
+
 		/* Shutdown major subsystems */
 		Tracker.Writeback.shutdown ();
 		Tracker.Events.shutdown ();
-
-		data_manager = null;
-		connection = null;
 		Tracker.DBus.shutdown ();
 		Tracker.Log.shutdown ();
 

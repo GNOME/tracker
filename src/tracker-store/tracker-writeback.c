@@ -200,6 +200,8 @@ tracker_writeback_transact (void)
 	GHashTableIter iter;
 	gpointer key, value;
 
+	g_return_if_fail (private == NULL);
+
 	if (!private->pending_events)
 		return;
 
