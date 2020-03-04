@@ -6274,18 +6274,16 @@ translate_GraphNode (TrackerSparql  *sparql,
 	     sparql->current_state.type != TRACKER_SPARQL_TYPE_UPDATE))
 		return TRUE;
 
-	if (!tracker_sparql_apply_quad (sparql, error))
-		return FALSE;
+	if (!tracker_sparql_apply_quad (sparql, &inner_error)) {
+		if (inner_error && !sparql->silent) {
+			g_propagate_error (error, inner_error);
+			return FALSE;
+		}
+	}
 
 	tracker_token_unset (&sparql->current_state.object);
 
-	if (inner_error && !sparql->silent) {
-		g_propagate_error (error, inner_error);
-		return FALSE;
-	} else {
-		g_clear_error (&inner_error);
-		return TRUE;
-	}
+	return TRUE;
 }
 
 static gboolean
