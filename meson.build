@@ -50,6 +50,7 @@ json_glib = dependency('json-glib-1.0', version: '>= 1.0', required: true)
 libsoup = dependency('libsoup-2.4', version: '> 2.40', required: true)
 libxml2 = dependency('libxml-2.0', version: '> 2.6')
 sqlite = dependency('sqlite3', version: '>' + sqlite_required)
+dbus = dependency('dbus-1')
 
 libmath = cc.find_library('m', required: false)
 
@@ -179,6 +180,34 @@ if unicode_library_name == ''
     error('libunistring explicitly requested, but not found')
   else
     error('Neither libicu or libunistring were found for Unicode support.')
+  endif
+endif
+
+####################################################################
+# D-Bus service files
+####################################################################
+
+if get_option('dbus_services_dir') == ''
+  dbus_services_dir = dbus.get_pkgconfig_variable('session_bus_services_dir',
+                                                  define_variable: [ 'datadir', datadir ])
+else
+  dbus_services_dir = get_option('dbus_services_dir')
+endif
+
+####################################################################
+# systemd user services
+####################################################################
+
+install_systemd_user_services = get_option('systemd')
+if install_systemd_user_services
+  systemd = dependency('systemd', required: true)
+
+  if get_option('systemd_user_services_dir') == ''
+    # FIXME: this would ideally use the systemduserunitdir pkgconfig variable, but
+    # it does not depend on variables we can override to install within prefix.
+    systemd_user_services_dir = join_paths(libdir, 'systemd', 'user')
+  else
+    systemd_user_services_dir = get_option('systemd_user_services_dir')
   endif
 endif
 
