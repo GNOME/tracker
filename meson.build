@@ -175,6 +175,34 @@ if unicode_library_name == ''
 endif
 
 ####################################################################
+# D-Bus service files
+####################################################################
+
+if get_option('dbus_services') == ''
+  dbus_services_dir = dbus.get_pkgconfig_variable('session_bus_services_dir',
+                                                  define_variable: [ 'datadir', datadir ])
+else
+  dbus_services_dir = get_option('dbus_services')
+endif
+
+####################################################################
+# systemd user services
+####################################################################
+
+install_systemd_user_services = get_option('systemd')
+if install_systemd_user_services
+  systemd = dependency('systemd', required: true)
+
+  if get_option('systemd_user_services_dir') == ''
+    # FIXME: this would ideally use the systemduserunitdir pkgconfig variable, but
+    # it does not depend on variables we can override to install within prefix.
+    systemd_user_services_dir = join_paths(libdir, 'systemd', 'user')
+  else
+    systemd_user_services_dir = get_option('systemd_user_services_dir')
+  endif
+endif
+
+####################################################################
 # bash-completion
 ####################################################################
 

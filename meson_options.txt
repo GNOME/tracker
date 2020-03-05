@@ -18,6 +18,12 @@ option('bash_completion', type: 'boolean', value: true,
        description: 'Whether to install Bash completion files')
 option('bash_completion_dir', type: 'string',
        description: 'Directory to install Bash completion files')
+option('dbus_services_dir', type: 'string', value: '',
+       description: 'Directory to install D-Bus .service files (or empty to use default)')
+option('systemd', type: 'boolean', value: 'true',
+       description: 'Whether to install systemd unit files')
+option('systemd_user_services_dir', type: 'string', value: '',
+       description: 'Directory to install systemd user unit files (or empty to use default)')
 option('test_utils', type: 'boolean', value: true,
        description: 'Whether to install the trackertestutils Python package')
 option('test_utils_dir', type: 'string', value: '',
