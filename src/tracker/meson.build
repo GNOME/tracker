@@ -1,6 +1,8 @@
 modules = [
     'endpoint',
+    'export',
     'help',
+    'import',
     'info',
     'sparql',
     'sql',
