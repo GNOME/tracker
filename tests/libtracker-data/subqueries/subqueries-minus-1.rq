@@ -1,0 +1,7 @@
+SELECT ?s WHERE {
+  {
+    ?s a example:Message
+  } MINUS {
+    ?s a example:Group
+  }
+} ORDER BY ?s
