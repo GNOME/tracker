@@ -5009,12 +5009,32 @@ static gboolean
 translate_MinusGraphPattern (TrackerSparql  *sparql,
                              GError        **error)
 {
+	TrackerStringBuilder *str, *cur;
+	TrackerContext *context;
+	GList *vars;
+
+	context = sparql->current_state.context;
+	vars = g_hash_table_get_keys (context->variable_set);
+
 	/* MinusGraphPattern ::= 'MINUS' GroupGraphPattern
 	 */
+
+	/* We are required to have the same variables in the same
+	 * order on both sides of EXCEPT. Wrap the query (so far)
+	 * with SELECT ... FROM () so we ensure this happens.
+	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_MINUS);
-	_prepend_string (sparql, "SELECT * FROM (");
+	str = _prepend_placeholder (sparql);
+	cur = tracker_sparql_swap_builder (sparql, str);
+	append_subquery_select_vars (sparql, context, vars);
+	tracker_sparql_swap_builder (sparql, cur);
+
 	_append_string (sparql, ") EXCEPT ");
+	append_subquery_select_vars (sparql, context, vars);
+	g_list_free (vars);
+
 	_call_rule (sparql, NAMED_RULE_GroupGraphPattern, error);
+	_append_string (sparql, ")");
 
 	return TRUE;
 }
