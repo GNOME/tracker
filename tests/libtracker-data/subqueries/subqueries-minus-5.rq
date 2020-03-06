@@ -1,0 +1,7 @@
+SELECT DISTINCT ?s WHERE {
+  {
+    ?s a ?u
+  } MINUS {
+    ?s a example:Message
+  }
+} ORDER BY ?s

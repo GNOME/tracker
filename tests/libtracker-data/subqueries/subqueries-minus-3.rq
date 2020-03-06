@@ -1,0 +1,7 @@
+SELECT ?one WHERE {
+  {
+    ?one a example:Message
+  } MINUS {
+    ?another a example:Message
+  }
+} ORDER BY ?one
