@@ -4977,24 +4977,10 @@ translate_DataBlockValue (TrackerSparql  *sparql,
 	return TRUE;
 }
 
-static gboolean
-translate_MinusGraphPattern (TrackerSparql  *sparql,
-                             GError        **error)
-{
-	/* MinusGraphPattern ::= 'MINUS' GroupGraphPattern
-	 */
-	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_MINUS);
-	_prepend_string (sparql, "SELECT * FROM (");
-	_append_string (sparql, ") EXCEPT ");
-	_call_rule (sparql, NAMED_RULE_GroupGraphPattern, error);
-
-	return TRUE;
-}
-
 static void
-append_union_select_vars (TrackerSparql  *sparql,
-                          TrackerContext *context,
-			  GList          *vars)
+append_subquery_select_vars (TrackerSparql  *sparql,
+                             TrackerContext *context,
+                             GList          *vars)
 {
 	GList *l;
 
@@ -5017,6 +5003,20 @@ append_union_select_vars (TrackerSparql  *sparql,
 	}
 
 	_append_string (sparql, "FROM (");
+}
+
+static gboolean
+translate_MinusGraphPattern (TrackerSparql  *sparql,
+                             GError        **error)
+{
+	/* MinusGraphPattern ::= 'MINUS' GroupGraphPattern
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_MINUS);
+	_prepend_string (sparql, "SELECT * FROM (");
+	_append_string (sparql, ") EXCEPT ");
+	_call_rule (sparql, NAMED_RULE_GroupGraphPattern, error);
+
+	return TRUE;
 }
 
 static gboolean
@@ -5072,7 +5072,7 @@ translate_GroupOrUnionGraphPattern (TrackerSparql  *sparql,
 			if (c != context->children)
 				_append_string (sparql, ") UNION ALL ");
 
-			append_union_select_vars (sparql, c->data, vars);
+			append_subquery_select_vars (sparql, c->data, vars);
 			tracker_sparql_swap_builder (sparql, old);
 			idx++;
 		}
