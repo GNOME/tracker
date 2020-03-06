@@ -193,6 +193,11 @@ const TestInfo tests[] = {
 	{ "subqueries/subqueries-1", "subqueries/data-1", FALSE },
 	{ "subqueries/subqueries-union-1", "subqueries/data-1", FALSE },
 	{ "subqueries/subqueries-union-2", "subqueries/data-1", FALSE },
+	{ "subqueries/subqueries-minus-1", "subqueries/data-1", FALSE },
+	{ "subqueries/subqueries-minus-2", "subqueries/data-1", FALSE },
+	{ "subqueries/subqueries-minus-3", "subqueries/data-1", FALSE },
+	{ "subqueries/subqueries-minus-4", "subqueries/data-1", FALSE },
+	{ "subqueries/subqueries-minus-5", "subqueries/data-1", FALSE },
 	/* Bracket error after WHERE */
 	{ "error/query-error-1", "error/query-error-1", TRUE, FALSE },
 	/* Unknown property */
