@@ -169,6 +169,10 @@ class TrackerCommandLineTestCase(ut.TestCase):
         finally:
             shutil.rmtree(dirpath, ignore_errors=True)
 
+    def data_path(self, filename):
+        test_data = pathlib.Path(__file__).parent.joinpath('test-data')
+        return test_data.joinpath(filename)
+
     def run_cli(self, command):
         command = [str(c) for c in command]
         log.info("Running: %s", ' '.join(command))
