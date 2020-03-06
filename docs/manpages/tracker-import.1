@@ -1,0 +1,20 @@
+.TH tracker-import 1 "Mar 2020" GNU "User Commands"
+
+.SH NAME
+tracker-import \- Import data into a Tracker database.
+
+.SH SYNOPSIS
+\fBtracker import\fR FILE.ttl
+
+.SH DESCRIPTION
+.B tracker import
+imports data into a Tracker database.
+
+The data must conform to the existing ontology of the database.
+
+The data must be in Turtle format. You can use a tool such as rapper(1) to
+convert the data from other formats to Turtle.
+
+.SH SEE ALSO
+.BR tracker-export (1),
+.BR tracker-sparql (1).
