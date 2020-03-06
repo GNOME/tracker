@@ -52,6 +52,34 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
                 ['tracker', 'sparql', '--database', tmpdir,
                  '--query', 'ASK { ?u a rdfs:Resource }'])
 
+    def test_export(self):
+        """Export contents of a Tracker database."""
+
+        with self.tmpdir() as tmpdir:
+            ontology_path = configuration.ontologies_dir()
+
+            # Create a database and export it as Turtle.
+            # We don't validate the output in this test, but we should.
+            self.run_cli(
+                ['tracker', 'endpoint', '--database', tmpdir,
+                 '--ontology-path', ontology_path])
+            self.run_cli(
+                ['tracker', 'export', '--database', tmpdir]);
+
+    def test_import(self):
+        """Import a Turtle file into a Tracker database."""
+
+        testdata = str(self.data_path('test-movie.ttl'))
+
+        with self.tmpdir() as tmpdir:
+            ontology_path = configuration.ontologies_dir()
+
+            self.run_cli(
+                ['tracker', 'endpoint', '--database', tmpdir,
+                 '--ontology-path', ontology_path])
+            self.run_cli(
+                ['tracker', 'import', '--database', tmpdir, testdata]);
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
