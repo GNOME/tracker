@@ -4977,24 +4977,10 @@ translate_DataBlockValue (TrackerSparql  *sparql,
 	return TRUE;
 }
 
-static gboolean
-translate_MinusGraphPattern (TrackerSparql  *sparql,
-                             GError        **error)
-{
-	/* MinusGraphPattern ::= 'MINUS' GroupGraphPattern
-	 */
-	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_MINUS);
-	_prepend_string (sparql, "SELECT * FROM (");
-	_append_string (sparql, ") EXCEPT ");
-	_call_rule (sparql, NAMED_RULE_GroupGraphPattern, error);
-
-	return TRUE;
-}
-
 static void
-append_union_select_vars (TrackerSparql  *sparql,
-                          TrackerContext *context,
-			  GList          *vars)
+append_subquery_select_vars (TrackerSparql  *sparql,
+                             TrackerContext *context,
+                             GList          *vars)
 {
 	GList *l;
 
@@ -5017,6 +5003,84 @@ append_union_select_vars (TrackerSparql  *sparql,
 	}
 
 	_append_string (sparql, "FROM (");
+}
+
+static GList *
+intersect_var_set (GHashTable *ht1,
+		   GHashTable *ht2)
+{
+	GHashTableIter iter;
+	GList *intersection = NULL;
+	gpointer key;
+
+	g_hash_table_iter_init (&iter, ht1);
+
+	while (g_hash_table_iter_next (&iter, &key, NULL)) {
+		if (g_hash_table_contains (ht2, key))
+			intersection = g_list_prepend (intersection, key);
+	}
+
+	return intersection;
+}
+
+
+static gboolean
+translate_MinusGraphPattern (TrackerSparql  *sparql,
+                             GError        **error)
+{
+	TrackerStringBuilder *pre, *post, *cur;
+	TrackerContext *cur_context, *context;
+	GList *intersection, *l, *vars;
+
+	cur_context = sparql->current_state.context;
+
+	/* MinusGraphPattern ::= 'MINUS' GroupGraphPattern
+	 */
+	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_MINUS);
+
+	pre = _prepend_placeholder (sparql);
+	post = _append_placeholder (sparql);
+
+	context = tracker_context_new ();
+	tracker_sparql_push_context (sparql, context);
+	_call_rule (sparql, NAMED_RULE_GroupGraphPattern, error);
+	tracker_sparql_pop_context (sparql, FALSE);
+
+	intersection = intersect_var_set (cur_context->variable_set, context->variable_set);
+
+	vars = g_hash_table_get_keys (cur_context->variable_set);
+	cur = tracker_sparql_swap_builder (sparql, pre);
+	append_subquery_select_vars (sparql, cur_context, vars);
+	tracker_sparql_swap_builder (sparql, cur);
+
+	if (intersection) {
+		cur = tracker_sparql_swap_builder (sparql, post);
+		_append_string (sparql, ") WHERE (");
+		for (l = intersection; l; l = l->next) {
+			if (l != intersection)
+				_append_string (sparql, ", ");
+			_append_string_printf (sparql, "%s ",
+					       tracker_variable_get_sql_expression (l->data));
+		}
+
+		_append_string (sparql, ") NOT IN (");
+		append_subquery_select_vars (sparql, context, intersection);
+
+		tracker_sparql_swap_builder (sparql, cur);
+		_append_string (sparql, ")) ");
+		g_list_free (intersection);
+	} else {
+		cur = tracker_sparql_swap_builder (sparql, post);
+		_append_string (sparql, ") EXCEPT ");
+		append_subquery_select_vars (sparql, context, vars);
+
+		tracker_sparql_swap_builder (sparql, cur);
+		_append_string (sparql, ") ");
+	}
+
+	g_list_free (vars);
+
+	return TRUE;
 }
 
 static gboolean
@@ -5072,7 +5136,7 @@ translate_GroupOrUnionGraphPattern (TrackerSparql  *sparql,
 			if (c != context->children)
 				_append_string (sparql, ") UNION ALL ");
 
-			append_union_select_vars (sparql, c->data, vars);
+			append_subquery_select_vars (sparql, c->data, vars);
 			tracker_sparql_swap_builder (sparql, old);
 			idx++;
 		}
