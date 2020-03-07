@@ -33,7 +33,8 @@ glib_required = '2.52.0'
 # 3.7.9 for FTS4 content= support
 # 3.7.15 for sqlite3_errstr() support
 # 3.8.3 for SQLITE_DETERMINISTIC
-sqlite_required = '3.8.3'
+# 3.15.0 for https://sqlite.org/rowvalue.html
+sqlite_required = '3.15.0'
 
 dbus = dependency('dbus-1', version: '> 1.3.1')
 gio = dependency('gio-2.0', version: '>' + glib_required)
