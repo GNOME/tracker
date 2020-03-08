@@ -30,7 +30,7 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
     def test_version(self):
         """Check we're testing the correct version of the CLI"""
         output = self.run_cli(
-            ['tracker', '--version'])
+            ['tracker3', '--version'])
 
         version_line = output.splitlines()[0]
         expected_version_line = 'Tracker %s' % configuration.tracker_version()
@@ -44,12 +44,12 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
             # Create the database
             self.run_cli(
-                ['tracker', 'endpoint', '--database', tmpdir,
+                ['tracker3', 'endpoint', '--database', tmpdir,
                  '--ontology-path', ontology_path])
 
             # Sanity check that it works.
             self.run_cli(
-                ['tracker', 'sparql', '--database', tmpdir,
+                ['tracker3', 'sparql', '--database', tmpdir,
                  '--query', 'ASK { ?u a rdfs:Resource }'])
 
 
