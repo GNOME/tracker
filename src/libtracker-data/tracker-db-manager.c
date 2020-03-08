@@ -36,10 +36,6 @@
 #include <libtracker-common/tracker-common.h>
 #include <libtracker-common/tracker-parser.h>
 
-#if HAVE_TRACKER_FTS
-#include <libtracker-fts/tracker-fts.h>
-#endif
-
 #include "tracker-db-manager.h"
 #include "tracker-db-interface-sqlite.h"
 #include "tracker-db-interface.h"

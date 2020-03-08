@@ -54,9 +54,7 @@ struct _TrackerDataUpdateBuffer {
 	/* string -> TrackerDataUpdateBufferGraph */
 	GPtrArray *graphs;
 
-#if HAVE_TRACKER_FTS
 	gboolean fts_ever_updated;
-#endif
 };
 
 struct _TrackerDataUpdateBufferGraph {
@@ -80,9 +78,7 @@ struct _TrackerDataUpdateBufferResource {
 	/* TrackerClass */
 	GPtrArray *types;
 
-#if HAVE_TRACKER_FTS
 	gboolean fts_updated;
-#endif
 };
 
 struct _TrackerDataUpdateBufferProperty {
@@ -90,9 +86,7 @@ struct _TrackerDataUpdateBufferProperty {
 	GValue value;
 	guint date_time : 1;
 
-#if HAVE_TRACKER_FTS
 	guint fts : 1;
-#endif
 };
 
 struct _TrackerDataUpdateBufferTable {
@@ -599,9 +593,7 @@ cache_insert_value (TrackerData *data,
 
 	g_value_init (&property.value, G_VALUE_TYPE (value));
 	g_value_copy (value, &property.value);
-#if HAVE_TRACKER_FTS
 	property.fts = fts;
-#endif
 	property.date_time = date_time;
 
 	table = cache_ensure_table (data, table_name, multiple_values);
@@ -635,9 +627,7 @@ cache_delete_value (TrackerData *data,
 
 	g_value_init (&property.value, G_VALUE_TYPE (value));
 	g_value_copy (value, &property.value);
-#if HAVE_TRACKER_FTS
 	property.fts = fts;
-#endif
 	property.date_time = date_time;
 
 	table = cache_ensure_table (data, table_name, multiple_values);
@@ -963,7 +953,6 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 		}
 	}
 
-#if HAVE_TRACKER_FTS
 	if (resource->fts_updated) {
 		TrackerProperty *prop;
 		GArray *values;
@@ -1006,7 +995,6 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 			g_ptr_array_free (text, TRUE);
 		}
 	}
-#endif
 }
 
 static void
@@ -1081,9 +1069,7 @@ tracker_data_update_buffer_clear (TrackerData *data)
 	g_hash_table_remove_all (data->update_buffer.resource_cache);
 	data->resource_buffer = NULL;
 
-#if HAVE_TRACKER_FTS
 	data->update_buffer.fts_ever_updated = FALSE;
-#endif
 }
 
 static void
@@ -1369,12 +1355,10 @@ get_old_property_values (TrackerData      *data,
                          GError          **error)
 {
 	GArray *old_values;
-#if HAVE_TRACKER_FTS
 	const gchar *database;
 
 	database = data->resource_buffer->graph->graph ?
 		data->resource_buffer->graph->graph : "main";
-#endif
 
 	/* read existing property values */
 	old_values = g_hash_table_lookup (data->resource_buffer->predicates, property);
@@ -1388,7 +1372,6 @@ get_old_property_values (TrackerData      *data,
 			return NULL;
 		}
 
-#if HAVE_TRACKER_FTS
 		if (tracker_property_get_fulltext_indexed (property)) {
 			TrackerDBInterface *iface;
 
@@ -1458,9 +1441,6 @@ get_old_property_values (TrackerData      *data,
 		} else {
 			old_values = get_property_values (data, property);
 		}
-#else
-		old_values = get_property_values (data, property);
-#endif
 	}
 
 	return old_values;
@@ -1933,9 +1913,7 @@ cache_delete_resource_type_full (TrackerData  *data,
 	if (!single_type) {
 		if (strcmp (tracker_class_get_uri (class), TRACKER_PREFIX_RDFS "Resource") == 0 &&
 		    g_hash_table_size (data->resource_buffer->tables) == 0) {
-#if HAVE_TRACKER_FTS
 			tracker_db_interface_sqlite_fts_delete_id (iface, database, data->resource_buffer->id);
-#endif
 			/* skip subclass query when deleting whole resource
 			   to improve performance */
 
@@ -2199,9 +2177,7 @@ resource_buffer_switch (TrackerData  *data,
 		} else {
 			resource_buffer->id = ensure_resource_id (data, resource_buffer->subject, &resource_buffer->create);
 		}
-#if HAVE_TRACKER_FTS
 		resource_buffer->fts_updated = FALSE;
-#endif
 		if (resource_buffer->create) {
 			resource_buffer->types = g_ptr_array_new ();
 		} else {
@@ -2655,7 +2631,6 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 
 		multiple_values = tracker_property_get_multiple_values (property);
 
-#if HAVE_TRACKER_FTS
 		/* This is unavoidable with FTS */
 		/* This does a check_property_domain too */
 		old_values = get_old_property_values (data, property, &new_error);
@@ -2672,39 +2647,6 @@ tracker_data_update_statement_with_uri (TrackerData  *data,
 			g_propagate_error (error, new_error);
 			return;
 		}
-#else
-		/* We can disable correct object-id for deletes array here */
-		if (!multiple_values) {
-			guint r;
-
-			for (r = 0; r < data->resource_buffer->types->len; r++) {
-				TrackerClass *m_class = g_ptr_array_index (data->resource_buffer->types, r);
-
-				/* We only do the old_values for GraphUpdated in tracker-store.
-				 * The subject's known classes are in resource_buffer->types
-				 * since resource_buffer_switch, so we can quickly check if any
-				 * of them has tracker:notify annotated. If so, get the old
-				 * values for the old_object_id */
-
-				if (tracker_class_get_notify (m_class)) {
-					/* This does a check_property_domain too */
-					old_values = get_old_property_values (data, property, &new_error);
-					domain_unchecked = FALSE;
-					if (!new_error) {
-						if (old_values->len > 0) {
-							/* evel knievel cast */
-							old_object_id = (gint) g_value_get_int64 (g_value_array_get_nth (old_values, 0));
-						}
-					} else {
-						g_propagate_error (error, new_error);
-						return;
-					}
-
-					break;
-				}
-			}
-		}
-#endif /* HAVE_TRACKER_FTS */
 
 		if (domain_unchecked && !check_property_domain (data, property)) {
 			g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CONSTRAINT,
@@ -2815,23 +2757,12 @@ tracker_data_update_statement_with_string (TrackerData  *data,
 	if (!resource_buffer_switch (data, graph, subject, 0, error))
 		return;
 
-#if HAVE_TRACKER_FTS
 	/* This is unavoidable with FTS */
 	get_old_property_values (data, property, &new_error);
 	if (new_error) {
 		g_propagate_error (error, new_error);
 		return;
 	}
-#else
-	if (!check_property_domain (data, property)) {
-		g_set_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CONSTRAINT,
-		             "Subject `%s' is not in domain `%s' of property `%s'",
-		             data->resource_buffer->subject,
-		             tracker_class_get_name (tracker_property_get_domain (property)),
-		             tracker_property_get_name (property));
-		return;
-	}
-#endif /* HAVE_TRACKER_FTS */
 
 	bytes_to_gvalue (object, tracker_property_get_data_type (property), &object_value, data, &new_error);
 	if (new_error) {
@@ -3028,11 +2959,9 @@ tracker_data_commit_transaction (TrackerData  *data,
 	data->in_transaction = FALSE;
 	data->in_ontology_transaction = FALSE;
 
-#if HAVE_TRACKER_FTS
 	if (data->update_buffer.fts_ever_updated) {
 		data->update_buffer.fts_ever_updated = FALSE;
 	}
-#endif
 
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA cache_size = %d", TRACKER_DB_CACHE_SIZE_DEFAULT);
 

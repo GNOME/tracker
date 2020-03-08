@@ -17,6 +17,7 @@ config_json = configure_file(
 functional_tests = [
   'insertion',
   'query',
+  'fts-functions',
   'sparql-bugs',
   'group-concat',
   'coalesce',
@@ -28,10 +29,6 @@ functional_tests = [
   'ontology-changes',
   'cli',
 ]
-
-if get_option('fts')
-  functional_tests += 'fts-functions'
-endif
 
 test_env = environment()
 test_env.prepend('GI_TYPELIB_PATH', tracker_sparql_uninstalled_dir)

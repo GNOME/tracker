@@ -33,9 +33,7 @@
 #include <libtracker-sparql/tracker-sparql.h>
 #include <libtracker-sparql/tracker-private.h>
 
-#if HAVE_TRACKER_FTS
 #include <libtracker-fts/tracker-fts.h>
-#endif
 
 
 #ifdef HAVE_LIBUNISTRING
@@ -2071,7 +2069,6 @@ close_database (TrackerDBInterface *db_interface)
 	}
 }
 
-#if HAVE_TRACKER_FTS
 static gchar **
 _fts_create_properties (GHashTable *properties)
 {
@@ -2099,7 +2096,6 @@ _fts_create_properties (GHashTable *properties)
 
 	return (gchar **) g_ptr_array_free (cols, FALSE);
 }
-#endif
 
 void
 tracker_db_interface_sqlite_fts_init (TrackerDBInterface  *db_interface,
@@ -2108,7 +2104,6 @@ tracker_db_interface_sqlite_fts_init (TrackerDBInterface  *db_interface,
                                       GHashTable          *multivalued,
                                       gboolean             create)
 {
-#if HAVE_TRACKER_FTS
 	GStrv fts_columns;
 
 	tracker_fts_init_db (db_interface->db, db_interface, db_interface->flags, properties);
@@ -2137,10 +2132,7 @@ tracker_db_interface_sqlite_fts_init (TrackerDBInterface  *db_interface,
 		                                              FALSE);
 		g_strfreev (fts_columns);
 	}
-#endif
 }
-
-#if HAVE_TRACKER_FTS
 
 void
 tracker_db_interface_sqlite_fts_delete_table (TrackerDBInterface *db_interface,
@@ -2347,8 +2339,6 @@ tracker_db_interface_sqlite_fts_rebuild_tokens (TrackerDBInterface *interface,
 {
 	tracker_fts_rebuild_tokens (interface->db, database, "fts5");
 }
-
-#endif
 
 void
 tracker_db_interface_sqlite_reset_collator (TrackerDBInterface *db_interface)

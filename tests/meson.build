@@ -5,13 +5,8 @@ subdir('common')
 subdir('gvdb')
 subdir('libtracker-common')
 subdir('libtracker-data')
-
-if enable_fts
-  subdir('libtracker-fts')
-endif
-
+subdir('libtracker-fts')
 subdir('libtracker-sparql')
-
 subdir('functional-tests')
 
 foreach t: tests
