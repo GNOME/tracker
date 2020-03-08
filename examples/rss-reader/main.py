@@ -232,18 +232,18 @@ if __name__ == "__main__":
     bus = dbus.SessionBus (dbus_loop)
     bus.add_signal_receiver (notification_addition,
                              signal_name="SubjectsAdded",
-                             dbus_interface="org.freedesktop.Tracker1.Resources.Class",
-                             path="/org/freedesktop/Tracker1/Resources/Classes/mfo/FeedMessage")
+                             dbus_interface="org.freedesktop.Tracker3.Resources.Class",
+                             path="/org/freedesktop/Tracker3/Resources/Classes/mfo/FeedMessage")
 
     bus.add_signal_receiver (notification_removal,
                              signal_name="SubjectsRemoved",
-                             dbus_interface="org.freedesktop.Tracker1.Resources.Class",
-                             path="/org/freedesktop/Tracker1/Resources/Classes/mfo/FeedMessage")
+                             dbus_interface="org.freedesktop.Tracker3.Resources.Class",
+                             path="/org/freedesktop/Tracker3/Resources/Classes/mfo/FeedMessage")
 
     bus.add_signal_receiver (notification_update,
                              signal_name="SubjectsChanged",
-                             dbus_interface="org.freedesktop.Tracker1.Resources.Class",
-                             path="/org/freedesktop/Tracker1/Resources/Classes/mfo/FeedMessage")
+                             dbus_interface="org.freedesktop.Tracker3.Resources.Class",
+                             path="/org/freedesktop/Tracker3/Resources/Classes/mfo/FeedMessage")
 
     window = ui.get_object ("main_window")
     gobject.set_application_name ("Rss/tracker")

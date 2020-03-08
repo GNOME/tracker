@@ -21,8 +21,8 @@
 import dbus
 import os
 
-TRACKER = 'org.freedesktop.Tracker1'
-TRACKER_OBJ = '/org/freedesktop/Tracker1/Resources'
+TRACKER = 'org.freedesktop.Tracker3'
+TRACKER_OBJ = '/org/freedesktop/Tracker3/Resources'
 
 FALSE = "false"
 TRUE = "true"
@@ -78,7 +78,7 @@ class TrackerRSS:
         bus = dbus.SessionBus ()
         self.tracker = bus.get_object (TRACKER, TRACKER_OBJ)
         self.iface = dbus.Interface (self.tracker,
-                                     "org.freedesktop.Tracker1.Resources")
+                                     "org.freedesktop.Tracker3.Resources")
         self.invisible_feeds = []
         self.load_config ()
         

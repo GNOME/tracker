@@ -33,8 +33,8 @@ except ImportError:
     print "No barnum. Crappy random"
     barnum_available = False
 
-TRACKER = 'org.freedesktop.Tracker1'
-TRACKER_OBJ = '/org/freedesktop/Tracker1/Resources'
+TRACKER = 'org.freedesktop.Tracker3'
+TRACKER_OBJ = '/org/freedesktop/Tracker3/Resources'
 
 # We are not inserting content, nor contributor!
 INSERT_SPARQL = """
@@ -59,7 +59,7 @@ class SignalerUI (gtk.Window):
         bus = dbus.SessionBus ()
         tracker = bus.get_object (TRACKER, TRACKER_OBJ)
         self.iface = dbus.Interface (tracker,
-                                     "org.freedesktop.Tracker1.Resources")
+                                     "org.freedesktop.Tracker3.Resources")
 
         vbox = gtk.VBox ()
 
