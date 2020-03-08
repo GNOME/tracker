@@ -26,6 +26,7 @@
 #include <gio/gio.h>
 
 #include <libtracker-data/tracker-data.h>
+#include <libtracker-data/tracker-turtle-reader.h>
 
 static gchar         *ontology_dir = NULL;
 
@@ -178,18 +179,19 @@ turtle_load_ontology (const gchar *turtle_subject,
 static void
 process_file (const gchar *ttl_path)
 {
+	const gchar *subject, *predicate, *object;
 	TrackerTurtleReader *reader;
 	GError *error = NULL;
 	GFile *ttl_file = g_file_new_for_path (ttl_path);
 
 	g_print ("Processing %s\n", ttl_path);
 
-	reader = tracker_turtle_reader_new (ttl_file, NULL);
+	reader = tracker_turtle_reader_new_for_file (ttl_file, NULL);
 
-	while (error == NULL && tracker_turtle_reader_next (reader, &error)) {
-		turtle_load_ontology (tracker_turtle_reader_get_subject (reader),
-		                      tracker_turtle_reader_get_predicate (reader),
-		                      tracker_turtle_reader_get_object (reader));
+	while (tracker_turtle_reader_next (reader,
+	                                   &subject, &predicate, &object,
+	                                   NULL, &error)) {
+		turtle_load_ontology (subject, predicate, object);
 	}
 
 	g_object_unref (reader);

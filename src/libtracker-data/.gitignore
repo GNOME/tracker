@@ -4,6 +4,5 @@ tracker-sparql-pattern.c
 tracker-sparql-query.[ch]
 tracker-sparql-query.vapi
 tracker-sparql-scanner.c
-tracker-turtle-reader.c
 *.valid
 *.cfg.5

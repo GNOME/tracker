@@ -38,6 +38,7 @@
 #include "tracker-property.h"
 #include "tracker-sparql-query.h"
 #include "tracker-sparql.h"
+#include "tracker-turtle-reader.h"
 
 typedef struct _TrackerDataUpdateBuffer TrackerDataUpdateBuffer;
 typedef struct _TrackerDataUpdateBufferGraph TrackerDataUpdateBufferGraph;
@@ -3074,34 +3075,35 @@ tracker_data_load_turtle_file (TrackerData  *data,
 	TrackerTurtleReader *reader = NULL;
 	GError *inner_error = NULL;
 	gboolean in_transaction = FALSE;
+	const gchar *subject, *predicate, *object_str;
+	gboolean object_is_uri;
 
 	tracker_data_begin_transaction (data, &inner_error);
 	if (inner_error)
 		goto failed;
 
 	in_transaction = TRUE;
-	reader = tracker_turtle_reader_new (file, &inner_error);
+	reader = tracker_turtle_reader_new_for_file (file, &inner_error);
 	if (inner_error)
 		goto failed;
 
-	while (tracker_turtle_reader_next (reader, &inner_error)) {
-		const gchar *object_str;
+	while (tracker_turtle_reader_next (reader,
+	                                   &subject,
+	                                   &predicate,
+	                                   &object_str,
+	                                   &object_is_uri,
+	                                   &inner_error)) {
 		GBytes *object;
 
-		object_str = tracker_turtle_reader_get_object (reader);
 		object = g_bytes_new (object_str, strlen (object_str) + 1);
 
-		if (tracker_turtle_reader_get_object_is_uri (reader)) {
+		if (object_is_uri) {
 			tracker_data_insert_statement_with_uri (data, graph,
-								tracker_turtle_reader_get_subject (reader),
-								tracker_turtle_reader_get_predicate (reader),
-								object,
+			                                        subject, predicate, object,
 								&inner_error);
 		} else {
 			tracker_data_insert_statement_with_string (data, graph,
-								   tracker_turtle_reader_get_subject (reader),
-								   tracker_turtle_reader_get_predicate (reader),
-								   object,
+			                                           subject, predicate, object,
 								   &inner_error);
 		}
 

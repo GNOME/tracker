@@ -46,6 +46,7 @@
 #include "tracker-sparql-query.h"
 #include "tracker-data-query.h"
 #include "tracker-sparql-parser.h"
+#include "tracker-turtle-reader.h"
 
 #define RDF_PROPERTY                    TRACKER_PREFIX_RDF "Property"
 #define RDF_TYPE                        TRACKER_PREFIX_RDF "type"
@@ -1817,10 +1818,11 @@ load_ontology_file (TrackerDataManager  *manager,
                     GError             **error)
 {
 	TrackerTurtleReader *reader;
-	GError              *ttl_error = NULL;
-	gchar               *ontology_uri;
+	GError *ttl_error = NULL;
+	gchar *ontology_uri;
+	const gchar *subject, *predicate, *object;
 
-	reader = tracker_turtle_reader_new (file, &ttl_error);
+	reader = tracker_turtle_reader_new_for_file (file, &ttl_error);
 
 	if (ttl_error) {
 		g_propagate_error (error, ttl_error);
@@ -1832,13 +1834,10 @@ load_ontology_file (TrackerDataManager  *manager,
 	/* Post checks are only needed for ontology updates, not the initial
 	 * ontology */
 
-	while (ttl_error == NULL && tracker_turtle_reader_next (reader, &ttl_error)) {
-		const gchar *subject, *predicate, *object;
+	while (tracker_turtle_reader_next (reader,
+	                                   &subject, &predicate, &object,
+	                                   NULL, &ttl_error)) {
 		GError *ontology_error = NULL;
-
-		subject = tracker_turtle_reader_get_subject (reader);
-		predicate = tracker_turtle_reader_get_predicate (reader);
-		object = tracker_turtle_reader_get_object (reader);
 
 		tracker_data_ontology_load_statement (manager, ontology_uri,
 		                                      subject, predicate, object,
@@ -1864,12 +1863,13 @@ static TrackerOntology*
 get_ontology_from_file (TrackerDataManager *manager,
                         GFile              *file)
 {
+	const gchar *subject, *predicate, *object;
 	TrackerTurtleReader *reader;
 	GError *error = NULL;
 	GHashTable *ontology_uris;
 	TrackerOntology *ret = NULL;
 
-	reader = tracker_turtle_reader_new (file, &error);
+	reader = tracker_turtle_reader_new_for_file (file, &error);
 
 	if (error) {
 		g_critical ("Turtle parse error: %s", error->message);
@@ -1882,13 +1882,9 @@ get_ontology_from_file (TrackerDataManager *manager,
 	                                       g_free,
 	                                       g_object_unref);
 
-	while (error == NULL && tracker_turtle_reader_next (reader, &error)) {
-		const gchar *subject, *predicate, *object;
-
-		subject = tracker_turtle_reader_get_subject (reader);
-		predicate = tracker_turtle_reader_get_predicate (reader);
-		object = tracker_turtle_reader_get_object (reader);
-
+	while (tracker_turtle_reader_next (reader,
+	                                   &subject, &predicate, &object,
+	                                   NULL, &error)) {
 		if (g_strcmp0 (predicate, RDF_TYPE) == 0) {
 			if (g_strcmp0 (object, TRACKER_PREFIX_TRACKER "Ontology") == 0) {
 				TrackerOntology *ontology;
@@ -2050,10 +2046,12 @@ import_ontology_file (TrackerDataManager *manager,
                       GFile              *file,
                       gboolean            in_update)
 {
+	const gchar *subject, *predicate, *object;
+	gboolean object_is_uri;
 	GError *error = NULL;
 	TrackerTurtleReader* reader;
 
-	reader = tracker_turtle_reader_new (file, &error);
+	reader = tracker_turtle_reader_new_for_file (file, &error);
 
 	if (error != NULL) {
 		g_critical ("%s", error->message);
@@ -2061,14 +2059,12 @@ import_ontology_file (TrackerDataManager *manager,
 		return;
 	}
 
-	while (tracker_turtle_reader_next (reader, &error)) {
-		const gchar *subject = tracker_turtle_reader_get_subject (reader);
-		const gchar *predicate = tracker_turtle_reader_get_predicate (reader);
-		const gchar *object  = tracker_turtle_reader_get_object (reader);
-
+	while (tracker_turtle_reader_next (reader,
+	                                   &subject, &predicate, &object,
+	                                   &object_is_uri, &error)) {
 		tracker_data_ontology_process_statement (manager,
 		                                         subject, predicate, object,
-		                                         tracker_turtle_reader_get_object_is_uri (reader),
+		                                         object_is_uri,
 		                                         in_update);
 	}
 

@@ -26,6 +26,7 @@
 #include <gio/gio.h>
 
 #include <libtracker-data/tracker-data.h>
+#include <libtracker-data/tracker-turtle-reader.h>
 
 static gchar         *ontology_dir = NULL;
 static gchar         *ttl_file = NULL;
@@ -118,6 +119,7 @@ load_ontology_files (const gchar *services_dir)
 	conf_file = g_dir_read_name (services);
 
 	while (conf_file) {
+		const gchar *subject, *predicate, *object;
 		TrackerTurtleReader *reader;
 		GError *error = NULL;
 		GFile *file;
@@ -130,13 +132,13 @@ load_ontology_files (const gchar *services_dir)
 		fullpath = g_build_filename (dir_uri, conf_file, NULL);
 		file = g_file_new_for_path (fullpath);
 
-		reader = tracker_turtle_reader_new (file, NULL);
+		reader = tracker_turtle_reader_new_for_file (file, NULL);
 		g_object_unref (file);
 
-		while (error == NULL && tracker_turtle_reader_next (reader, &error)) {
-			turtle_load_ontology (tracker_turtle_reader_get_subject (reader),
-			                      tracker_turtle_reader_get_predicate (reader),
-			                      tracker_turtle_reader_get_object (reader));
+		while (tracker_turtle_reader_next (reader,
+		                                   &subject, &predicate, &object,
+		                                   NULL, &error)) {
+			turtle_load_ontology (subject, predicate, object);
 		}
 
 		g_object_unref (reader);
@@ -162,6 +164,7 @@ load_ontology_files (const gchar *services_dir)
 gint
 main (gint argc, gchar **argv)
 {
+	const gchar *subject, *predicate, *object;
 	GOptionContext *context;
 	TrackerTurtleReader *reader;
 	GError *error = NULL;
@@ -194,13 +197,13 @@ main (gint argc, gchar **argv)
 	load_ontology_files (ontology_dir);
 
 	file = g_file_new_for_commandline_arg (ttl_file);
-	reader = tracker_turtle_reader_new (file, NULL);
+	reader = tracker_turtle_reader_new_for_file (file, NULL);
 	g_object_unref (file);
 
-	while (error == NULL && tracker_turtle_reader_next (reader, &error)) {
-		turtle_statement_handler (tracker_turtle_reader_get_subject (reader),
-		                          tracker_turtle_reader_get_predicate (reader),
-		                          tracker_turtle_reader_get_object (reader));
+	while (tracker_turtle_reader_next (reader,
+	                                   &subject, &predicate, &object,
+	                                   NULL, &error)) {
+		turtle_statement_handler (subject, predicate, object);
 	}
 
 	g_object_unref (reader);
