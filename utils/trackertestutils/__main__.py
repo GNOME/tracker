@@ -310,8 +310,8 @@ class MinerStatusWatch():
 
     """
     def __init__(self, sandbox, miner_name):
-        self.dbus_name = 'org.freedesktop.Tracker1.Miner.' + miner_name
-        self.object_path = '/org/freedesktop/Tracker1/Miner/' + miner_name
+        self.dbus_name = 'org.freedesktop.Tracker3.Miner.' + miner_name
+        self.object_path = '/org/freedesktop/Tracker3/Miner/' + miner_name
 
         self._sandbox = sandbox
 
@@ -329,7 +329,7 @@ class MinerStatusWatch():
         self._proxy = Gio.DBusProxy.new_sync(
             self._sandbox.get_connection(),
             Gio.DBusProxyFlags.NONE, None,
-            self.dbus_name, self.object_path, 'org.freedesktop.Tracker1.Miner',
+            self.dbus_name, self.object_path, 'org.freedesktop.Tracker3.Miner',
             None)
 
         # FIXME: this doesn't appear to work, so we have to use polling.

@@ -128,7 +128,7 @@ def main():
 
     rule_map = read_tracker_extract_rules(args.rules_dir)
 
-    db = Tracker.SparqlConnection.bus_new("org.freedesktop.Tracker1")
+    db = Tracker.SparqlConnection.bus_new("org.freedesktop.Tracker3")
 
     show_only = (args.output_dir == None)
 
