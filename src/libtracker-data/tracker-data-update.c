@@ -3073,15 +3073,9 @@ tracker_data_load_turtle_file (TrackerData  *data,
 {
 	TrackerTurtleReader *reader = NULL;
 	GError *inner_error = NULL;
-	gboolean in_transaction = FALSE;
 	const gchar *subject, *predicate, *object_str;
 	gboolean object_is_uri;
 
-	tracker_data_begin_transaction (data, &inner_error);
-	if (inner_error)
-		goto failed;
-
-	in_transaction = TRUE;
 	reader = tracker_turtle_reader_new_for_file (file, &inner_error);
 	if (inner_error)
 		goto failed;
@@ -3120,18 +3114,11 @@ tracker_data_load_turtle_file (TrackerData  *data,
 	if (inner_error)
 		goto failed;
 
-	tracker_data_commit_transaction (data, &inner_error);
-	if (inner_error)
-		goto failed;
-
 	g_clear_object (&reader);
 
 	return;
 
 failed:
-	if (in_transaction)
-		tracker_data_rollback_transaction (data);
-
 	g_clear_object (&reader);
 
 	g_propagate_error (error, inner_error);
