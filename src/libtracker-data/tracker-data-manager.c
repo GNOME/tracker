@@ -30,9 +30,7 @@
 
 #include <glib/gstdio.h>
 
-#if HAVE_TRACKER_FTS
 #include <libtracker-fts/tracker-fts.h>
-#endif
 
 #include <libtracker-common/tracker-locale.h>
 
@@ -130,12 +128,10 @@ enum {
 	N_PROPS
 };
 
-#if HAVE_TRACKER_FTS
 static gboolean tracker_data_manager_fts_changed (TrackerDataManager *manager);
 static void tracker_data_manager_update_fts (TrackerDataManager *manager,
                                              TrackerDBInterface *iface,
 					     const gchar        *database);
-#endif
 
 static void tracker_data_manager_initable_iface_init (GInitableIface *iface);
 
@@ -3771,7 +3767,6 @@ load_ontologies_gvdb (TrackerDataManager  *manager,
 	g_free (filename);
 }
 
-#if HAVE_TRACKER_FTS
 static gboolean
 tracker_data_manager_fts_changed (TrackerDataManager *manager)
 {
@@ -3898,7 +3893,6 @@ tracker_data_manager_update_fts (TrackerDataManager *manager,
 	g_hash_table_unref (fts_properties);
 	g_hash_table_unref (multivalued);
 }
-#endif
 
 GFile *
 tracker_data_manager_get_cache_location (TrackerDataManager *manager)
@@ -3987,15 +3981,11 @@ tracker_data_manager_initialize_iface (TrackerDataManager  *data_manager,
 				return FALSE;
 			}
 
-#if HAVE_TRACKER_FTS
 			tracker_data_manager_init_fts (data_manager, iface, value, FALSE);
-#endif
 		}
 	}
 
-#if HAVE_TRACKER_FTS
 	tracker_data_manager_init_fts (data_manager, iface, "main", FALSE);
-#endif
 
 	return TRUE;
 }
@@ -4247,9 +4237,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			return FALSE;
 		}
 
-#if HAVE_TRACKER_FTS
 		tracker_data_manager_init_fts (manager, iface, "main", TRUE);
-#endif
 
 		tracker_data_manager_initialize_iface (manager, iface, &internal_error);
 		if (internal_error) {
@@ -4582,14 +4570,12 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 			if (!ontology_error) {
 				/* Perform ALTER-TABLE and CREATE-TABLE calls for all that are is_new */
-#if HAVE_TRACKER_FTS
 				gboolean update_fts;
 
 				update_fts = tracker_data_manager_fts_changed (manager);
 
 				if (update_fts)
 					tracker_db_interface_sqlite_fts_delete_table (iface, "main");
-#endif
 
 				tracker_data_ontology_setup_db (manager, iface, "main", TRUE,
 				                                &ontology_error);
@@ -4603,34 +4589,28 @@ tracker_data_manager_initable_init (GInitable     *initable,
 					g_hash_table_iter_init (&iter, graphs);
 
 					while (g_hash_table_iter_next (&iter, &value, NULL)) {
-#if HAVE_TRACKER_FTS
 						if (update_fts)
 							tracker_db_interface_sqlite_fts_delete_table (iface, value);
-#endif
 
 						tracker_data_ontology_setup_db (manager, iface, value, TRUE,
 						                                &ontology_error);
 						if (ontology_error)
 							break;
 
-#if HAVE_TRACKER_FTS
 						if (update_fts) {
 							tracker_data_manager_update_fts (manager, iface, value);
 						} else {
 							tracker_data_manager_init_fts (manager, iface, value, FALSE);
 						}
-#endif
 					}
 				}
 
 				if (!ontology_error) {
-#if HAVE_TRACKER_FTS
 					if (update_fts) {
 						tracker_data_manager_update_fts (manager, iface, "main");
 					} else {
 						tracker_data_manager_init_fts (manager, iface, "main", FALSE);
 					}
-#endif
 				}
 
 				if (!ontology_error) {
@@ -4739,11 +4719,9 @@ skip_ontology_check:
 
 		tracker_db_manager_set_current_locale (manager->db_manager);
 
-#if HAVE_TRACKER_FTS
 		rebuild_fts_tokens (manager, iface);
 	} else if (!read_only && tracker_db_manager_get_tokenizer_changed (manager->db_manager)) {
 		rebuild_fts_tokens (manager, iface);
-#endif
 	}
 
 	if (!read_only) {
@@ -4975,9 +4953,7 @@ tracker_data_manager_create_graph (TrackerDataManager  *manager,
 	                                     FALSE, error))
 		goto detach;
 
-#if HAVE_TRACKER_FTS
 	tracker_data_manager_init_fts (manager, iface, name, TRUE);
-#endif
 
 	id = tracker_data_ensure_graph (manager->data_update, name, error);
 	if (id == 0)

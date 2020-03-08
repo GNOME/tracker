@@ -33,9 +33,7 @@ tracker_data_dependencies = [
     tracker_common_dep, gvdb_dep, sqlite,
 ]
 
-if get_option('fts')
-    tracker_data_dependencies += tracker_fts_dep
-endif
+tracker_data_dependencies += tracker_fts_dep
 
 libtracker_data = library('tracker-data',
     'tracker-class.c',

@@ -65,8 +65,6 @@ add_project_arguments(['-D', 'TRACKER_COMPILATION'],
                       ['-D', 'G_LOG_DOMAIN="Tracker"'],
                       language: 'vala')
 
-enable_fts = get_option('fts')
-
 network_manager = dependency('libnm', required: get_option('network_manager'))
 have_network_manager = network_manager.found()
 
@@ -77,63 +75,54 @@ have_network_manager = network_manager.found()
 libstemmer = cc.find_library('stemmer', required: get_option('stemmer'))
 have_libstemmer = libstemmer.found()
 
-##################################################################
-# Check for tracker-fts, allow disabling FTS support
-##################################################################
-
-if enable_fts
-  if meson.is_cross_build() and not meson.has_exe_wrapper()
-    sqlite3_fts5 = meson.get_cross_property('sqlite3_has_fts5')
-	if sqlite3_fts5 == ''
-	  error('Please assign an appropriate value for sqlite3_has_fts5 in the [properties] section of your crossfile')
-    elif sqlite3_fts5 == 'true'
-	  sqlite3_has_builtin_fts5 = true
-    elif sqlite3_fts5 == 'false'
-	  sqlite3_has_builtin_fts5 = false
-    else
-		error('Invalid value of sqlite3_has_fts5 property, use \'true\' or \'false\'')
-    endif
+if meson.is_cross_build() and not meson.has_exe_wrapper()
+  sqlite3_fts5 = meson.get_cross_property('sqlite3_has_fts5')
+  if sqlite3_fts5 == ''
+    error('Please assign an appropriate value for sqlite3_has_fts5 in the [properties] section of your crossfile')
+  elif sqlite3_fts5 == 'true'
+    sqlite3_has_builtin_fts5 = true
+  elif sqlite3_fts5 == 'false'
+    sqlite3_has_builtin_fts5 = false
   else
-    sqlite3_builtin_fts5_test = '''
-      #include <sqlite3.h>
-
-      int main (int argc, char *argv[]) {
-        sqlite3 *db;
-        int rc;
-        rc = sqlite3_open(":memory:", &db);
-        if (rc!=SQLITE_OK) return -1;
-        rc = sqlite3_exec(db, "create table a(text)", 0, 0, 0);
-        if (rc!=SQLITE_OK) return -1;
-        rc = sqlite3_exec(db, "create virtual table t using fts5(content='a',text)", 0, 0, 0);
-        if (rc!=SQLITE_OK) return -1;
-      }
-    '''
-
-    result = cc.run(sqlite3_builtin_fts5_test,
-      name: 'sqlite3 has builtin FTS5 module',
-      dependencies: sqlite)
-
-    if not result.compiled()
-      error('Failed to compile SQLite FTS test.')
-    endif
-
-    if result.returncode() == 0
-      sqlite3_has_builtin_fts5 = true
-    else
-      sqlite3_has_builtin_fts5 = false
-    endif
+    error('Invalid value of sqlite3_has_fts5 property, use \'true\' or \'false\'')
   endif
-
-  if sqlite3_has_builtin_fts5
-    message('Using sqlite3 builtin FTS module')
-  elif sqlite.version().version_compare('>= 3.20.0')
-    error('FTS support was enabled but SQLite doesn\'t have the FTS module built in')
-  else
-    message('sqlite3 is older than version 3.20.0, using FTS module that is bundled with Tracker')
-  endif
-
 else
-  sqlite3_has_builtin_fts5 = false
+  sqlite3_builtin_fts5_test = '''
+    #include <sqlite3.h>
+
+    int main (int argc, char *argv[]) {
+      sqlite3 *db;
+      int rc;
+      rc = sqlite3_open(":memory:", &db);
+      if (rc!=SQLITE_OK) return -1;
+      rc = sqlite3_exec(db, "create table a(text)", 0, 0, 0);
+      if (rc!=SQLITE_OK) return -1;
+      rc = sqlite3_exec(db, "create virtual table t using fts5(content='a',text)", 0, 0, 0);
+      if (rc!=SQLITE_OK) return -1;
+    }
+  '''
+
+  result = cc.run(sqlite3_builtin_fts5_test,
+    name: 'sqlite3 has builtin FTS5 module',
+    dependencies: sqlite)
+
+  if not result.compiled()
+    error('Failed to compile SQLite FTS test.')
+  endif
+
+  if result.returncode() == 0
+    sqlite3_has_builtin_fts5 = true
+  else
+    sqlite3_has_builtin_fts5 = false
+  endif
+endif
+
+if sqlite3_has_builtin_fts5
+  message('Using sqlite3 builtin FTS module')
+elif sqlite.version().version_compare('>= 3.20.0')
+  error('FTS support was enabled but SQLite doesn\'t have the FTS module built in')
+else
+  message('sqlite3 is older than version 3.20.0, using FTS module that is bundled with Tracker')
 endif
 
 ##################################################################
@@ -196,7 +185,6 @@ endif
 conf = configuration_data()
 
 # Config that goes in config.h
-conf.set10('HAVE_TRACKER_FTS', enable_fts)
 
 conf.set('HAVE_BUILTIN_FTS', sqlite3_has_builtin_fts5)
 conf.set('HAVE_LIBICU', unicode_library_name == 'icu')
@@ -316,8 +304,7 @@ summary = [
   '\nFeature Support:',
   '    Support for network status detection:   ' + have_network_manager.to_string(),
   '    Unicode support library:                ' + unicode_library_name,
-  '    Build with SQLite FTS support:          @0@ (built-in FTS: @1@)'.format(
-     get_option('fts'), sqlite3_has_builtin_fts5),
+  '    Use external FTS module:                ' + (not sqlite3_has_builtin_fts5).to_string(),
   '    Build with Stemming support:            ' + have_libstemmer.to_string(),
 ]
 
