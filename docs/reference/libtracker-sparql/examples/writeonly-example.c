@@ -16,7 +16,7 @@ int main (int argc, const char **argv)
     "FILTER (!bound(?tag)) "
     "}";
 
-  connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker1", NULL, NULL, &error);
+  connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files", NULL, NULL, &error);
   if (!connection) {
     g_printerr ("Couldn't obtain a connection to the Tracker store: %s",
                 error ? error->message : "unknown error");
