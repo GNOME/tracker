@@ -2608,7 +2608,10 @@ tracker_db_interface_lru_insert_unchecked (TrackerDBInterface          *db_inter
 	 *    `- [n-p] <- [n-p] <--------'    *
 	 *                                    */
 
-	if (stmt_lru->size >= stmt_lru->max) {
+	if (stmt_lru->size == 0) {
+		stmt_lru->head = stmt;
+		stmt_lru->tail = stmt;
+	} else if (stmt_lru->size >= stmt_lru->max) {
 		TrackerDBStatement *new_head;
 
 		/* We reached max-size of the LRU stmt cache. Destroy current
@@ -2621,11 +2624,6 @@ tracker_db_interface_lru_insert_unchecked (TrackerDBInterface          *db_inter
 		                     (gpointer) sqlite3_sql (stmt_lru->head->stmt));
 		stmt_lru->size--;
 		stmt_lru->head = new_head;
-	} else {
-		if (stmt_lru->size == 0) {
-			stmt_lru->head = stmt;
-			stmt_lru->tail = stmt;
-		}
 	}
 
 	/* Set the current stmt (which is always new here) as the new tail
