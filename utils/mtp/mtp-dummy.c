@@ -286,7 +286,7 @@ context_init (gint    argc,
 	}
 
 	/* Get connection */
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker1",
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
 	                                                NULL, NULL, &error);
 	if (!connection) {
 		/* Some error happened performing the query, not good */
