@@ -3075,10 +3075,6 @@ tracker_data_load_turtle_file (TrackerData  *data,
 	GError *inner_error = NULL;
 	gboolean in_transaction = FALSE;
 
-	tracker_data_begin_transaction (data, &inner_error);
-	if (inner_error)
-		goto failed;
-
 	in_transaction = TRUE;
 	reader = tracker_turtle_reader_new (file, &inner_error);
 	if (inner_error)
@@ -3116,10 +3112,6 @@ tracker_data_load_turtle_file (TrackerData  *data,
 			goto failed;
 	}
 
-	if (inner_error)
-		goto failed;
-
-	tracker_data_commit_transaction (data, &inner_error);
 	if (inner_error)
 		goto failed;
 
