@@ -64,7 +64,6 @@ gboolean            tracker_db_interface_sqlite_wal_checkpoint         (TrackerD
 gboolean            tracker_db_interface_init_vtabs                    (TrackerDBInterface       *interface,
                                                                         TrackerOntologies        *ontologies);
 
-#if HAVE_TRACKER_FTS
 void                tracker_db_interface_sqlite_fts_delete_table       (TrackerDBInterface       *interface,
                                                                         const gchar              *database);
 
@@ -89,7 +88,6 @@ gboolean            tracker_db_interface_sqlite_fts_delete_id          (TrackerD
 void                tracker_db_interface_sqlite_fts_rebuild_tokens     (TrackerDBInterface       *interface,
                                                                         const gchar              *database);
 
-#endif
 
 gboolean            tracker_db_interface_attach_database               (TrackerDBInterface       *db_interface,
                                                                         GFile                    *file,
