@@ -239,7 +239,11 @@ test_query (TestInfo      *test_info,
 	data_filename = g_strconcat (data_prefix, ".ttl", NULL);
 	file = g_file_new_for_path (data_filename);
 	data_update = tracker_data_manager_get_data (manager);
+	tracker_data_begin_transaction (data_update, &error);
+	g_assert_no_error (error);
 	tracker_data_load_turtle_file (data_update, file, NULL, &error);
+	g_assert_no_error (error);
+	tracker_data_commit_transaction (data_update, &error);
 	g_assert_no_error (error);
 	g_object_unref (file);
 
