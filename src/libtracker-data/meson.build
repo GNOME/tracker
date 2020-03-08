@@ -1,27 +1,3 @@
-# Vala parts of libtracker-data are split out separately, because we can't link
-# the Vala code to libicu. In the Makefile.am this library is called
-# libtracker-sparql-query.
-libtracker_data_vala = static_library('tracker-sparql-query',
-    'tracker-vala-namespace.vala',
-    'tracker-sparql-scanner.vala',
-    '../libtracker-common/libtracker-common.vapi',
-    'libtracker-data.vapi',
-    tracker_sparql_vapi,
-    tracker_common_enum_header,
-    c_args: tracker_c_args + [
-        '-include', 'libtracker-sparql/tracker-private.h',
-    ],
-    vala_args: [
-        '--debug',
-        '--pkg', 'posix',
-        # FIXME: Meson has code to add --target-glib automatically, but it
-        # doesn't seem to work here.
-        '--target-glib', glib_required,
-    ],
-    dependencies: [tracker_common_dep],
-    include_directories: [commoninc, configinc, srcinc],
-)
-
 tracker_data_enums = gnome.mkenums('tracker-data-enum-types',
     sources: 'tracker-db-interface-sqlite.h',
     c_template: 'tracker-data-enum-types.c.template',
@@ -66,7 +42,6 @@ libtracker_data = library('tracker-data',
     install_dir: tracker_internal_libs_dir,
     # This doesn't depend on tracker_common_dep because of
     # https://github.com/mesonbuild/meson/issues/671
-    link_with: [libtracker_data_vala],
     # We do *not* want --no-undefined here, this library uses
     # symbols from libtracker-sparql, but does not mean it should
     # be linked to it.
@@ -76,7 +51,7 @@ libtracker_data = library('tracker-data',
 )
 
 tracker_data_dep = declare_dependency(
-    link_with: [libtracker_data, libtracker_data_vala],
+    link_with: [libtracker_data],
     dependencies: tracker_data_dependencies,
     include_directories: include_directories('.'),
     sources: enums[1],
