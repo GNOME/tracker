@@ -19,11 +19,11 @@
  */
 #include "config.h"
 
-#include "tracker-sparql-query.h"
 #include "tracker-sparql-parser.h"
 #include "tracker-sparql-grammar.h"
 
-#include "string.h"
+#include <libtracker-sparql/tracker-sparql.h>
+#include <string.h>
 
 typedef struct _TrackerRuleState TrackerRuleState;
 typedef struct _TrackerNodeTree TrackerNodeTree;

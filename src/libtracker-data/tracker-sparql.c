@@ -29,7 +29,6 @@
 #include "tracker-sparql-grammar.h"
 #include "tracker-collation.h"
 #include "tracker-db-interface-sqlite.h"
-#include "tracker-sparql-query.h"
 #include "tracker-utils.h"
 
 #define TRACKER_NS "http://www.tracker-project.org/ontologies/tracker#"

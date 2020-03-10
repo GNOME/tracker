@@ -37,7 +37,6 @@
 #include "tracker-ontology.h"
 #include "tracker-ontologies.h"
 #include "tracker-property.h"
-#include "tracker-sparql-query.h"
 #include "tracker-sparql.h"
 #include "tracker-uuid.h"
 
