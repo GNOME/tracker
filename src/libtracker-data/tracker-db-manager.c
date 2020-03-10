@@ -575,15 +575,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		db_manager->in_use_filename = g_build_filename (db_manager->data_dir,
 		                                                IN_USE_FILENAME,
 		                                                NULL);
-
-		/* Don't do need_reindex checks for readonly (direct-access) */
-		if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
-
-			/* Make sure the directories exist */
-			g_debug ("Checking database directories exist");
-
-			g_mkdir_with_parents (db_manager->data_dir, 00755);
-		}
 	} else {
 		db_manager->shared_cache_key = tracker_generate_uuid (NULL);
 	}
