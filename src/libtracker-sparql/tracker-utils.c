@@ -78,3 +78,16 @@ tracker_sparql_get_uuid_urn (void)
 {
 	return tracker_generate_uuid ("urn:uuid");
 }
+
+/**
+ * tracker_sparql_get_ontology_nepomuk:
+ *
+ * Returns a path to the built-in Nepomuk ontologies.
+ *
+ * Returns: (transfer full): a #GFile instance.
+ */
+GFile *
+tracker_sparql_get_ontology_nepomuk (void)
+{
+	return g_file_new_for_path (SHAREDIR "/tracker/ontologies/nepomuk");
+}

@@ -378,10 +378,9 @@ test_sparql_query (TestInfo      *test_info,
 	test_schemas = g_file_get_parent (file);
 	g_object_unref (file);
 
-	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX |
-	                                    TRACKER_DB_MANAGER_IN_MEMORY,
+	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_IN_MEMORY,
 	                                    NULL, test_schemas, /* loc, domain and ontology_name */
-	                                    FALSE, 100, 100);
+	                                    100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
 

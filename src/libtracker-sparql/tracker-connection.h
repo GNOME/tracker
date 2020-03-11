@@ -119,6 +119,22 @@ TrackerSparqlConnection * tracker_sparql_connection_new_finish (GAsyncResult  *r
                                                                 GError       **error);
 
 TRACKER_AVAILABLE_IN_ALL
+TrackerSparqlConnection * tracker_sparql_connection_new_with_ontology (TrackerSparqlConnectionFlags   flags,
+                                                                       GFile                         *store,
+                                                                       GCancellable                  *cancellable,
+                                                                       GError                       **error);
+TRACKER_AVAILABLE_IN_ALL
+void tracker_sparql_connection_new_with_ontology_async (TrackerSparqlConnectionFlags   flags,
+                                                        GFile                         *store,
+                                                        GFile                         *ontology,
+                                                        GCancellable                  *cancellable,
+                                                        GAsyncReadyCallback            callback,
+                                                        gpointer                       user_data);
+
+TRACKER_AVAILABLE_IN_ALL
+TrackerSparqlConnection * tracker_sparql_connection_new_with_ontology_finish (GAsyncResult  *result,
+                                                                              GError       **error);
+TRACKER_AVAILABLE_IN_ALL
 TrackerSparqlConnection * tracker_sparql_connection_bus_new (const gchar      *service_name,
                                                              const gchar      *object_path,
                                                              GDBusConnection  *dbus_connection,
