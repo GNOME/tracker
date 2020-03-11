@@ -20,6 +20,7 @@
 #define __TRACKER_UTILS_H__
 
 #include <glib.h>
+#include <gio/gio.h>
 #include <libtracker-sparql/tracker-version.h>
 
 TRACKER_AVAILABLE_IN_ALL
@@ -35,5 +36,9 @@ TRACKER_AVAILABLE_IN_ALL
 gchar* tracker_sparql_escape_string (const gchar* literal);
 TRACKER_AVAILABLE_IN_ALL
 gchar* tracker_sparql_get_uuid_urn (void);
+
+TRACKER_AVAILABLE_IN_ALL
+GFile *
+tracker_sparql_get_ontology_nepomuk (void);
 
 #endif /* __TRACKER_UTILS_H__ */
