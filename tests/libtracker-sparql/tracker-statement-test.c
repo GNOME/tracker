@@ -194,7 +194,7 @@ create_local_connection (GError **error)
 
         ontology = g_file_new_for_path (TEST_ONTOLOGIES_DIR);
 
-        conn = tracker_sparql_connection_new (0, NULL, ontology, NULL, error);
+        conn = tracker_sparql_connection_new_with_ontology (0, NULL, ontology, NULL, error);
         g_object_unref (ontology);
 
         return conn;

@@ -48,8 +48,11 @@ GType tracker_direct_connection_get_type (void) G_GNUC_CONST;
 
 TrackerDirectConnection *tracker_direct_connection_new (TrackerSparqlConnectionFlags   flags,
                                                         GFile                         *store,
-                                                        GFile                         *ontology,
                                                         GError                       **error);
+TrackerDirectConnection *tracker_direct_connection_new_with_ontology (TrackerSparqlConnectionFlags   flags,
+                                                                      GFile                         *store,
+                                                                      GFile                         *ontology,
+                                                                      GError                       **error);
 
 TrackerDataManager *tracker_direct_connection_get_data_manager (TrackerDirectConnection *conn);
 

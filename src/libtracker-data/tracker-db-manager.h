@@ -38,30 +38,29 @@ G_DECLARE_FINAL_TYPE (TrackerDBManager, tracker_db_manager,
 #define TRACKER_DB_CACHE_SIZE_UPDATE 2000
 
 typedef enum {
-	TRACKER_DB_MANAGER_FORCE_REINDEX         = 1 << 1,
-	TRACKER_DB_MANAGER_REMOVE_ALL            = 1 << 2,
-	TRACKER_DB_MANAGER_READONLY              = 1 << 3,
-	TRACKER_DB_MANAGER_DO_NOT_CHECK_ONTOLOGY = 1 << 4,
-	TRACKER_DB_MANAGER_ENABLE_MUTEXES        = 1 << 5,
-	TRACKER_DB_MANAGER_FTS_ENABLE_STEMMER    = 1 << 6,
-	TRACKER_DB_MANAGER_FTS_ENABLE_UNACCENT   = 1 << 7,
-	TRACKER_DB_MANAGER_FTS_ENABLE_STOP_WORDS = 1 << 8,
-	TRACKER_DB_MANAGER_FTS_IGNORE_NUMBERS    = 1 << 9,
-	TRACKER_DB_MANAGER_IN_MEMORY             = 1 << 10,
+	TRACKER_DB_MANAGER_FLAGS_NONE            = 0,
+	TRACKER_DB_MANAGER_READONLY              = 1 << 1,
+	TRACKER_DB_MANAGER_DO_NOT_CHECK_ONTOLOGY = 1 << 2,
+	TRACKER_DB_MANAGER_ENABLE_MUTEXES        = 1 << 3,
+	TRACKER_DB_MANAGER_FTS_ENABLE_STEMMER    = 1 << 4,
+	TRACKER_DB_MANAGER_FTS_ENABLE_UNACCENT   = 1 << 5,
+	TRACKER_DB_MANAGER_FTS_ENABLE_STOP_WORDS = 1 << 6,
+	TRACKER_DB_MANAGER_FTS_IGNORE_NUMBERS    = 1 << 7,
+	TRACKER_DB_MANAGER_IN_MEMORY             = 1 << 8,
 } TrackerDBManagerFlags;
 
 typedef struct _TrackerDBManager TrackerDBManager;
 
+gboolean            tracker_db_manager_db_exists              (GFile *cache_location);
+
 TrackerDBManager   *tracker_db_manager_new                    (TrackerDBManagerFlags   flags,
                                                                GFile                  *cache_location,
                                                                gboolean               *first_time,
-                                                               gboolean                restoring_backup,
                                                                gboolean                shared_cache,
                                                                guint                   select_cache_size,
                                                                guint                   update_cache_size,
                                                                TrackerBusyCallback     busy_callback,
                                                                gpointer                busy_user_data,
-                                                               const gchar            *busy_operation,
                                                                GObject                *iface_data,
                                                                gpointer                vtab_data,
                                                                GError                **error);

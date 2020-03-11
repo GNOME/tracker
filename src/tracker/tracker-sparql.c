@@ -174,7 +174,7 @@ create_connection (GError **error)
 
 		file = g_file_new_for_commandline_arg (database_path);
 		return tracker_sparql_connection_new (TRACKER_SPARQL_CONNECTION_FLAGS_READONLY,
-		                                      file, NULL, NULL, error);
+		                                      file, error);
 	} else if (dbus_service && !database_path && !remote_service) {
 		GDBusConnection *dbus_conn;
 

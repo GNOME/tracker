@@ -154,7 +154,6 @@ main (gint argc, gchar *argv[])
 
 	tracker_sparql_connection_new_async (0,
 	                                     store,
-	                                     NULL,
 	                                     md->cancellable,
 	                                     connection_cb,
 	                                     md);
