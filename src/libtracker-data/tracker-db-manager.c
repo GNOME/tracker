@@ -240,28 +240,6 @@ db_set_params (TrackerDBInterface   *iface,
 	g_debug ("  Setting cache size to %d", cache_size);
 }
 
-static void
-tracker_db_manager_remove_all (TrackerDBManager *db_manager)
-{
-	gchar *filename;
-
-	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) != 0)
-		return;
-
-	g_info ("Removing all files for database %s", db_manager->db.abs_filename);
-
-	g_unlink (db_manager->db.abs_filename);
-
-	/* also delete shm and wal helper files */
-	filename = g_strdup_printf ("%s-shm", db_manager->db.abs_filename);
-	g_unlink (filename);
-	g_free (filename);
-
-	filename = g_strdup_printf ("%s-wal", db_manager->db.abs_filename);
-	g_unlink (filename);
-	g_free (filename);
-}
-
 static gboolean
 tracker_db_manager_get_metadata (TrackerDBManager   *db_manager,
                                  const gchar        *key,
@@ -447,33 +425,6 @@ tracker_db_manager_set_current_locale (TrackerDBManager *db_manager)
 }
 
 static void
-db_recreate_all (TrackerDBManager  *db_manager,
-		 GError           **error)
-{
-	GError *internal_error = NULL;
-
-	/* We call an internal version of this function here
-	 * because at the time 'initialized' = FALSE and that
-	 * will cause errors and do nothing.
-	 */
-	g_debug ("Cleaning up database files for reindex");
-
-	tracker_db_manager_remove_all (db_manager);
-
-	/* Now create the databases and close them */
-	g_info ("Creating database files for %s...", db_manager->db.abs_filename);
-
-	db_manager->db.iface = tracker_db_manager_create_db_interface (db_manager, FALSE, &internal_error);
-	if (internal_error) {
-		g_propagate_error (error, internal_error);
-		return;
-	}
-
-	g_clear_object (&db_manager->db.iface);
-	g_clear_object (&db_manager->db.wal_iface);
-}
-
-static void
 tracker_db_manager_ensure_location (TrackerDBManager *db_manager,
 				    GFile            *cache_location)
 {
@@ -497,57 +448,98 @@ tracker_db_manager_ensure_location (TrackerDBManager *db_manager,
 	g_free (dir);
 }
 
-static void
-perform_recreate (TrackerDBManager  *db_manager,
-		  gboolean          *first_time,
-		  GError           **error)
+gboolean
+tracker_db_manager_db_exists (GFile *cache_location)
+{
+	gchar *dir;
+	gchar *filename;
+	gboolean db_exists = FALSE;
+
+	dir = g_file_get_path (cache_location);
+	filename = g_build_filename (dir, db_base.file, NULL);
+
+	db_exists = g_file_test (filename, G_FILE_TEST_EXISTS);
+
+	g_free (dir);
+	g_free (filename);
+
+	return db_exists;
+}
+
+static gboolean
+db_check_integrity (TrackerDBManager *db_manager)
 {
 	GError *internal_error = NULL;
+	TrackerDBStatement *stmt;
+	TrackerDBCursor *cursor = NULL;
 
-	if (first_time) {
-		*first_time = TRUE;
+	stmt = tracker_db_interface_create_statement (db_manager->db.iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
+	                                              &internal_error,
+	                                              "PRAGMA integrity_check(1)");
+
+	if (!stmt) {
+		if (internal_error) {
+			g_message ("Corrupt database: failed to create integrity_check statement: %s", internal_error->message);
+		}
+
+		g_clear_error (&internal_error);
+		return FALSE;
 	}
 
-	g_clear_object (&db_manager->db.iface);
-	g_clear_object (&db_manager->db.wal_iface);
+	cursor = tracker_db_statement_start_cursor (stmt, NULL);
+	g_object_unref (stmt);
 
-	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) == 0 &&
-	    !tracker_file_system_has_enough_space (db_manager->data_dir, TRACKER_DB_MIN_REQUIRED_SPACE, TRUE)) {
-		g_set_error (error,
-		             TRACKER_DB_INTERFACE_ERROR,
-		             TRACKER_DB_OPEN_ERROR,
-		             "Filesystem has not enough space");
-		return;
+	if (cursor) {
+		if (tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
+			const gchar *check_result;
+
+			check_result = tracker_db_cursor_get_string (cursor, 0, NULL);
+			if (g_strcmp0 (check_result, "ok") != 0) {
+				g_message ("Corrupt database: sqlite integrity check returned '%s'", check_result);
+				return FALSE;
+			}
+		}
+		g_object_unref (cursor);
 	}
 
-	db_recreate_all (db_manager, &internal_error);
+	/* ensure that database has been initialized by an earlier tracker-store start
+	   by checking whether Resource table exists */
+	stmt = tracker_db_interface_create_statement (db_manager->db.iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
+	                                              &internal_error,
+	                                              "SELECT 1 FROM Resource");
+	if (!stmt) {
+		if (internal_error) {
+			g_message ("Corrupt database: failed to create resource check statement: %s", internal_error->message);
+		}
 
-	if (internal_error) {
-		g_propagate_error (error, internal_error);
+		g_clear_error (&internal_error);
+		return FALSE;
 	}
+
+	g_object_unref (stmt);
+
+	return TRUE;
 }
 
 TrackerDBManager *
 tracker_db_manager_new (TrackerDBManagerFlags   flags,
 			GFile                  *cache_location,
 			gboolean               *first_time,
-			gboolean                restoring_backup,
 			gboolean                shared_cache,
 			guint                   select_cache_size,
 			guint                   update_cache_size,
 			TrackerBusyCallback     busy_callback,
 			gpointer                busy_user_data,
-			const gchar            *busy_operation,
                         GObject                *iface_data,
                         gpointer                vtab_data,
 			GError                **error)
 {
 	TrackerDBManager *db_manager;
 	TrackerDBVersion version;
-	gboolean need_reindex;
 	int in_use_file;
 	TrackerDBInterface *resources_iface;
 	GError *internal_error = NULL;
+	gboolean need_to_create = FALSE;
 
 	db_manager = g_object_new (TRACKER_TYPE_DB_MANAGER, NULL);
 	db_manager->vtab_data = vtab_data;
@@ -556,8 +548,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	if (first_time) {
 		*first_time = FALSE;
 	}
-
-	need_reindex = FALSE;
 
 	/* Set up locations */
 	g_debug ("Setting database locations");
@@ -581,18 +571,12 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 
 	g_debug ("Checking whether database files exist");
 
-	/* Check we have the database in place, if it is
-	 * missing, we reindex.
-	 *
-	 * There's no need to check for files not existing (for
-	 * reindex) if reindexing is already needed.
-	 */
 	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) != 0) {
-		need_reindex = TRUE;
+		need_to_create = TRUE;
 	} else if (!g_file_test (db_manager->db.abs_filename, G_FILE_TEST_EXISTS)) {
 		if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
-			g_info ("Could not find database file:'%s', reindex will be forced", db_manager->db.abs_filename);
-			need_reindex = TRUE;
+			g_info ("Could not find database file:'%s', will create it.", db_manager->db.abs_filename);
+			need_to_create = TRUE;
 		} else {
 			g_set_error (error,
 			             TRACKER_DB_INTERFACE_ERROR,
@@ -608,24 +592,20 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		version = db_get_version (db_manager);
 
 		if (version < TRACKER_DB_VERSION_NOW) {
-			g_info ("  A reindex will be forced");
-			need_reindex = TRUE;
+			g_set_error (error,
+			             TRACKER_DB_INTERFACE_ERROR,
+			             TRACKER_DB_OPEN_ERROR,
+			             "Database version is too old: got version %i, but %i is needed",
+			             version, TRACKER_DB_VERSION_NOW);
+
+			g_object_unref (db_manager);
+			return NULL;
 		}
 	}
 
-
 	db_manager->locations_initialized = TRUE;
 
-	/* Don't do remove-dbs for readonly (direct-access) */
-	if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
-
-		/* If we are just initializing to remove the databases,
-		 * return here.
-		 */
-		if ((flags & TRACKER_DB_MANAGER_REMOVE_ALL) != 0) {
-			return db_manager;
-		}
-	} else {
+	if ((flags & TRACKER_DB_MANAGER_READONLY) != 0) {
 		GValue value = G_VALUE_INIT;
 		TrackerDBManagerFlags fts_flags = 0;
 
@@ -646,58 +626,67 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		tracker_db_interface_sqlite_enable_shared_cache ();
 	}
 
-	/* Should we reindex? If so, just remove all databases files,
-	 * NOT the paths, note, that these paths are also used for
-	 * other things like the nfs lock file.
-	 */
-	if (flags & TRACKER_DB_MANAGER_FORCE_REINDEX || need_reindex) {
+	if (need_to_create) {
+		*first_time = TRUE;
 
-		if (flags & TRACKER_DB_MANAGER_READONLY) {
-			/* no reindexing supported in read-only mode (direct access) */
-
+		if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) == 0 &&
+		     !tracker_file_system_has_enough_space (db_manager->data_dir, TRACKER_DB_MIN_REQUIRED_SPACE, TRUE)) {
 			g_set_error (error,
 			             TRACKER_DB_INTERFACE_ERROR,
 			             TRACKER_DB_OPEN_ERROR,
-			             "No reindexing supported in read-only mode (direct access)");
-
-			g_object_unref (db_manager);
-			return NULL;
+			             "Filesystem does not have enough space");
+			return FALSE;
 		}
 
-		perform_recreate (db_manager, first_time, &internal_error);
+		g_info ("Creating database files for %s...", db_manager->db.abs_filename);
 
+		db_manager->db.iface = tracker_db_manager_create_db_interface (db_manager, FALSE, &internal_error);
 		if (internal_error) {
 			g_propagate_error (error, internal_error);
 			g_object_unref (db_manager);
-			return NULL;
+			return FALSE;
 		}
 
-		tracker_db_manager_update_version (db_manager);
-	} else if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
-		/* do not do shutdown check for read-only mode (direct access) */
-		gboolean must_recreate = FALSE;
+		g_clear_object (&db_manager->db.iface);
 
-		/* Load databases */
+		tracker_db_manager_update_version (db_manager);
+	} else {
 		g_info ("Loading files for database %s...", db_manager->db.abs_filename);
 
-		if (!must_recreate && g_file_test (db_manager->in_use_filename, G_FILE_TEST_EXISTS)) {
-			gsize size = 0;
-			struct stat st;
-			TrackerDBStatement *stmt;
+		if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
+			/* Check that the database was closed cleanly and do a deeper integrity
+			 * check if it wasn't, raising an error if we detect corruption. */
 
-			g_info ("Didn't shut down cleanly last time, doing integrity checks");
+			if (g_file_test (db_manager->in_use_filename, G_FILE_TEST_EXISTS)) {
+				gsize size = 0;
+				struct stat st;
 
-			if (g_stat (db_manager->db.abs_filename, &st) == 0) {
-				size = st.st_size;
-			}
+				g_info ("Didn't shut down cleanly last time, doing integrity checks");
 
-			/* Size is 1 when using echo > file.db, none of our databases
-			 * are only one byte in size even initually. */
+				if (g_stat (db_manager->db.abs_filename, &st) == 0) {
+					size = st.st_size;
+				}
 
-			if (size <= 1) {
-				if (!restoring_backup) {
-					must_recreate = TRUE;
-				} else {
+				/* Size is 1 when using echo > file.db, none of our databases
+				 * are only one byte in size even initually. */
+				if (size <= 1) {
+					g_info ("Database is corrupt: size is 1 byte or less.");
+					return FALSE;
+				}
+
+				db_manager->db.iface = tracker_db_manager_create_db_interface (db_manager, FALSE, &internal_error);
+
+				if (internal_error) {
+					/* If this already doesn't succeed, then surely the file is
+					 * corrupt. No need to check for integrity anymore. */
+					g_propagate_error (error, internal_error);
+					g_object_unref (db_manager);
+					return NULL;
+				}
+
+				busy_callback ("Integrity checking", 0, busy_user_data);
+
+				if (db_check_integrity (db_manager) == FALSE) {
 					g_set_error (error,
 					             TRACKER_DB_INTERFACE_ERROR,
 					             TRACKER_DB_OPEN_ERROR,
@@ -705,99 +694,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 					g_object_unref (db_manager);
 					return NULL;
 				}
-			}
-
-			if (!must_recreate) {
-				db_manager->db.iface = tracker_db_manager_create_db_interface (db_manager, FALSE, &internal_error);
-
-				if (internal_error) {
-					/* If this already doesn't succeed, then surely the file is
-					 * corrupt. No need to check for integrity anymore. */
-					if (!restoring_backup) {
-						g_clear_error (&internal_error);
-						must_recreate = TRUE;
-					} else {
-						g_propagate_error (error, internal_error);
-						g_object_unref (db_manager);
-						return NULL;
-					}
-				}
-			}
-
-			if (!must_recreate) {
-				gchar *busy_status;
-
-				/* Report OPERATION - STATUS */
-				busy_status = g_strdup_printf ("%s - %s",
-				                               busy_operation,
-				                               "Integrity checking");
-				busy_callback (busy_status, 0, busy_user_data);
-				g_free (busy_status);
-
-				stmt = tracker_db_interface_create_statement (db_manager->db.iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
-				                                              &internal_error,
-				                                              "PRAGMA integrity_check(1)");
-
-				if (internal_error != NULL) {
-					if (internal_error->domain == TRACKER_DB_INTERFACE_ERROR &&
-					    internal_error->code == TRACKER_DB_QUERY_ERROR) {
-						must_recreate = TRUE;
-					} else {
-						g_critical ("%s", internal_error->message);
-					}
-					g_error_free (internal_error);
-					internal_error = NULL;
-				} else {
-					TrackerDBCursor *cursor = NULL;
-
-					if (stmt) {
-						cursor = tracker_db_statement_start_cursor (stmt, NULL);
-						g_object_unref (stmt);
-					} else {
-						g_critical ("Can't create stmt for integrity_check, no error given");
-					}
-
-					if (cursor) {
-						if (tracker_db_cursor_iter_next (cursor, NULL, NULL)) {
-							if (g_strcmp0 (tracker_db_cursor_get_string (cursor, 0, NULL), "ok") != 0) {
-								must_recreate = TRUE;
-							}
-						}
-						g_object_unref (cursor);
-					}
-				}
-			}
-
-			if (!must_recreate) {
-				/* ensure that database has been initialized by an earlier tracker-store start
-				   by checking whether Resource table exists */
-				stmt = tracker_db_interface_create_statement (db_manager->db.iface, TRACKER_DB_STATEMENT_CACHE_TYPE_NONE,
-				                                              &internal_error,
-				                                              "SELECT 1 FROM Resource");
-				if (internal_error != NULL) {
-					if (!restoring_backup) {
-						must_recreate = TRUE;
-						g_error_free (internal_error);
-						internal_error = NULL;
-					}
-				} else {
-					g_object_unref (stmt);
-				}
-			}
-		}
-
-		if (must_recreate) {
-			g_info ("Database severely damaged. We will recreate it.");
-
-			perform_recreate (db_manager, first_time, &internal_error);
-			if (internal_error) {
-				g_propagate_error (error, internal_error);
-				return FALSE;
-			}
-		} else {
-			if (internal_error) {
-				g_propagate_error (error, internal_error);
-				return FALSE;
 			}
 		}
 	}
@@ -818,25 +714,9 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	                                                          TRUE, &internal_error);
 
 	if (internal_error) {
-		if ((!restoring_backup) && (flags & TRACKER_DB_MANAGER_READONLY) == 0) {
-			GError *new_error = NULL;
-
-			perform_recreate (db_manager, first_time, &new_error);
-			if (!new_error) {
-				resources_iface = tracker_db_manager_create_db_interface (db_manager, TRUE,
-				                                                          &internal_error);
-			} else {
-				/* Most serious error is the recreate one here */
-				g_clear_error (&internal_error);
-				g_propagate_error (error, new_error);
-				g_object_unref (db_manager);
-				return NULL;
-			}
-		} else {
-			g_propagate_error (error, internal_error);
-			g_object_unref (db_manager);
-			return NULL;
-		}
+		g_propagate_error (error, internal_error);
+		g_object_unref (db_manager);
+		return NULL;
 	}
 
 	g_clear_object (&resources_iface);

@@ -53,7 +53,7 @@ class TrackerSparqlDirectTest(ut.TestCase):
         self.tmpdir = tempfile.mkdtemp(prefix='tracker-test-')
 
         try:
-            self.conn = Tracker.SparqlConnection.new(
+            self.conn = Tracker.SparqlConnection.new_with_ontology(
                 Tracker.SparqlConnectionFlags.NONE,
                 Gio.File.new_for_path(self.tmpdir),
                 Gio.File.new_for_path(cfg.ontologies_dir()),
@@ -86,7 +86,7 @@ class TrackerSparqlBusTest (ut.TestCase):
         log.info("Started database subprocess")
         bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
 
-        conn = Tracker.SparqlConnection.new(
+        conn = Tracker.SparqlConnection.new_with_ontology(
             Tracker.SparqlConnectionFlags.NONE,
             Gio.File.new_for_path(self.tmpdir),
             Gio.File.new_for_path(cfg.ontologies_dir()),

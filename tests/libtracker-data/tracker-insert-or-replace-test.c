@@ -145,7 +145,7 @@ main (int argc, char *argv[])
 	ontology = g_file_new_for_path (TEST_ONTOLOGIES_DIR);
 
 	manager = tracker_data_manager_new (0, cache, ontology,
-	                                    FALSE, 100, 100);
+	                                    100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
 
