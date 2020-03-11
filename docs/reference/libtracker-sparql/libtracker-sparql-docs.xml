@@ -36,6 +36,7 @@
     <xi:include href="xml/tracker-sparql-cursor.xml"/>
     <xi:include href="xml/tracker-notifier.xml"/>
     <xi:include href="xml/tracker-endpoint.xml"/>
+    <xi:include href="xml/tracker-ontologies.xml"/>
     <xi:include href="xml/tracker-misc.xml"/>
     <xi:include href="xml/tracker-version.xml"/>
   </part>
