@@ -212,7 +212,7 @@ test_ontology_change (void)
 		g_assert_cmpint (g_chmod (ontology_file, 0666), ==, 0);
 
 		manager = tracker_data_manager_new (0, data_location, test_schemas,
-		                                    FALSE, 100, 100);
+		                                    100, 100);
 		g_initable_init (G_INITABLE (manager), NULL, &error);
 		g_assert_no_error (error);
 
@@ -253,8 +253,7 @@ test_ontology_change (void)
 		g_object_unref (manager);
 	}
 
-	manager = tracker_data_manager_new (0, data_location, test_schemas,
-	                                    FALSE, 100, 100);
+	manager = tracker_data_manager_new (0, data_location, test_schemas, 100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
 

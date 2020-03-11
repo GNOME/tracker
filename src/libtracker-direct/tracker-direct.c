@@ -257,26 +257,25 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 
 	db_flags = translate_flags (priv->flags);
 
-	if (!priv->store)
+	if (!priv->store) {
 		db_flags |= TRACKER_DB_MANAGER_IN_MEMORY;
+	}
 
-	/* Init data manager */
-	if (!priv->ontology &&
-	    (db_flags & TRACKER_DB_MANAGER_READONLY) == 0) {
-		gchar *filename;
+	if (!priv->store || !tracker_db_manager_db_exists (priv->store)) {
+		/* If no ontology is specified on creation, we use the Nepomuk one. */
+		if (!priv->ontology) {
+			gchar *filename;
 
-		/* If the connection is read/write, and no ontology is specified,
-		 * we use the Nepomuk one.
-		 */
-		filename = g_build_filename (SHAREDIR, "tracker", "ontologies",
-		                             "nepomuk", NULL);
-		priv->ontology = g_file_new_for_path (filename);
-		g_free (filename);
+			filename = g_build_filename (SHAREDIR, "tracker", "ontologies",
+			                             "nepomuk", NULL);
+			priv->ontology = g_file_new_for_path (filename);
+			g_free (filename);
+		}
 	}
 
 	priv->data_manager = tracker_data_manager_new (db_flags, priv->store,
 	                                               priv->ontology,
-	                                               FALSE, 100, 100);
+	                                               100, 100);
 	if (!g_initable_init (G_INITABLE (priv->data_manager), cancellable, error)) {
 		g_clear_object (&priv->data_manager);
 		return FALSE;
@@ -1034,9 +1033,23 @@ tracker_direct_connection_class_init (TrackerDirectConnectionClass *klass)
 
 TrackerDirectConnection *
 tracker_direct_connection_new (TrackerSparqlConnectionFlags   flags,
-			       GFile                         *store,
-                               GFile                         *ontology,
+                               GFile                         *store,
                                GError                       **error)
+{
+	g_return_val_if_fail (!store || G_IS_FILE (store), NULL);
+	g_return_val_if_fail (!error || !*error, NULL);
+
+	return g_object_new (TRACKER_TYPE_DIRECT_CONNECTION,
+	                     "flags", flags,
+	                     "store-location", store,
+	                     NULL);
+}
+
+TrackerDirectConnection *
+tracker_direct_connection_new_with_ontology (TrackerSparqlConnectionFlags   flags,
+                                             GFile                         *store,
+                                             GFile                         *ontology,
+                                             GError                       **error)
 {
 	g_return_val_if_fail (!store || G_IS_FILE (store), NULL);
 	g_return_val_if_fail (!ontology || G_IS_FILE (ontology), NULL);

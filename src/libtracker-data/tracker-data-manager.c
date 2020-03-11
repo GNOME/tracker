@@ -69,8 +69,6 @@ struct _TrackerDataManager {
 	GFile *ontology_location;
 	GFile *cache_location;
 	guint initialized      : 1;
-	guint restoring_backup : 1;
-	guint first_time_index : 1;
 	guint flags;
 
 	gint select_cache_size;
@@ -3904,7 +3902,6 @@ TrackerDataManager *
 tracker_data_manager_new (TrackerDBManagerFlags   flags,
                           GFile                  *cache_location,
                           GFile                  *ontology_location,
-                          gboolean                restoring_backup,
                           guint                   select_cache_size,
                           guint                   update_cache_size)
 {
@@ -3926,7 +3923,6 @@ tracker_data_manager_new (TrackerDBManagerFlags   flags,
 	g_set_object (&manager->cache_location, cache_location);
 	g_set_object (&manager->ontology_location, ontology_location);
 	manager->flags = flags;
-	manager->restoring_backup = restoring_backup;
 	manager->select_cache_size = select_cache_size;
 	manager->update_cache_size = update_cache_size;
 
@@ -4115,7 +4111,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 {
 	TrackerDataManager *manager = TRACKER_DATA_MANAGER (initable);
 	TrackerDBInterface *iface;
-	gboolean is_first_time_index, check_ontology, has_graph_table = FALSE;
+	gboolean is_create, has_graph_table = FALSE;
 	TrackerDBCursor *cursor;
 	TrackerDBStatement *stmt;
 	GHashTable *ontos_table;
@@ -4145,12 +4141,11 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 	manager->db_manager = tracker_db_manager_new (manager->flags,
 	                                              manager->cache_location,
-	                                              &is_first_time_index,
-	                                              manager->restoring_backup,
+	                                              &is_create,
 	                                              FALSE,
 	                                              manager->select_cache_size,
 	                                              manager->update_cache_size,
-	                                              busy_callback, manager, "",
+	                                              busy_callback, manager,
 	                                              G_OBJECT (manager),
 						      manager->ontologies,
 	                                              &internal_error);
@@ -4163,8 +4158,6 @@ tracker_data_manager_initable_init (GInitable     *initable,
 	                  G_CALLBACK (setup_interface_cb), manager);
 	g_signal_connect (manager->db_manager, "update-interface",
 	                  G_CALLBACK (update_interface_cb), manager);
-
-	manager->first_time_index = is_first_time_index;
 
 	tracker_data_manager_update_status (manager, "Initializing data manager");
 
@@ -4182,15 +4175,17 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		return FALSE;
 	}
 
-	if (is_first_time_index && !read_only) {
+	if (is_create) {
+		TrackerOntology **ontologies;
+		guint n_ontologies, i;
+
+		g_info ("Applying ontologies from %s", g_file_peek_path (manager->ontology_location));
 		sorted = get_ontologies (manager, manager->ontology_location, &internal_error);
 
 		if (internal_error) {
 			g_propagate_error (error, internal_error);
 			return FALSE;
 		}
-
-		/* load ontology from files into memory (max_id starts at zero: first-time) */
 
 		for (l = sorted; l; l = l->next) {
 			GError *ontology_error = NULL;
@@ -4228,7 +4223,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 		if (!internal_error) {
 			tracker_data_ontology_import_into_db (manager, iface,
-							      FALSE,
+			                                      FALSE,
 			                                      &internal_error);
 		}
 
@@ -4259,38 +4254,50 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 		write_ontologies_gvdb (manager, TRUE /* overwrite */, NULL);
 
+		ontologies = tracker_ontologies_get_ontologies (manager->ontologies, &n_ontologies);
+
+		for (i = 0; i < n_ontologies; i++) {
+			GError *n_error = NULL;
+
+			update_ontology_last_modified (manager, iface, ontologies[i], &n_error);
+
+			if (n_error) {
+				g_critical ("%s", n_error->message);
+				g_clear_error (&n_error);
+			}
+		}
+
 		g_list_free_full (sorted, g_object_unref);
 		sorted = NULL;
-
-		/* First time, no need to check ontology */
-		check_ontology = FALSE;
 	} else {
-		if (!read_only) {
-			/* Load ontology from database into memory */
-			db_get_static_data (iface, manager, &internal_error);
-			check_ontology = (manager->flags & TRACKER_DB_MANAGER_DO_NOT_CHECK_ONTOLOGY) == 0;
+		GError *gvdb_error = NULL;
+		gboolean load_from_db = TRUE;
 
+		if (read_only) {
+			/* Not all ontology information is saved in the gvdb cache, so
+			 * it can only be used for read-only connections. */
+			g_info ("Loading cached ontologies from gvdb cache");
+			load_ontologies_gvdb (manager, &gvdb_error);
+
+			if (gvdb_error) {
+				g_debug ("Error loading ontology cache: %s. ", gvdb_error->message);
+				g_clear_error (&gvdb_error);
+			} else {
+				load_from_db = FALSE;
+			}
+		}
+
+		if (load_from_db) {
+			g_info ("Loading ontologies from database.");
+
+			db_get_static_data (iface, manager, &internal_error);
 			if (internal_error) {
 				g_propagate_error (error, internal_error);
 				return FALSE;
 			}
 
-			write_ontologies_gvdb (manager, FALSE /* overwrite */, NULL);
-		} else {
-			GError *gvdb_error = NULL;
-
-			load_ontologies_gvdb (manager, &gvdb_error);
-			check_ontology = FALSE;
-
-			if (gvdb_error) {
-				g_clear_error (&gvdb_error);
-
-				/* fall back to loading ontology from database into memory */
-				db_get_static_data (iface, manager, &internal_error);
-				if (internal_error) {
-					g_propagate_error (error, internal_error);
-					return FALSE;
-				}
+			if (!read_only) {
+				write_ontologies_gvdb (manager, FALSE /* overwrite */, NULL);
 			}
 		}
 
@@ -4301,17 +4308,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		}
 	}
 
-	if (!read_only) {
-		has_graph_table = query_table_exists (iface, "Graph", &internal_error);
-		if (internal_error) {
-			g_propagate_error (error, internal_error);
-			return FALSE;
-		}
-
-		check_ontology |= !has_graph_table;
-	}
-
-	if (check_ontology) {
+	if (!is_create && manager->ontology_location) {
 		GList *to_reload = NULL;
 		GList *ontos = NULL;
 		GPtrArray *seen_classes;
@@ -4321,6 +4318,8 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 		seen_classes = g_ptr_array_new ();
 		seen_properties = g_ptr_array_new ();
+
+		g_info ("Applying ontologies from %s to existing database", g_file_peek_path (manager->ontology_location));
 
 		/* Get all the ontology files from ontology_location */
 		ontos = get_ontologies (manager, manager->ontology_location, &internal_error);
@@ -4406,6 +4405,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 				GError *ontology_error = NULL;
 				gint val = GPOINTER_TO_INT (value);
 
+				has_graph_table = query_table_exists (iface, "Graph", &internal_error);
 				if (!has_graph_table) {
 					/* No graph table and no resource triggers,
 					 * the table must be recreated.
@@ -4683,26 +4683,12 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 		g_hash_table_unref (ontos_table);
 		g_list_free_full (ontos, g_object_unref);
-	} else if (is_first_time_index && !read_only) {
-		TrackerOntology **ontologies;
-		guint n_ontologies, i;
 
-		ontologies = tracker_ontologies_get_ontologies (manager->ontologies, &n_ontologies);
-
-		for (i = 0; i < n_ontologies; i++) {
-			GError *n_error = NULL;
-
-			update_ontology_last_modified (manager, iface, ontologies[i], &n_error);
-
-			if (n_error) {
-				g_critical ("%s", n_error->message);
-				g_clear_error (&n_error);
-			}
-		}
 	}
 
+
 skip_ontology_check:
-	if (!read_only && is_first_time_index) {
+	if (!read_only && is_create) {
 		tracker_db_manager_set_current_locale (manager->db_manager);
 		tracker_db_manager_tokenizer_update (manager->db_manager);
 	} else if (!read_only && tracker_db_manager_locale_changed (manager->db_manager, NULL)) {

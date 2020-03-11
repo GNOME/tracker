@@ -78,7 +78,7 @@ class OntologyChangeTestTemplate (ut.TestCase):
         self.__assert_ontology_dates(self.FIRST_ONTOLOGY_DIR, self.SECOND_ONTOLOGY_DIR)
 
         # Create a local store with the first set of ontologies.
-        conn1 = Tracker.SparqlConnection.new(
+        conn1 = Tracker.SparqlConnection.new_with_ontology(
             Tracker.SparqlConnectionFlags.NONE,
             Gio.File.new_for_path(self.tmpdir),
             Gio.File.new_for_path(str(self.ontology_path(self.FIRST_ONTOLOGY_DIR))),
@@ -90,7 +90,7 @@ class OntologyChangeTestTemplate (ut.TestCase):
         conn1.close()
 
         # Reopen the local store with the second set of ontologies.
-        conn2 = Tracker.SparqlConnection.new(
+        conn2 = Tracker.SparqlConnection.new_with_ontology(
             Tracker.SparqlConnectionFlags.NONE,
             Gio.File.new_for_path(self.tmpdir),
             Gio.File.new_for_path(str(self.ontology_path(self.SECOND_ONTOLOGY_DIR))),

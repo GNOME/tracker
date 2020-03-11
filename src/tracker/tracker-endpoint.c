@@ -235,7 +235,7 @@ tracker_endpoint (int argc, const char **argv)
 	g_print (_("Opening database at %s…"), database_path);
 	g_print ("\n");
 
-	connection = tracker_sparql_connection_new (0, database, ontology, NULL, &error);
+	connection = tracker_sparql_connection_new_with_ontology (0, database, ontology, NULL, &error);
 	if (!connection) {
 		g_printerr ("%s\n", error->message);
 		g_error_free (error);
