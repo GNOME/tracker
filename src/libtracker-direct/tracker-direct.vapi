@@ -3,7 +3,8 @@ namespace Tracker {
         namespace Direct {
                 [CCode (cheader_filename = "libtracker-direct/tracker-direct.h")]
                 public class Connection : Tracker.Sparql.Connection, GLib.Initable, GLib.AsyncInitable {
-                        public Connection (Tracker.Sparql.ConnectionFlags connection_flags, GLib.File loc, GLib.File? ontology) throws Tracker.Sparql.Error, GLib.IOError, GLib.DBusError;
+                        public Connection (Tracker.Sparql.ConnectionFlags connection_flags, GLib.File loc) throws Tracker.Sparql.Error, GLib.IOError, GLib.DBusError;
+                        public Connection.with_ontology (Tracker.Sparql.ConnectionFlags connection_flags, GLib.File loc, GLib.File? ontology) throws Tracker.Sparql.Error, GLib.IOError, GLib.DBusError;
                         public unowned Tracker.Data.Manager get_data_manager ();
                 }
         }
