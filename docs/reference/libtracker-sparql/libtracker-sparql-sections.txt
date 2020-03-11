@@ -7,6 +7,7 @@ tracker_sparql_escape_string
 tracker_sparql_escape_uri
 tracker_sparql_escape_uri_printf
 tracker_sparql_escape_uri_vprintf
+tracker_sparql_get_ontology_nepomuk
 <SUBSECTION Standard>
 TRACKER_TYPE_URI
 tracker_uri_get_type
@@ -256,6 +257,12 @@ TRACKER_IS_ENDPOINT_DBUS
 TRACKER_IS_ENDPOINT_DBUS_CLASS
 TrackerEndpointClass
 TrackerEndpointDBusClass
+</SECTION>
+
+<SECTION>
+<FILE>tracker-ontologies</FILE>
+<TITLE>Tracker ontologies</TITLE>
+TRACKER_ONTOLOGY_NEPOMUK
 </SECTION>
 
 <SECTION>

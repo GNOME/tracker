@@ -30,6 +30,7 @@ libtracker_sparql_c_public_headers = files(
     'tracker-endpoint-dbus.h',
     'tracker-namespace-manager.h',
     'tracker-notifier.h',
+    'tracker-ontologies.h',
     'tracker-resource.h',
     'tracker-statement.h',
     'tracker-utils.h',

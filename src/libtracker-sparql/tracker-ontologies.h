@@ -50,6 +50,13 @@ G_BEGIN_DECLS
 #define TRACKER_PREFIX_MLO      "http://www.tracker-project.org/temp/mlo#"
 #define TRACKER_PREFIX_MFO      "http://www.tracker-project.org/temp/mfo#"
 
+/**
+ * TRACKER_ONTOLOGY_NEPOMUK:
+ *
+ * Location of the builtin Nepomuk ontologies.
+ */
+#define TRACKER_ONTOLOGY_NEPOMUK    tracker_sparql_get_ontology_nepomuk ()
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_SPARQL_ONTOLOGY_H__ */

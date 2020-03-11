@@ -106,7 +106,7 @@ sql_by_query (void)
 	db_location = g_file_new_for_commandline_arg (database_path);
 	data_manager = tracker_data_manager_new (TRACKER_DB_MANAGER_READONLY,
 	                                         db_location, NULL,
-	                                         FALSE, 100, 100);
+	                                         100, 100);
 
 	if (!g_initable_init (G_INITABLE (data_manager), NULL, &error)) {
 		g_printerr ("%s: %s\n",
