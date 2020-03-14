@@ -21,7 +21,7 @@
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 
-#include <libtracker-data/tracker-sparql-query.h>
+#include <libtracker-data/tracker-turtle-reader.h>
 
 /* Ontology classes */
 #define RDFS_CLASS "http://www.w3.org/2000/01/rdf-schema#Class"
