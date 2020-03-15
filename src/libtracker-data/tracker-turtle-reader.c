@@ -587,12 +587,14 @@ tracker_turtle_reader_iterate_next (TrackerTurtleReader  *reader,
 				g_free (str);
 			} else if (parse_terminal (reader, terminal_STRING_LITERAL1, 1, &str) ||
 			           parse_terminal (reader, terminal_STRING_LITERAL2, 1, &str)) {
-				reader->object = str;
+				reader->object = g_strcompress (str);
+				g_free (str);
 				if (!handle_type_cast (reader, error))
 					return FALSE;
 			} else if (parse_terminal (reader, terminal_STRING_LITERAL_LONG1, 3, &str) ||
 			           parse_terminal (reader, terminal_STRING_LITERAL_LONG2, 3, &str)) {
-				reader->object = str;
+				reader->object = g_strcompress (str);
+				g_free (str);
 				if (!handle_type_cast (reader, error))
 					return FALSE;
 			} else if (parse_terminal (reader, terminal_DOUBLE, 0, &str) ||

@@ -21,7 +21,7 @@
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 
-#include <libtracker-data/tracker-sparql-query.h>
+#include <libtracker-data/tracker-turtle-reader.h>
 
 /* Ontology classes */
 #define RDFS_CLASS "http://www.w3.org/2000/01/rdf-schema#Class"
@@ -364,20 +364,21 @@ ttl_loader_load_ontology (Ontology    *ontology,
                           GFile       *ttl_file)
 {
 	TrackerTurtleReader *reader;
+	const gchar *subject, *predicate, *object;
 	GError *error = NULL;
 
 	g_return_if_fail (G_IS_FILE (ttl_file));
 
-	reader = tracker_turtle_reader_new (ttl_file, NULL);
+	reader = tracker_turtle_reader_new_for_file (ttl_file, &error);
 
-	while (error == NULL && tracker_turtle_reader_next (reader, &error)) {
-		load_in_memory (ontology,
-		                tracker_turtle_reader_get_subject (reader),
-		                tracker_turtle_reader_get_predicate (reader),
-		                tracker_turtle_reader_get_object (reader));
+	while (error == NULL &&
+	       tracker_turtle_reader_next (reader,
+	                                   &subject, &predicate, &object,
+	                                   NULL, &error)) {
+		load_in_memory (ontology, subject, predicate, object);
 	}
 
-	g_object_unref (reader);
+	g_clear_object (&reader);
 
 	if (error) {
 		g_message ("Turtle parse error: %s", error->message);
@@ -399,21 +400,22 @@ ttl_loader_load_prefix_from_description (Ontology            *ontology,
 OntologyDescription *
 ttl_loader_load_description (GFile *file)
 {
+	const gchar *subject, *predicate, *object;
 	OntologyDescription *desc;
 	TrackerTurtleReader *reader;
 	GError *error = NULL;
 
 	desc = ttl_model_description_new ();
-	reader = tracker_turtle_reader_new (file, NULL);
+	reader = tracker_turtle_reader_new_for_file (file, &error);
 
-	while (error == NULL && tracker_turtle_reader_next (reader, &error)) {
-		load_description (desc,
-		                  tracker_turtle_reader_get_subject (reader),
-		                  tracker_turtle_reader_get_predicate (reader),
-		                  tracker_turtle_reader_get_object (reader));
+	while (error == NULL &&
+	       tracker_turtle_reader_next (reader,
+	                                   &subject, &predicate, &object,
+	                                   NULL, &error)) {
+		load_description (desc, subject, predicate, object);
 	}
 
-	g_object_unref (reader);
+	g_clear_object (&reader);
 
 	if (error) {
 		g_message ("Turtle parse error: %s", error->message);
