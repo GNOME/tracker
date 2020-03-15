@@ -1,4 +1,4 @@
-option('docs', type: 'boolean', value: false, yield: true,
+option('docs', type: 'boolean', value: true, yield: true,
        description: 'Generate API documentation with gtk-doc')
 option('man', type: 'boolean', value: true, yield: true,
        description: 'Install man pages')
