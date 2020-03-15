@@ -24,7 +24,7 @@ Source code and issue tracking:
 
 All discussion related to Tracker happens on:
 
-  * <https://mail.gnome.org/mailman/listinfo/tracker-list>
+  * <https://discourse.gnome.org/tag/tracker>
 
 IRC channel #tracker on:
 
