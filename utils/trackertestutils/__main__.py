@@ -42,6 +42,7 @@ from gi.repository import Gio
 from gi.repository import GLib
 
 from . import dbusdaemon
+from . import dconf
 from . import helpers
 from . import mainloop
 
@@ -55,36 +56,6 @@ store_pid = -1
 store_proc = None
 
 original_xdg_data_home = GLib.get_user_data_dir()
-
-# Template config file
-config_template = """
-[General]
-verbosity=0
-sched-idle=0
-initial-sleep=0
-
-[Monitors]
-enable-monitors=false
-
-[Indexing]
-throttle=0
-index-on-battery=true
-index-on-battery-first-time=true
-index-removable-media=false
-index-optical-discs=false
-low-disk-space-limit=-1
-index-recursive-directories=;
-index-single-directories=;
-ignored-directories=;
-ignored-directories-with-content=;
-ignored-files=
-crawling-interval=-1
-removable-days-threshold=3
-
-[Writeback]
-enable-writeback=false
-"""
-
 
 log = logging.getLogger('sandbox')
 
@@ -134,8 +105,6 @@ def create_sandbox(index_location, prefix=None, verbosity=0, dbus_config=None,
         environment_set_and_add_path(extra_env, 'XDG_DATA_DIRS', prefix, 'share')
 
     # Preferences
-    extra_env['TRACKER_USE_CONFIG_FILES'] = 'yes'
-
     extra_env['G_MESSAGES_PREFIXED'] = 'all'
 
     extra_env['TRACKER_VERBOSITY'] = str(verbosity)
@@ -144,7 +113,7 @@ def create_sandbox(index_location, prefix=None, verbosity=0, dbus_config=None,
     log.debug('Using index location "%s"' % index_location)
 
     sandbox = helpers.TrackerDBusSandbox(dbus_config, extra_env=extra_env)
-    sandbox.start(new_session=(interactive == True))
+    sandbox.start(new_session=True)
 
     # Update our own environment, so when we launch a subprocess it has the
     # same settings as the Tracker daemons.
@@ -155,27 +124,9 @@ def create_sandbox(index_location, prefix=None, verbosity=0, dbus_config=None,
     return sandbox
 
 
-def config_set(content_locations_recursive=None, content_locations_single=None):
-    # Make sure File System miner is configured correctly
-    config_dir = os.path.join(os.environ['XDG_CONFIG_HOME'], 'tracker')
-    config_filename = os.path.join(config_dir, 'tracker-miner-fs.cfg')
-
-    log.debug('Using config file "%s"' % config_filename)
-
-    # Only update config if we're updating the database
-    os.makedirs(config_dir, exist_ok=True)
-
-    if not os.path.exists(config_filename):
-        f = open(config_filename, 'w')
-        f.write(config_template)
-        f.close()
-
-        log.debug('  Miner config file written')
-
-    # Set content path
-    config = configparser.ConfigParser()
-    config.optionxform = str
-    config.read(config_filename)
+def config_set(sandbox, content_locations_recursive=None,
+               content_locations_single=None, applications=False):
+    dconfclient = dconf.DConfClient(sandbox)
 
     if content_locations_recursive:
         log.debug("Using content locations: %s" %
@@ -183,23 +134,23 @@ def config_set(content_locations_recursive=None, content_locations_single=None):
     if content_locations_single:
         log.debug("Using non-recursive content locations: %s" %
               content_locations_single)
+    if applications:
+        log.debug("Indexing applications")
 
     def locations_gsetting(locations):
         locations = [dir if dir.startswith('&') else os.path.abspath(dir)
                      for dir in locations]
-        return GLib.Variant('as', locations).print_(False)
+        return GLib.Variant('as', locations)
 
-    if not config.has_section('General'):
-        config.add_section('General')
-
-    config.set('General', 'index-recursive-directories',
-               locations_gsetting(content_locations_recursive or []))
-    config.set('General', 'index-single-directories',
-               locations_gsetting(content_locations_single or []))
-
-    with open(config_filename, 'w') as f:
-        config.write(f)
-
+    dconfclient.write('org.freedesktop.Tracker.Miner.Files',
+                      'index-recursive-directories',
+                      locations_gsetting(content_locations_recursive or []))
+    dconfclient.write('org.freedesktop.Tracker.Miner.Files',
+                      'index-single-directories',
+                      locations_gsetting(content_locations_recursive or []))
+    dconfclient.write('org.freedesktop.Tracker.Miner.Files',
+                      'index-applications',
+                      GLib.Variant('b', applications))
 
 def link_to_mime_data():
     '''Create symlink to $XDG_DATA_HOME/mime in our custom data home dir.
@@ -432,7 +383,7 @@ def main():
     sandbox = create_sandbox(index_location, args.prefix, verbosity,
                              dbus_config=args.dbus_config,
                              interactive=interactive)
-    config_set()
+    config_set(sandbox)
 
     link_to_mime_data()
 
@@ -457,13 +408,21 @@ def main():
             command = [shell, '-c', ' '.join(shlex.quote(c) for c in args.command)]
 
             log.debug("Running: %s", command)
-            result = subprocess.run(command)
+            interrupted = False
+            try:
+                result = subprocess.run(command)
+            except KeyboardInterrupt:
+                interrupted = True
 
             if len(miner_watches) > 0:
                 wait_for_miners(miner_watches)
 
-            log.debug("Process finished with returncode %i", result.returncode)
-            sys.exit(result.returncode)
+            if interrupted:
+                log.debug("Process exited due to SIGINT")
+                sys.exit(0)
+            else:
+                log.debug("Process finished with returncode %i", result.returncode)
+                sys.exit(result.returncode)
     finally:
         sandbox.stop()
         if index_tmpdir:
