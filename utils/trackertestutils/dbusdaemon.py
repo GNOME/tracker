@@ -54,7 +54,17 @@ class DBusDaemon:
             raise DaemonNotStartedError()
         return self.address
 
+    def create_connection(self):
+        """Creates a new GDBusConnection."""
+        if self.address is None:
+            raise DaemonNotStartedError()
+        return Gio.DBusConnection.new_for_address_sync(
+            self.address,
+            Gio.DBusConnectionFlags.AUTHENTICATION_CLIENT |
+            Gio.DBusConnectionFlags.MESSAGE_BUS_CONNECTION, None, None)
+
     def get_connection(self):
+        """Returns a shared GDBusConnection for general use."""
         if self._gdbus_connection is None:
             raise DaemonNotStartedError()
         return self._gdbus_connection
@@ -98,10 +108,7 @@ class DBusDaemon:
         self._threads[0].start()
         self._threads[1].start()
 
-        self._gdbus_connection = Gio.DBusConnection.new_for_address_sync(
-            self.address,
-            Gio.DBusConnectionFlags.AUTHENTICATION_CLIENT |
-            Gio.DBusConnectionFlags.MESSAGE_BUS_CONNECTION, None, None)
+        self._gdbus_connection = self.create_connection()
 
         log.debug("Pinging the new D-Bus daemon...")
         self.ping_sync()
