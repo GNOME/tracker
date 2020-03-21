@@ -132,4 +132,4 @@ if __name__ == "__main__":
       * Check what happens in non-english encoding
       * Dynamic change of collation (not implemented yet in tracker)
     """)
-    ut.main(verbosity=2)
+    fixtures.tracker_test_main()
