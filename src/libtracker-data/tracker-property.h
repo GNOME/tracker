@@ -94,7 +94,6 @@ gboolean            tracker_property_get_is_new              (TrackerProperty   
 gboolean            tracker_property_get_is_new_domain_index (TrackerProperty      *property,
                                                               TrackerClass         *class);
 gboolean            tracker_property_get_writeback           (TrackerProperty      *property);
-const gchar *       tracker_property_get_default_value       (TrackerProperty      *property);
 gboolean            tracker_property_get_db_schema_changed   (TrackerProperty      *property);
 gboolean            tracker_property_get_cardinality_changed (TrackerProperty      *property);
 gboolean            tracker_property_get_is_inverse_functional_property
@@ -137,8 +136,6 @@ void                tracker_property_set_is_new_domain_index (TrackerProperty   
                                                               gboolean              value);
 void                tracker_property_set_writeback           (TrackerProperty      *property,
                                                                gboolean              value);
-void                tracker_property_set_default_value       (TrackerProperty      *property,
-                                                              const gchar          *value);
 void                tracker_property_set_db_schema_changed   (TrackerProperty      *property,
                                                               gboolean              value);
 void                tracker_property_set_cardinality_changed (TrackerProperty      *property,

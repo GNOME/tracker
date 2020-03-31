@@ -63,7 +63,6 @@ struct _TrackerPropertyPrivate {
 	gboolean       is_new;
 	gboolean       db_schema_changed;
 	gboolean       writeback;
-	gchar         *default_value;
 	GPtrArray     *is_new_domain_index;
 	gboolean       force_journal;
 
@@ -181,8 +180,6 @@ property_finalize (GObject *object)
 
 	g_array_free (priv->super_properties, TRUE);
 	g_array_free (priv->domain_indexes, TRUE);
-
-	g_free (priv->default_value);
 
 	(G_OBJECT_CLASS (tracker_property_parent_class)->finalize) (object);
 }
@@ -665,18 +662,6 @@ tracker_property_get_super_properties (TrackerProperty *property)
 	return (TrackerProperty **) priv->super_properties->data;
 }
 
-const gchar *
-tracker_property_get_default_value (TrackerProperty *property)
-{
-	TrackerPropertyPrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_PROPERTY (property), NULL);
-
-	priv = tracker_property_get_instance_private (property);
-
-	return priv->default_value;
-}
-
 void
 tracker_property_set_uri (TrackerProperty *property,
                           const gchar     *value)
@@ -1114,20 +1099,6 @@ tracker_property_del_super_property (TrackerProperty *property,
 			return;
 		}
 	}
-}
-
-void
-tracker_property_set_default_value (TrackerProperty *property,
-                                    const gchar     *value)
-{
-	TrackerPropertyPrivate *priv;
-
-	g_return_if_fail (TRACKER_IS_PROPERTY (property));
-
-	priv = tracker_property_get_instance_private (property);
-
-	g_free (priv->default_value);
-	priv->default_value = g_strdup (value);
 }
 
 void

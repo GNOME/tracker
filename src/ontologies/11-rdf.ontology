@@ -137,11 +137,6 @@ tracker:weight a rdf:Property ;
 	rdfs:domain rdf:Property ;
 	rdfs:range xsd:integer .
 
-tracker:defaultValue a rdf:Property ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdf:Property ;
-	rdfs:range xsd:string .
-
 tracker:added a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;

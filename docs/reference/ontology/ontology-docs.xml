@@ -52,7 +52,6 @@
     <xi:include href="xml/mtp-ontology.xml" />
     <xi:include href="xml/slo-ontology.xml" />
     <xi:include href="xml/tracker-ontology.xml" />
-    <xi:include href="xml/maemo-ontology.xml" />
     <xi:include href="xml/osinfo-ontology.xml" />
     <xi:include href="xml/nid3-ontology.xml" />
   </part>

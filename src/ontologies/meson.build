@@ -38,8 +38,6 @@ nepomuk = files(
     'nepomuk/89-mtp.ontology',
     'nepomuk/90-tracker.description',
     'nepomuk/90-tracker.ontology',
-    'nepomuk/91-maemo.description',
-    'nepomuk/91-maemo.ontology',
     'nepomuk/92-slo.description',
     'nepomuk/92-slo.ontology',
     'nepomuk/93-libosinfo.description',
