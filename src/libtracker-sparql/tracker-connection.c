@@ -54,17 +54,32 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
  * tracker_sparql_connection_new:
  * @flags: values from #TrackerSparqlConnectionFlags
  * @store: the directory that contains the database as a #GFile, or %NULL
- * @ontology: (nullable): the directory that contains the database schemas as
- *                        a #GFile, or %NULL to use the default schemas.
+ * @ontology: the directory that contains the database schemas as a #GFile, or %NULL
  * @cancellable: (nullable): a #GCancellable, or %NULL
  * @error: pointer to a #GError
  *
- * Opens a database. Use this for data managed by the current process.
+ * Creates or opens a database.
  *
+ * This method should only be used for databases owned by the current process.
  * To connect to databases managed by other processes, use
  * tracker_sparql_connection_bus_new().
  *
  * If @store is %NULL, the database will be created in memory.
+ *
+ * The @ontologies parameter must point to a location containing suitable
+ * `.ontology` files in Turtle format. These control the database schema that
+ * is used. You can use the default Nepomuk ontologies by calling
+ * tracker_sparql_get_ontology_nepomuk ().
+ *
+ * If you open an existing database using a different @ontology to the one it
+ * was created with, Tracker will attempt to migrate the existing data to the
+ * new schema. This may raise an error. In particular, not all migrations are
+ * possible without causing data loss and Tracker will refuse to delete data
+ * during a migration.
+ *
+ * You can also pass %NULL for @ontologies to mean "use the ontologies that the
+ * database was created with". This will fail if the database doesn't already
+ * exist.
  *
  * Returns: (transfer full): a new #TrackerSparqlConnection. Call
  * g_object_unref() on the object when no longer used.
@@ -75,9 +90,8 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
 /**
  * tracker_sparql_connection_new_async:
  * @flags: values from #TrackerSparqlConnectionFlags
- * @store: the directory that contains the database as a #GFile, or %NULL
- * @ontology: (nullable): the directory that contains the database schemas as
- *                        a #GFile, or %NULL to use the default schemas.
+ * @store: (nullable): the directory that contains the database as a #GFile, or %NULL
+ * @ontology: (nullable): the directory that contains the database schemas as a #GFile, or %NULL
  * @cancellable: (nullable): a #GCancellable, or %NULL
  * @callback: the #GAsyncReadyCallback called when the operation completes
  * @user_data: data passed to @callback
@@ -101,7 +115,7 @@ tracker_sparql_connection_class_init (TrackerSparqlConnectionClass *klass)
  * tracker_sparql_connection_bus_new:
  * @service_name: The name of the D-Bus service to connect to.
  * @object_path: (nullable): The path to the object, or %NULL to use the default.
- * @dbus_connection: (nullable): The #GDBusConnection to use, or %NULL to use the session bus.
+ * @dbus_connection: (nullable): The #GDBusConnection to use, or %NULL to use the session bus
  * @error: pointer to a #GError
  *
  * Connects to a database owned by another process on the

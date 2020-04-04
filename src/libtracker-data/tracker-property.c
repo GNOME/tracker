@@ -638,18 +638,6 @@ tracker_property_get_is_inverse_functional_property (TrackerProperty *property)
 	return priv->is_inverse_functional_property;
 }
 
-gboolean
-tracker_property_get_force_journal (TrackerProperty *property)
-{
-	TrackerPropertyPrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_PROPERTY (property), FALSE);
-
-	priv = tracker_property_get_instance_private (property);
-
-	return priv->force_journal;
-}
-
 TrackerProperty **
 tracker_property_get_super_properties (TrackerProperty *property)
 {
@@ -1050,19 +1038,6 @@ tracker_property_set_is_inverse_functional_property (TrackerProperty *property,
 	priv = tracker_property_get_instance_private (property);
 
 	priv->is_inverse_functional_property = value;
-}
-
-void
-tracker_property_set_force_journal (TrackerProperty *property,
-                                    gboolean         value)
-{
-	TrackerPropertyPrivate *priv;
-
-	g_return_if_fail (TRACKER_IS_PROPERTY (property));
-
-	priv = tracker_property_get_instance_private (property);
-
-	priv->force_journal = value;
 }
 
 void

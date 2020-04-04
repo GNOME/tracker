@@ -7,6 +7,7 @@ tracker_sparql_escape_string
 tracker_sparql_escape_uri
 tracker_sparql_escape_uri_printf
 tracker_sparql_escape_uri_vprintf
+tracker_sparql_get_ontology_nepomuk
 <SUBSECTION Standard>
 TRACKER_TYPE_URI
 tracker_uri_get_type

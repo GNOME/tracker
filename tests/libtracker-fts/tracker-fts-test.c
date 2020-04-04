@@ -75,8 +75,8 @@ test_sparql_query (gconstpointer test_data)
 	data_location = g_file_new_for_path (datadir);
 
 	conn = tracker_sparql_connection_new (TRACKER_SPARQL_CONNECTION_FLAGS_NONE,
-					      data_location, ontology,
-					      NULL, &error);
+	                                      data_location, ontology,
+	                                      NULL, &error);
 	g_assert_no_error (error);
 
 	g_object_unref (ontology);

@@ -53,9 +53,9 @@ test_blank (TestInfo      *info,
 	data_location = g_file_new_for_path (info->data_location);
 
 	/* initialization */
-	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FORCE_REINDEX,
+	manager = tracker_data_manager_new (TRACKER_DB_MANAGER_FLAGS_NONE,
 	                                    data_location, data_location, /* loc, domain and ontology_name */
-	                                    FALSE, 100, 100);
+	                                    100, 100);
 	g_initable_init (G_INITABLE (manager), NULL, &error);
 	g_assert_no_error (error);
 

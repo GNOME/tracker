@@ -137,7 +137,7 @@ connection_cb (GObject      *object,
 gint
 main (gint argc, gchar *argv[])
 {
-	GFile *store;
+	g_autoptr(GFile) store, ontology;
 	MyData *md;
 
 	if (argc > 1) {
@@ -152,9 +152,10 @@ main (gint argc, gchar *argv[])
 	md->timer = g_timer_new ();
 	md->cancellable = g_cancellable_new ();
 
+	ontology = tracker_sparql_get_ontology_nepomuk ();
 	tracker_sparql_connection_new_async (0,
 	                                     store,
-	                                     NULL,
+	                                     ontology,
 	                                     md->cancellable,
 	                                     connection_cb,
 	                                     md);
