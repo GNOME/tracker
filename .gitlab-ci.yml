@@ -13,6 +13,7 @@ variables:
 stages:
   - test
   - analysis
+  - website
 
 .test_template: &test
   stage: test
@@ -78,3 +79,28 @@ coverity:
       --form description="gitlab CI build"'
   only:
     - master
+
+pages:
+  stage: website
+  image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
+  dependencies: []
+  before_script:
+    - dnf install -y python3-pip
+    - pip3 install mkdocs mkdocs-cinder
+  script:
+    # Build tracker and install.
+    - su tracker -c 'mkdir build; cd build; meson .. --prefix=/tmp/tracker; ninja install'
+    # Build tracker-miners and install any documentation from there as well.
+    - su tracker -c '.gitlab-ci/checkout-tracker-miners.sh'
+    - su tracker -c 'cd extra/tracker-miners; mkdir build; cd build; env PKG_CONFIG_PATH=/tmp/tracker/lib64/pkgconfig meson .. --prefix=/tmp/tracker; ninja install'
+    # Generate the website using mkdocs.
+    - |
+      tracker_commit=$CI_COMMIT_SHA1
+      tracker_miners_commit=$(git -C ./extra/tracker-miners rev-parse HEAD)
+      ./docs/website/build.py --api-docs=/tmp/tracker/share/gtk-doc/html --tracker-commit=${tracker_commit}
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+    - sam/website
