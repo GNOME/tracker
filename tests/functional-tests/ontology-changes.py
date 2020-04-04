@@ -39,6 +39,7 @@ import trackertestutils.dconf
 import trackertestutils.helpers
 
 import configuration as cfg
+import fixtures
 
 
 RDFS_RANGE = "http://www.w3.org/2000/01/rdf-schema#range"
@@ -909,4 +910,4 @@ class PropertyRelegationTest (OntologyChangeTestTemplate):
 
 
 if __name__ == "__main__":
-    ut.main(verbosity=2)
+    fixtures.tracker_test_main()

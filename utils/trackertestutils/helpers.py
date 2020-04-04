@@ -497,5 +497,11 @@ class TrackerDBusSandbox:
         log.info("Stopping D-Bus daemon for sandbox.")
         self.daemon.stop()
 
+    def stop_miner_fs(self):
+        log.info("Stopping tracker-miner-fs process.")
+        pid = self.daemon.get_connection_unix_process_id_sync('org.freedesktop.Tracker1.Miner.Files')
+        os.kill(pid, signal.SIGTERM)
+        psutil.wait_pid(pid)
+
     def get_connection(self):
         return self.daemon.get_connection()
