@@ -1,0 +1,10 @@
+site_name: Tracker
+theme: cinder
+docs_dir: ./website
+
+nav:
+  - Home: 'index.md'
+  - Overview: 'overview.md'
+  - FAQ: 'faq.md'
+  - Community: 'community.md'
+  - Documentation: 'docs.md'
