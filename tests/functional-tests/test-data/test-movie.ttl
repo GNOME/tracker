@@ -1,0 +1,17 @@
+@prefix nmm: <http://www.tracker-project.org/temp/nmm#> .
+@prefix nfo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+_:3 a nfo:FileHash ;
+  nfo:hashValue "123456789ABC" ;
+  nfo:hashAlgorithm "gibest" .
+
+<file:///home/sam/Videos/My%20Movie.avi> a nmm:Video , nfo:FileDataObject ;
+  nfo:frameRate 25 ;
+  nfo:channels 2 ;
+  nfo:hasHash _:3 ;
+  nfo:sampleRate 48000 ;
+  nfo:width 640 ;
+  nfo:duration 6130 ;
+  nfo:aspectRatio 1 ;
+  nfo:height 272 .
