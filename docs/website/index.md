@@ -7,8 +7,8 @@ Are you having problems with Tracker in GNOME? Look at the [Frequently Asked
 Questions](faq).
 
 Are you interested in using or developing Tracker and want to find out more
-about it? Read the [overview](overview) first and then take a look at the
-[documentation](documentation).
+about it? Start with the [overview](overview), then see our documentation
+for [users](docs/user) and [developers](docs/developer).
 
 Do you want to contribute to Tracker? Join the [community](community)
 and look for some bugs marked 'Help wanted'
