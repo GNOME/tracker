@@ -1,0 +1,68 @@
+tracker-endpoint(1)
+===================
+
+== NAME
+tracker-endpoint - Create a SPARQL endpoint
+
+== SYNOPSIS
+
+....
+tracker endpoint [--dbus-service | -b] <service_name>
+                 [--database-path | -d] <database_path>
+                 [[--ontology | -o] <ontology_name> |
+                  [--ontology-path | -p] <ontology_path>]
+                 [[--system | --session]]
+....
+
+== DESCRIPTION
+
+This command allows creating SPARQL endpoints. The endpoint will be able
+to handle SPARQL select and update queries, and notify about changes in
+it.
+
+The endpoint is exported via DBus, accessible through the given
+_service_name_, either using it in a *SERVICE* clause, or by creating a
+dedicated bus-based SPARQL connection.
+
+When creating a database, the _ontology_name_ (or alternatively, a
+_ontology_path_) must be provided in order to generate the database. If
+_ontology_name_ is used, the ontology must exist in
+_$datadir/tracker/ontologies_
+
+The database itself will be stored according to _database_path_.
+
+== OPTIONS
+
+*-b, --dbus-service=<__service_name__>*::
+  Service name to use on the endpoint.
+*-d, --database-path=<__database_path__>*::
+  The path where the database will be stored.
+*-o, --ontology*::
+  The name of an ontology in _$datadir/tracker/ontologies_ to use on the
+  constructed database.
+*-p, --ontology-path*::
+  Full path to an ontology to use on the constructed database.
+*--session*::
+  Use the session bus. This is the default.
+*--system*::
+  Use the system bus.
+
+== EXAMPLES
+
+Export a Nepomuk endpoint with the _org.example.Example1_ bus name.
+
+  $ tracker endpoint -b org.example.Example1 -o nepomuk -d /tmp/example1
+
+Access this endpoint with the *tracker-sparql(1)* subcommand.
+
+  $ tracker sparql --dbus-service org.example.Example1 -q "
+    SELECT ?s ?o
+    WHERE {
+      ?u a ?o
+    }"
+
+== SEE ALSO
+
+*tracker-sparql*(1),
+
+<https://www.w3.org/TR/sparql11-query/>

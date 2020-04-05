@@ -54,6 +54,11 @@ sqlite = dependency('sqlite3', version: '>' + sqlite_required)
 
 libmath = cc.find_library('m', required: false)
 
+if get_option('man')
+  asciidoc = find_program('asciidoc')
+  xsltproc = find_program('xsltproc')
+endif
+
 add_project_arguments('-Wformat', '-Wformat-security', language: 'c')
 
 # There are various gchar vs. unsigned char warnings that occur in extract

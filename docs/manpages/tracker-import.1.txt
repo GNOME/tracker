@@ -1,0 +1,23 @@
+tracker-import(1)
+=================
+
+== NAME
+
+tracker-import - Import data into a Tracker database.
+
+== SYNOPSIS
+
+*tracker import* FILE.ttl
+
+== DESCRIPTION
+
+*tracker import* imports data into a Tracker database.
+
+The data must conform to the existing ontology of the database.
+
+The data must be in Turtle format. You can use a tool such as rapper(1)
+to convert the data from other formats to Turtle.
+
+== SEE ALSO
+
+*tracker-export*(1), *tracker-sparql*(1).
