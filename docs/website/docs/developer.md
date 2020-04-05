@@ -1,17 +1,4 @@
-# Documentation
-
-## User Documentation
-
-Tracker is a system component and most users will not need to interact with
-it directly.
-
-GNOME has documentation on how to
-[search for files in the file manager](https://developer.gnome.org/libtracker-sparql/stable/).
-
-The `tracker` commandline tool provides direct access to Tracker. Use the
-`--help` option for documentation of this tool.
-
-## Developer Documentation
+# Developer Documentation
     
 Application and platform developers using Tracker will interact with Tracker
 using one or more of the shared libraries it provides:
@@ -33,6 +20,9 @@ The following documentation may be useful:
 
  * [Tracker ontology documentation](https://developer.gnome.org/ontology/stable/).
  * [Tracker documentation on wiki.gnome.org](https://wiki.gnome.org/Projects/Tracker).
+
+For working on Tracker itself, read the [HACKING.md
+file](https://gitlab.gnome.org/GNOME/tracker/-/blob/master/HACKING.md).
 
 ## Preview Documentation
 
