@@ -7,4 +7,10 @@ nav:
   - Overview: 'overview.md'
   - FAQ: 'faq.md'
   - Community: 'community.md'
-  - Documentation: 'docs.md'
+  - Documentation:
+      User documentation: 'docs/user.md'
+      Developer documentation: 'docs/developer.md'
+      Commandline documentation: 'docs/commandline.md'
+
+markdown_extensions:
+  - admonition
