@@ -86,7 +86,7 @@ pages:
   dependencies: []
   before_script:
     - dnf install -y python3-pip
-    - pip3 install mkdocs mkdocs-cinder
+    - pip3 install beautifulsoup4 mkdocs mkdocs-cinder
   script:
     # Build tracker and install.
     - su tracker -c 'mkdir build; cd build; meson .. --prefix=/tmp/tracker; ninja install'
@@ -97,10 +97,10 @@ pages:
     - |
       tracker_commit=$CI_COMMIT_SHA1
       tracker_miners_commit=$(git -C ./extra/tracker-miners rev-parse HEAD)
-      ./docs/website/build.py --api-docs=/tmp/tracker/share/gtk-doc/html --tracker-commit=${tracker_commit}
+      ./docs/website/build.py --api-docs=/tmp/tracker/share/gtk-doc/html --tracker-commit=${tracker_commit} --man-pages ./docs/manpages/*.txt ./extra/tracker-miners/docs/manpages/*.txt
   artifacts:
     paths:
       - public
   only:
     - master
-    - sam/website
+    - /^sam\/website.*$
