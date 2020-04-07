@@ -157,7 +157,7 @@ ORDER BY DESC ?count
       tracker-miner-fs data, you can create a dedicated DBus connection to it through:
     </para>
     <programlisting>
-      conn = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker1.Miner.Files", ...);
+      conn = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files", ...);
     </programlisting>
     <para>
       If you are interested in storing your own data, you can do it through:
@@ -171,7 +171,7 @@ ORDER BY DESC ?count
     </para>
     <programlisting>
 SELECT ?url ?tag {
-  SERVICE &lt;dbus:org.freedesktop.Tracker1.Miner.Files&gt; {
+  SERVICE &lt;dbus:org.freedesktop.Tracker3.Miner.Files&gt; {
     ?a a rdfs:Resource;
        nie:url ?url .
   }

@@ -103,7 +103,7 @@ static int main(string[] args)
 	}
 
 	try {
-		conn = Connection.bus_new("org.freedesktop.Tracker1", null);
+		conn = Connection.bus_new("org.freedesktop.Tracker3.Miner.Files", null);
 	} catch (GLib.Error e) {
 		critical("Couldn't connect to Tracker: %s", e.message);
 		return 1;

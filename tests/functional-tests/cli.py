@@ -30,26 +30,26 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
     def test_version(self):
         """Check we're testing the correct version of the CLI"""
         output = self.run_cli(
-            ['tracker', '--version'])
+            ['tracker3', '--version'])
 
         version_line = output.splitlines()[0]
         expected_version_line = 'Tracker %s' % configuration.tracker_version()
         self.assertEqual(version_line, expected_version_line)
 
     def test_create_local_database(self):
-        """Create a database using `tracker endpoint` for local testing"""
+        """Create a database using `tracker3 endpoint` for local testing"""
 
         with self.tmpdir() as tmpdir:
             ontology_path = configuration.ontologies_dir()
 
             # Create the database
             self.run_cli(
-                ['tracker', 'endpoint', '--database', tmpdir,
+                ['tracker3', 'endpoint', '--database', tmpdir,
                  '--ontology-path', ontology_path])
 
             # Sanity check that it works.
             self.run_cli(
-                ['tracker', 'sparql', '--database', tmpdir,
+                ['tracker3', 'sparql', '--database', tmpdir,
                  '--query', 'ASK { ?u a rdfs:Resource }'])
 
     def test_export(self):
@@ -61,10 +61,10 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             # Create a database and export it as Turtle.
             # We don't validate the output in this test, but we should.
             self.run_cli(
-                ['tracker', 'endpoint', '--database', tmpdir,
+                ['tracker3', 'endpoint', '--database', tmpdir,
                  '--ontology-path', ontology_path])
             self.run_cli(
-                ['tracker', 'export', '--database', tmpdir]);
+                ['tracker3', 'export', '--database', tmpdir]);
 
     def test_import(self):
         """Import a Turtle file into a Tracker database."""
@@ -75,10 +75,10 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             ontology_path = configuration.ontologies_dir()
 
             self.run_cli(
-                ['tracker', 'endpoint', '--database', tmpdir,
+                ['tracker3', 'endpoint', '--database', tmpdir,
                  '--ontology-path', ontology_path])
             self.run_cli(
-                ['tracker', 'import', '--database', tmpdir, testdata]);
+                ['tracker3', 'import', '--database', tmpdir, testdata]);
 
 
 if __name__ == '__main__':

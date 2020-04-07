@@ -289,7 +289,7 @@ create_connection (GError **error)
 		return tracker_sparql_connection_remote_new (remote_service);
 	} else {
 		/* Default to tracker-miner-fs service */
-		return tracker_sparql_connection_bus_new ("org.freedesktop.Tracker1.Miner.Files",
+		return tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
 		                                          NULL, NULL, error);
 	}
 }

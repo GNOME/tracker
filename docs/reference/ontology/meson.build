@@ -16,4 +16,5 @@ generated = custom_target('ontology-doc-generated',
 gnome.gtkdoc('ontology',
     src_dir: include_directories('.'),
     main_xml: 'ontology-docs.xml',
+    install_dir: 'tracker@0@-nepomuk'.format(tracker_api_major),
     install: true)

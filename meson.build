@@ -9,6 +9,8 @@ cc = meson.get_compiler('c')
 
 # This is the X.Y used in -llibtracker-FOO-X.Y
 tracker_api_version = '3.0'
+tracker_api_major = tracker_api_version.split('.')[0]
+tracker_versioned_name = 'tracker-@0@'.format(tracker_api_major)
 
 tracker_version = meson.project_version().split('-')[0]
 tracker_major_version = tracker_version.split('.')[0].to_int()
@@ -64,9 +66,6 @@ add_project_arguments('-DTRACKER_COMPILATION',
 add_project_arguments(['-D', 'TRACKER_COMPILATION'],
                       ['-D', 'G_LOG_DOMAIN="Tracker"'],
                       language: 'vala')
-
-network_manager = dependency('libnm', required: get_option('network_manager'))
-have_network_manager = network_manager.found()
 
 ##################################################################
 # Check for libtracker-common, make sure libstemmer exists
@@ -190,18 +189,14 @@ conf.set('HAVE_BUILTIN_FTS', sqlite3_has_builtin_fts5)
 conf.set('HAVE_LIBICU', unicode_library_name == 'icu')
 conf.set('HAVE_LIBSTEMMER', have_libstemmer)
 conf.set('HAVE_LIBUNISTRING', unicode_library_name == 'unistring')
-conf.set('HAVE_NETWORK_MANAGER', have_network_manager)
 
-conf.set('HAVE_GETLINE', cc.has_function('getline', prefix : '#include <stdio.h>'))
 conf.set('HAVE_POSIX_FADVISE', cc.has_function('posix_fadvise', prefix : '#include <fcntl.h>'))
 conf.set('HAVE_STATVFS64', cc.has_header_symbol('sys/statvfs.h', 'statvfs64', args: '-D_LARGEFILE64_SOURCE'))
-conf.set('HAVE_STRNLEN', cc.has_function('strnlen', prefix : '#include <string.h>'))
 
 conf.set('LOCALEDIR', '"@0@/@1@"'.format(get_option('prefix'), get_option('localedir')))
 conf.set('SHAREDIR', '"@0@/@1@"'.format(get_option('prefix'), get_option('datadir')))
-conf.set('TRACKER_MINERS_DIR', '"@0@/@1@/tracker/miners"'.format(get_option('prefix'), get_option('datadir')))
 
-conf.set('GETTEXT_PACKAGE', '"tracker"')
+conf.set('GETTEXT_PACKAGE', '"@0@"'.format(tracker_versioned_name))
 conf.set('PACKAGE_VERSION', '"@0@"'.format(meson.project_version()))
 conf.set('TRACKER_VERSION', '"@0@"'.format(meson.project_version()))
 conf.set('TRACKER_MAJOR_VERSION', tracker_major_version)
@@ -242,7 +237,7 @@ tracker_install_rpath = ':'.join([tracker_internal_libs_dir, libdir])
 
 # NOTE: We don't use ${TRACKER_API_VERSION} because other content like
 # the ontology is installed to the same location.
-tracker_ontologies_dir = join_paths(get_option('prefix'), get_option('datadir'), 'tracker/ontologies')
+tracker_ontologies_dir = join_paths(get_option('prefix'), get_option('datadir'), tracker_versioned_name, 'ontologies')
 
 vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi')
 
@@ -302,7 +297,6 @@ summary = [
   '    Source code location:                   ' + meson.current_source_dir(),
   '    Compiler:                               ' + cc.get_id(),
   '\nFeature Support:',
-  '    Support for network status detection:   ' + have_network_manager.to_string(),
   '    Unicode support library:                ' + unicode_library_name,
   '    Use external FTS module:                ' + (not sqlite3_has_builtin_fts5).to_string(),
   '    Build with Stemming support:            ' + have_libstemmer.to_string(),

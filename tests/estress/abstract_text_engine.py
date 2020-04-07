@@ -25,8 +25,8 @@ from dbus.mainloop.glib import DBusGMainLoop
 import time
 import sys
 
-TRACKER = 'org.freedesktop.Tracker1'
-TRACKER_OBJ = '/org/freedesktop/Tracker1/Resources'
+TRACKER = 'org.freedesktop.Tracker3'
+TRACKER_OBJ = '/org/freedesktop/Tracker3/Resources'
 
 #
 # Abstract class that does the job.
@@ -44,7 +44,7 @@ class AbstractTextEngine:
         bus = dbus.SessionBus ()
         self.tracker = bus.get_object (TRACKER, TRACKER_OBJ)
         self.iface = dbus.Interface (self.tracker,
-                                     "org.freedesktop.Tracker1.Resources")
+                                     "org.freedesktop.Tracker3.Resources")
         if (timeout > 0):
             self.call = 0
             gobject.timeout_add (timeout * 1000,

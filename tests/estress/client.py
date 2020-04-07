@@ -25,8 +25,8 @@ import dbus
 import getopt
 import sys
 
-TRACKER = 'org.freedesktop.Tracker1'
-TRACKER_OBJ = '/org/freedesktop/Tracker1/Resources'
+TRACKER = 'org.freedesktop.Tracker3'
+TRACKER_OBJ = '/org/freedesktop/Tracker3/Resources'
 
 SPARQL_QUERY = """
     SELECT ?entry ?title ?date ?isRead WHERE {
@@ -41,7 +41,7 @@ SPARQL_QUERY = """
 
 bus = dbus.SessionBus ()
 obj = bus.get_object (TRACKER, TRACKER_OBJ)
-iface = dbus.Interface (obj, "org.freedesktop.Tracker1.Resources")
+iface = dbus.Interface (obj, "org.freedesktop.Tracker3.Resources")
 
 def run_query ():
     start = time.time ()

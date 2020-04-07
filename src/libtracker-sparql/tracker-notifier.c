@@ -78,6 +78,8 @@ typedef struct _TrackerNotifierEventCache TrackerNotifierEventCache;
 
 struct _TrackerNotifierSubscription {
 	GDBusConnection *connection;
+	TrackerNotifier *notifier;
+	gchar *service;
 	guint handler_id;
 };
 
@@ -120,14 +122,16 @@ G_DEFINE_TYPE_WITH_CODE (TrackerNotifier, tracker_notifier, G_TYPE_OBJECT,
                          G_ADD_PRIVATE (TrackerNotifier))
 
 static TrackerNotifierSubscription *
-tracker_notifier_subscription_new (GDBusConnection *connection,
-                                   guint            handler_id)
+tracker_notifier_subscription_new (TrackerNotifier *notifier,
+                                   GDBusConnection *connection,
+                                   const gchar     *service)
 {
 	TrackerNotifierSubscription *subscription;
 
 	subscription = g_new0 (TrackerNotifierSubscription, 1);
 	subscription->connection = g_object_ref (connection);
-	subscription->handler_id = handler_id;
+	subscription->notifier = notifier;
+	subscription->service = g_strdup (service);
 
 	return subscription;
 }
@@ -138,6 +142,7 @@ tracker_notifier_subscription_free (TrackerNotifierSubscription *subscription)
 	g_dbus_connection_signal_unsubscribe (subscription->connection,
 	                                      subscription->handler_id);
 	g_object_unref (subscription->connection);
+	g_free (subscription->service);
 	g_free (subscription);
 }
 
@@ -463,7 +468,8 @@ graph_updated_cb (GDBusConnection *connection,
                   GVariant        *parameters,
                   gpointer         user_data)
 {
-	TrackerNotifier *notifier = user_data;
+	TrackerNotifierSubscription *subscription = user_data;
+	TrackerNotifier *notifier = subscription->notifier;
 	TrackerNotifierEventCache *cache;
 	GVariantIter *events;
 	const gchar *graph;
@@ -471,8 +477,8 @@ graph_updated_cb (GDBusConnection *connection,
 
 	g_variant_get (parameters, "(sa{ii})", &graph, &events);
 
-	service = g_strdup_printf ("dbus:%s", sender_name);
-	cache = _tracker_notifier_event_cache_new (notifier, sender_name, graph);
+	service = g_strdup_printf ("dbus:%s", subscription->service);
+	cache = _tracker_notifier_event_cache_new (notifier, service, graph);
 	g_free (service);
 
 	handle_events (notifier, cache, events);
@@ -622,7 +628,6 @@ tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
 {
 	TrackerNotifierSubscription *subscription;
 	TrackerNotifierPrivate *priv;
-	guint handler_id;
 
 	g_return_val_if_fail (TRACKER_IS_NOTIFIER (notifier), 0);
 	g_return_val_if_fail (G_IS_DBUS_CONNECTION (connection), 0);
@@ -630,24 +635,23 @@ tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
 
 	priv = tracker_notifier_get_instance_private (notifier);
 
-	handler_id =
+	subscription = tracker_notifier_subscription_new (notifier, connection, service);
+	subscription->handler_id =
 		g_dbus_connection_signal_subscribe (connection,
 		                                    service,
-		                                    "org.freedesktop.Tracker1.Endpoint",
+		                                    "org.freedesktop.Tracker3.Endpoint",
 		                                    "GraphUpdated",
-		                                    "/org/freedesktop/Tracker1/Endpoint",
+		                                    "/org/freedesktop/Tracker3/Endpoint",
 		                                    graph,
 		                                    G_DBUS_SIGNAL_FLAGS_NONE,
 		                                    graph_updated_cb,
-		                                    notifier, NULL);
-
-	subscription = tracker_notifier_subscription_new (connection, handler_id);
+		                                    subscription, NULL);
 
 	g_hash_table_insert (priv->subscriptions,
 	                     GUINT_TO_POINTER (subscription->handler_id),
 	                     subscription);
 
-	return handler_id;
+	return subscription->handler_id;
 }
 
 void

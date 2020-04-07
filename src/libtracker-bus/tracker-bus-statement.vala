@@ -26,8 +26,6 @@ public class Tracker.Bus.Statement : Tracker.Sparql.Statement {
 	private string object_path;
 	private HashTable<string,GLib.Variant> arguments;
 
-	private const string ENDPOINT_IFACE = "org.freedesktop.Tracker1.Endpoint";
-
 	public Statement (DBusConnection bus, string dbus_name, string object_path, string query) {
 		Object ();
 		this.bus = bus;

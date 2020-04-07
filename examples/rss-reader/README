@@ -22,7 +22,7 @@ into tracker (using the sparql interface).
      with -r or remove the DBs, you need to load the file
      initial-data.ttl. For instance with this command:
 
-dbus-send --print-reply --dest=org.freedesktop.Tracker1 /org/freedesktop/Tracker1/Resources org.freedesktop.Tracker1.Resources.Load string:"/x/y/z/initial-data.ttl"
+dbus-send --print-reply --dest=org.freedesktop.Tracker3 /org/freedesktop/Tracker3/Resources org.freedesktop.Tracker3.Resources.Load string:"/x/y/z/initial-data.ttl"
 
 or more easily:
 

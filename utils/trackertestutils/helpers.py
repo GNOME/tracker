@@ -476,7 +476,7 @@ class TrackerDBusSandbox:
 
         log.info("Looking for active Tracker processes on the bus")
         for busname in self.daemon.list_names_sync():
-            if busname.startswith('org.freedesktop.Tracker1'):
+            if busname.startswith('org.freedesktop.Tracker3'):
                 pid = self.daemon.get_connection_unix_process_id_sync(busname)
                 tracker_processes.append(pid)
 
