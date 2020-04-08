@@ -22,6 +22,7 @@
 #include <glib-object.h>
 #include <glib/gprintf.h>
 #include <gio/gio.h>
+#include <stdlib.h>
 #include "ttl_loader.h"
 #include "ttl_model.h"
 #include "ttl_xml.h"
@@ -75,48 +76,6 @@ class_get_hierarchy (Ontology      *ontology,
 }
 
 static void
-print_xml_header (FILE          *f,
-                   OntologyClass *klass,
-                   Ontology      *ontology)
-{
-	gchar *id, *shortname;
-
-	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
-	shortname = ttl_model_name_to_shortname (ontology, klass->classname, NULL);
-
-        g_fprintf (f, "<?xml version='1.0' encoding='UTF-8'?>\n");
-        g_fprintf (f, "<refentry id='%s'>\n", id);
-
-        g_fprintf (f, "<refmeta><refentrytitle>%s</refentrytitle></refmeta>", shortname);
-        g_fprintf (f, "<refnamediv><refname>%s</refname></refnamediv>", shortname);
-
-	g_fprintf (f, "<refsect1 id='%s.description'>", id);
-
-	if (klass->description) {
-		g_fprintf (f, "<title>Description</title>\n");
-		g_fprintf (f, "<para>%s</para>\n", klass->description);
-	}
-
-	if (klass->deprecated)
-		g_fprintf (f, "<note><para>This class is deprecated.</para></note>\n");
-
-	if (klass->notify)
-		g_fprintf (f, "<note><para>This class emits notifications about changes, and can "
-		           "be tracked through the <literal>GraphUpdated</literal> DBus signal.</para></note>\n");
-
-	g_fprintf (f, "</refsect1>");
-
-	g_free (shortname);
-	g_free (id);
-}
-
-static void
-print_xml_footer (FILE *f)
-{
-	g_fprintf (f, "</refentry>\n");
-}
-
-static void
 print_predefined_instances (FILE          *f,
                             OntologyClass *klass,
                             Ontology      *ontology)
@@ -130,7 +89,7 @@ print_predefined_instances (FILE          *f,
 	shortname = ttl_model_name_to_shortname (ontology, klass->classname, NULL);
 	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
 
-	g_fprintf (f, "<refsect1 id='%s.predefined-instances'>", id);
+	g_fprintf (f, "<refsect3 id='%s.predefined-instances'>", id);
 	g_fprintf (f, "<title>Predefined instances</title><para>");
 	g_fprintf (f, "%s has the following predefined instances: ", shortname);
         g_fprintf (f, "<itemizedlist>\n");
@@ -147,55 +106,7 @@ print_predefined_instances (FILE          *f,
 		g_free (shortname);
 	}
 
-	g_fprintf (f, "</itemizedlist></para></refsect1>\n");
-}
-
-static void
-print_fts_properties (FILE          *f,
-                      OntologyClass *klass,
-                      Ontology      *ontology)
-{
-	gchar *shortname, *id;
-	GList *l, *fts_props = NULL;
-
-	for (l = klass->in_domain_of; l; l = l->next) {
-		OntologyProperty *prop;
-
-		prop = g_hash_table_lookup (ontology->properties, l->data);
-
-		if (prop->fulltextIndexed)
-			fts_props = g_list_prepend (fts_props, prop);
-	}
-
-	if (!fts_props)
-		return;
-
-	shortname = ttl_model_name_to_shortname (ontology, klass->classname, NULL);
-	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
-
-	g_fprintf (f, "<refsect1 id='%s.fts-properties'>", id);
-	g_fprintf (f, "<title>Full-text-indexed properties</title><para>");
-	g_fprintf (f, "%s has the following full-text-indexed properties: ", shortname);
-        g_fprintf (f, "<itemizedlist>\n");
-
-	for (l = fts_props; l; l = l->next) {
-		gchar *prop_shortname, *prop_id;
-		OntologyProperty *prop = l->data;
-
-		prop_shortname = ttl_model_name_to_shortname (ontology, prop->propertyname, NULL);
-		prop_id = ttl_model_name_to_shortname (ontology, prop->propertyname, "-");
-
-		g_fprintf (f, "<listitem><para>");
-		g_fprintf (f, "<link linkend=\"%s.%s\">%s</link>", id, prop_id, prop_shortname);
-		g_fprintf (f, "</para></listitem>\n");
-		g_free (prop_shortname);
-		g_free (prop_id);
-	}
-
-	g_fprintf (f, "</itemizedlist></para></refsect1>\n");
-	g_free (shortname);
-	g_free (id);
-	g_list_free (fts_props);
+	g_fprintf (f, "</itemizedlist></para></refsect3>\n");
 }
 
 typedef struct {
@@ -512,6 +423,9 @@ class_get_parent_hierarchy_strings (OntologyClass *klass,
 
 	context = hierarchy_context_new (klass, ontology);
 
+	/* Proceed from parent to child classes, populating the 
+	 * context->strings array.
+	 */
 	for (c = context->hierarchy; c; c = c->next) {
 		OntologyClass *cl = g_hash_table_lookup (ontology->classes, c->data);
 		hierarchy_context_resolve_class (context, cl, ontology);
@@ -539,7 +453,7 @@ print_class_hierarchy (FILE          *f,
 
 	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
 
-	g_fprintf (f, "<refsect1 id='%s.hierarchy'>", id);
+	g_fprintf (f, "<refsect3 id='%s.hierarchy'>", id);
 	g_fprintf (f, "<title>Class hierarchy</title>");
 	g_fprintf (f, "<screen>");
 
@@ -550,166 +464,222 @@ print_class_hierarchy (FILE          *f,
 		g_fprintf (f, "    %s\n", str->str->str);
 	}
 
-	g_fprintf (f, "</screen></refsect1>\n");
+	g_fprintf (f, "</screen></refsect3>\n");
 	g_ptr_array_unref (strings);
 }
 
 static void
-print_properties (FILE          *f,
-                  OntologyClass *klass,
-                  Ontology      *ontology)
+print_flag (FILE *f,
+            const gchar *flag_property_link,
+            const gchar *icon_name,
+            const gchar *flag_description)
 {
-	gchar *id, *prop_id, *shortname, *type_name, *type_class_id;
-	GList *l;
+	/* This must not contain any linebreaks, or gtkdoc-fixxrefs will not
+	 * resolve the link. See https://gitlab.gnome.org/GNOME/gtk-doc/-/issues/122
+	 */
+	g_fprintf (f, "<link linkend=\"%s\">", flag_property_link);
+	g_fprintf (f, "<inlinemediaobject>");
+	g_fprintf (f, "<imageobject><imagedata fileref=\"%s\" /></imageobject>", icon_name);
+	g_fprintf (f, "<alt>%s</alt>", flag_description);
+	g_fprintf (f, "</inlinemediaobject>");
+	g_fprintf (f, "</link>");
+};
 
-	if (!klass->in_domain_of)
+static void
+print_property_table (FILE          *f,
+                      Ontology      *ontology,
+                      const char    *id,
+                      GList         *properties)
+{
+	GList *l, *m;
+	g_autoptr(GList) properties_sorted = NULL;
+
+	if (!properties)
 		return;
 
-	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
-	g_fprintf (f, "<refsect1 id='%s.properties'>", id);
+	properties_sorted = g_list_sort (g_list_copy (properties), (GCompareFunc) strcmp);
+
+	/* We (ab)use the "struct_members" role to ensure devhelp2 <keyword> entries are
+	 * generated by gtkdoc-mkhtml2. This is needed for xrefs to work between the
+	 * libtracker-sparql and nepomuk ontology docs.
+	 */
+	g_fprintf (f, "<refsect3 role=\"struct_members\" id=\"%s.properties\">", id);
 	g_fprintf (f, "<title>Properties</title>");
 
-	for (l = klass->in_domain_of; l; l = l->next) {
+	g_fprintf (f, "<informaltable frame=\"none\"><tgroup cols=\"4\">");
+	g_fprintf (f, "<thead><row><entry>Name</entry><entry>Type</entry><entry>Notes</entry><entry>Description</entry></row></thead>");
+
+	g_fprintf (f, "<tbody>");
+	for (l = properties_sorted; l; l = l->next) {
 		OntologyProperty *prop;
+		g_autofree gchar *shortname = NULL, *basename = NULL, *type_name = NULL, *type_class_id = NULL, *prop_id = NULL;
 
 		prop = g_hash_table_lookup (ontology->properties, l->data);
 
 		prop_id = ttl_model_name_to_shortname (ontology, prop->propertyname, "-");
 		shortname = ttl_model_name_to_shortname (ontology, prop->propertyname, NULL);
-		type_name = ttl_model_name_to_shortname (ontology, prop->range->data, NULL);
+		basename = ttl_model_name_to_basename (ontology, prop->propertyname);
+		type_name = ttl_model_name_to_basename (ontology, prop->range->data);
 		type_class_id = ttl_model_name_to_shortname (ontology, prop->range->data, "-");
 
-		g_fprintf (f, "<refsect2 id='%s.%s' role='property'>", id, prop_id);
-		g_fprintf (f, "<indexterm zone='%s.%s'><primary sortas='%s'>%s</primary></indexterm>",
-		           id, prop_id, shortname, shortname);
-		g_fprintf (f, "<title>The <literal>“%s”</literal> property</title>", shortname);
-		g_fprintf (f, "<programlisting>“%s”"
-			   "          <link linkend=\"%s\">%s</link>"
-			   "</programlisting>",
-			   shortname, type_class_id, type_name);
+		g_fprintf (f, "<row role=\"member\">");
 
-		if (prop->description) {
-			g_fprintf (f, "<para>%s</para>", prop->description);
-		}
+		/* Property name column */
+		g_fprintf (f, "<entry role=\"struct_member_name\">");
+		/* This id is globally unique and can be used for internal links.
+		 * We abuse <structfield> so that gtkdoc-mkhtml2 creates a usable link. */
+		g_fprintf (f, "<para><structfield id=\"%s\">%s</structfield></para>", prop_id, basename);
+		/* This anchor is unique within the refentry and can be used for external links */
+		g_fprintf (f, "<anchor id='%s' />", basename);
+		g_fprintf (f, "<indexterm zone='%s'><primary sortas='%s'>%s</primary></indexterm>",
+		           prop_id, shortname, shortname);
+		g_fprintf (f, "</entry>");
 
-		if (prop->max_cardinality) {
-			g_fprintf (f, "<para>Number of possible elements per resource (Cardinality): %s</para>",
-				   prop->max_cardinality);
-		} else {
-			g_fprintf (f, "<para>Number of possible elements per resource (Cardinality): Unlimited</para>");
-		}
+		/* Type column */
+		g_fprintf (f, "<entry>");
+		g_fprintf (f, "<link linkend=\"%s\">%s</link>", type_class_id, type_name);
+		g_fprintf (f, "</entry>");
 
-		if (prop->fulltextIndexed) {
-			g_fprintf (f, "<note><para>This property is full-text-indexed, and can be looked up through <literal>fts:match</literal>.</para></note>\n");
-		}
+		/* Flags column */
+		g_fprintf (f, "<entry>");
 
 		if (prop->deprecated) {
-			g_fprintf (f, "<note><para>This property is deprecated.</para></note>\n");
+			print_flag (f, "tracker-deprecated", "icon-deprecated.svg",
+			            "This property is deprecated.");
 		}
 
 		if (prop->superproperties) {
-			GList *l;
+			for (m = prop->superproperties; m; m = m->next) {
+				g_autofree gchar *shortname = NULL, *superprop_id = NULL;
+				g_autofree gchar *message = NULL;
 
-			g_fprintf (f, "<note><para>This property supersedes the following properties from this or parent classes:</para>\n");
-			g_fprintf (f, "<itemizedlist>\n");
+				shortname = ttl_model_name_to_shortname (ontology, m->data, NULL);
+				superprop_id = ttl_model_name_to_shortname (ontology, m->data, "-");
 
-			for (l = prop->superproperties; l; l = l->next) {
-				gchar *class_shortname, *shortname, *class_id, *superprop_id;
-				OntologyProperty *superprop;
-				OntologyClass *cl;
+				message = g_strdup_printf ("This property extends %s", shortname);
 
-				superprop = g_hash_table_lookup (ontology->properties, l->data);
-
-				if (!superprop) {
-					superprop = ttl_model_property_new (l->data);
-					g_hash_table_insert (ontology->properties, g_strdup (superprop->propertyname), superprop);
-				}
-
-				if (!superprop->domain)
-					continue;
-
-				cl = g_hash_table_lookup (ontology->classes, superprop->domain->data);
-
-				shortname = ttl_model_name_to_shortname (ontology, superprop->propertyname, NULL);
-				class_shortname = ttl_model_name_to_shortname (ontology, cl->classname, NULL);
-				superprop_id = ttl_model_name_to_shortname (ontology, superprop->propertyname, "-");
-				class_id = ttl_model_name_to_shortname (ontology, cl->classname, "-");
-
-				g_fprintf (f, "<listitem><para>");
-				g_fprintf (f, "<link linkend=\"%s.%s\"><literal>“%s”</literal> from the <literal>%s</literal> class</link>",
-				           class_id, superprop_id,
-				           shortname, class_shortname);
-				g_fprintf (f, "</para></listitem>\n");
-
-				g_free (class_id);
-				g_free (superprop_id);
-				g_free (class_shortname);
-				g_free (shortname);
+				print_flag (f, superprop_id, "icon-superproperty.svg", message);
 			}
+		}
+		g_fprintf (f, "</entry>");
 
-			g_fprintf (f, "</itemizedlist></note>\n");
+		if (prop->max_cardinality != NULL && atoi (prop->max_cardinality) == 1) {
+			/* Single valued properties are most common, so we don't display this. */
+		} else {
+			g_autofree gchar *message = NULL;
+
+			if (prop->max_cardinality != NULL && atoi (prop->max_cardinality) > 0) {
+				message = g_strdup_printf ("This property can have a maximum of %i values", *prop->max_cardinality);
+			} else {
+				message = g_strdup_printf ("This property can have multiple values.");
+			}
+			print_flag (f, "nrl-maxCardinality", "icon-multivalue.svg", message);
 		}
 
-		g_fprintf (f, "</refsect2>\n");
+		if (prop->fulltextIndexed) {
+			print_flag (f, "tracker-fulltextIndexed", "icon-fulltextindexed.svg",
+			            "This property is full-text-indexed, and can be looked up through <literal>fts:match</literal>");
+		}
 
-		g_free (type_class_id);
-		g_free (type_name);
-		g_free (shortname);
-		g_free (prop_id);
+		/* Description column */
+		g_fprintf (f, "<entry>");
+		if (prop->description) {
+			g_fprintf (f, "<para>%s</para>", prop->description);
+		}
+		g_fprintf (f, "</entry>");
+		g_fprintf (f, "</row>");
 	}
 
-	g_fprintf (f, "</refsect1>");
-	g_free (id);
-}
+	g_fprintf (f, "</tbody></tgroup>");
+	g_fprintf (f, "</informaltable>");
 
-static void
-generate_class_docs (OntologyClass *klass,
-                     Ontology      *ontology,
-                     FILE          *f)
-{
-	print_xml_header (f, klass, ontology);
-	print_class_hierarchy (f, klass, ontology);
-	print_predefined_instances (f, klass, ontology);
-	print_fts_properties (f, klass, ontology);
-	print_properties (f, klass, ontology);
-	print_xml_footer (f);
+	g_fprintf (f, "</refsect3>");
 }
 
 void
-generate_ontology_class_docs (Ontology *ontology,
-                              GFile    *output_dir)
+print_ontology_class (Ontology      *ontology,
+                      OntologyClass *klass,
+                      FILE          *f)
 {
-	OntologyClass *klass;
-	GList *classes, *l;
-	FILE *f;
+	g_autofree gchar *name, *id;
 
-	classes = g_hash_table_get_values (ontology->classes);
+	g_return_if_fail (f != NULL);
 
-	for (l = classes; l; l = l->next) {
-		gchar *shortname, *class_filename, *output_file;
-		GFile *child;
+	name = ttl_model_name_to_basename (ontology, klass->classname);
+	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
 
-		klass = l->data;
-		shortname = ttl_model_name_to_shortname (ontology, klass->classname, "-");
-		class_filename = g_strdup_printf ("%s.xml", shortname);
-		child = g_file_get_child (output_dir, class_filename);
+	/* Anchor for external links. */
+	g_fprintf (f, "<anchor id='%s' />\n", name);
 
-		output_file = g_file_get_path (child);
-		g_object_unref (child);
+	g_fprintf (f, "<refsect2 role='rdf-class' id='%s'>\n", id);
+	g_fprintf (f, "<title>%s</title>\n", name);
 
-		f = fopen (output_file, "w");
+	if (klass->description || klass->description || klass->notify) {
+		g_fprintf (f, "<refsect3 id='%s.description'>\n", id);
+		g_fprintf (f, "  <title>Description</title>\n");
 
-		if (f == NULL) {
-			g_error ("Could not open %s for writing.\n", output_file);
+		if (klass->description) {
+			g_fprintf (f, "  %s", klass->description);
 		}
 
-		g_free (class_filename);
-		g_free (output_file);
-		g_free (shortname);
+		if (klass->deprecated) {
+			g_fprintf (f, "<para>");
+			print_flag (f, "tracker-deprecated", "icon-deprecated.svg", "Deprecated icon");
+			g_fprintf (f, "This class is deprecated.");
+			g_fprintf (f, "</para>");
+		}
 
-		generate_class_docs (klass, ontology, f);
-		fclose (f);
+		if (klass->notify) {
+			g_fprintf (f, "<para>");
+			print_flag (f, "tracker-notify", "icon-notify.svg", "Notify icon");
+			g_fprintf (f, "This class emits notifications about changes, and can "
+			             "be monitored using <link linkend=\"TrackerNotifier\">TrackerNotifier</link>.");
+			g_fprintf (f, "</para>");
+		}
+		g_fprintf (f, "</refsect3>\n");
 	}
 
-	g_list_free (classes);
+	if (klass->specification) {
+		g_fprintf (f, "<refsect3 id='%s.specification'>\n", id);
+		g_fprintf (f, "  <title>Specification</title>\n");
+		g_fprintf (f, "  <ulink url=\"%s\" />", klass->specification);
+		g_fprintf (f, "</refsect3>\n");
+	}
+
+	print_class_hierarchy (f, klass, ontology);
+	print_predefined_instances (f, klass, ontology);
+
+	print_property_table (f, ontology, id, klass->in_domain_of);
+
+	g_fprintf (f, "</refsect2>\n");
+}
+
+void
+print_ontology_extra_properties (Ontology      *ontology,
+                                 const char    *ontology_prefix,
+                                 const char    *classname,
+                                 GList         *properties_for_class,
+                                 FILE          *f)
+{
+	g_autofree gchar *short_classname = NULL;
+	g_autofree gchar *section_id = NULL, *class_id = NULL;
+
+	g_return_if_fail (f != NULL);
+
+	short_classname = ttl_model_name_to_shortname (ontology, classname, ":");
+
+	class_id = ttl_model_name_to_shortname (ontology, classname, "-");
+	section_id = g_strconcat (ontology_prefix, ".", class_id, NULL);
+
+	g_fprintf (f, "<refsect2 role='rdf-property-list' id='%s'>\n", section_id);
+	g_fprintf (f, "<title>Additional properties for %s</title>\n", short_classname);
+
+	g_fprintf (f, "<refsect3>\n");
+	g_fprintf (f, "  <title>Description</title>\n");
+	g_fprintf (f, "  <para>Properties this ontology defines which can describe %s resources.</para>",
+	           short_classname);
+	g_fprintf (f, "</refsect3>\n");
+
+	print_property_table (f, ontology, section_id, properties_for_class);
+	g_fprintf (f, "</refsect2>\n");
 }

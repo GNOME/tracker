@@ -41,4 +41,6 @@ gboolean tracker_turtle_reader_next (TrackerTurtleReader  *reader,
                                      gboolean             *object_is_uri,
                                      GError              **error);
 
+GHashTable *tracker_turtle_reader_get_prefixes (TrackerTurtleReader *reader);
+
 #endif /* __TRACKER_TURTLE_READER_H__ */

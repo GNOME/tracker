@@ -39,10 +39,10 @@
 
 /* #define TRACKER_NAMESPACE "http://www.tracker-project.org/ontologies/tracker#Namespace" */
 #define TRACKER_NS "http://www.tracker-project.org/ontologies/tracker#"
+#define TRACKER_SPECIFICATION TRACKER_NS "specification"
 #define TRACKER_NOTIFY TRACKER_NS "notify"
 #define TRACKER_FTS_INDEXED TRACKER_NS "fulltextIndexed"
 #define TRACKER_FTS_WEIGHT TRACKER_NS "weight"
-#define TRACKER_PREFIX TRACKER_NS "prefix"
 #define TRACKER_DEPRECATED TRACKER_NS "deprecated"
 
 /* Ontology description */
@@ -168,12 +168,6 @@ load_in_memory (Ontology    *ontology,
 
 		prop->weight = g_strdup (turtle_object);
 
-	} else if (!g_strcmp0 (turtle_predicate, TRACKER_PREFIX)) {
-		/* A tracker:prefix on a tracker:Namespace */
-		g_hash_table_insert (ontology->prefixes,
-				     g_strdup (turtle_subject),
-				     g_strdup (turtle_object));
-
 	} else if (!g_strcmp0 (turtle_predicate, RDFS_COMMENT)) {
 		OntologyClass *klass;
 		OntologyProperty *prop;
@@ -187,6 +181,22 @@ load_in_memory (Ontology    *ontology,
 				prop->description = g_strdup (turtle_object);
 			} else {
 				g_error ("Error in comment (%s doesn't exist)", turtle_subject);
+			}
+		}
+
+	} else if (!g_strcmp0 (turtle_predicate, TRACKER_SPECIFICATION)) {
+		OntologyClass *klass;
+		OntologyProperty *prop;
+
+		klass = g_hash_table_lookup (ontology->classes, turtle_subject);
+		if (klass) {
+			klass->specification = g_strdup (turtle_object);
+		} else {
+			prop = g_hash_table_lookup (ontology->properties, turtle_subject);
+			if (prop) {
+				prop->specification = g_strdup (turtle_object);
+			} else {
+				g_error ("Error in specification (%s doesn't exist)", turtle_subject);
 			}
 		}
 
@@ -358,41 +368,46 @@ ttl_loader_new_ontology (void)
 	return ontology;
 }
 
-void
+gboolean
 ttl_loader_load_ontology (Ontology    *ontology,
-                          GFile       *ttl_file)
+                          GFile       *ttl_file,
+                          GError     **error)
 {
 	TrackerTurtleReader *reader;
 	const gchar *subject, *predicate, *object;
-	GError *error = NULL;
+	const gchar *base_url, *prefix;
+	GHashTableIter iter;
+	GError *inner_error = NULL;
 
-	g_return_if_fail (G_IS_FILE (ttl_file));
+	g_return_val_if_fail (G_IS_FILE (ttl_file), 0);
 
-	reader = tracker_turtle_reader_new_for_file (ttl_file, &error);
+	reader = tracker_turtle_reader_new_for_file (ttl_file, &inner_error);
 
-	while (error == NULL &&
+	while (inner_error == NULL &&
 	       tracker_turtle_reader_next (reader,
 	                                   &subject, &predicate, &object,
-	                                   NULL, &error)) {
+	                                   NULL, &inner_error)) {
 		load_in_memory (ontology, subject, predicate, object);
+	}
+
+	g_hash_table_iter_init (&iter, tracker_turtle_reader_get_prefixes (reader));
+	while (g_hash_table_iter_next (&iter, (gpointer *) &prefix, (gpointer *) &base_url)) {
+		gchar *prefix_no_colon;
+
+		prefix_no_colon = g_strdup (prefix);
+		if (strrchr (prefix_no_colon, ':'))
+			*strrchr (prefix_no_colon, ':') = '\0';
+
+		g_hash_table_insert (ontology->prefixes, g_strdup (base_url), prefix_no_colon);
 	}
 
 	g_clear_object (&reader);
 
-	if (error) {
-		g_message ("Turtle parse error: %s", error->message);
-		g_error_free (error);
-	}
-}
-
-void
-ttl_loader_load_prefix_from_description (Ontology            *ontology,
-                                         OntologyDescription *description)
-{
-	if (!g_hash_table_lookup (ontology->prefixes, description->baseUrl)) {
-		g_hash_table_insert (ontology->prefixes,
-		                     g_strdup (description->baseUrl),
-		                     g_strdup (description->localPrefix));
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	} else {
+		return TRUE;
 	}
 }
 

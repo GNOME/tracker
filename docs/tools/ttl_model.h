@@ -26,6 +26,7 @@ G_BEGIN_DECLS
 
 typedef struct {
 	gchar *classname;
+	gchar *specification;
 	GList *superclasses;
 	GList *subclasses;
 	GList *in_domain_of;
@@ -38,6 +39,7 @@ typedef struct {
 
 typedef struct {
 	gchar *propertyname;
+	gchar *specification;
 	GList *type;
 	GList *domain;
 	GList *range;
@@ -84,6 +86,8 @@ gchar *               ttl_model_name_to_shortname (Ontology    *ontology,
                                                    const gchar *name,
                                                    const gchar *separator);
 
+gchar *               ttl_model_name_to_basename (Ontology    *ontology,
+                                                  const gchar *name);
 G_END_DECLS
 
 #endif /* __TRACKER_TTL_MODEL_H__ */
