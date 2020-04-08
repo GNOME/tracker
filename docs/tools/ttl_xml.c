@@ -20,6 +20,7 @@
 #include <glib/gprintf.h>
 
 #include "ttl_xml.h"
+#include "ttlresource2xml.h"
 
 typedef struct {
 	Ontology *ontology;
@@ -89,58 +90,76 @@ print_deprecated_message (FILE *f)
 static void
 print_xml_header (FILE *f, OntologyDescription *desc)
 {
-        gchar *upper_name;
-
-        g_fprintf (f, "<?xml version='1.0' encoding='UTF-8'?>\n");
+	g_fprintf (f, "<?xml version='1.0' encoding='UTF-8'?>\n");
 	g_fprintf (f, "<!DOCTYPE book PUBLIC \"-//OASIS//DTD DocBook XML V4.5//EN\"\n"
-		   "        \"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd\" [\n");
+	           "        \"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd\" [\n");
 	g_fprintf (f, "<!ENTITY %% local.common.attrib \"xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'\">\n");
 	g_fprintf (f, "]>");
 
-        g_fprintf (f, "<chapter id='%s-ontology' xmlns:xi=\"http://www.w3.org/2003/XInclude\">\n", desc->localPrefix);
-
-        upper_name = g_ascii_strup (desc->localPrefix, -1);
-        g_fprintf (f, "<title>%s: %s</title>\n", desc->title, desc->description ? desc->description : "");
-        g_free (upper_name);
-
-        print_people_list (f, "Authors:", desc->authors);
-        print_people_list (f, "Editors:", desc->editors);
-        print_people_list (f, "Contributors:", desc->contributors);
-
-        print_link_as_varlistentry (f, "Upstream:", "Upstream version", desc->upstream);
-        print_link_as_varlistentry (f, "ChangeLog:", "Tracker changes", desc->gitlog);
-
-        if (desc->copyright) {
-	        g_fprintf (f, "<varlistentry>\n");
-	        g_fprintf (f, "  <term>Copyright:</term>\n");
-	        g_fprintf (f, "  <listitem>\n");
-	        g_fprintf (f, "<para>%s</para>\n", desc->copyright);
-	        g_fprintf (f, "  </listitem>\n");
-	        g_fprintf (f, "</varlistentry>\n");
-        }
+	g_fprintf (f, "<refentry id='%s' xmlns:xi=\"http://www.w3.org/2003/XInclude\">\n", desc->localPrefix);
+	g_fprintf (f, "<refmeta>\n");
+	g_fprintf (f, "  <refentrytitle>%s</refentrytitle>\n", desc->title);
+	g_fprintf (f, "</refmeta>\n");
+	g_fprintf (f, "<refnamediv>\n");
+	g_fprintf (f, "<refname>%s</refname>", desc->title);
+	g_fprintf (f, "<refpurpose>%s</refpurpose>", desc->description);
+	g_fprintf (f, "</refnamediv>\n");
 }
 
 static void
-print_xml_footer (FILE *f)
+print_xml_footer (FILE *f, OntologyDescription *desc)
 {
-	g_fprintf (f,"</chapter>\n");
+	g_fprintf (f, "<refsect1>\n");
+	g_fprintf (f, "<title>Credits and Copyright</title>\n");
+	print_people_list (f, "Authors:", desc->authors);
+	print_people_list (f, "Editors:", desc->editors);
+	print_people_list (f, "Contributors:", desc->contributors);
+
+	print_link_as_varlistentry (f, "Upstream:", "Upstream version", desc->upstream);
+	print_link_as_varlistentry (f, "ChangeLog:", "Tracker changes", desc->gitlog);
+
+	if (desc->copyright) {
+		g_fprintf (f, "<varlistentry>\n");
+		g_fprintf (f, "  <term>Copyright:</term>\n");
+		g_fprintf (f, "  <listitem>\n");
+		g_fprintf (f, "<para>%s</para>\n", desc->copyright);
+		g_fprintf (f, "  </listitem>\n");
+		g_fprintf (f, "</varlistentry>\n");
+    }
+
+	g_fprintf (f, "</refsect1>\n");
+	g_fprintf (f, "</refentry>\n");
 }
 
 static void
-print_ontology_class (Ontology      *ontology,
-		      OntologyClass *def,
-		      FILE          *f)
+print_class_list (FILE       *f,
+                  Ontology   *ontology,
+                  const char *id,
+                  GList      *classes)
 {
-	gchar *name, *id;
+	GList *l;
 
-	g_return_if_fail (f != NULL);
+	g_fprintf (f, "<refsect1 id=\"%s.classes\">", id);
+	g_fprintf (f, "<title>Classes</title>");
 
-	name = ttl_model_name_to_shortname (ontology, def->classname, NULL);
-	id = ttl_model_name_to_shortname (ontology, def->classname, "-");
-	g_fprintf (f, "<xi:include href='%s.xml'/>\n", id);
-	g_free (id);
+	g_fprintf (f, "<simplelist>\n");
+	for (l = classes; l; l = l->next) {
+		OntologyClass *klass;
+		g_autofree char *basename = NULL, *id = NULL;
 
-        g_free (name);
+		klass = l->data;
+		basename = ttl_model_name_to_basename (ontology, klass->classname);
+		id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
+		g_fprintf (f, "<member>");
+		g_fprintf (f, "<link linkend=\"%s\">%s</link>", id, basename);
+		if (klass->description) {
+			g_fprintf (f, ": %s", klass->description);
+		}
+		g_fprintf (f, "</member>\n");
+	}
+	g_fprintf (f, "</simplelist>\n");
+
+	g_fprintf (f, "</refsect1>");
 }
 
 void
@@ -151,7 +170,7 @@ ttl_xml_print (OntologyDescription *description,
 {
 	GHashTableIter iter;
 	gchar *upper_name, *path, *introduction, *basename;
-	OntologyClass *def;
+	GList *classes, *l;
 	FILE *f;
 
 	path = g_file_get_path (file);
@@ -159,8 +178,12 @@ ttl_xml_print (OntologyDescription *description,
 	g_assert (f != NULL);
 	g_free (path);
 
-        upper_name = g_ascii_strup (description->localPrefix, -1);
+	upper_name = g_ascii_strup (description->localPrefix, -1);
+	classes = g_hash_table_get_values (ontology->classes);
+
 	print_xml_header (f, description);
+
+	print_class_list (f, ontology, description->localPrefix, classes);
 
 	basename = g_strdup_printf ("%s-introduction.xml", description->localPrefix);
 	introduction = g_build_filename (description_dir, basename, NULL);
@@ -171,16 +194,18 @@ ttl_xml_print (OntologyDescription *description,
 		           introduction);
 	}
 
-        g_fprintf (f, "<section id='%s-classes'>\n", description->localPrefix);
+    g_fprintf (f, "<refsect1 id='%s-classes'>\n", description->localPrefix);
 	g_fprintf (f, "<title>%s Ontology Classes</title>\n", upper_name);
 	g_hash_table_iter_init (&iter, ontology->classes);
 
-	while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &def)) {
-		print_ontology_class (ontology, def, f);
+	for (l = classes; l; l = l->next) {
+		print_ontology_class (ontology, l->data, f);
 	}
 
-        g_fprintf (f, "</section>\n");
-	print_xml_footer (f);
+    g_fprintf (f, "</refsect1>\n");
+	print_xml_footer (f, description);
+
+	g_list_free (classes);
 
 	g_free (upper_name);
 	g_free (introduction);

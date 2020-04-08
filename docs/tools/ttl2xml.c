@@ -173,8 +173,6 @@ main (gint argc, gchar **argv)
 	}
 	g_list_free_full (description_files, (GDestroyNotify) g_object_unref);
 
-	generate_ontology_class_docs (ontology, output_file);
-
 	ttl_loader_free_ontology (ontology);
 	g_option_context_free (context);
 
