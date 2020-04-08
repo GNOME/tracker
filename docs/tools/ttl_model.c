@@ -183,3 +183,20 @@ ttl_model_name_to_shortname (Ontology    *ontology,
 
 	return g_strconcat (short_prefix, separator, suffix, NULL);
 }
+
+gchar *
+ttl_model_name_to_basename (Ontology    *ontology,
+                            const gchar *name)
+{
+	g_autofree gchar *prefix = NULL;
+	const gchar *suffix;
+
+	prefix = name_get_prefix (ontology, name);
+
+	if (!prefix)
+		return g_strdup (name);
+
+	suffix = &name[strlen (prefix)];
+
+	return g_strdup (suffix);
+}

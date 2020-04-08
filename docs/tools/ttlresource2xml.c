@@ -130,7 +130,7 @@ print_predefined_instances (FILE          *f,
 	shortname = ttl_model_name_to_shortname (ontology, klass->classname, NULL);
 	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
 
-	g_fprintf (f, "<refsect1 id='%s.predefined-instances'>", id);
+	g_fprintf (f, "<refsect3 id='%s.predefined-instances'>", id);
 	g_fprintf (f, "<title>Predefined instances</title><para>");
 	g_fprintf (f, "%s has the following predefined instances: ", shortname);
         g_fprintf (f, "<itemizedlist>\n");
@@ -147,7 +147,7 @@ print_predefined_instances (FILE          *f,
 		g_free (shortname);
 	}
 
-	g_fprintf (f, "</itemizedlist></para></refsect1>\n");
+	g_fprintf (f, "</itemizedlist></para></refsect3>\n");
 }
 
 static void
@@ -173,7 +173,7 @@ print_fts_properties (FILE          *f,
 	shortname = ttl_model_name_to_shortname (ontology, klass->classname, NULL);
 	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
 
-	g_fprintf (f, "<refsect1 id='%s.fts-properties'>", id);
+	g_fprintf (f, "<refsect3 id='%s.fts-properties'>", id);
 	g_fprintf (f, "<title>Full-text-indexed properties</title><para>");
 	g_fprintf (f, "%s has the following full-text-indexed properties: ", shortname);
         g_fprintf (f, "<itemizedlist>\n");
@@ -192,7 +192,7 @@ print_fts_properties (FILE          *f,
 		g_free (prop_id);
 	}
 
-	g_fprintf (f, "</itemizedlist></para></refsect1>\n");
+	g_fprintf (f, "</itemizedlist></para></refsect3>\n");
 	g_free (shortname);
 	g_free (id);
 	g_list_free (fts_props);
@@ -512,6 +512,9 @@ class_get_parent_hierarchy_strings (OntologyClass *klass,
 
 	context = hierarchy_context_new (klass, ontology);
 
+	/* Proceed from parent to child classes, populating the 
+	 * context->strings array.
+	 */
 	for (c = context->hierarchy; c; c = c->next) {
 		OntologyClass *cl = g_hash_table_lookup (ontology->classes, c->data);
 		hierarchy_context_resolve_class (context, cl, ontology);
@@ -539,7 +542,7 @@ print_class_hierarchy (FILE          *f,
 
 	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
 
-	g_fprintf (f, "<refsect1 id='%s.hierarchy'>", id);
+	g_fprintf (f, "<refsect3 id='%s.hierarchy'>", id);
 	g_fprintf (f, "<title>Class hierarchy</title>");
 	g_fprintf (f, "<screen>");
 
@@ -550,7 +553,7 @@ print_class_hierarchy (FILE          *f,
 		g_fprintf (f, "    %s\n", str->str->str);
 	}
 
-	g_fprintf (f, "</screen></refsect1>\n");
+	g_fprintf (f, "</screen></refsect3>\n");
 	g_ptr_array_unref (strings);
 }
 
@@ -559,39 +562,53 @@ print_properties (FILE          *f,
                   OntologyClass *klass,
                   Ontology      *ontology)
 {
-	gchar *id, *prop_id, *shortname, *type_name, *type_class_id;
+	g_autofree gchar *id = NULL;
 	GList *l;
 
 	if (!klass->in_domain_of)
 		return;
 
 	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
-	g_fprintf (f, "<refsect1 id='%s.properties'>", id);
+	g_fprintf (f, "<refsect3 id='%s.properties'>", id);
 	g_fprintf (f, "<title>Properties</title>");
 
+	g_fprintf (f, "<table>");
+	g_fprintf (f, "<thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>");
+
+	g_fprintf (f, "<tbody>");
 	for (l = klass->in_domain_of; l; l = l->next) {
 		OntologyProperty *prop;
+		g_autofree gchar *shortname = NULL, *basename = NULL, *type_name = NULL, *type_class_id = NULL, *prop_id = NULL;
 
 		prop = g_hash_table_lookup (ontology->properties, l->data);
 
 		prop_id = ttl_model_name_to_shortname (ontology, prop->propertyname, "-");
 		shortname = ttl_model_name_to_shortname (ontology, prop->propertyname, NULL);
+		basename = ttl_model_name_to_basename (ontology, prop->propertyname);
 		type_name = ttl_model_name_to_shortname (ontology, prop->range->data, NULL);
 		type_class_id = ttl_model_name_to_shortname (ontology, prop->range->data, "-");
 
-		g_fprintf (f, "<refsect2 id='%s.%s' role='property'>", id, prop_id);
+		g_fprintf (f, "<tr>");
+
+		g_fprintf (f, "<td>");
 		g_fprintf (f, "<indexterm zone='%s.%s'><primary sortas='%s'>%s</primary></indexterm>",
 		           id, prop_id, shortname, shortname);
-		g_fprintf (f, "<title>The <literal>“%s”</literal> property</title>", shortname);
-		g_fprintf (f, "<programlisting>“%s”"
-			   "          <link linkend=\"%s\">%s</link>"
-			   "</programlisting>",
-			   shortname, type_class_id, type_name);
+		g_fprintf (f, "%s", basename);
+		g_fprintf (f, "</td>");
 
+		g_fprintf (f, "<td>");
+		g_fprintf (f, "<link linkend=\"%s\">%s</link>", type_class_id, type_name);
+		g_fprintf (f, "</td>");
+
+		g_fprintf (f, "<td>");
 		if (prop->description) {
 			g_fprintf (f, "<para>%s</para>", prop->description);
 		}
+		g_fprintf (f, "</td>");
+		g_fprintf (f, "</tr>");
 
+		/* FIXME: where to put this info? */
+		/*
 		if (prop->max_cardinality) {
 			g_fprintf (f, "<para>Number of possible elements per resource (Cardinality): %s</para>",
 				   prop->max_cardinality);
@@ -648,68 +665,39 @@ print_properties (FILE          *f,
 			}
 
 			g_fprintf (f, "</itemizedlist></note>\n");
-		}
-
-		g_fprintf (f, "</refsect2>\n");
-
-		g_free (type_class_id);
-		g_free (type_name);
-		g_free (shortname);
-		g_free (prop_id);
+		}*/
 	}
+	g_fprintf (f, "</tbody>");
+	g_fprintf (f, "</table>");
 
-	g_fprintf (f, "</refsect1>");
-	g_free (id);
+	g_fprintf (f, "</refsect3>");
 }
 
-static void
-generate_class_docs (OntologyClass *klass,
-                     Ontology      *ontology,
-                     FILE          *f)
+void
+print_ontology_class (Ontology      *ontology,
+                      OntologyClass *klass,
+                      FILE          *f)
 {
-	print_xml_header (f, klass, ontology);
+	g_autofree gchar *name, *id;
+
+	g_return_if_fail (f != NULL);
+
+	name = ttl_model_name_to_basename (ontology, klass->classname);
+	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
+
+	g_fprintf (f, "<refsect2 id='%s'>\n", id);
+	g_fprintf (f, "<title>%s</title>\n", name);
+
+	g_fprintf (f, "<refsect3 id='%s.description'>\n", id);
+	g_fprintf (f, "  <title>Description</title>\n");
+	if (klass->description) {
+		g_fprintf (f, "  <para>%s</para>", klass->description);
+	}
+	g_fprintf (f, "</refsect3>\n");
+
 	print_class_hierarchy (f, klass, ontology);
 	print_predefined_instances (f, klass, ontology);
 	print_fts_properties (f, klass, ontology);
 	print_properties (f, klass, ontology);
-	print_xml_footer (f);
-}
-
-void
-generate_ontology_class_docs (Ontology *ontology,
-                              GFile    *output_dir)
-{
-	OntologyClass *klass;
-	GList *classes, *l;
-	FILE *f;
-
-	classes = g_hash_table_get_values (ontology->classes);
-
-	for (l = classes; l; l = l->next) {
-		gchar *shortname, *class_filename, *output_file;
-		GFile *child;
-
-		klass = l->data;
-		shortname = ttl_model_name_to_shortname (ontology, klass->classname, "-");
-		class_filename = g_strdup_printf ("%s.xml", shortname);
-		child = g_file_get_child (output_dir, class_filename);
-
-		output_file = g_file_get_path (child);
-		g_object_unref (child);
-
-		f = fopen (output_file, "w");
-
-		if (f == NULL) {
-			g_error ("Could not open %s for writing.\n", output_file);
-		}
-
-		g_free (class_filename);
-		g_free (output_file);
-		g_free (shortname);
-
-		generate_class_docs (klass, ontology, f);
-		fclose (f);
-	}
-
-	g_list_free (classes);
+	g_fprintf (f, "</refsect2>\n");
 }

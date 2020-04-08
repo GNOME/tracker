@@ -84,6 +84,8 @@ gchar *               ttl_model_name_to_shortname (Ontology    *ontology,
                                                    const gchar *name,
                                                    const gchar *separator);
 
+gchar *               ttl_model_name_to_basename (Ontology    *ontology,
+                                                  const gchar *name);
 G_END_DECLS
 
 #endif /* __TRACKER_TTL_MODEL_H__ */
