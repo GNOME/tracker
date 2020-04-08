@@ -16,29 +16,29 @@
    <orderedlist>
      <listitem>
        <para>
-       As a Box (using the class <link linkend="mlo-GeoBoundingBox">mlo:GeoBoundingBox</link> and the property <link linkend="mlo-GeoLocation.mlo-asBoundingBox">mlo:asBoundingBox</link>)
+       As a Box (using the class <link linkend="mlo-GeoBoundingBox">mlo:GeoBoundingBox</link> and the property <link linkend="mlo-asBoundingBox">mlo:asBoundingBox</link>)
        </para>
      </listitem>
      <listitem>
        <para>
-      As a point with coordinates (using the class <link linkend="mlo-GeoPoint">mlo:GeoPoint</link> and the property <link linkend="mlo-GeoLocation.mlo-asGeoPoint">mlo:asGeoPoint</link>) as a single point in the space with its coordinates
+      As a point with coordinates (using the class <link linkend="mlo-GeoPoint">mlo:GeoPoint</link> and the property <link linkend="mlo-asGeoPoint">mlo:asGeoPoint</link>) as a single point in the space with its coordinates
        </para>
      </listitem>
      <listitem>
        <para>
-       As a postal address, with the text description (using the class <link linkend="nco-PostalAddress">nco:PostalAddress</link> from <link linkend="nco-ontology">NCO ontology</link> and the property <link linkend="mlo-GeoLocation.mlo-asPostalAddress">mlo:asPostalAddress</link>)
+       As a postal address, with the text description (using the class <link linkend="nco-PostalAddress">nco:PostalAddress</link> from <link linkend="nco-ontology">NCO ontology</link> and the property <link linkend="mlo-asPostalAddress">mlo:asPostalAddress</link>)
        </para>
      </listitem>
    </orderedlist>
    <para>These three representations are not exclusive, but is responsibility of the applications to keep the data consistent.</para>
-   <para>Some places in the space has an special meaning, E.G. premises, buildings or services. This fact is represented in the ontology with the class <link linkend="mlo-Landmark">mlo:Landmark</link>. The title and description of the Landmark itself can be set using the <link linkend="nie-InformationElement">nie:InformationElement</link> properties (<link linkend="nie-InformationElement.nie-title">nie:title</link>, <link linkend="nie-InformationElement.nie-description">nie:description</link>, ...). A location is linked with a landmark with the property <link linkend="nie-InformationElement.mlo-location">mlo:location</link> inherited from the superclass Information Element.</para>
-   <para>Landmark can be grouped in categories. For this reason, the ontology provides a property <link linkend="mlo-Landmark.mlo-belongsToCategory">mlo:belongsToCategory</link> that links a Landmark with the class <link linkend="mlo-LandmarkCategory">mlo:LandmarkCategory</link> . The ontology includes also a predefined set of instances, very common an a de-facto standard in the industry.</para>
+   <para>Some places in the space has an special meaning, E.G. premises, buildings or services. This fact is represented in the ontology with the class <link linkend="mlo-Landmark">mlo:Landmark</link>. The title and description of the Landmark itself can be set using the <link linkend="nie-InformationElement">nie:InformationElement</link> properties (<link linkend="nie-title">nie:title</link>, <link linkend="nie-description">nie:description</link>, ...). A location is linked with a landmark with the property <link linkend="mlo-location">mlo:location</link> inherited from the superclass Information Element.</para>
+   <para>Landmark can be grouped in categories. For this reason, the ontology provides a property <link linkend="mlo-belongsToCategory">mlo:belongsToCategory</link> that links a Landmark with the class <link linkend="mlo-LandmarkCategory">mlo:LandmarkCategory</link> . The ontology includes also a predefined set of instances, very common an a de-facto standard in the industry.</para>
  </refsect2>
 
  <refsect2 id="mlo-considerations">
    <title>Considerations</title>
 
-   <para>A <link linkend="mlo-Landmark">mlo:Landmark</link> is linked with its location using the property <link linkend="nie-InformationElement.mlo-location">mlo:location</link>, inherited from its superclass <link linkend="nie-InformationElement">nie:InformationElement</link>.</para>
+   <para>A <link linkend="mlo-Landmark">mlo:Landmark</link> is linked with its location using the property <link linkend="mlo-location">mlo:location</link>, inherited from its superclass <link linkend="nie-InformationElement">nie:InformationElement</link>.</para>
 
    <para>All classes in the ontology are subclasses of <link linkend="nie-InformationElement">nie:InformationElement</link>. It is not indicated in the graphic for the sake of clarity.</para>
 
@@ -51,8 +51,8 @@
 
    <para>We want to put special emphasis in the point that the applications must keep the different representations of the points consistent. Basically a point in the space is very unlikely to change (the point is there or not), but it is not difficult to assume that some application can complete the information, taking the postal addresses of the points without coordinates, and set the coordinates using some web service.</para>
 
-   <para>A box is considered as a <emphasis>2 dimensions</emphasis> area orientated to the north, aligned to parallels and meridians. The area is defined with two points: the southern east point (down left corner, in the <link linkend="mlo-GeoBoundingBox.mlo-bbSouthEast">mlo:bbSouthEast</link> property) and northern western point (upper right corner, in the <link linkend="mlo-GeoBoundingBox.mlo-bbNorthWest">mlo:bbNorthWest</link> property).</para>
+   <para>A box is considered as a <emphasis>2 dimensions</emphasis> area orientated to the north, aligned to parallels and meridians. The area is defined with two points: the southern east point (down left corner, in the <link linkend="mlo-bbSouthEast">mlo:bbSouthEast</link> property) and northern western point (upper right corner, in the <link linkend="mlo-bbNorthWest">mlo:bbNorthWest</link> property).</para>
 
-   <para><link linkend="mlo-LandmarkCategory">mlo:LandmarkCategory</link> has a property <link linkend="mlo-LandmarkCategory.mlo-isRemovable">mlo:isRemovable</link> to mark is the category is predefined and shouldn't be deleted by the applications. Tracker (and probably other backends) doesn't enforce applications to respect this value, but consider it a gentleman agreement.</para>
+   <para><link linkend="mlo-LandmarkCategory">mlo:LandmarkCategory</link> has a property <link linkend="mlo-isRemovable">mlo:isRemovable</link> to mark is the category is predefined and shouldn't be deleted by the applications. Tracker (and probably other backends) doesn't enforce applications to respect this value, but consider it a gentleman agreement.</para>
  </refsect2>
 </section>

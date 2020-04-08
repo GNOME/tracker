@@ -8,5 +8,4 @@
 	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/11-rdf.ontology";
 
 	dsc:localPrefix "rdf" ;
-	dsc:baseUrl "http://www.w3.org/2000/01/rdf-schema#" ;
 	dsc:relativePath "./11-rdf.ontology" .

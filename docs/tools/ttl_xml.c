@@ -20,6 +20,7 @@
 #include <glib/gprintf.h>
 
 #include "ttl_xml.h"
+#include "ttlresource2xml.h"
 
 typedef struct {
 	Ontology *ontology;
@@ -89,69 +90,207 @@ print_deprecated_message (FILE *f)
 static void
 print_xml_header (FILE *f, OntologyDescription *desc)
 {
-        gchar *upper_name;
-
-        g_fprintf (f, "<?xml version='1.0' encoding='UTF-8'?>\n");
+	g_fprintf (f, "<?xml version='1.0' encoding='UTF-8'?>\n");
 	g_fprintf (f, "<!DOCTYPE book PUBLIC \"-//OASIS//DTD DocBook XML V4.5//EN\"\n"
-		   "        \"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd\" [\n");
+	           "        \"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd\" [\n");
 	g_fprintf (f, "<!ENTITY %% local.common.attrib \"xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'\">\n");
 	g_fprintf (f, "]>");
 
-        g_fprintf (f, "<chapter id='%s-ontology' xmlns:xi=\"http://www.w3.org/2003/XInclude\">\n", desc->localPrefix);
-
-        upper_name = g_ascii_strup (desc->localPrefix, -1);
-        g_fprintf (f, "<title>%s: %s</title>\n", desc->title, desc->description ? desc->description : "");
-        g_free (upper_name);
-
-        print_people_list (f, "Authors:", desc->authors);
-        print_people_list (f, "Editors:", desc->editors);
-        print_people_list (f, "Contributors:", desc->contributors);
-
-        print_link_as_varlistentry (f, "Upstream:", "Upstream version", desc->upstream);
-        print_link_as_varlistentry (f, "ChangeLog:", "Tracker changes", desc->gitlog);
-
-        if (desc->copyright) {
-	        g_fprintf (f, "<varlistentry>\n");
-	        g_fprintf (f, "  <term>Copyright:</term>\n");
-	        g_fprintf (f, "  <listitem>\n");
-	        g_fprintf (f, "<para>%s</para>\n", desc->copyright);
-	        g_fprintf (f, "  </listitem>\n");
-	        g_fprintf (f, "</varlistentry>\n");
-        }
+	g_fprintf (f, "<refentry id='%s' xmlns:xi=\"http://www.w3.org/2003/XInclude\">\n", desc->localPrefix);
+	g_fprintf (f, "<refmeta>\n");
+	g_fprintf (f, "  <refentrytitle>%s</refentrytitle>\n", desc->title);
+	g_fprintf (f, "</refmeta>\n");
+	g_fprintf (f, "<refnamediv>\n");
+	g_fprintf (f, "<refname>%s</refname>", desc->title);
+	g_fprintf (f, "<refpurpose>%s</refpurpose>", desc->description);
+	g_fprintf (f, "</refnamediv>\n");
 }
 
 static void
-print_xml_footer (FILE *f)
+print_xml_footer (FILE *f, OntologyDescription *desc)
 {
-	g_fprintf (f,"</chapter>\n");
+	g_fprintf (f, "<refsect1>\n");
+	g_fprintf (f, "<title>Credits and Copyright</title>\n");
+	print_people_list (f, "Authors:", desc->authors);
+	print_people_list (f, "Editors:", desc->editors);
+	print_people_list (f, "Contributors:", desc->contributors);
+
+	print_link_as_varlistentry (f, "Upstream:", "Upstream version", desc->upstream);
+	print_link_as_varlistentry (f, "ChangeLog:", "Tracker changes", desc->gitlog);
+
+	if (desc->copyright) {
+		g_fprintf (f, "<varlistentry>\n");
+		g_fprintf (f, "  <term>Copyright:</term>\n");
+		g_fprintf (f, "  <listitem>\n");
+		g_fprintf (f, "<para>%s</para>\n", desc->copyright);
+		g_fprintf (f, "  </listitem>\n");
+		g_fprintf (f, "</varlistentry>\n");
+    }
+
+	g_fprintf (f, "</refsect1>\n");
+	g_fprintf (f, "</refentry>\n");
+}
+
+static gint compare_class (gconstpointer a,
+                           gconstpointer b)
+{
+	return strcmp (((OntologyClass *)a)->classname, ((OntologyClass *)b)->classname);
+}
+
+/* By default we list properties under their respective class.
+ *
+ * Ontologies can contain properties whose class is in a different
+ * ontology, and we treat these specially as 'extra properties'.
+ *
+ * This functions returns a hash table mapping class name to the
+ * extra properties provided for that class.
+ */
+static GHashTable *
+get_extra_properties (GList *classes,
+                      GList *properties)
+{
+	GList *l, *c;
+	GHashTable *extra_properties;
+	GHashTableIter iter;
+	gchar *classname;
+	GList *properties_for_class;
+
+	extra_properties = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+	for (l = properties; l; l = l->next) {
+		OntologyProperty *prop = l->data;
+		gboolean has_domain_in_this_ontology = FALSE;
+
+		for (c = classes; c; c = c->next) {
+			OntologyClass *klass;
+
+			klass = c->data;
+			if (g_list_find_custom (prop->domain, klass->classname, (GCompareFunc)strcmp)) {
+				has_domain_in_this_ontology = TRUE;
+				break;
+			}
+		}
+
+		if (!has_domain_in_this_ontology) {
+			for (c = prop->domain; c; c = c->next) {
+				const gchar *classname;
+				GList *list;
+
+				classname = c->data;
+				list = g_hash_table_lookup (extra_properties, classname);
+				list = g_list_append (list, prop->propertyname);
+				g_hash_table_insert (extra_properties, g_strdup (classname), list);
+			}
+		}
+	}
+
+	g_hash_table_iter_init (&iter, extra_properties);
+	while (g_hash_table_iter_next (&iter, (gpointer *)&classname, (gpointer *)&properties_for_class)) {
+		properties_for_class = g_list_sort (properties_for_class, (GCompareFunc) strcmp);
+		g_hash_table_iter_replace (&iter, properties_for_class);
+	}
+
+	return extra_properties;
 }
 
 static void
-print_ontology_class (Ontology      *ontology,
-		      OntologyClass *def,
-		      FILE          *f)
+print_synopsis (FILE                 *f,
+                OntologyDescription *desc)
 {
-	gchar *name, *id;
-
-	g_return_if_fail (f != NULL);
-
-	name = ttl_model_name_to_shortname (ontology, def->classname, NULL);
-	id = ttl_model_name_to_shortname (ontology, def->classname, "-");
-	g_fprintf (f, "<xi:include href='%s.xml'/>\n", id);
-	g_free (id);
-
-        g_free (name);
+	g_fprintf (f, "<refsynopsisdiv>\n");
+	g_fprintf (f, "<synopsis>\n");
+	g_fprintf (f, "@prefix %s: &lt;%s&gt;\n", desc->localPrefix, desc->baseUrl);
+	g_fprintf (f, "</synopsis>\n");
+	g_fprintf (f, "</refsynopsisdiv>\n");
 }
 
+static void
+print_toc_classes (FILE       *f,
+                   Ontology   *ontology,
+                   const char *id,
+                   GList      *classes)
+{
+	GList *l;
+
+	if (!classes)
+		return;
+
+	g_fprintf (f, "<refsect1 id=\"%s.classes\">", id);
+	g_fprintf (f, "<title>Classes</title>");
+
+	for (l = classes; l; l = l->next) {
+		OntologyClass *klass;
+		g_autofree char *basename = NULL, *id = NULL;
+
+		klass = l->data;
+		basename = ttl_model_name_to_basename (ontology, klass->classname);
+		id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
+
+		if (l != classes) {
+			g_fprintf (f, ", ");
+		}
+		g_fprintf (f, "<link linkend=\"%s\">%s</link>", id, basename);
+	}
+
+	g_fprintf (f, "</refsect1>");
+}
+
+static void
+print_toc_extra_properties (FILE       *f,
+                            Ontology   *ontology,
+                            const char *id,
+                            GHashTable *extra_properties)
+{
+	GList *props_for_class, *c, *l;
+	g_autoptr(GList) classes = NULL;
+	gboolean print_comma = FALSE;
+
+	if (g_hash_table_size (extra_properties) == 0)
+		return;
+
+	g_fprintf (f, "<refsect1 id=\"%s.extra_properties\">", id);
+	g_fprintf (f, "<title>Additional Properties</title>");
+
+	classes = g_hash_table_get_keys (extra_properties);
+	classes = g_list_sort (classes, (GCompareFunc)strcmp);
+	for (c = classes; c; c = c->next) {
+		gchar *classname;
+
+		classname = c->data;
+		props_for_class = g_hash_table_lookup (extra_properties, classname);
+		for (l = props_for_class; l; l = l->next) {
+			OntologyProperty *prop;
+			g_autofree char *basename = NULL, *prop_id = NULL;
+
+			prop = g_hash_table_lookup (ontology->properties, l->data);
+
+			basename = ttl_model_name_to_basename (ontology, prop->propertyname);
+			prop_id = ttl_model_name_to_shortname (ontology, prop->propertyname, "-");
+
+			if (print_comma) {
+				g_fprintf (f, ", ");
+			} else {
+				print_comma = TRUE;
+			}
+
+			g_fprintf (f, "<link linkend=\"%s\">%s</link>", prop_id, basename);
+		}
+	}
+
+	g_fprintf (f, "</refsect1>");
+}
+
+/* Generate docbook XML document for one ontology. */
 void
 ttl_xml_print (OntologyDescription *description,
-                Ontology            *ontology,
-                GFile               *file,
-                const gchar         *description_dir)
+               Ontology            *ontology,
+               GFile               *file,
+               const gchar         *description_dir)
 {
-	GHashTableIter iter;
 	gchar *upper_name, *path, *introduction, *basename;
-	OntologyClass *def;
+	g_autoptr(GList) classes = NULL, properties = NULL, extra_classes = NULL;
+	g_autoptr(GHashTable) extra_properties = NULL;
+	GList *l;
 	FILE *f;
 
 	path = g_file_get_path (file);
@@ -159,8 +298,17 @@ ttl_xml_print (OntologyDescription *description,
 	g_assert (f != NULL);
 	g_free (path);
 
-        upper_name = g_ascii_strup (description->localPrefix, -1);
+	upper_name = g_ascii_strup (description->localPrefix, -1);
+	classes = g_list_sort (g_hash_table_get_values (ontology->classes), compare_class);
+	properties = g_hash_table_get_values (ontology->properties);
+
+	extra_properties = get_extra_properties (classes, properties);
+
 	print_xml_header (f, description);
+
+	print_synopsis (f, description);
+	print_toc_classes (f, ontology, description->localPrefix, classes);
+	print_toc_extra_properties (f, ontology, description->localPrefix, extra_properties);
 
 	basename = g_strdup_printf ("%s-introduction.xml", description->localPrefix);
 	introduction = g_build_filename (description_dir, basename, NULL);
@@ -171,16 +319,39 @@ ttl_xml_print (OntologyDescription *description,
 		           introduction);
 	}
 
-        g_fprintf (f, "<section id='%s-classes'>\n", description->localPrefix);
-	g_fprintf (f, "<title>%s Ontology Classes</title>\n", upper_name);
-	g_hash_table_iter_init (&iter, ontology->classes);
+	if (classes != NULL) {
+    	g_fprintf (f, "<refsect1 id='%s-classes'>\n", description->localPrefix);
+		g_fprintf (f, "<title>Class Details</title>\n");
 
-	while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &def)) {
-		print_ontology_class (ontology, def, f);
+		for (l = classes; l; l = l->next) {
+			print_ontology_class (ontology, l->data, f);
+		}
+
+		g_fprintf (f, "</refsect1>\n");
 	}
 
-        g_fprintf (f, "</section>\n");
-	print_xml_footer (f);
+	if (g_hash_table_size (extra_properties) > 0) {
+		g_fprintf (f, "<refsect1 id='%s-extra-properties'>\n", description->localPrefix);
+		g_fprintf (f, "<title>Property Details</title>\n");
+
+		extra_classes = g_hash_table_get_keys (extra_properties);
+		extra_classes = g_list_sort (extra_classes, (GCompareFunc)strcmp);
+		for (l = extra_classes; l; l = l->next) {
+			gchar *classname;
+			GList *properties_for_class;
+
+			classname = l->data;
+
+			properties_for_class = g_hash_table_lookup (extra_properties, classname);
+			if (properties_for_class) {
+				print_ontology_extra_properties (ontology, description->localPrefix, classname, properties_for_class, f);
+			}
+		}
+
+		g_fprintf (f, "</refsect1>\n");
+	}
+
+	print_xml_footer (f, description);
 
 	g_free (upper_name);
 	g_free (introduction);

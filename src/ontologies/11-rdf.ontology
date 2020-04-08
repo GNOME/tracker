@@ -13,71 +13,84 @@ rdfs: a tracker:Namespace ;
 
 rdfs:Resource a rdfs:Class ;
 	rdfs:label "All Resources" ;
-	rdfs:comment "All resources" .
+	rdfs:comment "All resources" ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_resource> .
 
 rdfs:Class a rdfs:Class ;
 	rdfs:label "Class" ;
 	rdfs:comment "The class of classes" ;
-	rdfs:subClassOf rdfs:Resource .
+	rdfs:subClassOf rdfs:Resource ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_class> .
 
 rdf:Property a rdfs:Class ;
 	rdfs:label "Property" ;
 	rdfs:comment "The class of RDF properties" ;
-	rdfs:subClassOf rdfs:Resource .
+	rdfs:subClassOf rdfs:Resource ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_property> .
 
 rdfs:Literal a rdfs:Class ;
 	rdfs:label "Literal" ;
 	rdfs:comment "The class of literal values, eg. textual strings and integers" ;
-	rdfs:subClassOf rdfs:Resource .
+	rdfs:subClassOf rdfs:Resource ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_literal> .
 
 rdfs:Datatype a rdfs:Class ;
 	rdfs:label "Datatype" ;
 	rdfs:comment "The class of RDF datatypes." ;
-	rdfs:subClassOf rdfs:Class .
+	rdfs:subClassOf rdfs:Class ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_datatype> .
 
 rdf:langString a rdfs:Class, rdfs:Datatype ;
 	rdfs:subClassOf rdfs:Literal ;
 	rdfs:label "langString" ;
-	rdfs:comment "The datatype of language-tagged string values" .
+	rdfs:comment "The datatype of language-tagged string values" ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_langstring> .
 
 rdf:type a rdf:Property ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:comment "The subject is an instance of a class" ;
-	rdfs:range rdfs:Class .
+	rdfs:range rdfs:Class ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_type> .
 
 rdfs:subClassOf a rdf:Property ;
 	rdfs:comment "The subject is a subclass of a class" ;
 	rdfs:domain rdfs:Class ;
-	rdfs:range rdfs:Class .
+	rdfs:range rdfs:Class ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_subclassof> .
 
 rdfs:subPropertyOf a rdf:Property ;
 	rdfs:comment "The subject is a subproperty of a property" ;
 	rdfs:domain rdf:Property ;
-	rdfs:range rdf:Property .
+	rdfs:range rdf:Property ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_subpropertyof> .
 
 rdfs:comment a rdf:Property ;
 	rdfs:comment "A description of the subject resource" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
-	rdfs:range xsd:string .
+	rdfs:range xsd:string ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_comment> .
 
 rdfs:label a rdf:Property ;
 	rdfs:comment "A human-readable name for the subject" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
-	rdfs:range xsd:string .
+	rdfs:range xsd:string ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_label> .
 
 rdfs:domain a rdf:Property ;
 	rdfs:comment "A domain of the subject property" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
-	rdfs:range rdfs:Resource .
+	rdfs:range rdfs:Resource ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_domain> .
 
 rdfs:range a rdf:Property ;
 	rdfs:comment "A range of the subject property" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
-	rdfs:range rdfs:Class .
+	rdfs:range rdfs:Class ;
+	tracker:specification <https://www.w3.org/TR/rdf-schema/#ch_range> .
 
 rdf:List a rdfs:Class ;
 	rdfs:label "List" ;
@@ -184,3 +197,9 @@ tracker:deprecated a rdf:Property;
 	rdfs:range xsd:boolean;
 	rdfs:label "deprecated";
 	rdfs:comment "If this property is assigned, the subject class, property, or resource, is deprecated and should not be used in production systems any longer. It may be removed without further notice." .
+
+tracker:specification a rdf:Property ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdfs:Class , rdfs:Property ;
+	rdfs:range xsd:string ;
+	rdfs:comment "Link to upstream specification for an ontology class or property." .

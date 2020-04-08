@@ -28,6 +28,7 @@ ttl_model_class_new (const gchar *classname)
 	def = g_new0 (OntologyClass, 1);
 
 	def->classname = g_strdup (classname);
+	def->specification = NULL;
 	def->superclasses = NULL;
 	def->subclasses = NULL;
 	def->in_domain_of = NULL;
@@ -51,6 +52,7 @@ ttl_model_class_free (OntologyClass *def)
 	g_list_free_full (def->in_range_of, (GDestroyNotify) g_free);
 
 	g_free (def->description);
+	g_free (def->specification);
 
 	g_list_free_full (def->instances, (GDestroyNotify) g_free);
 
@@ -65,6 +67,7 @@ ttl_model_property_new (const gchar *propname)
 	prop = g_new0 (OntologyProperty, 1);
 
 	prop->propertyname = g_strdup (propname);
+	prop->specification = NULL;
 	prop->type = NULL;
 	prop->domain = NULL;
 	prop->range = NULL;
@@ -93,6 +96,7 @@ ttl_model_property_free (OntologyProperty *def)
 	g_free (def->max_cardinality);
 	g_free (def->description);
 	g_free (def->weight);
+	g_free (def->specification);
 	g_free (def);
 }
 
@@ -182,4 +186,21 @@ ttl_model_name_to_shortname (Ontology    *ontology,
 	g_free (prefix);
 
 	return g_strconcat (short_prefix, separator, suffix, NULL);
+}
+
+gchar *
+ttl_model_name_to_basename (Ontology    *ontology,
+                            const gchar *name)
+{
+	g_autofree gchar *prefix = NULL;
+	const gchar *suffix;
+
+	prefix = name_get_prefix (ontology, name);
+
+	if (!prefix)
+		return g_strdup (name);
+
+	suffix = &name[strlen (prefix)];
+
+	return g_strdup (suffix);
 }

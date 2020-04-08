@@ -1,6 +1,6 @@
-<section id="nmm-explanation">
+<refsection id="nmm-overview">
 <title>Overview</title>
-<sect2>
+<refsection>
 <title>Introduction</title>
 
 <para>This ontology extends NIE (Nepomuk Information Element ontology) and NFO (Nepomuk File Ontology) into the domains of multimedia, including Images, Videos, Music and Radio, and includes a couple of properties to support uPnP sharing.</para>
@@ -8,21 +8,21 @@
 <para>This ontology replaces/complements NID3 and NEXIF. Those ontologies are a direct map of the respective metadata standards, which makes very difficult to map cleanly other standards (like gstreamer metadata, mp4, ogg, and so on). Besides, those ontologies contain a lot of very low level technical information that is useless to the average user of the desktop.</para>
 
 <para>Our approach in NMM is to keep the minimum properties that make sense for the user, and are present in all (or almost all) specific metadata formats. A profesional photographer (or musician) who needs more fine-grained details for its documents, is free to add also nID3 information or other extensions to the ontology.</para>
-</sect2>
+</refsection>
 
-<sect2>
+<refsection>
   <title>Images domain</title>
 
-<para>The core of images in NMM ontology is the class <link linkend="nmm-Photo">nmm:Photo.</link> It is (through a long hierarchy) a <link linkend="nie-InformationElement">nie:InformationElement</link>, an interpretation of some bytes. It has properties to store the basic information (camera, metering mode, white balance, flash), and inherits from <link linkend="nfo-Image">nfo:Image</link> orientation (<link linkend="nfo-Image.nfo-orientation">nfo:orientation</link>) and resolution (<link linkend="nfo-Image.nfo-verticalResolution">nfo:verticalResolution</link> and <link linkend="nfo-Image.nfo-horizontalResolution">nfo:horizontalResolution</link>).</para>
+<para>The core of images in NMM ontology is the class <link linkend="nmm-Photo">nmm:Photo.</link> It is (through a long hierarchy) a <link linkend="nie-InformationElement">nie:InformationElement</link>, an interpretation of some bytes. It has properties to store the basic information (camera, metering mode, white balance, flash), and inherits from <link linkend="nfo-Image">nfo:Image</link> orientation (<link linkend="nfo-orientation">nfo:orientation</link>) and resolution (<link linkend="nfo-verticalResolution">nfo:verticalResolution</link> and <link linkend="nfo-horizontalResolution">nfo:horizontalResolution</link>).</para>
 
 <para>Note that for tags, nie:keywords (from nie:InformationElement) can be used, or the <link linkend="nao-ontology">NAO</link> ontology.</para>
-</sect2>
+</refsection>
 
-<sect2>
+<refsection>
   <title>Radio domain</title>
 <para>NMM includes classes and properties to represent analog and digital radio stations. There is a class <link linkend="nmm-RadioStation">nmm:RadioStation</link> on the <link linkend="nie-InformationElement">nie:InformationElement</link> side of the ontology, representing what the user sees about that station (genre via PTY codes, icon, plus title inherited from nie:InformationElement)</para>
-<para>A <link linkend="nmm-RadioStation">nmm:RadioStation</link> can have one or more <link linkend="nmm-RadioStation.nmm-carrier">nmm:carrier</link> properties representing the different frequencies (or links when it is digitial) it can be tuned. This property links the station with <link linkend="nfo-MediaStream">nfo:MediaStream</link>, but usually it will point to one of the subclasses: <link linkend="nmm-DigitalRadio">nmm:DigitalRadio</link> (if digital) or <link linkend="nmm-AnalogRadio">nmm:AnalogRadio</link> (if analog). An analog station has properties as modulation and frequency, while the digial station has streaming bitrate, encoding or protocol.</para>
+<para>A <link linkend="nmm-RadioStation">nmm:RadioStation</link> can have one or more <link linkend="nmm-carrier">nmm:carrier</link> properties representing the different frequencies (or links when it is digitial) it can be tuned. This property links the station with <link linkend="nfo-MediaStream">nfo:MediaStream</link>, but usually it will point to one of the subclasses: <link linkend="nmm-DigitalRadio">nmm:DigitalRadio</link> (if digital) or <link linkend="nmm-AnalogRadio">nmm:AnalogRadio</link> (if analog). An analog station has properties as modulation and frequency, while the digial station has streaming bitrate, encoding or protocol.</para>
 <para>Note that nfo:MediaStream refers to a flux of bytes/data, and it is on the <link linkend="nie-DataObject">nie:DataObject</link> side of the ontology</para>
 
-</sect2>
-</section>
+</refsection>
+</refsection>

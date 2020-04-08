@@ -27,8 +27,14 @@
 
 G_BEGIN_DECLS
 
-void generate_ontology_class_docs (Ontology *ontology,
-                                   GFile    *output_dir);
+void print_ontology_class (Ontology      *ontology,
+                           OntologyClass *klass,
+                           FILE          *f);
+void print_ontology_extra_properties (Ontology      *ontology,
+                                      const char    *ontology_prefix,
+                                      const char    *classname,
+                                      GList         *properties_for_class,
+                                      FILE          *f);
 
 G_END_DECLS
 

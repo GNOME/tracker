@@ -678,3 +678,11 @@ tracker_turtle_reader_next (TrackerTurtleReader  *reader,
 
 	return TRUE;
 }
+
+GHashTable *
+tracker_turtle_reader_get_prefixes (TrackerTurtleReader *reader)
+{
+	g_return_val_if_fail (TRACKER_IS_TURTLE_READER (reader), FALSE);
+
+	return reader->prefixes;
+}
