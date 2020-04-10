@@ -43,8 +43,7 @@
 #define TRACKER_FTS_INDEXED TRACKER_NS "fulltextIndexed"
 #define TRACKER_FTS_WEIGHT TRACKER_NS "weight"
 #define TRACKER_PREFIX TRACKER_NS "prefix"
-
-#define NAO_DEPRECATED "http://www.semanticdesktop.org/ontologies/2007/08/15/nao#deprecated"
+#define TRACKER_DEPRECATED TRACKER_NS "deprecated"
 
 /* Ontology description */
 #define DSC_PREFIX "http://www.tracker-project.org/temp/dsc#"
@@ -266,9 +265,9 @@ load_in_memory (Ontology    *ontology,
 			                                       g_strdup (turtle_subject));
 		}
 
-	} else if (!g_strcmp0 (turtle_predicate, NAO_DEPRECATED)) {
+	} else if (!g_strcmp0 (turtle_predicate, TRACKER_DEPRECATED)) {
 		/*
-		 * X nao:deprecated true
+		 * X tracker:deprecated true
 		 *
 		 * This can apply to classes OR properties OR
 		 * namespaces!

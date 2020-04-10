@@ -170,3 +170,10 @@ tracker:writeback a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range xsd:boolean .
+
+tracker:deprecated a rdf:Property;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdfs:Resource;
+	rdfs:range xsd:boolean;
+	rdfs:label "deprecated";
+	rdfs:comment "If this property is assigned, the subject class, property, or resource, is deprecated and should not be used in production systems any longer. It may be removed without further notice." .

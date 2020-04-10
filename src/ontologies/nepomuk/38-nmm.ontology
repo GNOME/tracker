@@ -1,7 +1,6 @@
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix nco: <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#> .
 @prefix nfo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#> .
-@prefix nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#> .
 @prefix nie: <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#> .
 @prefix nmm: <http://www.tracker-project.org/temp/nmm#> .
 @prefix nrl: <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#> .
@@ -192,7 +191,7 @@ nmm:albumTitle a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicAlbum ;
 	rdfs:range xsd:string ;
-	nao:deprecated true ;
+	tracker:deprecated true ;
 	tracker:fulltextIndexed true ;
 	tracker:weight 6 .
 

@@ -1,6 +1,5 @@
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix nie: <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#> .
-@prefix nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#> .
 @prefix nrl: <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -170,7 +169,7 @@ nie:interpretedAs a rdf:Property ;
 	rdfs:range nie:InformationElement .
 
 nie:isStoredAs a rdf:Property ;
- 	nao:deprecated true ;
+ 	tracker:deprecated true ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range nie:DataObject .
