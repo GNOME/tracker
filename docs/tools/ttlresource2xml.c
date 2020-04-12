@@ -584,7 +584,7 @@ print_property_table (FILE          *f,
 		prop_id = ttl_model_name_to_shortname (ontology, prop->propertyname, "-");
 		shortname = ttl_model_name_to_shortname (ontology, prop->propertyname, NULL);
 		basename = ttl_model_name_to_basename (ontology, prop->propertyname);
-		type_name = ttl_model_name_to_shortname (ontology, prop->range->data, NULL);
+		type_name = ttl_model_name_to_basename (ontology, prop->range->data);
 		type_class_id = ttl_model_name_to_shortname (ontology, prop->range->data, "-");
 
 		g_fprintf (f, "<tr>");
