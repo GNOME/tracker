@@ -593,7 +593,7 @@ print_property_table (FILE          *f,
 		g_fprintf (f, "<indexterm zone='%s.%s'><primary sortas='%s'>%s</primary></indexterm>",
 		           id, prop_id, shortname, shortname);
 		/* This anchor is globally unique and can be used for internal links */
-		g_fprintf (f, "<anchor id='%s.property.%s' />", id, basename);
+		g_fprintf (f, "<anchor role='rdf-property' id='%s.property.%s' />", id, basename);
 		/* This anchor is unique within the refentry and can be used for external links */
 		g_fprintf (f, "<anchor id='%s' />", basename);
 		g_fprintf (f, "%s", basename);
@@ -691,7 +691,7 @@ print_ontology_class (Ontology      *ontology,
 	/* Anchor for external links. */
 	g_fprintf (f, "<anchor id='%s' />\n", name);
 
-	g_fprintf (f, "<refsect2 id='%s'>\n", id);
+	g_fprintf (f, "<refsect2 role='rdf-class' id='%s'>\n", id);
 	g_fprintf (f, "<title>%s</title>\n", name);
 
 	g_fprintf (f, "<refsect3 id='%s.description'>\n", id);
