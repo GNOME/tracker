@@ -104,7 +104,6 @@ gint
 main (gint argc, gchar **argv)
 {
 	GOptionContext *context;
-	Ontology *ontology = NULL;
 	OntologyDescription *description = NULL;
 	GList *description_files, *l;
 	g_autoptr(GFile) ontology_file = NULL, output_file = NULL;
@@ -146,10 +145,8 @@ main (gint argc, gchar **argv)
 	g_mkdir_with_parents (path, 0755);
 	g_free (path);
 
-	ontology = ttl_loader_new_ontology ();
-
 	for (l = description_files; l; l = l->next) {
-		Ontology *file_ontology = NULL;
+		Ontology *ontology = NULL;
 		g_autoptr(GFile) ttl_file = NULL, ttl_output_file = NULL;
 		gchar *filename;
 
@@ -160,20 +157,17 @@ main (gint argc, gchar **argv)
 		ttl_output_file = g_file_get_child (output_file, filename);
 		g_free (filename);
 
-		file_ontology = ttl_loader_new_ontology ();
+		ontology = ttl_loader_new_ontology ();
 
 		ttl_loader_load_ontology (ontology, ttl_file);
-		ttl_loader_load_ontology (file_ontology, ttl_file);
-		ttl_loader_load_prefix_from_description (ontology, description);
 
-		ttl_xml_print (description, file_ontology, ttl_output_file, description_dir);
+		ttl_xml_print (description, ontology, ttl_output_file, description_dir);
 
-		ttl_loader_free_ontology (file_ontology);
+		ttl_loader_free_ontology (ontology);
 		ttl_loader_free_description (description);
 	}
 	g_list_free_full (description_files, (GDestroyNotify) g_object_unref);
 
-	ttl_loader_free_ontology (ontology);
 	g_option_context_free (context);
 
 	return 0;

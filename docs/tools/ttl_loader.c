@@ -42,7 +42,6 @@
 #define TRACKER_NOTIFY TRACKER_NS "notify"
 #define TRACKER_FTS_INDEXED TRACKER_NS "fulltextIndexed"
 #define TRACKER_FTS_WEIGHT TRACKER_NS "weight"
-#define TRACKER_PREFIX TRACKER_NS "prefix"
 #define TRACKER_DEPRECATED TRACKER_NS "deprecated"
 
 /* Ontology description */
@@ -167,12 +166,6 @@ load_in_memory (Ontology    *ontology,
 		}
 
 		prop->weight = g_strdup (turtle_object);
-
-	} else if (!g_strcmp0 (turtle_predicate, TRACKER_PREFIX)) {
-		/* A tracker:prefix on a tracker:Namespace */
-		g_hash_table_insert (ontology->prefixes,
-				     g_strdup (turtle_subject),
-				     g_strdup (turtle_object));
 
 	} else if (!g_strcmp0 (turtle_predicate, RDFS_COMMENT)) {
 		OntologyClass *klass;
@@ -364,6 +357,8 @@ ttl_loader_load_ontology (Ontology    *ontology,
 {
 	TrackerTurtleReader *reader;
 	const gchar *subject, *predicate, *object;
+	const gchar *base_url, *prefix;
+	GHashTableIter iter;
 	GError *error = NULL;
 
 	g_return_if_fail (G_IS_FILE (ttl_file));
@@ -377,22 +372,22 @@ ttl_loader_load_ontology (Ontology    *ontology,
 		load_in_memory (ontology, subject, predicate, object);
 	}
 
+	g_hash_table_iter_init (&iter, tracker_turtle_reader_get_prefixes (reader));
+	while (g_hash_table_iter_next (&iter, (gpointer *) &prefix, (gpointer *) &base_url)) {
+		gchar *prefix_no_colon;
+
+		prefix_no_colon = g_strdup (prefix);
+		if (strrchr (prefix_no_colon, ':'))
+			*strrchr (prefix_no_colon, ':') = '\0';
+
+		g_hash_table_insert (ontology->prefixes, g_strdup (base_url), prefix_no_colon);
+	}
+
 	g_clear_object (&reader);
 
 	if (error) {
 		g_message ("Turtle parse error: %s", error->message);
 		g_error_free (error);
-	}
-}
-
-void
-ttl_loader_load_prefix_from_description (Ontology            *ontology,
-                                         OntologyDescription *description)
-{
-	if (!g_hash_table_lookup (ontology->prefixes, description->baseUrl)) {
-		g_hash_table_insert (ontology->prefixes,
-		                     g_strdup (description->baseUrl),
-		                     g_strdup (description->localPrefix));
 	}
 }
 
