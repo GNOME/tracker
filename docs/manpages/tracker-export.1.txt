@@ -1,0 +1,31 @@
+tracker-export(1)
+=================
+
+== NAME
+
+tracker-export - Export all data from a Tracker database.
+
+== SYNOPSIS
+
+*tracker export* [_options_...]
+
+== DESCRIPTION
+
+*tracker export* exports all data stored in a Tracker database, in
+Turtle format.
+
+The output is intended to be machine-readable, not human readable. Use a
+tool such as rapper(1) to convert the data to different formats.
+
+== EXAMPLES
+
+Export all data from Tracker Index and prettify the output using
+rapper(1).::
+
+....
+$ tracker export -b org.freedesktop.Tracker1.Miner.Files | rapper - -I . -i turtle -o turtle
+....
+
+== SEE ALSO
+
+*tracker-import*(1), *tracker-sparql*(1).

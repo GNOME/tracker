@@ -1,0 +1,50 @@
+tracker-sql(1)
+==============
+
+== NAME
+
+tracker-sql - Use SQL to query the Tracker databases.
+
+== SYNOPSIS
+
+....
+tracker sql -q <sql> | -f <file>
+....
+
+== DESCRIPTION
+
+This command allows probing of the current database. When using commands
+like *tracker sparql*, the SPARQL used is translated into SQL before
+being run on the database. This allows direct use of the database using
+SQL avoiding the SPARQL engine entirely.
+
+The caller can run a query two ways, either by providing a _file_ with
+the query or by providing a string with the _sql_ query.
+
+The _file_ argument can be either a local path or a URI. It also does
+not have to be an absolute path.
+
+== OPTIONS
+
+*-f, --file=<__file__>*::
+  Use a _file_ with SPARQL content to query. Don't forget to end all
+  queries with a semicolon (;) and also to use quotes around table
+  names. The quotes are important because most tables are named after
+  ontology classes like "nfo:Document" and queries will fail without the
+  quotes.
+*-q, --query=<__sql__>*::
+  Use a _sql_ string to query the database with.
+
+== EXAMPLES
+
+Show first 10 "nfo:Document" entries where the TOC is not NULL::
++
+----
+$ tracker sql -q 'SELECT * FROM "nfo:Document" WHERE "nfo:tableOfContents" NOT NULL LIMIT 10;'
+----
+
+== SEE ALSO
+
+*tracker-sparql*(1), *tracker-store*(1), *tracker-info*(1).
+
+*http://en.wikipedia.org/wiki/SQL*
