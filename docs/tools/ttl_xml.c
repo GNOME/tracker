@@ -203,7 +203,6 @@ print_toc_classes (FILE       *f,
 	g_fprintf (f, "<refsect1 id=\"%s.classes\">", id);
 	g_fprintf (f, "<title>Classes</title>");
 
-	g_fprintf (f, "<simplelist>\n");
 	for (l = classes; l; l = l->next) {
 		OntologyClass *klass;
 		g_autofree char *basename = NULL, *id = NULL;
@@ -211,14 +210,12 @@ print_toc_classes (FILE       *f,
 		klass = l->data;
 		basename = ttl_model_name_to_basename (ontology, klass->classname);
 		id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
-		g_fprintf (f, "<member>");
-		g_fprintf (f, "<link linkend=\"%s\">%s</link>", id, basename);
-		if (klass->description) {
-			g_fprintf (f, ": %s", klass->description);
+
+		if (l != classes) {
+			g_fprintf (f, ", ");
 		}
-		g_fprintf (f, "</member>\n");
+		g_fprintf (f, "<link linkend=\"%s\">%s</link>", id, basename);
 	}
-	g_fprintf (f, "</simplelist>\n");
 
 	g_fprintf (f, "</refsect1>");
 }
@@ -239,7 +236,6 @@ print_toc_extra_properties (FILE       *f,
 	g_fprintf (f, "<refsect1 id=\"%s.extra_properties\">", id);
 	g_fprintf (f, "<title>Properties</title>");
 
-	g_fprintf (f, "<simplelist>\n");
 	g_hash_table_iter_init (&iter, extra_properties);
 	while (g_hash_table_iter_next (&iter, (gpointer*) &classname, (gpointer*) &props_for_class)) {
 		for (l = props_for_class; l; l = l->next) {
@@ -250,15 +246,13 @@ print_toc_extra_properties (FILE       *f,
 
 			basename = ttl_model_name_to_basename (ontology, prop->propertyname);
 			id = ttl_model_name_to_shortname (ontology, prop->propertyname, "-");
-			g_fprintf (f, "<member>");
-			g_fprintf (f, "<link linkend=\"%s\">%s</link>", id, basename);
-			if (prop->description) {
-				g_fprintf (f, ": %s", prop->description);
+
+			if (l != props_for_class) {
+				g_fprintf (f, ", ");
 			}
-			g_fprintf (f, "</member>\n");
+			g_fprintf (f, "<link linkend=\"%s\">%s</link>", id, basename);
 		}
 	}
-	g_fprintf (f, "</simplelist>\n");
 
 	g_fprintf (f, "</refsect1>");
 }
@@ -303,7 +297,7 @@ ttl_xml_print (OntologyDescription *description,
 
 	if (classes != NULL) {
     	g_fprintf (f, "<refsect1 id='%s-classes'>\n", description->localPrefix);
-		g_fprintf (f, "<title>%s Ontology Classes</title>\n", upper_name);
+		g_fprintf (f, "<title>Class Details</title>\n");
 
 		for (l = classes; l; l = l->next) {
 			print_ontology_class (ontology, l->data, f);
@@ -318,7 +312,7 @@ ttl_xml_print (OntologyDescription *description,
 		GList *properties_for_class;
 
 		g_fprintf (f, "<refsect1 id='%s-extra-properties'>\n", description->localPrefix);
-		g_fprintf (f, "<title>%s Ontology Properties</title>\n", upper_name);
+		g_fprintf (f, "<title>Property Details</title>\n");
 
 		g_hash_table_iter_init (&iter, extra_properties);
 		while (g_hash_table_iter_next (&iter, (gpointer *)&classname, (gpointer *)&properties_for_class)) {
