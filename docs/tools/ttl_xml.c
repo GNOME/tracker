@@ -179,6 +179,17 @@ get_extra_properties (GList *classes,
 }
 
 static void
+print_synopsis (FILE                 *f,
+                OntologyDescription *desc)
+{
+	g_fprintf (f, "<refsynopsisdiv>\n");
+	g_fprintf (f, "<synopsis>\n");
+	g_fprintf (f, "@prefix %s: &lt;%s&gt;\n", desc->localPrefix, desc->baseUrl);
+	g_fprintf (f, "</synopsis>\n");
+	g_fprintf (f, "</refsynopsisdiv>\n");
+}
+
+static void
 print_toc_classes (FILE       *f,
                    Ontology   *ontology,
                    const char *id,
@@ -277,6 +288,7 @@ ttl_xml_print (OntologyDescription *description,
 
 	print_xml_header (f, description);
 
+	print_synopsis (f, description);
 	print_toc_classes (f, ontology, description->localPrefix, classes);
 	print_toc_extra_properties (f, ontology, description->localPrefix, extra_properties);
 
