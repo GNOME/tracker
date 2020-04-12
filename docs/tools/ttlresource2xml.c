@@ -558,17 +558,18 @@ print_class_hierarchy (FILE          *f,
 }
 
 static void
-print_properties (FILE          *f,
-                  OntologyClass *klass,
-                  Ontology      *ontology)
+print_property_table (FILE          *f,
+                      Ontology      *ontology,
+                      const char    *classname,
+                      GList         *properties)
 {
 	g_autofree gchar *id = NULL;
 	GList *l;
 
-	if (!klass->in_domain_of)
+	if (!properties)
 		return;
 
-	id = ttl_model_name_to_shortname (ontology, klass->classname, "-");
+	id = ttl_model_name_to_shortname (ontology, classname, "-");
 	g_fprintf (f, "<refsect3 id='%s.properties'>", id);
 	g_fprintf (f, "<title>Properties</title>");
 
@@ -576,7 +577,7 @@ print_properties (FILE          *f,
 	g_fprintf (f, "<thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>");
 
 	g_fprintf (f, "<tbody>");
-	for (l = klass->in_domain_of; l; l = l->next) {
+	for (l = properties; l; l = l->next) {
 		OntologyProperty *prop;
 		g_autofree gchar *shortname = NULL, *basename = NULL, *type_name = NULL, *type_class_id = NULL, *prop_id = NULL;
 
@@ -698,6 +699,32 @@ print_ontology_class (Ontology      *ontology,
 	print_class_hierarchy (f, klass, ontology);
 	print_predefined_instances (f, klass, ontology);
 	print_fts_properties (f, klass, ontology);
-	print_properties (f, klass, ontology);
+
+	print_property_table (f, ontology, klass->classname, klass->in_domain_of);
+
+	g_fprintf (f, "</refsect2>\n");
+}
+
+void
+print_ontology_extra_properties (Ontology      *ontology,
+                                 const char    *classname,
+                                 GList         *properties_for_class,
+                                 FILE          *f)
+{
+	g_autofree gchar *id = NULL;
+
+	g_return_if_fail (f != NULL);
+
+	id = ttl_model_name_to_shortname (ontology, classname, "-");
+
+	g_fprintf (f, "<refsect2 id='%s'>\n", id);
+	g_fprintf (f, "<title>Properties for %s</title>\n", id);
+
+	g_fprintf (f, "<refsect3 id='%s.description'>\n", id);
+	g_fprintf (f, "  <title>Description</title>\n");
+	g_fprintf (f, "  <para>Properties which can be used for %s resources.</para>", id);
+	g_fprintf (f, "</refsect3>\n");
+
+	print_property_table (f, ontology, classname, properties_for_class);
 	g_fprintf (f, "</refsect2>\n");
 }

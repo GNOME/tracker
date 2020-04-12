@@ -30,6 +30,10 @@ G_BEGIN_DECLS
 void print_ontology_class (Ontology      *ontology,
                            OntologyClass *klass,
                            FILE          *f);
+void print_ontology_extra_properties (Ontology      *ontology,
+                                      const char    *classname,
+                                      GList         *properties_for_class,
+                                      FILE          *f);
 
 G_END_DECLS
 
