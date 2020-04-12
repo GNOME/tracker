@@ -1,4 +1,33 @@
-# Logging
+# Tracker HACKING guide
+
+This file contains information useful for developers who want to improve
+the tracker and tracker-miners projects.
+
+## Automated testing
+
+You can run the Tracker testsuite using the `meson test` command.
+
+Tracker runs the tests automatically in GitLab CI. The .gitlab-ci.yml file
+controls this. Here are the latest tests that were run:
+
+ * https://gitlab.gnome.org/GNOME/tracker/pipelines
+ * https://gitlab.gnome.org/GNOME/tracker-miners/pipelines
+
+Some distros also run the test suite, including these:
+
+  * Ubuntu autopkgtest:
+      * https://autopkgtest.ubuntu.com/packages/tracker/
+      * https://autopkgtest.ubuntu.com/packages/tracker-miners/
+  * Debian builds:
+      * https://buildd.debian.org/status/package.php?p=tracker
+      * https://buildd.debian.org/status/package.php?p=tracker-miners
+  * Debian reproducible-builds:
+      * https://tests.reproducible-builds.org/debian/rb-pkg/unstable/amd64/tracker.html
+      * https://tests.reproducible-builds.org/debian/rb-pkg/unstable/amd64/tracker-miners.html
+
+OpenSuSE do automated whole-system testing that includes the GNOME desktop for their Tumbleweed rolling release distro: https://openqa.opensuse.org/group_overview/1
+
+## Logging
 
 The following environment variables control logging from Tracker daemons:
 
@@ -30,7 +59,7 @@ When working with GitLab CI, you can use the
 to set the values of these variables and increase the verbosity of the tests in
 CI.
 
-# Attaching a debugger to Tracker daemons
+## Attaching a debugger to Tracker daemons
 
 Tracker daemons are not started directly. Instead they are started by the D-Bus
 daemon by request. When using the run-uninstalled script or the
@@ -48,7 +77,7 @@ option to avoid your process being killed by the test runner. When you see
 the 'Pausing' message, run the `gdb attach``command in another terminal within
 10 seconds.
 
-# Running Tracker daemons under Valgrind
+## Running Tracker daemons under Valgrind
 
 The Tracker daemons are launched using D-Bus autolaunch. When running them from
 the source tree using the run-uninstalled script or the functional-tests, the
