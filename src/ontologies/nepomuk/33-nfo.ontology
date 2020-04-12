@@ -3,16 +3,14 @@
 @prefix nfo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#> .
 @prefix nie: <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#> .
 @prefix nrl: <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#> .
-@prefix nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix tracker: <http://www.tracker-project.org/ontologies/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#> .
 
 nfo: a tracker:Namespace, tracker:Ontology ;
 	tracker:prefix "nfo" ;
-	nao:lastModified "2014-10-06T13:05:00Z" .
+	tracker:lastModified "2014-10-06T13:05:00Z" .
 
 nfo:Document a rdfs:Class ;
 	rdfs:label "Document" ;

@@ -40,6 +40,7 @@
   <part id="ontology">
     <title>Ontology</title>
     <xi:include href="xml/nie-ontology.xml" />
+    <xi:include href="xml/nao-ontology.xml"/>
     <xi:include href="xml/nfo-ontology.xml" />
     <xi:include href="xml/nco-ontology.xml" />
     <xi:include href="xml/nmo-ontology.xml" />

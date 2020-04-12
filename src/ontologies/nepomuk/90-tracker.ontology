@@ -9,7 +9,7 @@
 
 tracker: a tracker:Ontology ;
 	tracker:prefix "tracker" ;
-	nao:lastModified "2019-07-15T09:41:00Z" .
+	tracker:lastModified "2019-07-15T09:41:00Z" .
 
 tracker:isDefaultTag a rdf:Property ;
 	rdfs:domain nao:Tag ;

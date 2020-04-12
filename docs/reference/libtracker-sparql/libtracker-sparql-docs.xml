@@ -46,7 +46,6 @@
     <xi:include href="xml/xsd-ontology.xml"/>
     <xi:include href="xml/rdf-ontology.xml"/>
     <xi:include href="xml/nrl-ontology.xml"/>
-    <xi:include href="xml/nao-ontology.xml"/>
   </part>
 
   <xi:include href="ontologies.xml"/>

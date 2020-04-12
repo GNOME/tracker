@@ -7,13 +7,13 @@ base_ontology = files(
     '12-nrl.ontology',
     '20-dc.description',
     '20-dc.ontology',
-    '31-nao.description',
-    '31-nao.ontology',
 )
 
 nepomuk = files(
     'nepomuk/30-nie.description',
     'nepomuk/30-nie.ontology',
+    'nepomuk/31-nao.description',
+    'nepomuk/31-nao.ontology',
     'nepomuk/32-nco.description',
     'nepomuk/32-nco.ontology',
     'nepomuk/33-nfo.description',

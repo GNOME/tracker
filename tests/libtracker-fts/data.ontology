@@ -5,10 +5,9 @@
 @prefix test: <http://www.example.org/test#> .
 @prefix tracker: <http://www.tracker-project.org/ontologies/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#> .
 
 test: a tracker:Ontology ;
-	nao:lastModified "2018-09-30T13:00:00Z" .
+	tracker:lastModified "2018-09-30T13:00:00Z" .
 
 fts: a tracker:Namespace ;
 	tracker:prefix "fts" .

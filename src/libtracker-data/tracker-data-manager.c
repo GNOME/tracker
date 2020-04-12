@@ -59,7 +59,7 @@
 #define NRL_INVERSE_FUNCTIONAL_PROPERTY TRACKER_PREFIX_NRL "InverseFunctionalProperty"
 #define NRL_MAX_CARDINALITY             TRACKER_PREFIX_NRL "maxCardinality"
 
-#define NAO_LAST_MODIFIED               TRACKER_PREFIX_NAO "lastModified"
+#define TRACKER_LAST_MODIFIED           TRACKER_PREFIX_TRACKER "lastModified"
 
 #define ZLIBBUFSIZ 8192
 
@@ -1235,7 +1235,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		}
 
 		tracker_namespace_set_prefix (namespace, object);
-	} else if (g_strcmp0 (predicate, NAO_LAST_MODIFIED) == 0) {
+	} else if (g_strcmp0 (predicate, TRACKER_LAST_MODIFIED) == 0) {
 		TrackerOntology *ontology;
 
 		ontology = tracker_ontologies_get_ontology_by_uri (manager->ontologies, subject);
@@ -1869,7 +1869,7 @@ get_ontology_from_file (TrackerDataManager *manager,
 				                     g_strdup (subject),
 				                     ontology);
 			}
-		} else if (g_strcmp0 (predicate, NAO_LAST_MODIFIED) == 0) {
+		} else if (g_strcmp0 (predicate, TRACKER_LAST_MODIFIED) == 0) {
 			TrackerOntology *ontology;
 
 			ontology = g_hash_table_lookup (ontology_uris, subject);
@@ -1900,7 +1900,7 @@ get_ontology_from_file (TrackerDataManager *manager,
 
 	if (ret == NULL) {
 		gchar *uri = g_file_get_uri (file);
-		g_critical ("Ontology file has no nao:lastModified header: %s", uri);
+		g_critical ("Ontology file has no tracker:lastModified header: %s", uri);
 		g_free (uri);
 	}
 
@@ -1981,7 +1981,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 		if (namespace && tracker_namespace_get_is_new (namespace) != in_update) {
 			return;
 		}
-	} else if (g_strcmp0 (predicate, NAO_LAST_MODIFIED) == 0) {
+	} else if (g_strcmp0 (predicate, TRACKER_LAST_MODIFIED) == 0) {
 		TrackerOntology *ontology;
 
 		ontology = tracker_ontologies_get_ontology_by_uri (manager->ontologies, subject);
@@ -2176,7 +2176,7 @@ db_get_static_data (TrackerDBInterface  *iface,
 
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &internal_error,
 	                                              "SELECT (SELECT Uri FROM Resource WHERE ID = \"tracker:Ontology\".ID), "
-	                                              "       (SELECT \"nao:lastModified\" FROM \"rdfs:Resource\" WHERE ID = \"tracker:Ontology\".ID) "
+	                                              "       \"tracker:lastModified\" "
 	                                              "FROM \"tracker:Ontology\"");
 
 	if (stmt) {
@@ -3567,7 +3567,6 @@ get_ontologies (TrackerDataManager  *manager,
 	sorted = g_list_sort (sorted, (GCompareFunc) compare_file_names);
 
 	/* Add our builtin ontologies so they are loaded first */
-	sorted = g_list_prepend (sorted, g_file_new_for_uri ("resource://org/freedesktop/tracker/ontology/31-nao.ontology"));
 	sorted = g_list_prepend (sorted, g_file_new_for_uri ("resource://org/freedesktop/tracker/ontology/20-dc.ontology"));
 	sorted = g_list_prepend (sorted, g_file_new_for_uri ("resource://org/freedesktop/tracker/ontology/12-nrl.ontology"));
 	sorted = g_list_prepend (sorted, g_file_new_for_uri ("resource://org/freedesktop/tracker/ontology/11-rdf.ontology"));
@@ -3886,10 +3885,9 @@ update_ontology_last_modified (TrackerDataManager  *manager,
 	ontology_uri = tracker_ontology_get_uri (ontology);
 	last_mod = tracker_ontology_get_last_modified (ontology);
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, error,
-	                                              "UPDATE \"rdfs:Resource\" SET \"nao:lastModified\"= ? "
-	                                              "WHERE \"rdfs:Resource\".ID = "
-	                                              "(SELECT Resource.ID FROM Resource INNER JOIN \"rdfs:Resource\" "
-	                                              "ON \"rdfs:Resource\".ID = Resource.ID WHERE "
+	                                              "UPDATE \"tracker:Ontology\" SET \"tracker:lastModified\"= ? "
+	                                              "WHERE \"tracker:Ontology\".ID = "
+	                                              "(SELECT Resource.ID FROM Resource WHERE "
 	                                              "Resource.Uri = ?)");
 	if (stmt) {
 		tracker_db_statement_bind_int (stmt, 0, last_mod);
@@ -4275,14 +4273,13 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 		/* check ontology against database */
 
-		/* Get a map of tracker:Ontology v. nao:lastModified so that we can test
+		/* Get a map of tracker:Ontology v. tracker:lastModified so that we can test
 		 * for all the ontology files in ontology_location whether the last-modified
 		 * has changed since we dealt with the file last time. */
 
 		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &n_error,
-		        "SELECT Resource.Uri, \"rdfs:Resource\".\"nao:lastModified\" FROM \"tracker:Ontology\" "
-		        "INNER JOIN Resource ON Resource.ID = \"tracker:Ontology\".ID "
-		        "INNER JOIN \"rdfs:Resource\" ON \"tracker:Ontology\".ID = \"rdfs:Resource\".ID");
+		        "SELECT Resource.Uri, \"tracker:Ontology\".\"tracker:lastModified\" FROM \"tracker:Ontology\" "
+		        "INNER JOIN Resource ON Resource.ID = \"tracker:Ontology\".ID ");
 
 		if (stmt) {
 			cursor = tracker_db_statement_start_cursor (stmt, &n_error);

@@ -5,7 +5,6 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix tracker: <http://www.tracker-project.org/ontologies/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#> .
 
 # This is our example namespace
 @prefix ex: <http://example.org/#>
@@ -13,4 +12,4 @@
 ex: a tracker:Namespace, tracker:Ontology
     tracker:prefix "ex"
     rdfs:comment "example ontology"
-    nao:lastModified "2017-01-01T15:00:00Z"
+    tracker:lastModified "2017-01-01T15:00:00Z"

@@ -6,11 +6,10 @@
 @prefix nfo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#> .
 @prefix mto: <http://www.tracker-project.org/temp/mto#> .
 @prefix tracker: <http://www.tracker-project.org/ontologies/tracker#> .
-@prefix nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#> .
 
 mto: a tracker:Namespace, tracker:Ontology ;
 	tracker:prefix "mto" ;
-	nao:lastModified "2010-10-20T07:42:00Z" .
+	tracker:lastModified "2010-10-20T07:42:00Z" .
 
 mto:TransferElement a rdfs:Class ;
 	rdfs:label "Transfer element" ;

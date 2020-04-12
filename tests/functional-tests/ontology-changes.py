@@ -153,9 +153,9 @@ class OntologyChangeTestTemplate (ut.TestCase):
         def get_ontology_date(ontology):
             with open(ontology, 'r') as f:
                 for line in f:
-                    if "nao:lastModified" in line:
+                    if "tracker:lastModified" in line:
                         getmodtime = re.compile(
-                            'nao:lastModified\ \"' + ISO9601_REGEX + '\"')
+                            'tracker:lastModified\ \"' + ISO9601_REGEX + '\"')
                         modtime_match = getmodtime.search(line)
 
                         if (modtime_match):
@@ -170,7 +170,7 @@ class OntologyChangeTestTemplate (ut.TestCase):
         second_date = get_ontology_date(
             self.ontology_path(second).joinpath("91-test.ontology"))
         if first_date >= second_date:
-            self.fail("nao:modifiedTime in '%s' is not more recent in the second ontology" % (
+            self.fail("tracker:lastModified in '%s' is not more recent in the second ontology" % (
                 "91-test.ontology"))
 
 

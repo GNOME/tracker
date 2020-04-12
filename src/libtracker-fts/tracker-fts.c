@@ -177,14 +177,14 @@ tracker_fts_delete_table (sqlite3     *db,
 	gchar *query;
 	int rc;
 
-	query = g_strdup_printf ("DROP VIEW fts_view");
+	query = g_strdup_printf ("DROP VIEW IF EXISTS fts_view");
 	rc = sqlite3_exec (db, query, NULL, NULL, NULL);
 	g_free (query);
 
 	if (rc == SQLITE_OK) {
-		query = g_strdup_printf ("DROP TABLE \"%s\".%s",
+		query = g_strdup_printf ("DROP TABLE IF EXISTS \"%s\".%s",
 					 database, table_name);
-		sqlite3_exec (db, query, NULL, NULL, NULL);
+		rc = sqlite3_exec (db, query, NULL, NULL, NULL);
 		g_free (query);
 	}
 
@@ -200,6 +200,9 @@ tracker_fts_alter_table (sqlite3     *db,
 {
 	gchar *query, *tmp_name;
 	int rc;
+
+	if (g_hash_table_size (tables) == 0)
+		return TRUE;
 
 	tmp_name = g_strdup_printf ("%s_TMP", table_name);
 
