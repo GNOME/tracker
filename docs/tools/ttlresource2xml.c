@@ -560,16 +560,14 @@ print_class_hierarchy (FILE          *f,
 static void
 print_property_table (FILE          *f,
                       Ontology      *ontology,
-                      const char    *classname,
+                      const char    *id,
                       GList         *properties)
 {
-	g_autofree gchar *id = NULL;
 	GList *l;
 
 	if (!properties)
 		return;
 
-	id = ttl_model_name_to_shortname (ontology, classname, "-");
 	g_fprintf (f, "<refsect3 id='%s.properties'>", id);
 	g_fprintf (f, "<title>Properties</title>");
 
@@ -594,6 +592,8 @@ print_property_table (FILE          *f,
 		g_fprintf (f, "<td>");
 		g_fprintf (f, "<indexterm zone='%s.%s'><primary sortas='%s'>%s</primary></indexterm>",
 		           id, prop_id, shortname, shortname);
+		g_fprintf (f, "<anchor id='%s.property.%s' />",
+		           id, basename);
 		g_fprintf (f, "%s", basename);
 		g_fprintf (f, "</td>");
 
@@ -700,31 +700,37 @@ print_ontology_class (Ontology      *ontology,
 	print_predefined_instances (f, klass, ontology);
 	print_fts_properties (f, klass, ontology);
 
-	print_property_table (f, ontology, klass->classname, klass->in_domain_of);
+	print_property_table (f, ontology, id, klass->in_domain_of);
 
 	g_fprintf (f, "</refsect2>\n");
 }
 
 void
 print_ontology_extra_properties (Ontology      *ontology,
+                                 const char    *ontology_prefix,
                                  const char    *classname,
                                  GList         *properties_for_class,
                                  FILE          *f)
 {
-	g_autofree gchar *id = NULL;
+	g_autofree gchar *short_classname = NULL;
+	g_autofree gchar *section_id = NULL, *class_id = NULL;
 
 	g_return_if_fail (f != NULL);
 
-	id = ttl_model_name_to_shortname (ontology, classname, "-");
+	short_classname = ttl_model_name_to_shortname (ontology, classname, ":");
 
-	g_fprintf (f, "<refsect2 id='%s'>\n", id);
-	g_fprintf (f, "<title>Properties for %s</title>\n", id);
+	class_id = ttl_model_name_to_shortname (ontology, classname, "-");
+	section_id = g_strconcat (ontology_prefix, ".", class_id, NULL);
 
-	g_fprintf (f, "<refsect3 id='%s.description'>\n", id);
+	g_fprintf (f, "<refsect2 id='%s'>\n", section_id);
+	g_fprintf (f, "<title>Properties for %s</title>\n", short_classname);
+
+	g_fprintf (f, "<refsect3>\n");
 	g_fprintf (f, "  <title>Description</title>\n");
-	g_fprintf (f, "  <para>Properties which can be used for %s resources.</para>", id);
+	g_fprintf (f, "  <para>Properties which can be used for %s resources.</para>",
+	           short_classname);
 	g_fprintf (f, "</refsect3>\n");
 
-	print_property_table (f, ontology, classname, properties_for_class);
+	print_property_table (f, ontology, section_id, properties_for_class);
 	g_fprintf (f, "</refsect2>\n");
 }
