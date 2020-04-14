@@ -929,15 +929,6 @@ nfo:orientation a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	tracker:writeback true .
 
-@prefix poi: <http://www.tracker-project.org/ontologies/poi#> .
-
-poi: a tracker:Namespace ;
-	tracker:prefix "poi" .
-
-# TDB
-poi:ObjectOfInterest a rdfs:Class ;
-	rdfs:subClassOf rdfs:Resource .
-
 # Addition to nepomuk
 nfo:mediaListEntry a rdf:Property ;
 	rdfs:label "Media list entry" ;
