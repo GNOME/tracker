@@ -72,6 +72,15 @@ The file chooser dialog supplied by GTK has a search interface. There's
 a [Tracker backend](https://gitlab.gnome.org/GNOME/gtk/blob/master/gtk/gtksearchenginetracker.c)
 for this.
 
+### Media tools
+
+[Grilo](https://wiki.gnome.org/Projects/Grilo) is a library for finding and
+fetching media content from many different sources. It uses Tracker to browse
+and search local media content.
+
+[Rygel](https://wiki.gnome.org/Projects/Rygel) is a home media solution that serves
+content over UPnP. It uses Tracker to find your media files.
+
 ### Sailfish OS
 
 [Sailfish OS](https://sailfishos.org) uses Tracker for [indexing media
