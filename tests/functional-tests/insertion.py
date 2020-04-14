@@ -189,9 +189,9 @@ class TrackerStoreInsertionTests (fixtures.TrackerSparqlDirectTest):
                           <test://instance-1> nie:usageCounter ?v .
                         }
                         DELETE {
-                          <test://instance-1> nie:contentAccessed ?w .
+                          <test://instance-1> nie:contentLastModified ?w .
                         } WHERE {
-                          <test://instance-1> nie:contentAccessed ?w .
+                          <test://instance-1> nie:contentLastModified ?w .
                         }
                         """)
 
@@ -200,7 +200,7 @@ class TrackerStoreInsertionTests (fixtures.TrackerSparqlDirectTest):
                         INSERT {
                            <test://instance-1> a nmm:MusicPiece, nfo:FileDataObject;
                            nie:usageCounter '%d';
-                           nie:contentAccessed '2000-01-01T00:4%d:47Z' .
+                           nie:contentLastModified '2000-01-01T00:4%d:47Z' .
                         }""" % (i, i))
 
             # Query for the property values and verify whether the last change
@@ -209,7 +209,7 @@ class TrackerStoreInsertionTests (fixtures.TrackerSparqlDirectTest):
                           SELECT ?playcount ?date WHERE {
                              <test://instance-1> a nmm:MusicPiece ;
                                  nie:usageCounter ?playcount ;
-                                 nie:contentAccessed ?date.
+                                 nie:contentLastModified ?date.
                           }""")
 
             self.assertEqual(len(result), 1)
@@ -231,7 +231,7 @@ class TrackerStoreInsertionTests (fixtures.TrackerSparqlDirectTest):
                         INSERT OR REPLACE {
                            <test://instance-1> a nmm:MusicPiece, nfo:FileDataObject;
                            nie:usageCounter '%d';
-                           nie:contentAccessed '2000-01-01T00:4%d:47Z' .
+                           nie:contentLastModified '2000-01-01T00:4%d:47Z' .
                         }""" % (i, i))
 
             # Query for the property values and verify whether the last change
@@ -240,7 +240,7 @@ class TrackerStoreInsertionTests (fixtures.TrackerSparqlDirectTest):
                           SELECT ?playcount ?date WHERE {
                              <test://instance-1> a nmm:MusicPiece ;
                                  nie:usageCounter ?playcount ;
-                                 nie:contentAccessed ?date.
+                                 nie:contentLastModified ?date.
                           }""")
 
             self.assertEqual(len(result), 1)

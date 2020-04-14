@@ -198,13 +198,6 @@ nie:contentCreated a rdf:Property ;
 	rdfs:range xsd:dateTime ;
 	tracker:writeback true .
 
-# Addition to nepomuk
-nie:contentAccessed a rdf:Property ;
-	rdfs:subPropertyOf nie:informationElementDate ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain nie:InformationElement ;
-	rdfs:range xsd:dateTime .
-
 nie:lastRefreshed a rdf:Property ;
 	rdfs:comment "Date when information about this data object was retrieved (for the first time) or last refreshed from the data source. This property is important for metadata extraction applications that don't receive any notifications of changes in the data source and have to poll it regularly. This may lead to information becoming out of date. In these cases this property may be used to determine the age of data, which is an important element of it's dependability" ;
 	rdfs:subPropertyOf dc:date ;

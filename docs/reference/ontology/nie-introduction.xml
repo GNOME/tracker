@@ -101,17 +101,11 @@ its album).
   </varlistentry>
 
   <varlistentry>
-    <term><link linkend="nie-InformationElement.nie-contentAccessed">nie:contentAccessed</link></term>
+    <term><link linkend="nie-DataObject.nie-lastRefreshed">nie:lastRefreshed</link></term>
     <listitem>
-      <para>For resources coming from the filesystem, this is the usual access time to the file. For other  kind of resources (online or virtual), the application accessing it should update its value.</para>
+      <para>.</para>
     </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><link linkend="nie-DataObject.nie-lastRefreshed">nie:lastRefreshed</link></term>
-      <listitem>
-	<para>.</para>
-      </listitem>
-    </varlistentry>
+  </varlistentry>
 </variablelist>
 </sect3>
 </sect2>
