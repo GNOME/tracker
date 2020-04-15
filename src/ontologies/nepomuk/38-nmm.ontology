@@ -196,18 +196,6 @@ nmm:artwork a rdf:Property ;
 	rdfs:subPropertyOf nfo:depiction .
 
 # Addition to nepomuk
-nmm:albumTitle a rdf:Property ;
-	rdfs:label "Title" ;
-	rdfs:comment "nmm:albumTitle is deprecated, use nie:title instead" ;
-	rdfs:subPropertyOf nie:title ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain nmm:MusicAlbum ;
-	rdfs:range xsd:string ;
-	tracker:deprecated true ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 6 .
-
-# Addition to nepomuk
 nmm:albumDuration a rdf:Property ;
 	rdfs:label "Album duration" ;
 	rdfs:comment "Duration of the album" ;
