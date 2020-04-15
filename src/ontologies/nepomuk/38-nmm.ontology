@@ -244,15 +244,6 @@ nmm:setNumber a rdf:Property ;
 	rdfs:domain nmm:MusicAlbumDisc ;
 	rdfs:range xsd:integer .
 
-# Addition to nepomuk.
-# This property doesn't make sense... it is the other way around
-# From the list ot the item, not from the item to the list
-nmm:videoAlbum a rdf:Property ;
-	rdfs:label "Album" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain nmm:Video ;
-	rdfs:range nfo:MediaList .
-
 nmm:episodeNumber a rdf:Property ;
 	rdfs:label "Episode number" ;
 	rdfs:comment "Episode number of a TV show" ;
