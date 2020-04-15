@@ -8,9 +8,11 @@ nrl: a tracker:Namespace, tracker:Ontology ;
 	tracker:prefix "nrl" ;
 	tracker:lastModified "2010-02-16T11:00:00Z" .
 
-nrl:InverseFunctionalProperty a rdfs:Class .
+nrl:InverseFunctionalProperty a rdfs:Class ;
+	rdfs:comment "A marker class to identify inverse functional properties" .
 
 nrl:maxCardinality a rdf:Property ;
+	rdfs:comment "Specifies a maximum value cardinality for a specific property" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range xsd:integer .

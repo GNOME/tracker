@@ -536,6 +536,7 @@ nco:foafUrl a rdf:Property ;
 nco:emailAddress a rdf:Property ;
 	a nrl:InverseFunctionalProperty ;
 	rdfs:label "emailAddress" ;
+	rdfs:comment "Email address" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:EmailAddress ;
 	rdfs:range xsd:string ;
@@ -699,12 +700,14 @@ nco:presence-status-busy a nco:PresenceStatus .
 nco:presence-status-unknown a nco:PresenceStatus .
 nco:presence-status-error a nco:PresenceStatus .
 
+# Addition to nepomuk
 nco:imPresence a rdf:Property ;
 	rdfs:label "imPresence" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:IMAddress ;
 	rdfs:range nco:PresenceStatus .
 
+# Addition to nepomuk
 nco:presenceLastModified a rdf:Property ;
 	rdfs:label "Presence last modified";
 	rdfs:comment "Timestamp of the last change in the presence status";

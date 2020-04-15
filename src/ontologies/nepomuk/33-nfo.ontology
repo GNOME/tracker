@@ -68,6 +68,7 @@ nfo:MediaFileListEntry a rdfs:Class ;
 
 nfo:VectorImage a rdfs:Class ;
 	rdfs:label "VectorImage" ;
+	rdfs:comment "A vector image (e.g. SVG)" ;
 	rdfs:subClassOf nfo:Image .
 
 nfo:Audio a rdfs:Class ;
@@ -387,6 +388,7 @@ nfo:pageCount a rdf:Property ;
 
 nfo:programmingLanguage a rdf:Property ;
 	rdfs:label "programmingLanguage" ;
+	rdfs:comment "Indicates the name of the programming language this source code file is written in. Examples might include 'C', 'C++', 'Java' etc" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:SourceCode ;
 	rdfs:range xsd:string .
@@ -817,28 +819,33 @@ nfo:peakGain a rdf:Property ;
 
 nfo:characterPosition a rdf:Property ;
 	rdfs:label "Character position" ;
+	rdfs:comment "Character position of the bookmark" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:Bookmark ;
 	rdfs:range xsd:integer .
 
 nfo:pageNumber a rdf:Property ;
 	rdfs:label "Page number" ;
+	rdfs:comment "Page linked by the bookmark" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:Bookmark ;
 	rdfs:range xsd:integer .
 
 nfo:streamPosition a rdf:Property ;
 	rdfs:label "Stream position" ;
+	rdfs:comment "Stream position of the bookmark, suitable for e.g. audio books. Expressed in milliseconds" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:Bookmark ;
 	rdfs:range xsd:integer .
 
+# Addition to nepomuk
 nfo:streamDuration a rdf:Property ;
 	rdfs:label "Stream duration" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:Bookmark ;
 	rdfs:range xsd:integer .
 
+# Addition to nepomuk
 nfo:domain a rdf:Property ;
 	rdfs:label "Domain for a web history entry" ;
 	nrl:maxCardinality 1 ;
@@ -846,6 +853,7 @@ nfo:domain a rdf:Property ;
 	rdfs:range xsd:string ;
 	tracker:weight 3 .
 
+# Addtion to nepomuk
 nfo:uri a rdf:Property ;
 	rdfs:label "Uri for a web history entry" ;
 	nrl:maxCardinality 1 ;
@@ -853,8 +861,7 @@ nfo:uri a rdf:Property ;
 	rdfs:range xsd:string ;
 	tracker:weight 5 .
 
-# Added
-
+# Addition to nepomuk
 nfo:ImageCategory a rdfs:Class ;
         rdfs:label "Image category" ;
         rdfs:comment "A image category" ;
@@ -862,11 +869,13 @@ nfo:ImageCategory a rdfs:Class ;
 
 nfo:image-category-screenshot a nfo:ImageCategory .
 
+# Addition to nepomuk
 nfo:SoftwareCategory a rdfs:Class ;
 	rdfs:label "Software" ;
 	rdfs:comment "A software category" ;
 	rdfs:subClassOf nfo:DataContainer, nie:InformationElement .
 
+# Addition to nepomuk
 nfo:softwareCategoryIcon a rdf:Property ;
 	rdfs:label "SoftwareIcon" ;
 	rdfs:comment "Icon of the software" ;
@@ -874,12 +883,14 @@ nfo:softwareCategoryIcon a rdf:Property ;
 	rdfs:domain nfo:SoftwareCategory ;
 	rdfs:range nfo:Image .
 
+# Addition to nepomuk
 nfo:SoftwareApplication a rdfs:Class ;
 	rdfs:label "Application" ;
 	rdfs:comment "An application" ;
 	rdfs:subClassOf nfo:Software ;
 	tracker:notify true .
 
+# Addition to nepomuk
 nfo:softwareIcon a rdf:Property ;
 	rdfs:label "SoftwareIcon" ;
 	rdfs:comment "Icon of the software" ;
@@ -887,6 +898,7 @@ nfo:softwareIcon a rdf:Property ;
 	rdfs:domain nfo:Software ;
 	rdfs:range nfo:Image .
 
+# Addition to nepomuk
 nfo:softwareCmdLine a rdf:Property ;
 	rdfs:label "SoftwareCmdLine" ;
 	rdfs:comment "Command to launch the software" ;
@@ -895,8 +907,7 @@ nfo:softwareCmdLine a rdf:Property ;
 	rdfs:range xsd:string ;
 	tracker:weight 3 .
 
-# Also added
-
+# Addition to nepomuk
 nfo:Orientation a rdfs:Class ;
 	rdfs:label "Orientation enum" ;
 	rdfs:comment "Orientation enum" ;
@@ -911,29 +922,21 @@ nfo:orientation-right a nfo:Orientation .
 nfo:orientation-right-mirror a nfo:Orientation .
 nfo:orientation-left a nfo:Orientation .
 
+# Addition to nepomuk
 nfo:orientation a rdf:Property ;
 	rdfs:domain nfo:Image ;
 	rdfs:range nfo:Orientation ;
 	nrl:maxCardinality 1 ;
 	tracker:writeback true .
 
-@prefix poi: <http://www.tracker-project.org/ontologies/poi#> .
-
-poi: a tracker:Namespace ;
-	tracker:prefix "poi" .
-
-# TDB
-poi:ObjectOfInterest a rdfs:Class ;
-	rdfs:subClassOf rdfs:Resource .
-
-# Ivan's magic proposal for happy media lists
+# Addition to nepomuk
 nfo:mediaListEntry a rdf:Property ;
 	rdfs:label "Media list entry" ;
 	rdfs:comment "A certain item belongs to a media list. This can reflect that a song is in a playlist, an image or video in an Album" ;
 	rdfs:domain nfo:MediaList ;
 	rdfs:range nie:InformationElement .
 
-# This change must be proposed upstream
+# Addition to nepomuk
 nfo:isContentEncrypted a rdf:Property ;
 	rdfs:label "Is content encrypted" ;
 	rdfs:comment "Might change (IE of DataObject property?)" ;
@@ -941,7 +944,7 @@ nfo:isContentEncrypted a rdf:Property ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:boolean .
 
-# This change must be proposed upstream
+# Addition to nepomuk
 nfo:isBootable a rdf:Property ;
 	rdfs:label "Is content bootable" ;
 	rdfs:comment "True when the file is bootable, for example like an ISO or other disc images" ;
@@ -949,13 +952,13 @@ nfo:isBootable a rdf:Property ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:boolean .
 
-# Ontology request by Alexander Bokovoy, replaces nfo:device
-# These classes and properties need to be submitted to NEPOMUK
+# Addition to nepomuk
 nfo:Equipment a rdfs:Class ;
 	rdfs:label "Equipment" ;
 	rdfs:comment "The equipment used to create media" ;
 	rdfs:subClassOf nie:InformationElement .
 
+# Addition to nepomuk
 nfo:equipment a rdf:Property ;
 	rdfs:label "Device" ;
 	rdfs:comment "Equipment used to create the media" ;
@@ -963,6 +966,7 @@ nfo:equipment a rdf:Property ;
 	rdfs:domain nfo:Media ;
 	rdfs:range nfo:Equipment .
 
+# Addition to nepomuk
 nfo:manufacturer a rdf:Property ;
 	rdfs:label "Manufacturer" ;
 	rdfs:comment "The manufacturer of the equipment" ;
@@ -970,6 +974,7 @@ nfo:manufacturer a rdf:Property ;
 	rdfs:domain nfo:Equipment ;
 	rdfs:range xsd:string .
 
+# Addition to nepomuk
 nfo:model a rdf:Property ;
 	rdfs:label "Model" ;
 	rdfs:comment "The model of the equipment" ;
@@ -977,6 +982,7 @@ nfo:model a rdf:Property ;
 	rdfs:domain nfo:Equipment ;
 	rdfs:range xsd:string .
 
+# Addition to nepomuk
 nfo:equipmentSoftware a rdf:Property ;
 	rdfs:label "Equipment software" ;
 	rdfs:comment "The software of the equipment" ;
@@ -984,19 +990,19 @@ nfo:equipmentSoftware a rdf:Property ;
 	rdfs:domain nfo:Equipment ;
 	rdfs:range xsd:string .
 
-# This class needs to be submitted to NEPOMUK
+# Addition to nepomuk
 nfo:HelpDocument a rdfs:Class ;
 	rdfs:label "Help document" ;
 	rdfs:comment "User guides and similar to assist the user" ;
 	rdfs:subClassOf nfo:Document .
 
-# This class needs to be submitted to NEPOMUK
+# Addition to nepomuk
 nfo:EBook a rdfs:Class ;
 	rdfs:label "Electronic book" ;
 	rdfs:comment "Books which can be electronically viewed" ;
 	rdfs:subClassOf nfo:PaginatedTextDocument .
 
-# This property needs to be submitted to NEPOMUK
+# Addition to nepomuk
 nfo:lastPlayedPosition a rdf:Property ;
         rdfs:comment "Position in the media (in seconds) where the play was paused. Positive number, being 0 the beginning of the media." ;
         rdfs:label "last played position" ;
@@ -1004,7 +1010,7 @@ nfo:lastPlayedPosition a rdf:Property ;
         rdfs:domain nfo:Media ;
         rdfs:range xsd:integer .
 
-# Bug upstream: http://sourceforge.net/apps/trac/oscaf/ticket/123
+# Addition to nepomuk
 nfo:audioOffset a rdf:Property;
         rdfs:label "Time offset within media container (seconds)" ;
         rdfs:comment "Specifies the start offset of this resource within a larger file, such as a single song within a recording of a radio broadcast or a CD rip.";
@@ -1013,12 +1019,13 @@ nfo:audioOffset a rdf:Property;
         rdfs:range xsd:double.
 
 
-# Regions on images. These class and props need to be submitted to NEPOMUK
+# Addition to nepomuk
 nfo:RegionOfInterest a rdfs:Class;
         rdfs:label "Region of Interest";
         rdfs:comment "Area on an image with relevant content. Following the spec in http://www.metadataworkinggroup.org";
         rdfs:subClassOf nie:InformationElement.
 
+# Addition to nepomuk
 nfo:regionOfInterestX a rdf:Property;
         rdfs:label "Region of interest X";
         rdfs:comment "Coordinate X where the region starts. It is normalized (values between 0 and 1) to the width of the picture. Starting in the upper left corner.";
@@ -1026,6 +1033,7 @@ nfo:regionOfInterestX a rdf:Property;
         rdfs:domain nfo:RegionOfInterest ;
         rdfs:range xsd:double.
 
+# Addition to nepomuk
 nfo:regionOfInterestY a rdf:Property;
         rdfs:label "Region of interest Y";
         rdfs:comment "Coordinate y where the region starts. It is normalized (values between 0 and 1) to the height of the picture. Starting in the upper left corner.";
@@ -1033,6 +1041,7 @@ nfo:regionOfInterestY a rdf:Property;
         rdfs:domain nfo:RegionOfInterest ;
         rdfs:range xsd:double.
 
+# Addition to nepomuk
 nfo:regionOfInterestWidth a rdf:Property;
         rdfs:label "Region of interest width";
         rdfs:comment "Width of the region. It is normalized (values between 0 and 1) to the total width of the picture.";
@@ -1040,6 +1049,7 @@ nfo:regionOfInterestWidth a rdf:Property;
         rdfs:domain nfo:RegionOfInterest ;
         rdfs:range xsd:double.
 
+# Addition to nepomuk
 nfo:regionOfInterestHeight a rdf:Property;
         rdfs:label "Region of interest height";
         rdfs:comment "Height of the region. It is normalized (values between 0 and 1) to the total height of the picture.";
@@ -1047,6 +1057,7 @@ nfo:regionOfInterestHeight a rdf:Property;
         rdfs:domain nfo:RegionOfInterest ;
         rdfs:range xsd:double.
 
+# Addition to nepomuk
 nfo:RegionOfInterestContent a rdfs:Class;
         rdfs:label "Region of interest type";
         rdfs:comment "Content in the area. There is a predefined set of contents in the spec: http://www.metadataworkinggroup.org";
@@ -1058,6 +1069,7 @@ nfo:roi-content-focus a nfo:RegionOfInterestContent .
 nfo:roi-content-barcode a nfo:RegionOfInterestContent .
 nfo:roi-content-undefined a nfo:RegionOfInterestContent .
 
+# Addition to nepomuk
 nfo:regionOfInterestType a rdf:Property;
         rdfs:label "Region of interest type";
         rdfs:comment "The content of a region can be one of the predefined types in the spec";
@@ -1065,12 +1077,14 @@ nfo:regionOfInterestType a rdf:Property;
         rdfs:domain nfo:RegionOfInterest ;
         rdfs:range nfo:RegionOfInterestContent .
 
+# Addition to nepomuk
 nfo:hasRegionOfInterest a rdf:Property;
         rdfs:label "Has region or interest";
         rdfs:comment "Link an element with a defined region";
         rdfs:domain nfo:Image ;
         rdfs:range nfo:RegionOfInterest.
 
+# Addition to nepomuk
 nfo:roiRefersTo a rdf:Property;
         rdfs:label "Region of interest refers to" ;
         rdfs:comment "Link to an item that is represented in the region. The 'type' of the region can give a clue of what exact content is linked in this property";

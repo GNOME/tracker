@@ -11,10 +11,12 @@ nao: a tracker:Namespace, tracker:Ontology ;
 	tracker:lastModified "2010-12-25T16:00:00Z" .
 
 nao:Tag a rdfs:Class ;
+	rdfs:comment "Represents a generic tag" ;
 	rdfs:subClassOf rdfs:Resource ;
 	tracker:notify true .
 
 nao:prefLabel a rdf:Property ;
+	rdfs:comment "A preferred label for a resource" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nao:Tag ;
 	rdfs:range xsd:string ;
@@ -32,17 +34,20 @@ nao:description a rdf:Property ;
 	tracker:weight 3 .
 
 nao:hasTag a rdf:Property ;
+	rdfs:comment "Defines an existing tag for a resource" ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range rdfs:Resource ;
 	tracker:writeback true ;
 	tracker:indexed true .
 
 nao:identifier a rdf:Property ;
+	rdfs:comment "Defines a generic identifier for a resource" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string .
 
 nao:numericRating a rdf:Property ;
+	rdfs:comment "Annotation for a resource in the form of a numeric rating (float value), allowed values are between 1 and 10 whereas 0 is interpreted as not set" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:double .

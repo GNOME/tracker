@@ -15,22 +15,24 @@ nmm: a tracker:Namespace, tracker:Ontology ;
 
 nmm:MusicPiece a rdfs:Class ;
 	rdfs:label "Music" ;
+	rdfs:comment "Used to assign music-specific properties such as BPM to video and audio" ;
 	tracker:notify true ;
 	tracker:domainIndex nie:title ;
 	rdfs:subClassOf nfo:Media .
 
 nmm:MusicAlbum a rdfs:Class ;
 	rdfs:label "Music album" ;
+	rdfs:comment "The music album as provided by the publisher. Not to be confused with media lists or collections" ;
 	tracker:notify true ;
 	tracker:domainIndex nie:title ;
 	rdfs:subClassOf nfo:MediaList .
 
-# Added Dec 1 2010
+# Addition to nepomuk
 nmm:MusicAlbumDisc a rdfs:Class ;
 	rdfs:label "Music album Disc" ;
 	rdfs:subClassOf nie:InformationElement .
 
-# Added Dec 1 2010
+# Addition to nepomuk
 nmm:albumDiscAlbum a rdf:Property ;
 	rdfs:label "album disc's album" ;
 	rdfs:comment "Album of the disc" ;
@@ -38,28 +40,53 @@ nmm:albumDiscAlbum a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicAlbumDisc .
 
+# Addition to nepomuk
 nmm:SynchronizedText a rdfs:Class ;
 	rdfs:label "Synchronized text (use nie:language to set the language). Valid for subtitles and lyrics" ;
 	rdfs:subClassOf nfo:PlainTextDocument .
 
+# Addition to nepomuk
 nmm:Video a rdfs:Class ;
 	rdfs:label "Video" ;
 	tracker:notify true ;
 	rdfs:subClassOf nfo:Video ;
 	rdfs:subClassOf nfo:Audio .
 
+# Addition to nepomuk
 nmm:Artist a rdfs:Class ;
 	rdfs:label "Artist" ;
 	rdfs:comment "An artist." ;
 	tracker:notify true ;
 	rdfs:subClassOf nie:InformationElement , nco:Role .
 
+# Addition to nepomuk
 nmm:Playlist a rdfs:Class ;
 	rdfs:label "Media playlist" ;
 	rdfs:comment "Specific class to split MediaList in Albums and playlists." ;
 	tracker:notify true ;
 	rdfs:subClassOf nfo:MediaList .
 
+nmm:Movie a rdfs:Class ;
+	rdfs:label "Movie" ;
+	rdfs:comment "A Movie" ;
+	rdfs:subClassOf nie:InformationElement, nfo:Media, nfo:Video, nfo:Visual .
+
+nmm:TVSeason a rdfs:Class ;
+	rdfs:label "TV Season" ;
+	rdfs:comment "A season of a TV show" ;
+	rdfs:subClassOf nie:InformationElement .
+
+nmm:TVSeries a rdfs:Class ;
+	rdfs:label "TV Series" ;
+	rdfs:comment "A TV Series has multiple seasons and episodes" ;
+	rdfs:subClassOf nie:InformationElement .
+
+nmm:TVShow a rdfs:Class ;
+	rdfs:label "TV Show" ;
+	rdfs:comment "A TV show" ;
+	rdfs:subClassOf nie:InformationElement, nfo:Media, nfo:Video, nfo:Visual .
+
+# Addition to nepomuk
 nmm:artistName a rdf:Property ;
 	rdfs:label "fullname" ;
 	rdfs:comment "Name of the artist" ;
@@ -82,6 +109,7 @@ nmm:musicAlbum a rdf:Property ;
 	tracker:indexed true ;
 	tracker:weight 6 .
 
+# Addition to nepomuk
 nmm:musicAlbumDisc a rdf:Property ;
 	rdfs:label "is part of album disc" ;
 	rdfs:comment "album disc the music belongs to" ;
@@ -90,6 +118,7 @@ nmm:musicAlbumDisc a rdf:Property ;
 	rdfs:domain nmm:MusicPiece ;
 	rdfs:range nmm:MusicAlbumDisc .
 
+# Addition to nepomuk.
 # Cardinality could be > 1 if we create one for album collections
 nmm:albumArtist a rdf:Property ;
 	rdfs:label "artist" ;
@@ -135,6 +164,7 @@ nmm:lyricist a rdf:Property ;
 	rdfs:range nmm:Artist ;
 	tracker:weight 4 .
 
+# Addition to nepomuk
 nmm:lyrics a rdf:Property ;
 	rdfs:label "File with the lyrics for the music piece" ;
 	rdfs:domain nmm:MusicPiece ;
@@ -147,6 +177,7 @@ nmm:trackNumber a rdf:Property ;
 	rdfs:domain nmm:MusicPiece ;
 	rdfs:range xsd:integer .
 
+# Addition to nepomuk
 nmm:isForHearingImpaired a rdf:Property ;
 	rdfs:label "Is for hearing-impaired" ;
 	rdfs:comment "Does text stream contain helper tags for hearing-impaired such as &lt;steps in hallway&gt;" ;
@@ -184,17 +215,7 @@ nmm:artwork a rdf:Property ;
 	rdfs:range nfo:Image ;
 	rdfs:subPropertyOf nfo:depiction .
 
-nmm:albumTitle a rdf:Property ;
-	rdfs:label "Title" ;
-	rdfs:comment "nmm:albumTitle is deprecated, use nie:title instead" ;
-	rdfs:subPropertyOf nie:title ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain nmm:MusicAlbum ;
-	rdfs:range xsd:string ;
-	tracker:deprecated true ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 6 .
-
+# Addition to nepomuk
 nmm:albumDuration a rdf:Property ;
 	rdfs:label "Album duration" ;
 	rdfs:comment "Duration of the album" ;
@@ -223,32 +244,14 @@ nmm:setNumber a rdf:Property ;
 	rdfs:domain nmm:MusicAlbumDisc ;
 	rdfs:range xsd:integer .
 
-# This property doesn't make sense... it is the other way around
-# From the list ot the item, not from the item to the list
-nmm:videoAlbum a rdf:Property ;
-	rdfs:label "Album" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain nmm:Video ;
-	rdfs:range nfo:MediaList .
-
-nmm:isSeries a rdf:Property ;
-	rdfs:label "Is series" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain nmm:Video ;
-	rdfs:range xsd:boolean .
-
-nmm:season a rdf:Property ;
-	rdfs:label "Season" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain nmm:Video ;
-	rdfs:range xsd:integer .
-
 nmm:episodeNumber a rdf:Property ;
 	rdfs:label "Episode number" ;
+	rdfs:comment "Episode number of a TV show" ;
 	nrl:maxCardinality 1 ;
-	rdfs:domain nmm:Video ;
+	rdfs:domain nmm:TVShow ;
 	rdfs:range xsd:integer .
 
+# Addition to nepomuk
 nmm:runTime a rdf:Property ;
 	rdfs:label "Run time" ;
 	nrl:maxCardinality 1 ;
@@ -257,16 +260,19 @@ nmm:runTime a rdf:Property ;
 
 nmm:synopsis a rdf:Property ;
 	rdfs:label "Synopsis" ;
+	rdfs:comment "Long form description of video content (plot, premise, etc.)" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Video ;
 	rdfs:range xsd:string .
 
+# Addition to nepomuk
 nmm:MPAARating a rdf:Property ;
 	rdfs:label "MPAA Rating" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Video ;
 	rdfs:range xsd:string .
 
+# Addition to nepomuk
 nmm:category a rdf:Property ;
 	rdfs:label "Category" ;
 	nrl:maxCardinality 1 ;
@@ -289,6 +295,7 @@ nmm:director a rdf:Property ;
 	rdfs:range nmm:Artist ;
 	tracker:weight 4 .
 
+# Addition to nepomuk, it has nmm:producer though
 nmm:producedBy a rdf:Property ;
 	rdfs:label "Produced by" ;
 	nrl:maxCardinality 1 ;
@@ -296,30 +303,35 @@ nmm:producedBy a rdf:Property ;
 	rdfs:range nmm:Artist ;
 	tracker:weight 3 .
 
+# Addition to nepomuk
 nmm:leadActor a rdf:Property ;
 	rdfs:label "Lead actor" ;
 	rdfs:domain nmm:Video ;
 	rdfs:range nmm:Artist ;
 	tracker:weight 4 .
 
+# Addition to nepomuk
 nmm:hasSubtitle a rdf:Property ;
 	rdfs:label "Has subtitle" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Video ;
 	rdfs:range xsd:boolean .
 
+# Addition to nepomuk
 nmm:subtitle a rdf:Property ;
 	rdfs:label "Subtitle file relevant for the video" ;
 	rdfs:domain nmm:Video ;
 	rdfs:range nmm:SynchronizedText ;
 	tracker:weight 5 .
 
+# Addition to nepomuk
 nmm:isContentEncrypted a rdf:Property ;
 	rdfs:label "Is content encrypted FIXME: defined already in IE in this ontology!" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Video ;
 	rdfs:range xsd:boolean .
 
+# Addition to nepomuk
 nmm:skipCounter a rdf:Property ;
 	rdfs:label "Increase if the media is skip while playing" ;
 	nrl:maxCardinality 1 ;
@@ -328,12 +340,14 @@ nmm:skipCounter a rdf:Property ;
 
 ## Image ontology
 
+# Addition to nepomuk
 nmm:ImageList a rdfs:Class ;
 	rdfs:subClassOf nfo:MediaList ;
 	rdfs:label "Image album" ;
 	tracker:notify true ;
 	rdfs:comment "An album of images" .
 
+# Addition to nepomuk
 nmm:Photo a rdfs:Class ;
 	rdfs:subClassOf nfo:Image ;
 	rdfs:label "Photo" ;
@@ -546,3 +560,53 @@ nmm:uPnPShared a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:Media ;
 	rdfs:range xsd:boolean .
+
+nmm:hasSeasonEpisode a rdf:Property ;
+	rdfs:label "whether an episode belongs to this season" ;
+	rdfs:comment "Relates a TV Show season to its episodes" ;
+	rdfs:subPropertyOf nie:hasLogicalPart ;
+	rdfs:domain nmm:TVSeason ;
+	rdfs:range nmm:TVShow .
+
+nmm:seasonNumber a rdf:Property ;
+	rdfs:label "Season number" ;
+	rdfs:comment "The number of a season" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nmm:TVSeason ;
+	rdfs:range xsd:integer .
+
+nmm:seasonOf a rdf:Property ;
+	rdfs:label "Series that the season belongs to" ;
+	rdfs:comment "Relates a TV Season to its series" ;
+	rdfs:subPropertyOf nie:isLogicalPartOf ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nmm:TVSeason ;
+	rdfs:range nmm:TVSeries .
+
+nmm:hasEpisode a rdf:Property ;
+	rdfs:label "Episodes in a TV series" ;
+	rdfs:comment "A TVSeries has many episodes" ;
+	rdfs:domain nmm:TVSeries ;
+	rdfs:range nmm:TVShow .
+
+nmm:hasSeason a rdf:Property ;
+	rdfs:label "Seasons in a TV series" ;
+	rdfs:comment "Relates a TV Series to its seasons" ;
+	rdfs:subPropertyOf nie:hasLogicalPart ;
+	rdfs:domain nmm:TVSeries ;
+	rdfs:range nmm:TVSeason .
+
+nmm:isPartOfSeason a rdf:Property ;
+	rdfs:label "Season that the episode belongs to" ;
+	rdfs:comment "Relates a TV Show to its season" ;
+	rdfs:subPropertyOf nie:isLogicalPartOf ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nmm:TVShow ;
+	rdfs:range nmm:TVSeason .
+
+nmm:series a rdf:Property ;
+	rdfs:label "Series of a TV show" ;
+	rdfs:comment "Relates a TV Show to its TV series" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nmm:TVShow ;
+	rdfs:range nmm:TVSeries .

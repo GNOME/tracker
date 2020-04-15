@@ -17,14 +17,17 @@ rdfs:Resource a rdfs:Class ;
 
 rdfs:Class a rdfs:Class ;
 	rdfs:label "Class" ;
+	rdfs:comment "The class of classes" ;
 	rdfs:subClassOf rdfs:Resource .
 
 rdf:Property a rdfs:Class ;
 	rdfs:label "Property" ;
+	rdfs:comment "The class of RDF properties" ;
 	rdfs:subClassOf rdfs:Resource .
 
 rdfs:Literal a rdfs:Class ;
 	rdfs:label "Literal" ;
+	rdfs:comment "The class of literal values, eg. textual strings and integers" ;
 	rdfs:subClassOf rdfs:Resource .
 
 rdfs:Datatype a rdfs:Class ;
@@ -39,32 +42,39 @@ rdf:langString a rdfs:Class, rdfs:Datatype ;
 
 rdf:type a rdf:Property ;
 	rdfs:domain rdfs:Resource ;
+	rdfs:comment "The subject is an instance of a class" ;
 	rdfs:range rdfs:Class .
 
 rdfs:subClassOf a rdf:Property ;
+	rdfs:comment "The subject is a subclass of a class" ;
 	rdfs:domain rdfs:Class ;
 	rdfs:range rdfs:Class .
 
 rdfs:subPropertyOf a rdf:Property ;
+	rdfs:comment "The subject is a subproperty of a property" ;
 	rdfs:domain rdf:Property ;
 	rdfs:range rdf:Property .
 
 rdfs:comment a rdf:Property ;
+	rdfs:comment "A description of the subject resource" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string .
 
 rdfs:label a rdf:Property ;
+	rdfs:comment "A human-readable name for the subject" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string .
 
 rdfs:domain a rdf:Property ;
+	rdfs:comment "A domain of the subject property" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range rdfs:Resource .
 
 rdfs:range a rdf:Property ;
+	rdfs:comment "A range of the subject property" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range rdfs:Class .
@@ -99,6 +109,7 @@ tracker:Namespace a rdfs:Class ;
 
 tracker:Ontology a rdfs:Class ;
 	rdfs:label "Ontology" ;
+	rdfs:comment "An ontology" ;
 	rdfs:subClassOf rdfs:Resource .
 
 tracker:lastModified a rdf:Property ;
@@ -109,59 +120,55 @@ tracker:lastModified a rdf:Property ;
 	rdfs:range xsd:dateTime .
 
 tracker:prefix a rdf:Property ;
+	rdfs:label "Base prefix of the subject namespace" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain tracker:Namespace ;
 	rdfs:range xsd:string .
 
 tracker:domainIndex a rdf:Property ;
+	rdfs:comment "Property is a domain index for the subject class" ;
 	rdfs:domain rdfs:Class ;
 	rdfs:range rdf:Property .
 
 tracker:indexed a rdf:Property ;
+	rdfs:comment "Whether a property has an index" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range xsd:boolean .
 
 tracker:secondaryIndex a rdf:Property ;
+	rdfs:comment "Whether subject and object properties share an index" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range rdf:Property .
 
 tracker:fulltextIndexed a rdf:Property ;
+	rdfs:comment "Whether the property is full-text indexed" ;
 	nrl:maxCardinality 1 ;
-	rdfs:domain rdf:Property ;
-	rdfs:range xsd:boolean .
-
-tracker:fulltextNoLimit a rdf:Property ;
-	nrl:maxCardinality 1 ;
-	rdfs:comment "tracker:fulltextNoLimit is deprecated, no word length limits are imposed on FTS" ;
 	rdfs:domain rdf:Property ;
 	rdfs:range xsd:boolean .
 
 tracker:weight a rdf:Property ;
+	rdfs:comment "Property weight on full-text search relevance" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range xsd:integer .
 
 tracker:added a rdf:Property ;
+	rdfs:comment "Time of insertion of the resource" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:dateTime ;
 	tracker:indexed true .
 
-# implicitly updated modification time
 tracker:modified a rdf:Property ;
+	rdfs:comment "Modification sequence number" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:integer .
 
-# used to track resources that have been partially restored and require reextraction
-tracker:damaged a rdf:Property ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdfs:Resource ;
-	rdfs:range xsd:boolean .
-
 tracker:notify a rdf:Property ;
+	rdfs:comment "Whether resources of this class emits notifications on changes" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Class ;
 	rdfs:range xsd:boolean .
