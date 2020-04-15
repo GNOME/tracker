@@ -66,6 +66,26 @@ nmm:Playlist a rdfs:Class ;
 	tracker:notify true ;
 	rdfs:subClassOf nfo:MediaList .
 
+nmm:Movie a rdfs:Class ;
+	rdfs:label "Movie" ;
+	rdfs:comment "A Movie" ;
+	rdfs:subClassOf nie:InformationElement, nfo:Media, nfo:Video, nfo:Visual .
+
+nmm:TVSeason a rdfs:Class ;
+	rdfs:label "TV Season" ;
+	rdfs:comment "A season of a TV show" ;
+	rdfs:subClassOf nie:InformationElement .
+
+nmm:TVSeries a rdfs:Class ;
+	rdfs:label "TV Series" ;
+	rdfs:comment "A TV Series has multiple seasons and episodes" ;
+	rdfs:subClassOf nie:InformationElement .
+
+nmm:TVShow a rdfs:Class ;
+	rdfs:label "TV Show" ;
+	rdfs:comment "A TV show" ;
+	rdfs:subClassOf nie:InformationElement, nfo:Media, nfo:Video, nfo:Visual .
+
 # Addition to nepomuk
 nmm:artistName a rdf:Property ;
 	rdfs:label "fullname" ;
@@ -233,25 +253,11 @@ nmm:videoAlbum a rdf:Property ;
 	rdfs:domain nmm:Video ;
 	rdfs:range nfo:MediaList .
 
-# Addition to nepomuk
-nmm:isSeries a rdf:Property ;
-	rdfs:label "Is series" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain nmm:Video ;
-	rdfs:range xsd:boolean .
-
-# Addition to nepomuk
-nmm:season a rdf:Property ;
-	rdfs:label "Season" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain nmm:Video ;
-	rdfs:range xsd:integer .
-
-# Nepomuk sets this property in domain of nmm:TVShow
 nmm:episodeNumber a rdf:Property ;
 	rdfs:label "Episode number" ;
+	rdfs:comment "Episode number of a TV show" ;
 	nrl:maxCardinality 1 ;
-	rdfs:domain nmm:Video ;
+	rdfs:domain nmm:TVShow ;
 	rdfs:range xsd:integer .
 
 # Addition to nepomuk
@@ -563,3 +569,53 @@ nmm:uPnPShared a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:Media ;
 	rdfs:range xsd:boolean .
+
+nmm:hasSeasonEpisode a rdf:Property ;
+	rdfs:label "whether an episode belongs to this season" ;
+	rdfs:comment "Relates a TV Show season to its episodes" ;
+	rdfs:subPropertyOf nie:hasLogicalPart ;
+	rdfs:domain nmm:TVSeason ;
+	rdfs:range nmm:TVShow .
+
+nmm:seasonNumber a rdf:Property ;
+	rdfs:label "Season number" ;
+	rdfs:comment "The number of a season" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nmm:TVSeason ;
+	rdfs:range xsd:integer .
+
+nmm:seasonOf a rdf:Property ;
+	rdfs:label "Series that the season belongs to" ;
+	rdfs:comment "Relates a TV Season to its series" ;
+	rdfs:subPropertyOf nie:isLogicalPartOf ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nmm:TVSeason ;
+	rdfs:range nmm:TVSeries .
+
+nmm:hasEpisode a rdf:Property ;
+	rdfs:label "Episodes in a TV series" ;
+	rdfs:comment "A TVSeries has many episodes" ;
+	rdfs:domain nmm:TVSeries ;
+	rdfs:range nmm:TVShow .
+
+nmm:hasSeason a rdf:Property ;
+	rdfs:label "Seasons in a TV series" ;
+	rdfs:comment "Relates a TV Series to its seasons" ;
+	rdfs:subPropertyOf nie:hasLogicalPart ;
+	rdfs:domain nmm:TVSeries ;
+	rdfs:range nmm:TVSeason .
+
+nmm:isPartOfSeason a rdf:Property ;
+	rdfs:label "Season that the episode belongs to" ;
+	rdfs:comment "Relates a TV Show to its season" ;
+	rdfs:subPropertyOf nie:isLogicalPartOf ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nmm:TVShow ;
+	rdfs:range nmm:TVSeason .
+
+nmm:series a rdf:Property ;
+	rdfs:label "Series of a TV show" ;
+	rdfs:comment "Relates a TV Show to its TV series" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nmm:TVShow ;
+	rdfs:range nmm:TVSeries .
