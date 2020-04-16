@@ -694,12 +694,19 @@ print_ontology_class (Ontology      *ontology,
 	g_fprintf (f, "<refsect2 role='rdf-class' id='%s'>\n", id);
 	g_fprintf (f, "<title>%s</title>\n", name);
 
-	g_fprintf (f, "<refsect3 id='%s.description'>\n", id);
-	g_fprintf (f, "  <title>Description</title>\n");
 	if (klass->description) {
-		g_fprintf (f, "  <para>%s</para>", klass->description);
+		g_fprintf (f, "<refsect3 id='%s.description'>\n", id);
+		g_fprintf (f, "  <title>Description</title>\n");
+		g_fprintf (f, "  %s", klass->description);
+		g_fprintf (f, "</refsect3>\n");
 	}
-	g_fprintf (f, "</refsect3>\n");
+
+	if (klass->specification) {
+		g_fprintf (f, "<refsect3 id='%s.specification'>\n", id);
+		g_fprintf (f, "  <title>Specification</title>\n");
+		g_fprintf (f, "  <ulink url=\"%s\" />", klass->specification);
+		g_fprintf (f, "</refsect3>\n");
+	}
 
 	print_class_hierarchy (f, klass, ontology);
 	print_predefined_instances (f, klass, ontology);

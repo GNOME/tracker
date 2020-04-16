@@ -26,6 +26,7 @@ G_BEGIN_DECLS
 
 typedef struct {
 	gchar *classname;
+	gchar *specification;
 	GList *superclasses;
 	GList *subclasses;
 	GList *in_domain_of;
@@ -38,6 +39,7 @@ typedef struct {
 
 typedef struct {
 	gchar *propertyname;
+	gchar *specification;
 	GList *type;
 	GList *domain;
 	GList *range;

@@ -39,6 +39,7 @@
 
 /* #define TRACKER_NAMESPACE "http://www.tracker-project.org/ontologies/tracker#Namespace" */
 #define TRACKER_NS "http://www.tracker-project.org/ontologies/tracker#"
+#define TRACKER_SPECIFICATION TRACKER_NS "specification"
 #define TRACKER_NOTIFY TRACKER_NS "notify"
 #define TRACKER_FTS_INDEXED TRACKER_NS "fulltextIndexed"
 #define TRACKER_FTS_WEIGHT TRACKER_NS "weight"
@@ -180,6 +181,22 @@ load_in_memory (Ontology    *ontology,
 				prop->description = g_strdup (turtle_object);
 			} else {
 				g_error ("Error in comment (%s doesn't exist)", turtle_subject);
+			}
+		}
+
+	} else if (!g_strcmp0 (turtle_predicate, TRACKER_SPECIFICATION)) {
+		OntologyClass *klass;
+		OntologyProperty *prop;
+
+		klass = g_hash_table_lookup (ontology->classes, turtle_subject);
+		if (klass) {
+			klass->specification = g_strdup (turtle_object);
+		} else {
+			prop = g_hash_table_lookup (ontology->properties, turtle_subject);
+			if (prop) {
+				prop->specification = g_strdup (turtle_object);
+			} else {
+				g_error ("Error in specification (%s doesn't exist)", turtle_subject);
 			}
 		}
 
