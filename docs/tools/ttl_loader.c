@@ -351,24 +351,25 @@ ttl_loader_new_ontology (void)
 	return ontology;
 }
 
-void
+gboolean
 ttl_loader_load_ontology (Ontology    *ontology,
-                          GFile       *ttl_file)
+                          GFile       *ttl_file,
+                          GError     **error)
 {
 	TrackerTurtleReader *reader;
 	const gchar *subject, *predicate, *object;
 	const gchar *base_url, *prefix;
 	GHashTableIter iter;
-	GError *error = NULL;
+	GError *inner_error = NULL;
 
-	g_return_if_fail (G_IS_FILE (ttl_file));
+	g_return_val_if_fail (G_IS_FILE (ttl_file), 0);
 
-	reader = tracker_turtle_reader_new_for_file (ttl_file, &error);
+	reader = tracker_turtle_reader_new_for_file (ttl_file, &inner_error);
 
-	while (error == NULL &&
+	while (inner_error == NULL &&
 	       tracker_turtle_reader_next (reader,
 	                                   &subject, &predicate, &object,
-	                                   NULL, &error)) {
+	                                   NULL, &inner_error)) {
 		load_in_memory (ontology, subject, predicate, object);
 	}
 
@@ -385,9 +386,11 @@ ttl_loader_load_ontology (Ontology    *ontology,
 
 	g_clear_object (&reader);
 
-	if (error) {
-		g_message ("Turtle parse error: %s", error->message);
-		g_error_free (error);
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	} else {
+		return TRUE;
 	}
 }
 

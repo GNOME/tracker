@@ -28,8 +28,9 @@ G_BEGIN_DECLS
 
 Ontology            * ttl_loader_new_ontology     (void);
 
-void                  ttl_loader_load_ontology    (Ontology    *ontology,
-						   GFile       *filename);
+gboolean              ttl_loader_load_ontology    (Ontology    *ontology,
+                                                   GFile       *filename,
+                                                   GError     **error);
 OntologyDescription * ttl_loader_load_description (GFile       *filename);
 
 void                  ttl_loader_load_prefix_from_description (Ontology            *ontology,

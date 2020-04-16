@@ -108,6 +108,8 @@ main (gint argc, gchar **argv)
 	GList *description_files, *l;
 	g_autoptr(GFile) ontology_file = NULL, output_file = NULL;
 	gchar *path;
+	gboolean success;
+	g_autoptr(GError) error = NULL;
 
 	/* Translators: this messagge will apper immediately after the  */
 	/* usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>     */
@@ -145,6 +147,7 @@ main (gint argc, gchar **argv)
 	g_mkdir_with_parents (path, 0755);
 	g_free (path);
 
+	success = TRUE;
 	for (l = description_files; l; l = l->next) {
 		Ontology *ontology = NULL;
 		g_autoptr(GFile) ttl_file = NULL, ttl_output_file = NULL;
@@ -159,7 +162,12 @@ main (gint argc, gchar **argv)
 
 		ontology = ttl_loader_new_ontology ();
 
-		ttl_loader_load_ontology (ontology, ttl_file);
+		success &= ttl_loader_load_ontology (ontology, ttl_file, &error);
+
+		if (error) {
+			g_printerr ("%s: Turtle parse error: %s\n", g_file_peek_path (ttl_file), error->message);
+			g_clear_error (&error);
+		}
 
 		ttl_xml_print (description, ontology, ttl_output_file, description_dir);
 
@@ -170,5 +178,5 @@ main (gint argc, gchar **argv)
 
 	g_option_context_free (context);
 
-	return 0;
+	return !(success);
 }
