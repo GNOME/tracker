@@ -240,17 +240,17 @@ print_toc_extra_properties (FILE       *f,
 	while (g_hash_table_iter_next (&iter, (gpointer*) &classname, (gpointer*) &props_for_class)) {
 		for (l = props_for_class; l; l = l->next) {
 			OntologyProperty *prop;
-			g_autofree char *basename = NULL, *class_id = NULL;
+			g_autofree char *basename = NULL, *prop_id = NULL;
 
 			prop = g_hash_table_lookup (ontology->properties, l->data);
 
 			basename = ttl_model_name_to_basename (ontology, prop->propertyname);
-			class_id = ttl_model_name_to_shortname (ontology, classname, "-");
+			prop_id = ttl_model_name_to_shortname (ontology, prop->propertyname, "-");
 
 			if (l != props_for_class) {
 				g_fprintf (f, ", ");
 			}
-			g_fprintf (f, "<link linkend=\"%s.%s.property.%s\">%s</link>", id, class_id, basename, basename);
+			g_fprintf (f, "<link linkend=\"%s\">%s</link>", prop_id, basename);
 		}
 	}
 

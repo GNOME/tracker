@@ -11,6 +11,10 @@ fixxref_args = [
     '--extra-dir=@0@'.format(join_paths(docpath, 'libtracker-sparql')),
 ]
 
+icon_images = files(
+  'images/icon-fulltextindexed.svg'
+)
+
 subdir('libtracker-sparql')
 
 subdir('ontology')
