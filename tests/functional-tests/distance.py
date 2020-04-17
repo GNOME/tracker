@@ -39,9 +39,9 @@ class TestDistanceFunctions (fixtures.TrackerSparqlDirectTest):
         for lat, log in POINT_COORDS:
             insert = """
             INSERT {
-            <%s> a mlo:GeoPoint ;
-                mlo:longitude %d ;
-                mlo:latitude %d .                
+            <%s> a slo:GeoLocation ;
+                slo:longitude %d ;
+                slo:latitude %d .
             }
             """ % ("point://test/point/" + str(self.counter), log, lat)
             self.tracker.update(insert)
@@ -65,13 +65,13 @@ class TestDistanceFunctions (fixtures.TrackerSparqlDirectTest):
         query_1_to_2 = """
         SELECT xsd:integer(tracker:%s-distance(?lat1,?lat2,?lon1,?lon2))
         WHERE {
-          <point://test/point/%d> a mlo:GeoPoint ;
-             mlo:latitude ?lat1 ;
-             mlo:longitude ?lon1 .
+          <point://test/point/%d> a slo:GeoLocation ;
+             slo:latitude ?lat1 ;
+             slo:longitude ?lon1 .
 
-          <point://test/point/%d> a mlo:GeoPoint ;
-             mlo:latitude ?lat2 ;
-             mlo:longitude ?lon2 .
+          <point://test/point/%d> a slo:GeoLocation ;
+             slo:latitude ?lat2 ;
+             slo:longitude ?lon2 .
         }
         """ % (sum_func, id1, id2)
         result = self.tracker.query(query_1_to_2)

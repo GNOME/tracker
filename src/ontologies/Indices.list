@@ -35,45 +35,6 @@
 * nie:contentCreated domainIndex for nfo:Visual
   - Used to improve performance of ORDER BY on nie:contentCreated
 
-34-nmo:
-* nmo:from:
-  - For use cases where fts:match needs to be done against the assosiated
-  contacts in addition to the class itself
-
-* nmo:to:
-  - For use cases where fts:match needs to be done against the assosiated
-  contacts in addition to the class itself
-
-
-* nmo:sender:
-  - ?
-
-* nmo:sentDate:
-  - Used for sorting messages when displaying all messages (or rather the last N).
-  - Domain index for nmo:Call used for linear call history.
-
-* nmo:receivedDate:
-  - Secondary index for nmo:communicationChannel to display last N messages on
-  a specific channel.
-
-* nmo:conversation:
-  - Used for retrieving all messages of a specific conversation.
-
-* nmo:communicationChannel:
-  - Used for displaying all conversations on a specific channel (for example,
-  all conversations with a specific contact).
-  - Secondary index on nmo:receivedDate
-
-* nmo:lastMessageDate:
-  - Used for sorting the list of all channels by time of last message.
-
-* nmo:hasParticipant:
-  - Used for retrieving the communication channel for a specific contact. Used
-  when inserting new messages, for example.
-
-* maemo:localPhoneNumber:
-  - For matching against the local part of the phone number
-
 38-nmm:
 * nmm:musicAlbum:
   - Used for retrieving songs on an album.
@@ -91,12 +52,3 @@
 
 * nie:title domainIndex for nmm:MusicPiece
   - Used to improve performance of ORDER BY on nie:title
-
-40-mlo:
-* mlo:location:
-  - Used for retrieving all content in some specific location
-
-* mlo:asPostalAddress:
-* mlo:asBoundingBox:
-* mlo:asGeoPoint:
-  - For matching location into coordinates

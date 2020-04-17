@@ -1,3 +1,0 @@
-SELECT ?boundary
-WHERE { ?x nmo:boundary ?boundary }
-ORDER BY ?boundary

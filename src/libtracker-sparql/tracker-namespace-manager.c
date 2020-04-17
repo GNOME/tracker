@@ -141,16 +141,13 @@ tracker_namespace_manager_get_default ()
 		tracker_namespace_manager_add_prefix (manager, "dc", TRACKER_PREFIX_DC);
 
 		tracker_namespace_manager_add_prefix (manager, "nrl", TRACKER_PREFIX_NRL);
-		tracker_namespace_manager_add_prefix (manager, "nmo", TRACKER_PREFIX_NMO);
 		tracker_namespace_manager_add_prefix (manager, "nie", TRACKER_PREFIX_NIE);
 		tracker_namespace_manager_add_prefix (manager, "nco", TRACKER_PREFIX_NCO);
 		tracker_namespace_manager_add_prefix (manager, "nao", TRACKER_PREFIX_NAO);
-		tracker_namespace_manager_add_prefix (manager, "nid3", TRACKER_PREFIX_NID3);
 		tracker_namespace_manager_add_prefix (manager, "nfo", TRACKER_PREFIX_NFO);
 
 		tracker_namespace_manager_add_prefix (manager, "slo", TRACKER_PREFIX_SLO);
 		tracker_namespace_manager_add_prefix (manager, "nmm", TRACKER_PREFIX_NMM);
-		tracker_namespace_manager_add_prefix (manager, "mlo", TRACKER_PREFIX_MLO);
 		tracker_namespace_manager_add_prefix (manager, "mfo", TRACKER_PREFIX_MFO);
 		tracker_namespace_manager_add_prefix (manager, "osinfo", TRACKER_PREFIX_OSINFO);
 
