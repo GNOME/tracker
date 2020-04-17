@@ -145,7 +145,6 @@ tracker_namespace_manager_get_default ()
 		tracker_namespace_manager_add_prefix (manager, "nie", TRACKER_PREFIX_NIE);
 		tracker_namespace_manager_add_prefix (manager, "nco", TRACKER_PREFIX_NCO);
 		tracker_namespace_manager_add_prefix (manager, "nao", TRACKER_PREFIX_NAO);
-		tracker_namespace_manager_add_prefix (manager, "nid3", TRACKER_PREFIX_NID3);
 		tracker_namespace_manager_add_prefix (manager, "nfo", TRACKER_PREFIX_NFO);
 
 		tracker_namespace_manager_add_prefix (manager, "slo", TRACKER_PREFIX_SLO);

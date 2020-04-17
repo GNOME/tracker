@@ -24,8 +24,6 @@ nepomuk = files(
     'nepomuk/35-ncal.ontology',
     'nepomuk/36-scal.description',
     'nepomuk/36-scal.ontology',
-    'nepomuk/37-nid3.description',
-    'nepomuk/37-nid3.ontology',
     'nepomuk/38-nmm.description',
     'nepomuk/38-nmm.ontology',
     'nepomuk/39-mto.description',

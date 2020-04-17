@@ -2,7 +2,6 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsl: <http://www.w3.org/1999/XSL/Transform#> .
-@prefix nid3: <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#> .
 @prefix nfo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#> .
 @prefix nmo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#> .
 @prefix nie: <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#> .
