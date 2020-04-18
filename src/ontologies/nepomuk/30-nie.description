@@ -9,7 +9,7 @@
 	dsc:author "Michael Sintek, DFKI, &lt;michael.sintek@dfki.de&gt;";
 	dsc:author "Ludger van Elst, DFKI, &lt;elst@dfki.uni-kl.de&gt;";
 	dsc:editor "Antoni Mylka, DFKI, &lt;antoni.mylka@dfki.de&gt;";
-	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/30-nie.ontology";
+	dsc:gitlog "hhttps://gitlab.gnome.org/GNOME/tracker/-/commits/master/src/ontologies/30-nie.ontology";
 	dsc:contributor "Evgeny 'phreedom' Egorochkin, KDE Strigi Developer, &lt;stexx@mail.ru&gt;";
 	dsc:contributor "Christiaan Fluit, Aduna, &lt;christiaan.fluit@aduna-software.com&gt;";
 

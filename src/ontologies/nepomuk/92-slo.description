@@ -7,7 +7,7 @@
 	dsc:author "Ivan Frade &lt;ivan.frade@nokia.com&gt;" ;
 	dsc:editor "Ivan Frade &lt;ivan.frade@nokia.com&gt;" ;
 
-	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/92-slo.ontology";
+	dsc:gitlog "hhttps://gitlab.gnome.org/GNOME/tracker/-/commits/master/src/ontologies/92-slo.ontology";
 
 	dsc:baseUrl "http://www.tracker-project.org/temp/slo#" ;
 	dsc:localPrefix "slo" ;

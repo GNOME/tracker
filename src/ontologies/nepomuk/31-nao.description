@@ -19,7 +19,7 @@
 	dsc:contributor "Julien Gaugaz, L3S, &lt;gaugaz@l3s.de&gt;";
 	dsc:contributor "Antoni Mylka, DFKI, &lt;antoni.mylka@dfki.de&gt;";
 
-	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/31-nao.ontology";
+	dsc:gitlog "hhttps://gitlab.gnome.org/GNOME/tracker/-/commits/master/src/ontologies/31-nao.ontology";
 	dsc:upstream "http://www.semanticdesktop.org/ontologies/nao/";
 
 	dsc:localPrefix "nao" ;
