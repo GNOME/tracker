@@ -31,17 +31,11 @@ OpenSuSE do automated whole-system testing that includes the GNOME desktop for t
 
 The following environment variables control logging from Tracker daemons:
 
+  * `G_MESSAGES_DEBUG`: controls log output from all GLib-based libraries
+    in the current process. Use `G_MESSAGES_DEBUG=Tracker` to see Tracker
+    related messages, or `G_MESSAGES_DEBUG=all` to see everything.
   * `TRACKER_DEBUG`: takes a comma-separated list of keywords to enable
     extra debugging output. Use the keyword 'help' for a list of keywords.
-  * `TRACKER_VERBOSITY`: takes a value of 1, 2 or 3 and causes increasing
-    amounts of log output from Tracker code to be written to stdout.
-  * `G_MESSAGES_DEBUG`: controls log output from GLib-based libraries that
-    are used in the Tracker process. Use `G_MESSAGES_DEBUG=all` for maximal
-    log output.
-
-Internally, Tracker will set `G_MESSAGES_DEBUG=Tracker` if `TRACKER_VERBOSITY`
-is set and `G_MESSAGES_DEBUG` is not set, to enable printing of its own log
-messages to stdout.
 
 You can set these variables when using `tracker-sandbox`, and when running the
 Tracker test suite. Note that Meson will not print log output from tests by

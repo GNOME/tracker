@@ -86,7 +86,7 @@ def environment_set_and_add_path(env, var, prefix, suffix):
     env[var] = full
 
 
-def create_sandbox(index_location, prefix=None, verbosity=0, dbus_config=None,
+def create_sandbox(index_location, prefix=None, dbus_config=None,
                    interactive=False):
     assert prefix is None or dbus_config is None
 
@@ -106,8 +106,6 @@ def create_sandbox(index_location, prefix=None, verbosity=0, dbus_config=None,
 
     # Preferences
     extra_env['G_MESSAGES_PREFIXED'] = 'all'
-
-    extra_env['TRACKER_VERBOSITY'] = str(verbosity)
 
     log.debug('Using prefix location "%s"' % prefix)
     log.debug('Using index location "%s"' % index_location)
@@ -188,9 +186,6 @@ def argument_parser():
                         help="run Tracker from the given install prefix. You "
                              "can run the system version of Tracker by "
                              "specifying --prefix=/usr")
-    parser.add_argument('-v', '--verbosity', default=None,
-                        choices=['0', '1', '2', '3', 'errors', 'minimal', 'detailed', 'debug'],
-                        help="show debugging info from Tracker processes")
     parser.add_argument('-i', '--index', metavar='DIR', action=expand_path,
                         default=default_index_location, dest='index_location',
                         help=f"directory to the index (default={default_index_location})")
@@ -212,16 +207,6 @@ def argument_parser():
     parser.add_argument('command', type=str, nargs='*', help="Command to run inside the shell")
 
     return parser
-
-
-def verbosity_as_int(verbosity):
-    verbosity_map = {
-        'errors': 0,
-        'minimal': 1,
-        'detailed': 2,
-        'debug': 3
-    }
-    return verbosity_map.get(verbosity, int(verbosity))
 
 
 def init_logging(debug_sandbox, debug_dbus):
@@ -353,16 +338,6 @@ def main():
             "Note that running Tracker from the build tree implies "
             "--dbus-config.")
 
-    if args.verbosity is None:
-        verbosity = verbosity_as_int(os.environ.get('TRACKER_VERBOSITY', 0))
-    else:
-        verbosity = verbosity_as_int(args.verbosity)
-        if 'TRACKER_VERBOSITY' in os.environ:
-            if verbosity != int(os.environ['TRACKER_VERBOSITY']):
-                raise RuntimeError("Incompatible values for TRACKER_VERBOSITY "
-                                   "from environment and from --verbosity "
-                                   "parameter.")
-
     if args.command is None and args.wait_for_miner is not None:
         raise RuntimeError("--wait-for-miner cannot be used when opening an "
                            "interactive shell.")
@@ -380,7 +355,7 @@ def main():
     interactive = not (args.command)
 
     # Set up environment variables and foo needed to get started.
-    sandbox = create_sandbox(index_location, args.prefix, verbosity,
+    sandbox = create_sandbox(index_location, args.prefix,
                              dbus_config=args.dbus_config,
                              interactive=interactive)
     config_set(sandbox)
