@@ -37,6 +37,7 @@ stages:
       echo
       echo "Test suite settings:"
       echo
+      echo "TRACKER_DEBUG: ${TRACKER_DEBUG}"
       echo "TRACKER_VERBOSITY: ${TRACKER_VERBOSITY}"
       echo "TRACKER_TESTS_VERBOSE: ${TRACKER_TESTS_VERBOSE}"
       echo "MESON_TEST_EXTRA_ARGS: ${MESON_TEST_EXTRA_ARGS}"

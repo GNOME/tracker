@@ -31,6 +31,8 @@ OpenSuSE do automated whole-system testing that includes the GNOME desktop for t
 
 The following environment variables control logging from Tracker daemons:
 
+  * `TRACKER_DEBUG`: takes a comma-separated list of keywords to enable
+    extra debugging output. Use the keyword 'help' for a list of keywords.
   * `TRACKER_VERBOSITY`: takes a value of 1, 2 or 3 and causes increasing
     amounts of log output from Tracker code to be written to stdout.
   * `G_MESSAGES_DEBUG`: controls log output from GLib-based libraries that

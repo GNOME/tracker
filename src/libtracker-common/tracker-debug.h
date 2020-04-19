@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008, Nokia <ivan.frade@nokia.com>
+ * Copyright (C) 2020, Sam Thursfield <sam@afuera.me.uk>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * Boston, MA  02110-1301, USA.
  */
 
-#ifndef __LIBTRACKER_COMMON_H__
-#define __LIBTRACKER_COMMON_H__
+#ifndef __TRACKER_DEBUG_H__
+#define __TRACKER_DEBUG_H__
 
 #if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
 #error "only <libtracker-common/tracker-common.h> must be included directly."
@@ -26,19 +26,29 @@
 
 #include <glib.h>
 
-#define __LIBTRACKER_COMMON_INSIDE__
+G_BEGIN_DECLS
 
-#include "tracker-date-time.h"
-#include "tracker-debug.h"
-#include "tracker-file-utils.h"
-#include "tracker-language.h"
-#include "tracker-log.h"
-#include "tracker-parser.h"
-#include "tracker-type-utils.h"
-#include "tracker-utils.h"
-#include "tracker-locale.h"
-#include "tracker-enum-types.h"
+typedef enum {
+  TRACKER_DEBUG_SQL_STATEMENTS  = 1 <<  1,
+} TrackerDebugFlag;
 
-#undef __LIBTRACKER_COMMON_INSIDE__
+#ifdef G_ENABLE_DEBUG
 
-#endif /* __LIBTRACKER_COMMON_H__ */
+#define TRACKER_DEBUG_CHECK(type) G_UNLIKELY (tracker_get_debug_flags () & TRACKER_DEBUG_##type)
+
+#define TRACKER_NOTE(type,action)                G_STMT_START {     \
+    if (TRACKER_DEBUG_CHECK (type))                                 \
+       { action; };                              } G_STMT_END
+
+#else /* !G_ENABLE_DEBUG */
+
+#define TRACKER_DEBUG_CHECK(type) 0
+#define TRACKER_NOTE(type, action)
+
+#endif /* G_ENABLE_DEBUG */
+
+guint tracker_get_debug_flags (void);
+
+G_END_DECLS
+
+#endif /* __TRACKER_DEBUG_H__ */
