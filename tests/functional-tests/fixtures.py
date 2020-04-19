@@ -53,7 +53,7 @@ def tracker_test_main():
     else:
         # Output some messages from D-Bus daemon to stderr by default. In practice,
         # only errors and warnings should be output here unless the environment
-        # contains G_MESSAGES_DEBUG= and/or TRACKER_VERBOSITY=1 or more.
+        # contains G_MESSAGES_DEBUG=.
         handler_stderr = logging.StreamHandler(stream=sys.stderr)
         handler_stderr.addFilter(logging.Filter('trackertestutils.dbusdaemon.stderr'))
         handler_stdout = logging.StreamHandler(stream=sys.stderr)

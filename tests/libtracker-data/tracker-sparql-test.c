@@ -488,8 +488,6 @@ main (int argc, char **argv)
 
 	setlocale (LC_COLLATE, "en_US.utf8");
 
-	tracker_log_init (0, NULL);
-
 	current_dir = g_get_current_dir ();
 	tests_data_dir = g_build_filename (current_dir, "sparql-test-data-XXXXXX", NULL);
 	g_free (current_dir);

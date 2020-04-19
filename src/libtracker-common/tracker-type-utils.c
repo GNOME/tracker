@@ -30,7 +30,6 @@
 
 #include <glib.h>
 
-#include "tracker-log.h"
 #include "tracker-utils.h"
 #include "tracker-type-utils.h"
 
