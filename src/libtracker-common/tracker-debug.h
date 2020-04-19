@@ -29,7 +29,8 @@
 G_BEGIN_DECLS
 
 typedef enum {
-  TRACKER_DEBUG_SQL_STATEMENTS  = 1 <<  1,
+  TRACKER_DEBUG_SQL_INDEXES     = 1 <<  1,
+  TRACKER_DEBUG_SQL_STATEMENTS  = 1 <<  2,
 } TrackerDebugFlag;
 
 #ifdef G_ENABLE_DEBUG
