@@ -23,6 +23,7 @@
 
 #ifdef G_ENABLE_DEBUG
 static const GDebugKey tracker_debug_keys[] = {
+  { "sql-indexes", TRACKER_DEBUG_SQL_INDEXES },
   { "sql-statements", TRACKER_DEBUG_SQL_STATEMENTS },
 };
 #endif /* G_ENABLE_DEBUG */
