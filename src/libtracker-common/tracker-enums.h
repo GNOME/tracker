@@ -30,12 +30,6 @@ typedef enum {
 } TrackerVerbosity;
 
 typedef enum {
-	TRACKER_SCHED_IDLE_ALWAYS,
-	TRACKER_SCHED_IDLE_FIRST_INDEX,
-	TRACKER_SCHED_IDLE_NEVER,
-} TrackerSchedIdle;
-
-typedef enum {
 	TRACKER_SERIALIZATION_FORMAT_SPARQL,
 	TRACKER_SERIALIZATION_FORMAT_TURTLE,
 	/* JSON and JSON_LD are treated as the same thing right now, but we could
