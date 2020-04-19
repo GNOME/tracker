@@ -67,9 +67,11 @@ add_project_arguments('-Wno-pointer-sign', language: 'c')
 
 add_project_arguments('-DTRACKER_COMPILATION',
                       '-DG_LOG_DOMAIN="Tracker"',
+                      '-DG_LOG_STRUCTURED=1',
                       language: 'c')
 add_project_arguments(['-D', 'TRACKER_COMPILATION'],
                       ['-D', 'G_LOG_DOMAIN="Tracker"'],
+                      ['-D', 'G_LOG_STRUCTURED=1'],
                       language: 'vala')
 
 debug_cflags = []
