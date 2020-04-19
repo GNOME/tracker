@@ -40,48 +40,4 @@
         <function><link linkend="tracker-sparql-connection-remote-new">tracker_sparql_connection_remote_new</link></function>.
     </para>
   </chapter>
-
-  <chapter id="tracker-overview-environment-variables">
-    <title>Environment Variables</title>
-
-    <para>
-      There are a number of environment variables which affect the way
-      that the libtracker-sparql library will do its work. Those
-      environment variables are described here.
-
-      <itemizedlist>
-	<listitem>
-	  <emphasis>TRACKER_USE_LOG_FILES</emphasis>
-	  <para>
-	    Don't just log to stdout and stderr, but to log files too
-	    which are kept in $HOME/.local/share/tracker/. This came
-	    into effect in 0.15.3 and 0.16.0. After this version of
-	    Tracker, logging to file (usually useful for debugging)
-	    can only be done by declaring this environment variable.
-	  </para>
-	</listitem>
-	<listitem>
-	  <emphasis>TRACKER_USE_CONFIG_FILES</emphasis>
-	  <para>
-	    Don't use GSettings, instead use a config file similar to
-	    how settings were saved in 0.10.x. That is, a file which
-	    is much like an .ini file. These are saved to
-	    $HOME/.config/tracker/
-	  </para>
-	</listitem>
-	<listitem>
-	  <emphasis>TRACKER_VERBOSITY</emphasis>
-	  <para>
-	    Lets you choose the log level for libtracker-sparql.
-	    configuration to control it. Values range
-	    from <emphasis>0</emphasis> to <emphasis>3</emphasis>,
-	    0=errors, 1=minimal, 2=detailed, 3=debug. By default it
-	    is <emphasis>0</emphasis>.
-	  </para>
-	</listitem>
-      </itemizedlist>
-    </para>
-
-  </chapter>
-
 </part>

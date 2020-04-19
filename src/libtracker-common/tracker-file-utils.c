@@ -38,7 +38,6 @@
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 
-#include "tracker-log.h"
 #include "tracker-file-utils.h"
 #include "tracker-type-utils.h"
 

@@ -61,12 +61,6 @@ namespace Tracker {
 		public static void save_directory_list (void *object, string property, GLib.KeyFile key_file, string group, string key);
 	}
 
-	[CCode (cheader_filename = "libtracker-common/tracker-common.h")]
-	namespace Log {
-		public bool init (int verbosity, out string used_filename);
-		public void shutdown ();
-	}
-
 	[CCode (cheader_filename = "libtracker-common/tracker-locale.h")]
 	namespace Locale {
 		public void sanity_check ();

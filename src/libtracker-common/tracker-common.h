@@ -32,7 +32,6 @@
 #include "tracker-debug.h"
 #include "tracker-file-utils.h"
 #include "tracker-language.h"
-#include "tracker-log.h"
 #include "tracker-parser.h"
 #include "tracker-type-utils.h"
 #include "tracker-utils.h"

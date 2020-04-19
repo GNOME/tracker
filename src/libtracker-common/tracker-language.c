@@ -28,7 +28,6 @@
 #include <libstemmer.h>
 #endif /* HAVE_LIBSTEMMER */
 
-#include "tracker-log.h"
 #include "tracker-language.h"
 
 typedef struct _TrackerLanguagePrivate TrackerLanguagePrivate;
