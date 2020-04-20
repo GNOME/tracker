@@ -37,6 +37,12 @@ The following environment variables control logging from Tracker daemons:
   * `TRACKER_DEBUG`: takes a comma-separated list of keywords to enable
     extra debugging output. Use the keyword 'help' for a list of keywords.
 
+    Options include:
+
+        - sql-indexes
+        - sql-statements
+        - miner-fs-events
+
 You can set these variables when using `tracker-sandbox`, and when running the
 Tracker test suite. Note that Meson will not print log output from tests by
 default, use `meson test --verbose` or `meson test --print-errorlogs` to
