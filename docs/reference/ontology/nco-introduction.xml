@@ -29,7 +29,7 @@
  <refsect2 id="nco-PostalAddressRepresentation">
    <title>Postal Address</title>
 
-   <para>Postal address class <link linkend="nco-PostalAddress">nco:PostalAddress</link> represents a point in the space defined by the usual street, number, postal code textual data. Most of its parameters come from the RFC 2426 section 3.2.1 with few extensions for more granular APIs (<link linkend="nco-PostalAddress.nco-county">nco:county</link> and <link linkend="nco-PostalAddress.nco-district">nco:district</link>)</para>
+   <para>Postal address class <link linkend="nco-PostalAddress">nco:PostalAddress</link> represents a point in the space defined by the usual street, number, postal code textual data. Most of its parameters come from the RFC 2426 section 3.2.1 with few extensions for more granular APIs (<link linkend="nco-county">nco:county</link> and <link linkend="nco-district">nco:district</link>)</para>
  </refsect2>
 
   <refsect2 id="nco-ImContactsRepresentations">

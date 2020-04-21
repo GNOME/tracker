@@ -23,8 +23,8 @@ ontology.
 
 <para>
 Both sides are linked using the
-property <link linkend="nie-DataObject.nie-interpretedAs">nie:interpretedAs</link> (and its reverse
-<link linkend="nie-InformationElement.nie-isStoredAs">nie:isStoredAs</link>), indicating the correspondence
+property <link linkend="nie-interpretedAs">nie:interpretedAs</link> (and its reverse
+<link linkend="nie-isStoredAs">nie:isStoredAs</link>), indicating the correspondence
 between the physical element and its interpretation. There is also a
 property to
 link <link linkend="nie-InformationElement">nie:InformationElement</link>s,
@@ -42,32 +42,32 @@ its album).
   </para>
   <variablelist>
     <varlistentry>
-      <term><link linkend="nie-InformationElement.nie-title">nie:title</link></term>
+      <term><link linkend="nie-title">nie:title</link></term>
       <listitem><para>Title or name or short text describing the item</para></listitem>
     </varlistentry>
 
     <varlistentry>
-      <term><link linkend="nie-InformationElement.nie-description">nie:description</link></term>
+      <term><link linkend="nie-description">nie:description</link></term>
       <listitem><para>More verbose comment about the element</para></listitem>
     </varlistentry>
 
     <varlistentry>
-      <term><link linkend="nie-InformationElement.nie-language">nie:language</link></term>
+      <term><link linkend="nie-language">nie:language</link></term>
       <listitem><para>To specify the language of the item.</para></listitem>
     </varlistentry>
 
     <varlistentry>
-      <term><link linkend="nie-InformationElement.nie-plainTextContent">nie:plainTextContent</link></term>
+      <term><link linkend="nie-plainTextContent">nie:plainTextContent</link></term>
       <listitem><para>Just the raw content of the file, if it makes sense as text.</para></listitem>
     </varlistentry>
 
     <varlistentry>
-      <term><link linkend="nie-InformationElement.nie-generator">nie:generator</link></term>
+      <term><link linkend="nie-generator">nie:generator</link></term>
       <listitem><para>Software/Agent that set/produced the information.</para></listitem>
     </varlistentry>
 
     <varlistentry>
-      <term><link linkend="nie-InformationElement.nie-usageCounter">nie:usageCounter</link></term>
+      <term><link linkend="nie-usageCounter">nie:usageCounter</link></term>
       <listitem><para>Count number of accesses to the information. It can be an
       indicator of relevance for advanced searches</para></listitem>
     </varlistentry>
@@ -79,7 +79,7 @@ its album).
 <para>There are few important dates for the life-cycle of a resource. These dates are properties of the nie:InformationElement class, and inherited for its subclasses:</para>
 <variablelist>
   <varlistentry>
-     <term><link linkend="nie-InformationElement.nie-informationElementDate">nie:informationElementDate</link></term>
+     <term><link linkend="nie-informationElementDate">nie:informationElementDate</link></term>
      <listitem>
        <para>This is an ''abstract'' property that act as superproperty of
        the other dates. Don't use it directly.</para>
@@ -87,27 +87,27 @@ its album).
   </varlistentry>
 
   <varlistentry>
-    <term><link linkend="nie-InformationElement.nie-contentLastModified">nie:contentLastModified</link></term>
+    <term><link linkend="nie-contentLastModified">nie:contentLastModified</link></term>
     <listitem>
       <para>Modification time of a resource. Usually the mtime of a local file, or information from the server for online resources.</para>
     </listitem>
   </varlistentry>
 
   <varlistentry>
-    <term><link linkend="nie-InformationElement.nie-contentCreated">nie:contentCreated</link></term>
+    <term><link linkend="nie-contentCreated">nie:contentCreated</link></term>
     <listitem>
       <para>Creation time of the content. If the contents is created by an application, the same application should set the value of this property. Note that this property can be undefined for resources in the filesystem because the creation time is not available in the most common filesystem formats.</para>
     </listitem>
   </varlistentry>
 
   <varlistentry>
-    <term><link linkend="nie-InformationElement.nie-contentAccessed">nie:contentAccessed</link></term>
+    <term><link linkend="nie-contentAccessed">nie:contentAccessed</link></term>
     <listitem>
       <para>For resources coming from the filesystem, this is the usual access time to the file. For other  kind of resources (online or virtual), the application accessing it should update its value.</para>
     </listitem>
     </varlistentry>
     <varlistentry>
-      <term><link linkend="nie-DataObject.nie-lastRefreshed">nie:lastRefreshed</link></term>
+      <term><link linkend="nie-lastRefreshed">nie:lastRefreshed</link></term>
       <listitem>
 	<para>.</para>
       </listitem>
@@ -123,8 +123,8 @@ its album).
  <listitem>Every file (local or remote) should generate one DataObject instance and an InformationElement instance.</listitem>
  <listitem>Even when Data Objects and Information Elements are completely different things, for efficiency reasons in Tracker we use the same URI for both of them.</listitem>
  <listitem>The URI will be an autogenerated ID, and the real location of the item (e.g. ''file://path/to/file.mp3'') is a property of the Data Object</listitem>
- <listitem>Every DataObject must have the property <link linkend="nie-DataObject.nie-url">nie:url</link>, that points to the location of the resource, and should be used by any program that wants to access it.</listitem>
- <listitem>There is a deprecated property in the ontology: <link linkend="nie-InformationElement.nie-isStoredAs">nie:isStoredAs</link> . We discourage its use in the code: in the best case it is a loopback to the nie:url value, but in general it can contain any value or not be set at all.</listitem>
+ <listitem>Every DataObject must have the property <link linkend="nie-url">nie:url</link>, that points to the location of the resource, and should be used by any program that wants to access it.</listitem>
+ <listitem>There is a deprecated property in the ontology: <link linkend="nie-isStoredAs">nie:isStoredAs</link> . We discourage its use in the code: in the best case it is a loopback to the nie:url value, but in general it can contain any value or not be set at all.</listitem>
 </orderedlist>
 
 <para>Here comes an example, for the image file /home/user/a.jpeg:</para>

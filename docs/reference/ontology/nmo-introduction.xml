@@ -10,13 +10,13 @@
   <sect2 id="nmo-message-core-class">
     <title>The Message class</title>
 
-    <para>The <link linkend="nmo-Message">nmo:Message</link> class is the common superclass for Emails, SMS, IM Messages, MMS (in NMO domain) and even Feed messages (defined in <link linkend="mfo-explanation">MFO ontology</link>). As such, it has the common properties for a 'Message' as an meaningful item in a communication: sender and receiver of the message, sent/received time, status of the message (read, answered and so on). It is a subclass of <link linkend="nie-InformationElement">nie:InformationElement</link> and from there inherits the <link linkend="nie-InformationElement.nie-plainTextContent">nie:plainTextContent</link> property (which, as its name states, contains the text of the message).
+    <para>The <link linkend="nmo-Message">nmo:Message</link> class is the common superclass for Emails, SMS, IM Messages, MMS (in NMO domain) and even Feed messages (defined in <link linkend="mfo-explanation">MFO ontology</link>). As such, it has the common properties for a 'Message' as an meaningful item in a communication: sender and receiver of the message, sent/received time, status of the message (read, answered and so on). It is a subclass of <link linkend="nie-InformationElement">nie:InformationElement</link> and from there inherits the <link linkend="nie-plainTextContent">nie:plainTextContent</link> property (which, as its name states, contains the text of the message).
     </para>
 
     <para>Few considerations from practical point of view:</para>
     <orderedlist>
-      <listitem><para> <link linkend="nmo-Message.nmo-to">nmo:to</link> and <link linkend="nmo-Message.nmo-from">nmo:from</link> should be set always, and there is a predefined instance in NCO for the "me" contact.</para></listitem>
-      <listitem><para> <link linkend="nmo-Message.nmo-isSent">nmo:isSent</link> should be used to indicate the direction of the message. This helps with the performance of queries to build a conversation view.</para></listitem>
+      <listitem><para> <link linkend="nmo-to">nmo:to</link> and <link linkend="nmo-from">nmo:from</link> should be set always, and there is a predefined instance in NCO for the "me" contact.</para></listitem>
+      <listitem><para> <link linkend="nmo-isSent">nmo:isSent</link> should be used to indicate the direction of the message. This helps with the performance of queries to build a conversation view.</para></listitem>
       <listitem><para> Even when there is a <link linkend="nmo-MessageHeader">nmo:MessageHeader</link> class that can store any arbitrary pair of key-values, its use must be as limited as possible. It is there to store the specific headers in the messages (mainly email) that cannot be completely represented in the ontology. Handle those headers in queries is a performance bottleneck that should be avoided in general.</para></listitem>
     </orderedlist>
   </sect2>
@@ -24,7 +24,7 @@
   <sect2 id="nmo-conversation-representation">
     <title>Conversations</title>
     <para>The dialog between two contacts could be considered a list of messages sorted by time, but that representation is too simplistic. Two contacts can keep a simultaneous communication in two channels (e.g. IM and IRC), and the concept of conversation, a communication with a beginning and end is also important to sort the information in the UI.</para>
-    <para>The ontology provides a <link linkend="nmo-CommunicationChannel">nmo:CommunicationChannel</link> class, which groups all messages between a certain set of contacts (linked via <link linkend="nmo-CommunicationChannel.nmo-hasParticipant">nmo:hasParticipant</link> property). The communication channel can be transient (an ad-hoc conversation in IM represented in the subclass <link linkend="nmo-TransientChannel">nmo:TransientChannel</link>) or permanent (a well-known IRC channel would be an instance of <link linkend="nmo-PermanentChannel">nmo:PermanentChannel</link> ). Every time 'me' talks with an specific contact, the communication channel should be the same. It identifies somehow the whole list of messages between a set of participants.</para>
+    <para>The ontology provides a <link linkend="nmo-CommunicationChannel">nmo:CommunicationChannel</link> class, which groups all messages between a certain set of contacts (linked via <link linkend="nmo-hasParticipant">nmo:hasParticipant</link> property). The communication channel can be transient (an ad-hoc conversation in IM represented in the subclass <link linkend="nmo-TransientChannel">nmo:TransientChannel</link>) or permanent (a well-known IRC channel would be an instance of <link linkend="nmo-PermanentChannel">nmo:PermanentChannel</link> ). Every time 'me' talks with an specific contact, the communication channel should be the same. It identifies somehow the whole list of messages between a set of participants.</para>
     <para>There is a second important class, <link linkend="nmo-Conversation">nmo:Conversation</link> to group messages delimited in a time frame. Every time a IM dialog is open (e.g. a window talking with a certain contact) a new instance of <link linkend="nmo-Conversation">nmo:Conversation</link> is created.</para>
   </sect2>
 
@@ -32,7 +32,7 @@
     <title>Email domain</title>
     <para>The users usually see an Email as a flat Message, with some thread information and maybe 'attachments' in it, but in fact internally an Email message is a tree with a special root node (the envelope) that links to other nodes called MIME parts. This MIME parts can be plain text (for instance the content of the email that the user read) or binary blobs (like a document attached to the message). When a message is forwarded, the previous envelope (the root node of the original message) becomes just a mime part of the forwarded email.</para>
 
-    <para>The ontology represents completely that email tree. The Envelope, root node or more external representation of the Email is the basic <link linkend="nmo-Email">nmo:Email</link> class, subclass of Message. Every node in the tree is always a <link linkend="nmo-MimePart">nmo:MimePart</link> with the required properties to decode the content (mimetype, encoding, boundaries). When the node is internal, then it can use the <link linkend="nie-InformationElement.nie-hasPart">nie:hasPart</link> property to link other nodes. The leaf nodes can be instances of specific content classes (besides <link linkend="nmo-MimePart">nmo:MimePart</link>). For example, an MP3 embedded in an Email, will be represented as an instance nmo:MimePart <emphasis>and</emphasis> <link linkend="nmm-MusicPiece">nmm:MusicPiece</link>. </para>
+    <para>The ontology represents completely that email tree. The Envelope, root node or more external representation of the Email is the basic <link linkend="nmo-Email">nmo:Email</link> class, subclass of Message. Every node in the tree is always a <link linkend="nmo-MimePart">nmo:MimePart</link> with the required properties to decode the content (mimetype, encoding, boundaries). When the node is internal, then it can use the <link linkend="nie-hasPart">nie:hasPart</link> property to link other nodes. The leaf nodes can be instances of specific content classes (besides <link linkend="nmo-MimePart">nmo:MimePart</link>). For example, an MP3 embedded in an Email, will be represented as an instance nmo:MimePart <emphasis>and</emphasis> <link linkend="nmm-MusicPiece">nmm:MusicPiece</link>. </para>
 
     <para>For more detailed (and highly technical) explanation of the email representation in general and this example in concrete, please check <ulink url="http://live.gnome.org/Tracker/Documentation/Examples/SPARQL/Email">this wiki page</ulink></para>
   </sect2>
@@ -46,11 +46,11 @@
     </para>
     <itemizedlist>
       <listitem>A <link linkend="nmo-SMSMessage">nmo:SMSMessage</link> instance to represent the message itself</listitem>
-      <listitem><link linkend="nmo-Message.nmo-to">nmo:to</link> and <link linkend="nmo-Message.nmo-from">nmo:from</link> linking the contacts (one of them "me", the other a nco:Contact or even a nco:PersonContact if the software is able to identify him).</listitem>
-      <listitem>For some implementations, is useful to save the original vcards. For that <link linkend="nmo-PhoneMessage.nmo-fromVCard">nmo:fromVCard</link> and <link linkend="nmo-PhoneMessage.nmo-toVCard">nmo:toVCard</link> properties can be used. Those properties point to files in the file system with the vcards</listitem>
-      <listitem><link linkend="nie-InformationElement.nie-plainTextContent">nie:plainTextContent</link> inherited from <link linkend="nie-InformationElement">nie:InformationElement</link> for the content.</listitem>
-      <listitem>If needed, language and characterSet are inherited from NIE (<link linkend="nie-InformationElement.nie-language">nie:language</link>, <link linkend="nie-InformationElement.nie-characterSet">nie:characterSet</link>), but there is a specific <link linkend="nmo-PhoneMessage.nmo-encoding">nmo:encoding</link> property.</listitem>
-      <listitem>Note that nmo:SMSMessage is a subclass of <link linkend="nmo-Message">nmo:Message</link> and inherits all its properties, including <link linkend="nmo-Message.nmo-isDeleted">nmo:isDeleted</link></listitem>
+      <listitem><link linkend="nmo-to">nmo:to</link> and <link linkend="nmo-from">nmo:from</link> linking the contacts (one of them "me", the other a nco:Contact or even a nco:PersonContact if the software is able to identify him).</listitem>
+      <listitem>For some implementations, is useful to save the original vcards. For that <link linkend="nmo-fromVCard">nmo:fromVCard</link> and <link linkend="nmo-toVCard">nmo:toVCard</link> properties can be used. Those properties point to files in the file system with the vcards</listitem>
+      <listitem><link linkend="nie-plainTextContent">nie:plainTextContent</link> inherited from <link linkend="nie-InformationElement">nie:InformationElement</link> for the content.</listitem>
+      <listitem>If needed, language and characterSet are inherited from NIE (<link linkend="nie-language">nie:language</link>, <link linkend="nie-characterSet">nie:characterSet</link>), but there is a specific <link linkend="nmo-encoding">nmo:encoding</link> property.</listitem>
+      <listitem>Note that nmo:SMSMessage is a subclass of <link linkend="nmo-Message">nmo:Message</link> and inherits all its properties, including <link linkend="nmo-isDeleted">nmo:isDeleted</link></listitem>
     </itemizedlist>
 
     <para>Here is an example of an SMS Message in Tracker/Nepomuk: </para>
@@ -84,7 +84,7 @@
 
   <sect2 id="nmo-call-domain">
     <title>Call domain</title>
-    <para>Voice calls are considered messages in the ontology. A call is a communication item between two contacts (therefore a Message with to/from properties) with an extra property <link linkend="nmo-Call.nmo-duration">nmo:duration</link>. Each call is represented as an instance of <link linkend="nmo-Call">nmo:Call</link> class. There is also a <link linkend="nmo-VOIPCall">nmo:VOIPCall</link> class (subclass of <link linkend="nmo-Call">nmo:Call</link>) for VOIP communications (e.g. Skype, GTalk,...). </para>
+    <para>Voice calls are considered messages in the ontology. A call is a communication item between two contacts (therefore a Message with to/from properties) with an extra property <link linkend="nmo-duration">nmo:duration</link>. Each call is represented as an instance of <link linkend="nmo-Call">nmo:Call</link> class. There is also a <link linkend="nmo-VOIPCall">nmo:VOIPCall</link> class (subclass of <link linkend="nmo-Call">nmo:Call</link>) for VOIP communications (e.g. Skype, GTalk,...). </para>
   </sect2>
 
 </section>

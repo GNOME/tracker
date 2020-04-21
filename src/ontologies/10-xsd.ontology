@@ -6,10 +6,26 @@ xsd: a tracker:Namespace, tracker:Ontology ;
 	tracker:prefix "xsd" ;
 	tracker:lastModified "2010-02-16T11:00:00Z" .
 
-xsd:string a rdfs:Class .
-xsd:boolean a rdfs:Class .
-xsd:integer a rdfs:Class .
-xsd:double a rdfs:Class .
-xsd:date a rdfs:Class .
-xsd:dateTime a rdfs:Class .
+xsd:string a rdfs:Class ;
+	rdfs:comment "The type of string properties." ;
+	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#string" .
 
+xsd:boolean a rdfs:Class ;
+	rdfs:comment "The type of true / false properties." ;
+	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#boolean" .
+
+xsd:integer a rdfs:Class ;
+	rdfs:comment "The type of integer properties." ;
+	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#integer" .
+
+xsd:double a rdfs:Class ;
+	rdfs:comment "The type of floating point properties." ;
+	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#double" .
+
+xsd:date a rdfs:Class ;
+	rdfs:comment "The type of date properties." ;
+	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#date" .
+
+xsd:dateTime a rdfs:Class ;
+	rdfs:comment "The type of date-time properties." ;
+	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#dateTime" .
