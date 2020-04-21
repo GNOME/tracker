@@ -85,7 +85,6 @@ pages:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
   dependencies: []
   before_script:
-    - dnf install -y python3-pip xmlto
     - pip3 install beautifulsoup4 mkdocs mkdocs-cinder
   script:
     # Build tracker and install.
