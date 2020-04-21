@@ -194,7 +194,7 @@ def main():
         dest  = apidocs_dest.joinpath(name)
         if not src.exists():
             raise RuntimeError("Expected path {} doesn't exist.".format(src))
-        log.info("  - Copying %s to %s", src, dest)
+        log.info("  - Copying %s to %s (%i files)", src, dest, len(list(src.iterdir())))
         shutil.copytree(src, dest)
 
     log.info("Adding preview header to API reference documentation")
