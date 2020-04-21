@@ -1,4 +1,4 @@
-@prefix dsc: <http://www.tracker-project.org/temp/dsc#> .
+@prefix dsc: <http://tracker.api.gnome.org/ontology/v3/dsc#> .
 
 <virtual-ontology-uri:31-nao.ontology> a dsc:Ontology ;
 	dsc:title "Nepomuk Annotation Ontology (NAO)" ;
@@ -23,7 +23,7 @@
 	dsc:upstream "http://www.semanticdesktop.org/ontologies/nao/";
 
 	dsc:localPrefix "nao" ;
-	dsc:baseUrl "http://www.semanticdesktop.org/ontologies/2007/08/15/nao#" ;
+	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/nao#" ;
 	dsc:relativePath "./31-nao.ontology" ;
 
 	dsc:copyright "&copy; 2007 <ulink url=\"http://nepomuk.semanticdesktop.org\">NEPOMUK Consortium</ulink>&reg;. This work is made available under the terms of NEPOMUK <ulink url=\"http://www.semanticdesktop.org/ontologies/nfo/LICENSE.txt\">software license</ulink>" .

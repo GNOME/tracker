@@ -39,10 +39,10 @@ TestInfo tests[] = {
 	{ "simple", "statement/simple.rq", "statement/simple.out", "hello" },
 	{ "simple-error", "statement/simple-error.rq" },
 	{ "object", "statement/object.rq", "statement/object.out", "Music album" },
-	{ "object-iri", "statement/object-iri.rq", "statement/object-iri.out", "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#MediaList" },
-	{ "subject", "statement/subject.rq", "statement/subject.out", "http://www.tracker-project.org/temp/nmm#MusicAlbum" },
+	{ "object-iri", "statement/object-iri.rq", "statement/object-iri.out", "http://tracker.api.gnome.org/ontology/v3/nfo#MediaList" },
+	{ "subject", "statement/subject.rq", "statement/subject.out", "http://tracker.api.gnome.org/ontology/v3/nmm#MusicAlbum" },
 	{ "subject-2", "statement/subject.rq", "statement/subject-2.out", "urn:nonexistent" },
-	{ "filter", "statement/filter.rq", "statement/filter.out", "http://www.tracker-project.org/temp/nmm#MusicAlbum", "Music album" },
+	{ "filter", "statement/filter.rq", "statement/filter.out", "http://tracker.api.gnome.org/ontology/v3/nmm#MusicAlbum", "Music album" },
 };
 
 typedef struct {

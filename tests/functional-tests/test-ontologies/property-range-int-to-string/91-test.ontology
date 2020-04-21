@@ -1,9 +1,9 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#> .
+@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix test: <http://example.org/ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix nrl: <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#> .
+@prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 
 #
 # Note: If you modify this ontology remember to replicate the changes in the other

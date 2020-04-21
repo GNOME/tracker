@@ -9,7 +9,7 @@
 
    E.g.
 
-   ./ttl2html -f ../../src/ontologies/39-mto.ontology -u http://www.tracker-project.org/temp/mto#
+   ./ttl2html -f ../../src/ontologies/39-mto.ontology -u http://tracker.api.gnome.org/ontology/v3/mto#
 
 
 == ontology-validator ==

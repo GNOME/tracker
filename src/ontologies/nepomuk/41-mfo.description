@@ -1,4 +1,4 @@
-@prefix dsc: <http://www.tracker-project.org/temp/dsc#> .
+@prefix dsc: <http://tracker.api.gnome.org/ontology/v3/dsc#> .
 
 <virtual-ontology-uri:41-mfo.ontology> a dsc:Ontology ;
 	dsc:title "Maemo Feeds Ontology (MFO)" ;
@@ -12,5 +12,5 @@
 	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/41-mfo.ontology";
 
 	dsc:localPrefix "mfo" ;
-	dsc:baseUrl "http://www.tracker-project.org/temp/mfo#" ;
+	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/mfo#" ;
 	dsc:relativePath "./41-mfo.ontology" .

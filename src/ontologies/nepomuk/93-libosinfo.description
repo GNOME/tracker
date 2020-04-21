@@ -1,4 +1,4 @@
-@prefix dsc: <http://www.tracker-project.org/temp/dsc#> .
+@prefix dsc: <http://tracker.api.gnome.org/ontology/v3/dsc#> .
 
 <virtual-ontology-uri:93-libosinfo.ontology> a dsc:Ontology ;
 	dsc:title "libosinfo-specific annotations Ontology" ;
@@ -9,5 +9,5 @@
 	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/93-libosinfo.ontology";
 
 	dsc:localPrefix "osinfo" ;
-	dsc:baseUrl "http://www.tracker-project.org/ontologies/osinfo#";
+	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/osinfo#";
 	dsc:relativePath "./93-libosinfo.ontology" .

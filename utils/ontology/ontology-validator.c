@@ -43,12 +43,12 @@ static GOptionEntry   entries[] = {
 #define RDFS_SUBCLASSOF  "http://www.w3.org/2000/01/rdf-schema#subClassOf"
 #define RDFS_SUBPROPERTYOF  "http://www.w3.org/2000/01/rdf-schema#subPropertyOf"
 #define RDFS_TYPE "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-#define TRACKER_NS "http://www.tracker-project.org/ontologies/tracker#Namespace"
-#define TRACKER_ONTO "http://www.tracker-project.org/ontologies/tracker#Ontology"
-#define TRACKER_PREFIX "http://www.tracker-project.org/ontologies/tracker#prefix"
+#define TRACKER_NS "http://tracker.api.gnome.org/ontology/v3/tracker#Namespace"
+#define TRACKER_ONTO "http://tracker.api.gnome.org/ontology/v3/tracker#Ontology"
+#define TRACKER_PREFIX "http://tracker.api.gnome.org/ontology/v3/tracker#prefix"
 #define RDFS_RANGE "http://www.w3.org/2000/01/rdf-schema#range"
 #define RDFS_DOMAIN "http://www.w3.org/2000/01/rdf-schema#domain"
-#define NRL_IFP "http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#InverseFunctionalProperty"
+#define NRL_IFP "http://tracker.api.gnome.org/ontology/v3/nrl#InverseFunctionalProperty"
 
 static GList *unknown_items = NULL;
 static GList *known_items = NULL;

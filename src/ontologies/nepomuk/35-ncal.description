@@ -1,4 +1,4 @@
-@prefix dsc: <http://www.tracker-project.org/temp/dsc#> .
+@prefix dsc: <http://tracker.api.gnome.org/ontology/v3/dsc#> .
 
 <virtual-ontology-uri:35-ncal.ontology> a dsc:Ontology ;
 	dsc:title "Nepomuk Calendar Ontology (NCAL)" ;
@@ -19,7 +19,7 @@
 	dsc:upstream "http://www.semanticdesktop.org/ontologies/ncal/";
 
 	dsc:localPrefix "ncal" ;
-	dsc:baseUrl "http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#" ;
+	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/ncal#" ;
 	dsc:relativePath "./35-ncal.ontology" ;
 
 	dsc:copyright "&copy; 2007 <ulink url=\"http://nepomuk.semanticdesktop.org\">NEPOMUK Consortium</ulink>&reg;. This work is made available under the terms of NEPOMUK <ulink url=\"http://www.semanticdesktop.org/ontologies/nfo/LICENSE.txt\">software license</ulink>" .

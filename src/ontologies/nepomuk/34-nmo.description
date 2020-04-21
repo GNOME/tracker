@@ -1,4 +1,4 @@
-@prefix dsc: <http://www.tracker-project.org/temp/dsc#> .
+@prefix dsc: <http://tracker.api.gnome.org/ontology/v3/dsc#> .
 
 <virtual-ontology-uri:34-nmo.ontology> a dsc:Ontology ;
 	dsc:title "Nepomuk Messaging Ontology (NMO)" ;
@@ -19,7 +19,7 @@
 	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/data/ontologies/34-nmo.ontology";
 
 	dsc:localPrefix "nmo" ;
-	dsc:baseUrl "http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#" ;
+	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/nmo#" ;
 	dsc:relativePath "./34-nmo.ontology" ;
 
 	dsc:upstream "http://www.semanticdesktop.org/ontologies/nmo/";
