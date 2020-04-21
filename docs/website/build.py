@@ -190,7 +190,12 @@ def main():
     apidocs_dest = output_path.joinpath('docs/api-preview')
     apidocs_dest.mkdir(parents=True)
     for name in ['libtracker-sparql3', 'tracker3-nepomuk']:
-        shutil.copytree(apidocs_src.joinpath(name), apidocs_dest.joinpath(name))
+        src = apidocs_src.joinpath(name)
+        dest  = apidocs_dest.joinpath(name)
+        if not src.exists():
+            raise RuntimeError("Expected path {} doesn't exist.".format(src))
+        log.info("  - Copying %s", src)
+        shutil.copytree(src, dest)
 
     log.info("Adding preview header to API reference documentation")
     text = apidocs_header(args.tracker_commit)
