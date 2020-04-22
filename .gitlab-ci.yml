@@ -95,8 +95,8 @@ pages:
     - su tracker -w install_prefix -c 'cd extra/tracker-miners; mkdir build; cd build; env PKG_CONFIG_PATH="$install_prefix/lib64/pkgconfig" meson .. --prefix="$install_prefix"; ninja install'
     # Generate the website using mkdocs.
     - |
-      tracker_commit=$CI_COMMIT_SHA1
-      tracker_miners_commit=$(git -C ./extra/tracker-miners rev-parse HEAD)
+      export tracker_commit=$CI_COMMIT_SHA1
+      export tracker_miners_commit=$(git -C ./extra/tracker-miners rev-parse HEAD)
       ./docs/website/build.py --api-docs="$install_prefix/share/gtk-doc/html" --tracker-commit=${tracker_commit} --man-pages ./docs/manpages/*.txt ./extra/tracker-miners/docs/manpages/*.txt
   artifacts:
     paths:
