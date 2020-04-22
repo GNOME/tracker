@@ -88,15 +88,16 @@ pages:
     - pip3 install beautifulsoup4 mkdocs mkdocs-cinder
   script:
     # Build tracker and install.
-    - su tracker -c 'mkdir build; cd build; meson .. --prefix=/tmp/tracker; ninja install'
+    - install_prefix="$(pwd)/tracker-install"
+    - su tracker -c 'mkdir build; cd build; meson .. --prefix="$install_prefix"; ninja install'
     # Build tracker-miners and install any documentation from there as well.
     - su tracker -c '.gitlab-ci/checkout-tracker-miners.sh'
-    - su tracker -c 'cd extra/tracker-miners; mkdir build; cd build; env PKG_CONFIG_PATH=/tmp/tracker/lib64/pkgconfig meson .. --prefix=/tmp/tracker; ninja install'
+    - su tracker -c 'cd extra/tracker-miners; mkdir build; cd build; env PKG_CONFIG_PATH="$install_prefix/lib64/pkgconfig" meson .. --prefix="$install_prefix"; ninja install'
     # Generate the website using mkdocs.
     - |
       tracker_commit=$CI_COMMIT_SHA1
       tracker_miners_commit=$(git -C ./extra/tracker-miners rev-parse HEAD)
-      ./docs/website/build.py --api-docs=/tmp/tracker/share/gtk-doc/html --tracker-commit=${tracker_commit} --man-pages ./docs/manpages/*.txt ./extra/tracker-miners/docs/manpages/*.txt
+      ./docs/website/build.py --api-docs="$install_prefix/share/gtk-doc/html" --tracker-commit=${tracker_commit} --man-pages ./docs/manpages/*.txt ./extra/tracker-miners/docs/manpages/*.txt
   artifacts:
     paths:
       - public
