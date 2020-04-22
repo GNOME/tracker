@@ -97,6 +97,7 @@ pages:
     - |
       export tracker_commit=$CI_COMMIT_SHA1
       export tracker_miners_commit=$(git -C ./extra/tracker-miners rev-parse HEAD)
+      echo "Using commits: ${tracker_commit}  ${tracker_miners_commit}"
       ./docs/website/build.py --api-docs="$install_prefix/share/gtk-doc/html" --tracker-commit=${tracker_commit} --man-pages ./docs/manpages/*.txt ./extra/tracker-miners/docs/manpages/*.txt
   artifacts:
     paths:
