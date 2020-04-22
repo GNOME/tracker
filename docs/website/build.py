@@ -80,12 +80,15 @@ def add_apidocs_header(text, filename):
         '<div class="section">',
     ]
 
+    wrote_marker = False
+
     with open(filename, encoding='utf8') as f_in:
         with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf8') as f_out:
             for line in f_in:
                 for marker in markers:
-                    if line.find(marker) != -1:
+                    if not wrote_marker and line.find(marker) != -1:
                         f_out.write(text)
+                        wrote_marker = True
                 f_out.write(line)
     shutil.move(f_out.name, filename)
 
@@ -194,7 +197,7 @@ def main():
         dest  = apidocs_dest.joinpath(name)
         if not src.exists():
             raise RuntimeError("Expected path {} doesn't exist.".format(src))
-        log.info("  - Copying %s to %s", src, dest)
+        log.info("  - Copying %s to %s (%i files)", src, dest, len(list(src.iterdir())))
         shutil.copytree(src, dest)
 
     log.info("Adding preview header to API reference documentation")
