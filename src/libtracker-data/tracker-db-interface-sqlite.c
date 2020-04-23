@@ -2261,7 +2261,14 @@ tracker_db_interface_sqlite_fts_delete_text (TrackerDBInterface  *db_interface,
 	TrackerDBStatement *stmt;
 	GError *error = NULL;
 	gchar *query;
+	gboolean has_text = FALSE;
 	gint i;
+
+	for (i = 0; old_text[i] != NULL; i++)
+		has_text |= old_text[i] && *old_text[i];
+
+	if (!has_text)
+		return TRUE;
 
 	query = tracker_db_interface_sqlite_fts_create_query (db_interface,
 							      database,
