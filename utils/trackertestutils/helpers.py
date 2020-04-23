@@ -216,21 +216,34 @@ class await_update():
         if not cursor.next():
             raise AwaitException("Expected data is not present in the store.")
 
+        self.stored_as = cursor.get_string(0)[0]
+
+        query_on_create = 'SELECT nie:isStoredAs(tracker:uri(%s)) { }'
         query_after = ' '.join([
             'SELECT ?urn tracker:id(?urn) '
             ' WHERE { '
             '   ?urn a rdfs:Resource ; ',
             self.after_predicates,
-            '   . FILTER (tracker:id(?urn) = %s) '
+            '   . FILTER (tracker:id(?urn) = %s) ',
             '}'
-        ]) % self.resource_id
+        ])
 
         def match_cb(notifier, service, graph, events):
             for event in events:
-                if event.get_event_type() == Tracker.NotifierEventType.UPDATE and event.get_id() == self.resource_id:
-                    log.debug("Processing %s event for id %s", event.get_event_type(), event.get_id())
-                    log.debug("Running %s", query_after)
-                    cursor = self.conn.query(query_after)
+                log.debug("Processing %s event for id %s", event.get_event_type(), event.get_id())
+                if event.get_event_type() == Tracker.NotifierEventType.DELETE and event.get_id() == self.resource_id:
+                    self.resource_deleted = True
+                elif event.get_event_type() in [Tracker.NotifierEventType.CREATE,
+                                                Tracker.NotifierEventType.UPDATE]:
+                    if event.get_event_type() == Tracker.NotifierEventType.CREATE:
+                        if not self.resource_deleted:
+                            raise AwaitException("Received insert with no prior delete")
+                        cursor = self.conn.query(query_on_create % event.get_id())
+                        if cursor.next() and cursor.get_string(0)[0] == self.stored_as:
+                            self.resource_id = event.get_id()
+
+                    log.debug("Running %s", query_after % event.get_id())
+                    cursor = self.conn.query(query_after % event.get_id())
 
                     if cursor.next():
                         log.debug("Query matched!")
