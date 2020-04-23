@@ -205,7 +205,7 @@ class await_update():
         log.info("Awaiting update of resource id %s", self.resource_id)
 
         query_before = ' '.join([
-            'SELECT ?urn tracker:id(?urn) '
+            'SELECT nie:isStoredAs(?urn) ?urn tracker:id(?urn) '
             ' WHERE { '
             '   ?urn a rdfs:Resource ; ',
             self.before_predicates,
@@ -428,7 +428,7 @@ class StoreHelper():
         Get the internal ID for a given resource, identified by URL.
         """
         result = self.query(
-            'SELECT tracker:id(?r) WHERE { ?r nie:url "%s" }' % url)
+            'SELECT tracker:id(?r) WHERE { ?r nie:isStoredAs/nie:url "%s" }' % url)
         if len(result) == 1:
             return int(result[0][0])
         elif len(result) == 0:
