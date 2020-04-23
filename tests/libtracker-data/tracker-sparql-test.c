@@ -252,6 +252,7 @@ const TestInfo tests[] = {
 	{ "update/delete-insert-where-query-4", "update/delete-insert-where-4", FALSE, FALSE },
 	{ "update/delete-insert-where-query-5", "update/delete-insert-where-5", FALSE, FALSE },
 	{ "update/delete-insert-where-query-6", "update/delete-insert-where-6", FALSE, FALSE },
+	{ "update/select-date-with-offset-1", "update/insert-date-with-offset-1", FALSE, FALSE },
 	{ NULL }
 };
 

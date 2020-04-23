@@ -34,3 +34,9 @@ example:stringMultivalued a rdf:Property ;
         rdfs:domain example:A ;
         rdfs:range xsd:string .
 
+example:date a rdf:Property ;
+	rdfs:domain example:A ;
+	rdfs:range xsd:dateTime .
+
+example:predefined a example:A ;
+	example:date "2001-01-01T01:01:01+02:00" .
