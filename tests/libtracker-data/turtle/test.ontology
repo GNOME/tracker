@@ -6,7 +6,7 @@
 @prefix f: <http://example.org/ns3#> .
 @prefix b: <http://example.org/b2#> .
 @prefix bz: <http://example.org/b2> .
-@prefix tracker: <http://www.tracker-project.org/ontologies/tracker#> .
+@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix bar: <bar#> .
 
 foo: a tracker:Namespace ;

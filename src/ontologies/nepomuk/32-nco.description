@@ -1,4 +1,4 @@
-@prefix dsc: <http://www.tracker-project.org/temp/dsc#> .
+@prefix dsc: <http://tracker.api.gnome.org/ontology/v3/dsc#> .
 
 <virtual-ontology-uri:32-nco.ontology> a dsc:Ontology ;
 	dsc:title "Nepomuk Contacts Ontology (NCO)" ;
@@ -20,7 +20,7 @@
 	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/32-nco.ontology";
 
 	dsc:localPrefix "nco" ;
-	dsc:baseUrl "http://www.semanticdesktop.org/ontologies/2007/03/22/nco#" ;
+	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/nco#" ;
 	dsc:relativePath "./32-nco.ontology" ;
 
 	dsc:copyright "&copy; 2007 <ulink url=\"http://www.dfki.de/\">DFKI</ulink> &copy; 2009 <ulink url=\"http://www.nokia.com/\">Nokia</ulink>. The ontologies are made available under the terms of NEPOMUK <ulink url=\"http://www.semanticdesktop.org/ontologies/nfo/LICENSE.txt\">software license</ulink> (FIXME verify)".

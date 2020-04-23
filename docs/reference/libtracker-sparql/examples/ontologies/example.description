@@ -1,4 +1,4 @@
-@prefix dsc: <http://www.tracker-project.org/temp/dsc#> .
+@prefix dsc: <http://tracker.api.gnome.org/ontology/v3/dsc#> .
 
 <virtual-ontology-uri:30-nie.ontology> a dsc:Ontology ;
 	dsc:title "Example ontology" ;

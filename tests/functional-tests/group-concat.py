@@ -73,9 +73,9 @@ class TestGroupConcat (fixtures.TrackerSparqlDirectTest):
         instances = results[0][1].split('|')
         assert len(instances) == 3
 
-        TEXT_CHAT = "http://www.semanticdesktop.org/ontologies/2007/03/22/nco#im-capability-text-chat"
-        MEDIA_CALLS = "http://www.semanticdesktop.org/ontologies/2007/03/22/nco#im-capability-media-calls"
-        FILE_TRANSFERS = "http://www.semanticdesktop.org/ontologies/2007/03/22/nco#im-capability-file-transfers"
+        TEXT_CHAT = "http://tracker.api.gnome.org/ontology/v3/nco#im-capability-text-chat"
+        MEDIA_CALLS = "http://tracker.api.gnome.org/ontology/v3/nco#im-capability-media-calls"
+        FILE_TRANSFERS = "http://tracker.api.gnome.org/ontology/v3/nco#im-capability-file-transfers"
         assert TEXT_CHAT in instances
         assert MEDIA_CALLS in instances
         assert FILE_TRANSFERS in instances

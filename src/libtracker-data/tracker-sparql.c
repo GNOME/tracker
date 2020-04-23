@@ -31,10 +31,10 @@
 #include "tracker-db-interface-sqlite.h"
 #include "tracker-utils.h"
 
-#define TRACKER_NS "http://www.tracker-project.org/ontologies/tracker#"
+#define TRACKER_NS "http://tracker.api.gnome.org/ontology/v3/tracker#"
 #define RDF_NS "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 #define RDFS_NS "http://www.w3.org/2000/01/rdf-schema#"
-#define FTS_NS "http://www.tracker-project.org/ontologies/fts#"
+#define FTS_NS "http://tracker.api.gnome.org/ontology/v3/fts#"
 #define XSD_NS "http://www.w3.org/2001/XMLSchema#"
 #define FN_NS "http://www.w3.org/2005/xpath-functions#"
 

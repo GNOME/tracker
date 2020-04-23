@@ -31,24 +31,24 @@ G_BEGIN_DECLS
 #define TRACKER_PREFIX_RDF      "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 #define TRACKER_PREFIX_RDFS     "http://www.w3.org/2000/01/rdf-schema#"
 #define TRACKER_PREFIX_XSD      "http://www.w3.org/2001/XMLSchema#"
-#define TRACKER_PREFIX_TRACKER  "http://www.tracker-project.org/ontologies/tracker#"
+#define TRACKER_PREFIX_TRACKER  "http://tracker.api.gnome.org/ontology/v3/tracker#"
 #define TRACKER_PREFIX_DC       "http://purl.org/dc/elements/1.1/"
 
 /* Our Nepomuk selection */
-#define TRACKER_PREFIX_NRL      "http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#"
-#define TRACKER_PREFIX_NMO      "http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#"
-#define TRACKER_PREFIX_NIE      "http://www.semanticdesktop.org/ontologies/2007/01/19/nie#"
-#define TRACKER_PREFIX_NCO      "http://www.semanticdesktop.org/ontologies/2007/03/22/nco#"
-#define TRACKER_PREFIX_NAO      "http://www.semanticdesktop.org/ontologies/2007/08/15/nao#"
-#define TRACKER_PREFIX_NID3     "http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#"
-#define TRACKER_PREFIX_NFO      "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#"
-#define TRACKER_PREFIX_OSINFO   "http://www.tracker-project.org/ontologies/osinfo#"
+#define TRACKER_PREFIX_NRL      "http://tracker.api.gnome.org/ontology/v3/nrl#"
+#define TRACKER_PREFIX_NMO      "http://tracker.api.gnome.org/ontology/v3/nmo#"
+#define TRACKER_PREFIX_NIE      "http://tracker.api.gnome.org/ontology/v3/nie#"
+#define TRACKER_PREFIX_NCO      "http://tracker.api.gnome.org/ontology/v3/nco#"
+#define TRACKER_PREFIX_NAO      "http://tracker.api.gnome.org/ontology/v3/nao#"
+#define TRACKER_PREFIX_NID3     "http://tracker.api.gnome.org/ontology/v3/nid3#"
+#define TRACKER_PREFIX_NFO      "http://tracker.api.gnome.org/ontology/v3/nfo#"
+#define TRACKER_PREFIX_OSINFO   "http://tracker.api.gnome.org/ontology/v3/osinfo#"
 
 /* Temporary */
-#define TRACKER_PREFIX_SLO      "http://www.tracker-project.org/temp/slo#"
-#define TRACKER_PREFIX_NMM      "http://www.tracker-project.org/temp/nmm#"
-#define TRACKER_PREFIX_MLO      "http://www.tracker-project.org/temp/mlo#"
-#define TRACKER_PREFIX_MFO      "http://www.tracker-project.org/temp/mfo#"
+#define TRACKER_PREFIX_SLO      "http://tracker.api.gnome.org/ontology/v3/slo#"
+#define TRACKER_PREFIX_NMM      "http://tracker.api.gnome.org/ontology/v3/nmm#"
+#define TRACKER_PREFIX_MLO      "http://tracker.api.gnome.org/ontology/v3/mlo#"
+#define TRACKER_PREFIX_MFO      "http://tracker.api.gnome.org/ontology/v3/mfo#"
 
 G_END_DECLS
 

@@ -1,4 +1,4 @@
-@prefix dsc: <http://www.tracker-project.org/temp/dsc#> .
+@prefix dsc: <http://tracker.api.gnome.org/ontology/v3/dsc#> .
 
 <virtual-ontology-uri:40-mlo.ontology> a dsc:Ontology ;
 	dsc:title "Simplified Maemo Location Ontology (SLO) (experimental/for testing)" ;
@@ -9,6 +9,6 @@
 
 	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/92-slo.ontology";
 
-	dsc:baseUrl "http://www.tracker-project.org/temp/slo#" ;
+	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/slo#" ;
 	dsc:localPrefix "slo" ;
 	dsc:relativePath "./92-slo.ontology" .

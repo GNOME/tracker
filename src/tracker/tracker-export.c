@@ -145,7 +145,7 @@ print_turtle (TrackerSparqlCursor *cursor,
 		}
 
 		/* Don't display nie:plainTextContent */
-		//if (!plain_text_content && strcmp (key, "http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent") == 0) {
+		//if (!plain_text_content && strcmp (key, "http://tracker.api.gnome.org/ontology/v3/nie#plainTextContent") == 0) {
 		//	continue;
 		//}
 

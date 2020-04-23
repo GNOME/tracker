@@ -58,7 +58,7 @@ not have to be an absolute path.
 *-p, --list-properties=[_class_]*::
   Returns a list of properties which pertain to a _class_. You can use
   both formats here for the _class_, either the full name
-  _http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#Video_ or
+  _http://tracker.api.gnome.org/ontology/v3/nfo#Video_ or
   the shortened prefix name _nfo:Video_.
 
 This gives the following result:
@@ -67,8 +67,8 @@ This gives the following result:
 $ tracker sparql -p nfo:Video
 
 Properties: 2
-  http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#frameRate
-  http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#frameCount
+  http://tracker.api.gnome.org/ontology/v3/nfo#frameRate
+  http://tracker.api.gnome.org/ontology/v3/nfo#frameCount
 ----
 
 These properties _nfo:frameRate_ and _nfo:frameCount_ can then be used
@@ -175,16 +175,16 @@ ROOT
 $ tracker sparql -s text
 
 Classes: 4
-  http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#TextDocument
-  http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#PlainTextDocument
-  http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#PaginatedTextDocument
-  http://www.tracker-project.org/temp/nmm#SynchronizedText
+  http://tracker.api.gnome.org/ontology/v3/nfo#TextDocument
+  http://tracker.api.gnome.org/ontology/v3/nfo#PlainTextDocument
+  http://tracker.api.gnome.org/ontology/v3/nfo#PaginatedTextDocument
+  http://tracker.api.gnome.org/ontology/v3/nmm#SynchronizedText
 
 Properties: 4
-  http://www.tracker-project.org/ontologies/tracker#fulltextIndexed
-  http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent
-  http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#plainTextMessageContent
-  http://www.tracker-project.org/temp/scal#textLocation
+  http://tracker.api.gnome.org/ontology/v3/tracker#fulltextIndexed
+  http://tracker.api.gnome.org/ontology/v3/nie#plainTextContent
+  http://tracker.api.gnome.org/ontology/v3/nmo#plainTextMessageContent
+  http://tracker.api.gnome.org/ontology/v3/scal#textLocation
 ----
 
 See also *--tree*.
@@ -193,7 +193,7 @@ See also *--tree*.
   Returns the shorthand for a class given by a URL. For example:
 
 ----
-$ tracker sparql --get-shorthand http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#plainTextMessageContent
+$ tracker sparql --get-shorthand http://tracker.api.gnome.org/ontology/v3/nmo#plainTextMessageContent
 nmo:plainTextMessageContent
 ----
 
@@ -203,7 +203,7 @@ nmo:plainTextMessageContent
 
 ----
 $ tracker sparql --get-longhand nmm:MusicPiece
-http://www.tracker-project.org/temp/nmm#MusicPiece
+http://tracker.api.gnome.org/ontology/v3/nmm#MusicPiece
 ----
 
 == EXAMPLES

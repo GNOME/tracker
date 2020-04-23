@@ -1,14 +1,14 @@
 @prefix rdf: <http://www.w3.org/2000/01/rdf-schema#>.
-@prefix nrl: <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
-@prefix nid3: <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
-@prefix nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
-@prefix nco: <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
-@prefix nmo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.
-@prefix nfo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>.
-@prefix nie: <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>.
-@prefix ncal: <http://www.semanticdesktop.org/ontologies/2007/04/02/ncal#>.
+@prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#>.
+@prefix nid3: <http://tracker.api.gnome.org/ontology/v3/nid3#>.
+@prefix nao: <http://tracker.api.gnome.org/ontology/v3/nao#>.
+@prefix nco: <http://tracker.api.gnome.org/ontology/v3/nco#>.
+@prefix nmo: <http://tracker.api.gnome.org/ontology/v3/nmo#>.
+@prefix nfo: <http://tracker.api.gnome.org/ontology/v3/nfo#>.
+@prefix nie: <http://tracker.api.gnome.org/ontology/v3/nie#>.
+@prefix ncal: <http://tracker.api.gnome.org/ontology/v3/ncal#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-@prefix mfo: <http://www.tracker-project.org/temp/mfo#>.
+@prefix mfo: <http://tracker.api.gnome.org/ontology/v3/mfo#>.
 
 <http://maemo.org/news/planet-maemo/atom.xml> a mfo:FeedChannel;
         nie:title "Planet Maemo";

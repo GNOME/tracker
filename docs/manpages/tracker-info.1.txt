@@ -25,7 +25,7 @@ not have to be an absolute path.
 *-f, --full-namespaces*::
   By default, all keys and values reported about any given _file_ are
   returned in shortened form, for example, _nie:title_ is shown instead
-  of _http://www.semanticdesktop.org/ontologies/2007/01/19/nie#title_.
+  of _http://tracker.api.gnome.org/ontology/v3/nie#title_.
   This makes things much easier to see generally and the output is less
   cluttered. This option reverses that so FULL namespaces are shown
   instead.

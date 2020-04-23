@@ -146,7 +146,7 @@ print_plain (gchar               *urn_or_filename,
 		}
 
 		/* Don't display nie:plainTextContent */
-		if (strcmp (key, "http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent") == 0) {
+		if (strcmp (key, "http://tracker.api.gnome.org/ontology/v3/nie#plainTextContent") == 0) {
 			if (plain_text_content) {
 				fts_key = g_strdup (key);
 				fts_value = g_strdup (value);
@@ -241,7 +241,7 @@ print_turtle (gchar               *urn,
 		}
 
 		/* Don't display nie:plainTextContent */
-		if (!plain_text_content && strcmp (key, "http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent") == 0) {
+		if (!plain_text_content && strcmp (key, "http://tracker.api.gnome.org/ontology/v3/nie#plainTextContent") == 0) {
 			continue;
 		}
 

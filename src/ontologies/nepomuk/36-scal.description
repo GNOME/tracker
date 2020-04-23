@@ -1,4 +1,4 @@
-@prefix dsc: <http://www.tracker-project.org/temp/dsc#> .
+@prefix dsc: <http://tracker.api.gnome.org/ontology/v3/dsc#> .
 
 <virtual-ontology-uri:36-scal.ontology> a dsc:Ontology ;
 	dsc:title "Simplified Calendar Ontology (SCAL)" ;
@@ -8,5 +8,5 @@
 	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/36-scal.ontology";
 
 	dsc:localPrefix "scal" ;
-	dsc:baseUrl "http://www.tracker-project.org/temp/scal#" ;
+	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/scal#" ;
 	dsc:relativePath "./36-scal.ontology" .

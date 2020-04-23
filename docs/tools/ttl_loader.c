@@ -35,10 +35,10 @@
 #define RDFS_LABEL "http://www.w3.org/2000/01/rdf-schema#label"
 #define RDFS_SUBPROPERTYOF "http://www.w3.org/2000/01/rdf-schema#subPropertyOf"
 
-#define NRL_MAX_CARDINALITY "http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#maxCardinality"
+#define NRL_MAX_CARDINALITY "http://tracker.api.gnome.org/ontology/v3/nrl#maxCardinality"
 
-/* #define TRACKER_NAMESPACE "http://www.tracker-project.org/ontologies/tracker#Namespace" */
-#define TRACKER_NS "http://www.tracker-project.org/ontologies/tracker#"
+/* #define TRACKER_NAMESPACE "http://tracker.api.gnome.org/ontology/v3/tracker#Namespace" */
+#define TRACKER_NS "http://tracker.api.gnome.org/ontology/v3/tracker#"
 #define TRACKER_CLASS_SPECIFICATION TRACKER_NS "classSpecification"
 #define TRACKER_PROPERTY_SPECIFICATION TRACKER_NS "propertySpecification"
 #define TRACKER_NOTIFY TRACKER_NS "notify"
@@ -47,7 +47,7 @@
 #define TRACKER_DEPRECATED TRACKER_NS "deprecated"
 
 /* Ontology description */
-#define DSC_PREFIX "http://www.tracker-project.org/temp/dsc#"
+#define DSC_PREFIX "http://tracker.api.gnome.org/ontology/v3/dsc#"
 
 #define DSC_ONTOLOGY DSC_PREFIX "Ontology"
 #define DSC_TITLE DSC_PREFIX "title"
