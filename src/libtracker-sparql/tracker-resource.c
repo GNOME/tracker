@@ -963,14 +963,6 @@ tracker_resource_compare (TrackerResource *a,
 	return strcmp (a_priv->identifier, b_priv->identifier);
 };
 
-/* Internal helper. */
-static GList *
-g_list_find_resource (GList *list,
-                      TrackerResource *resource) {
-	return g_list_find_custom (list, resource, (GCompareFunc) tracker_resource_compare);
-}
-
-
 /* Helper function for serialization code. This allows you to selectively
  * populate 'interned_namespaces' from 'all_namespaces' based on when a
  * particular prefix is actually used. This is quite inefficient compared
@@ -1053,7 +1045,7 @@ generate_nested_turtle_resource (TrackerResource    *resource,
 	                      data->all_namespaces))
 		return;
 
-	if (g_list_find_resource (data->done_list, resource) == NULL) {
+	if (g_list_find (data->done_list, resource) == NULL) {
 		data->done_list = g_list_prepend (data->done_list, resource);
 		generate_turtle (resource, data);
 		g_string_append (data->string, "\n");
@@ -1435,7 +1427,7 @@ generate_sparql_deletes (TrackerResource    *resource,
 {
 	TrackerResourcePrivate *priv = GET_PRIVATE (resource);
 
-	if (g_list_find_resource (data->done_list, resource) != NULL)
+	if (g_list_find (data->done_list, resource) != NULL)
 		/* We already processed this resource. */
 		return;
 
@@ -1460,7 +1452,7 @@ generate_sparql_insert_pattern (TrackerResource    *resource,
 	const GValue *value;
 	gboolean had_property = FALSE;
 
-	if (g_list_find_resource (data->done_list, resource) != NULL)
+	if (g_list_find (data->done_list, resource) != NULL)
 		/* We already processed this resource. */
 		return;
 
@@ -1617,7 +1609,7 @@ generate_jsonld_value (const GValue       *value,
 
 		resource = TRACKER_RESOURCE (g_value_get_object (value));
 
-		if (g_list_find_resource (data->done_list, resource) == NULL) {
+		if (g_list_find (data->done_list, resource) == NULL) {
 			data->done_list = g_list_prepend (data->done_list, resource);
 			json_builder_begin_object (data->builder);
 
