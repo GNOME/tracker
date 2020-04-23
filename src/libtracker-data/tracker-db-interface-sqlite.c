@@ -27,6 +27,7 @@
 #include <errno.h>
 
 #include <libtracker-common/tracker-date-time.h>
+#include <libtracker-common/tracker-debug.h>
 #include <libtracker-common/tracker-locale.h>
 #include <libtracker-common/tracker-parser.h>
 
@@ -2512,7 +2513,7 @@ tracker_db_interface_prepare_stmt (TrackerDBInterface  *db_interface,
 	sqlite3_stmt *sqlite_stmt;
 	int retval;
 
-	g_debug ("Preparing query: '%s'", full_query);
+	TRACKER_NOTE (SQL_STATEMENTS, g_message ("Preparing query: '%s'", full_query));
 	retval = sqlite3_prepare_v2 (db_interface->db, full_query, -1, &sqlite_stmt, NULL);
 
 	if (retval != SQLITE_OK) {

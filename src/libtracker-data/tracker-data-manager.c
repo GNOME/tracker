@@ -32,6 +32,7 @@
 
 #include <libtracker-fts/tracker-fts.h>
 
+#include <libtracker-common/tracker-debug.h>
 #include <libtracker-common/tracker-locale.h>
 
 #include "tracker-class.h"
@@ -232,9 +233,10 @@ set_secondary_index_for_single_value_property (TrackerDBInterface  *iface,
 {
 	GError *internal_error = NULL;
 
-	g_debug ("Dropping secondary index (single-value property):  "
-	         "DROP INDEX IF EXISTS \"%s_%s\"",
-	         service_name, field_name);
+	TRACKER_NOTE (ONTOLOGY_CHANGES,
+	              g_message ("Dropping secondary index (single-value property):  "
+	                         "DROP INDEX IF EXISTS \"%s_%s\"",
+	                         service_name, field_name));
 
 	tracker_db_interface_execute_query (iface, &internal_error,
 	                                    "DROP INDEX IF EXISTS \"%s\".\"%s_%s\"",
@@ -248,9 +250,10 @@ set_secondary_index_for_single_value_property (TrackerDBInterface  *iface,
 	}
 
 	if (enabled) {
-		g_debug ("Creating secondary index (single-value property): "
-		         "CREATE INDEX \"%s_%s\" ON \"%s\" (\"%s\", \"%s\")",
-		         service_name, field_name, service_name, field_name, second_field_name);
+		TRACKER_NOTE (ONTOLOGY_CHANGES,
+		              g_message ("Creating secondary index (single-value property): "
+		                         "CREATE INDEX \"%s_%s\" ON \"%s\" (\"%s\", \"%s\")",
+		                         service_name, field_name, service_name, field_name, second_field_name));
 
 		tracker_db_interface_execute_query (iface, &internal_error,
 		                                    "CREATE INDEX \"%s\".\"%s_%s\" ON \"%s\" (\"%s\", \"%s\")",
@@ -278,9 +281,10 @@ set_index_for_single_value_property (TrackerDBInterface  *iface,
 {
 	GError *internal_error = NULL;
 
-	g_debug ("Dropping index (single-value property): "
-	         "DROP INDEX IF EXISTS \"%s_%s\"",
-	         service_name, field_name);
+	TRACKER_NOTE (ONTOLOGY_CHANGES,
+	              g_message ("Dropping index (single-value property): "
+	                         "DROP INDEX IF EXISTS \"%s_%s\"",
+	                         service_name, field_name));
 
 	tracker_db_interface_execute_query (iface, &internal_error,
 	                                    "DROP INDEX IF EXISTS \"%s\".\"%s_%s\"",
@@ -301,9 +305,10 @@ set_index_for_single_value_property (TrackerDBInterface  *iface,
 		else
 			expr = g_strdup_printf ("\"%s\"", field_name);
 
-		g_debug ("Creating index (single-value property): "
-		         "CREATE INDEX \"%s_%s\" ON \"%s\" (%s)",
-		         service_name, field_name, service_name, expr);
+		TRACKER_NOTE (ONTOLOGY_CHANGES,
+		              g_message ("Creating index (single-value property): "
+		                         "CREATE INDEX \"%s_%s\" ON \"%s\" (%s)",
+		                         service_name, field_name, service_name, expr));
 
 		tracker_db_interface_execute_query (iface, &internal_error,
 		                                    "CREATE INDEX \"%s\".\"%s_%s\" ON \"%s\" (%s)",
@@ -333,9 +338,10 @@ set_index_for_multi_value_property (TrackerDBInterface  *iface,
 	GError *internal_error = NULL;
 	gchar *expr;
 
-	g_debug ("Dropping index (multi-value property): "
-	         "DROP INDEX IF EXISTS \"%s_%s_ID_ID\"",
-	         service_name, field_name);
+	TRACKER_NOTE (ONTOLOGY_CHANGES,
+	              g_message ("Dropping index (multi-value property): "
+	                         "DROP INDEX IF EXISTS \"%s_%s_ID_ID\"",
+	                         service_name, field_name));
 
 	tracker_db_interface_execute_query (iface, &internal_error,
 	                                    "DROP INDEX IF EXISTS \"%s\".\"%s_%s_ID_ID\"",
@@ -351,10 +357,10 @@ set_index_for_multi_value_property (TrackerDBInterface  *iface,
 	/* Useful to have this here for the cases where we want to fully
 	 * re-create the indexes even without an ontology change (when locale
 	 * of the user changes) */
-	g_debug ("Dropping index (multi-value property): "
-	         "DROP INDEX IF EXISTS \"%s_%s_ID\"",
-	         service_name,
-	         field_name);
+	TRACKER_NOTE (ONTOLOGY_CHANGES,
+	              g_message ("Dropping index (multi-value property): "
+	                         "DROP INDEX IF EXISTS \"%s_%s_ID\"",
+	                         service_name, field_name));
 	tracker_db_interface_execute_query (iface, &internal_error,
 	                                    "DROP INDEX IF EXISTS \"%s\".\"%s_%s_ID\"",
 	                                    database,
@@ -376,12 +382,10 @@ set_index_for_multi_value_property (TrackerDBInterface  *iface,
 		expr = g_strdup_printf ("\"%s\"", field_name);
 
 	if (enabled) {
-		g_debug ("Creating index (multi-value property): "
-		         "CREATE INDEX \"%s_%s_ID\" ON \"%s_%s\" (ID)",
-		         service_name,
-		         field_name,
-		         service_name,
-		         field_name);
+		TRACKER_NOTE (ONTOLOGY_CHANGES,
+		              g_message ("Creating index (multi-value property): "
+		                         "CREATE INDEX \"%s_%s_ID\" ON \"%s_%s\" (ID)",
+		                         service_name, field_name, service_name, field_name));
 
 		tracker_db_interface_execute_query (iface, &internal_error,
 		                                    "CREATE INDEX \"%s\".\"%s_%s_ID\" ON \"%s_%s\" (ID)",
@@ -396,13 +400,10 @@ set_index_for_multi_value_property (TrackerDBInterface  *iface,
 			return;
 		}
 
-		g_debug ("Creating index (multi-value property): "
-		         "CREATE UNIQUE INDEX \"%s_%s_ID_ID\" ON \"%s_%s\" (%s, ID)",
-		         service_name,
-		         field_name,
-		         service_name,
-		         field_name,
-		         expr);
+		TRACKER_NOTE (ONTOLOGY_CHANGES,
+		              g_message ("Creating index (multi-value property): "
+		                        "CREATE UNIQUE INDEX \"%s_%s_ID_ID\" ON \"%s_%s\" (%s, ID)",
+		                        service_name, field_name, service_name, field_name, expr));
 
 		tracker_db_interface_execute_query (iface, &internal_error,
 		                                    "CREATE UNIQUE INDEX \"%s\".\"%s_%s_ID_ID\" ON \"%s_%s\" (%s, ID)",
@@ -418,13 +419,10 @@ set_index_for_multi_value_property (TrackerDBInterface  *iface,
 			return;
 		}
 	} else {
-		g_debug ("Creating index (multi-value property): "
-		         "CREATE UNIQUE INDEX \"%s_%s_ID_ID\" ON \"%s_%s\" (ID, %s)",
-		         service_name,
-		         field_name,
-		         service_name,
-		         field_name,
-		         expr);
+		TRACKER_NOTE (ONTOLOGY_CHANGES,
+		              g_message ("Creating index (multi-value property): "
+		                         "CREATE UNIQUE INDEX \"%s_%s_ID_ID\" ON \"%s_%s\" (ID, %s)",
+		                         service_name, field_name, service_name, field_name, expr));
 
 		tracker_db_interface_execute_query (iface, &internal_error,
 		                                    "CREATE UNIQUE INDEX \"%s\".\"%s_%s_ID_ID\" ON \"%s_%s\" (ID, %s)",
