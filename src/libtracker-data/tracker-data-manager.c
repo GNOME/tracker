@@ -865,8 +865,9 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 				while (*super_classes) {
 					if (*super_classes == super_class) {
 						ignore = TRUE;
-						g_debug ("%s: Class %s already has rdfs:subClassOf in %s",
-						         ontology_path, object, subject);
+						TRACKER_NOTE (ONTOLOGY_CHANGES,
+						              g_message ("%s: Class %s already has rdfs:subClassOf in %s",
+						                         ontology_path, object, subject));
 						break;
 					}
 					super_classes++;
@@ -982,8 +983,9 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		properties = tracker_class_get_domain_indexes (class);
 		while (*properties) {
 			if (property == *properties) {
-				g_debug ("%s: Property %s already a tracker:domainIndex in %s",
-				         ontology_path, object, subject);
+				TRACKER_NOTE (ONTOLOGY_CHANGES,
+				              g_message ("%s: Property %s already a tracker:domainIndex in %s",
+				                         ontology_path, object, subject));
 				ignore = TRUE;
 			}
 			properties++;
@@ -1050,8 +1052,9 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 				while (*super_properties) {
 					if (*super_properties == super_property) {
 						ignore = TRUE;
-						g_debug ("%s: Property %s already has rdfs:subPropertyOf in %s",
-						         ontology_path, object, subject);
+						TRACKER_NOTE (ONTOLOGY_CHANGES,
+						              g_message ("%s: Property %s already has rdfs:subPropertyOf in %s",
+						                         ontology_path, object, subject));
 						break;
 					}
 					super_properties++;
@@ -1311,8 +1314,9 @@ check_for_deleted_domain_index (TrackerDataManager *manager,
 
 		for (l = hfound; l != NULL; l = l->next) {
 			TrackerProperty *prop = l->data;
-			g_debug ("Ontology change: keeping tracker:domainIndex: %s",
-			         tracker_property_get_name (prop));
+			TRACKER_NOTE (ONTOLOGY_CHANGES,
+			              g_message ("Ontology change: keeping tracker:domainIndex: %s",
+			                         tracker_property_get_name (prop)));
 			tracker_property_set_is_new_domain_index (prop, class, TRUE);
 		}
 
@@ -1322,8 +1326,9 @@ check_for_deleted_domain_index (TrackerDataManager *manager,
 			const gchar *uri;
 			GBytes *bytes;
 
-			g_debug ("Ontology change: deleting tracker:domainIndex: %s",
-			         tracker_property_get_name (prop));
+			TRACKER_NOTE (ONTOLOGY_CHANGES,
+			              g_message ("Ontology change: deleting tracker:domainIndex: %s",
+			                         tracker_property_get_name (prop)));
 			tracker_property_del_domain_index (prop, class);
 			tracker_class_del_domain_index (class, prop);
 
@@ -2567,14 +2572,15 @@ create_decomposed_metadata_property_table (TrackerDBInterface *iface,
 			/* multiple values */
 
 			if (in_update) {
-				g_debug ("Altering database for class '%s' property '%s': multi value",
-				         service_name, field_name);
+				TRACKER_NOTE (ONTOLOGY_CHANGES,
+				              g_message ("Altering database for class '%s' property '%s': multi value",
+				                         service_name, field_name));
 			}
 
 			if (in_change && !tracker_property_get_is_new (property) && !tracker_property_get_cardinality_changed (property)) {
-				g_debug ("Drop index: DROP INDEX IF EXISTS \"%s_%s_ID\"\nRename: ALTER TABLE \"%s_%s\" RENAME TO \"%s_%s_TEMP\"",
-				         service_name, field_name, service_name, field_name,
-				         service_name, field_name);
+				TRACKER_NOTE (ONTOLOGY_CHANGES,
+				              g_message ("Drop index: DROP INDEX IF EXISTS \"%s_%s_ID\"\nRename: ALTER TABLE \"%s_%s\" RENAME TO \"%s_%s_TEMP\"",
+				                         service_name, field_name, service_name, field_name, service_name, field_name));
 
 				tracker_db_interface_execute_query (iface, &internal_error,
 				                                    "DROP INDEX IF EXISTS \"%s\".\"%s_%s_ID\"",
@@ -2770,7 +2776,7 @@ copy_from_domain_to_domain_index (TrackerDBInterface  *iface,
 	                         source_name,
 	                         dest_name);
 
-	g_debug ("Copying: '%s'", query);
+	TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Copying: '%s'", query));
 
 	tracker_db_interface_execute_query (iface, &internal_error, "%s", query);
 
@@ -3017,7 +3023,7 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 	}
 
 	if (in_change && !tracker_class_get_is_new (service)) {
-		g_debug ("Rename: ALTER TABLE \"%s\" RENAME TO \"%s_TEMP\"", service_name, service_name);
+		TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Rename: ALTER TABLE \"%s\" RENAME TO \"%s_TEMP\"", service_name, service_name));
 		tracker_db_interface_execute_query (iface, &internal_error,
 		                                    "ALTER TABLE \"%s\".\"%s\" RENAME TO \"%s_TEMP\"",
 		                                    database, service_name, service_name);
@@ -3031,7 +3037,7 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 
 	if (in_change || !in_update || (in_update && tracker_class_get_is_new (service))) {
 		if (in_update)
-			g_debug ("Altering database with new class '%s' (create)", service_name);
+			TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Altering database with new class '%s' (create)", service_name));
 		in_alter = FALSE;
 		create_sql = g_string_new ("");
 		g_string_append_printf (create_sql, "CREATE TABLE \"%s\".\"%s\" (ID INTEGER NOT NULL PRIMARY KEY",
@@ -3073,11 +3079,12 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 				/* single value */
 
 				if (in_update) {
-					g_debug ("%sAltering database for class '%s' property '%s': single value (%s)",
-					         in_alter ? "" : "  ",
-					         service_name,
-					         field_name,
-					         in_alter ? "alter" : "create");
+					TRACKER_NOTE (ONTOLOGY_CHANGES,
+					              g_message ("%sAltering database for class '%s' property '%s': single value (%s)",
+					                         in_alter ? "" : "  ",
+					                         service_name,
+					                         field_name,
+					                         in_alter ? "alter" : "create"));
 				}
 
 				if (!in_alter) {
@@ -3127,7 +3134,7 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 						g_string_append (alter_sql, " UNIQUE");
 					}
 
-					g_debug ("Altering: '%s'", alter_sql->str);
+					TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Altering: '%s'", alter_sql->str));
 					tracker_db_interface_execute_query (iface, &internal_error, "%s", alter_sql->str);
 					if (internal_error) {
 						g_string_free (alter_sql, TRUE);
@@ -3170,7 +3177,7 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 
 	if (create_sql) {
 		g_string_append (create_sql, ")");
-		g_debug ("Creating: '%s'", create_sql->str);
+		TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Creating: '%s'", create_sql->str));
 		tracker_db_interface_execute_query (iface, &internal_error,
 		                                    "%s", create_sql->str);
 		if (internal_error) {
@@ -3227,7 +3234,7 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 		                         database, service_name, in_col_sql->str,
 		                         sel_col_sql->str, database, service_name);
 
-		g_debug ("Copy: %s", query);
+		TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Copy: %s", query));
 
 		tracker_db_interface_execute_query (iface, &internal_error, "%s", query);
 
@@ -3263,7 +3270,7 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 				g_string_free (n_in_col_sql, TRUE);
 				g_string_free (n_sel_col_sql, TRUE);
 
-				g_debug ("Copy supported nlr:maxCardinality change: %s", query);
+				TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Copy supported nlr:maxCardinality change: %s", query));
 
 				tracker_db_interface_execute_query (iface, &internal_error, "%s", query);
 
@@ -3276,7 +3283,7 @@ create_decomposed_metadata_tables (TrackerDataManager  *manager,
 			}
 		}
 
-		g_debug ("Rename (drop): DROP TABLE \"%s_TEMP\"", service_name);
+		TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Rename (drop): DROP TABLE \"%s_TEMP\"", service_name));
 		tracker_db_interface_execute_query (iface, &internal_error,
 		                                    "DROP TABLE \"%s\".\"%s_TEMP\"",
 						    database, service_name);
@@ -3641,7 +3648,7 @@ tracker_data_manager_recreate_indexes (TrackerDataManager  *manager,
 		return;
 	}
 
-	g_debug ("Dropping all indexes...");
+	TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Dropping all indexes..."));
 	for (i = 0; i < n_properties; i++) {
 		fix_indexed (manager, properties [i], FALSE, &internal_error);
 
@@ -3651,7 +3658,7 @@ tracker_data_manager_recreate_indexes (TrackerDataManager  *manager,
 		}
 	}
 
-	g_debug ("Starting index re-creation...");
+	TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Starting index re-creation..."));
 	for (i = 0; i < n_properties; i++) {
 		fix_indexed (manager, properties [i], TRUE, &internal_error);
 
@@ -3666,7 +3673,7 @@ tracker_data_manager_recreate_indexes (TrackerDataManager  *manager,
 		               (gdouble) ((gdouble) i / (gdouble) n_properties),
 		               manager);
 	}
-	g_debug ("  Finished index re-creation...");
+	TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("  Finished index re-creation..."));
 }
 
 static gboolean
@@ -4132,7 +4139,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 			GFile *ontology_file = l->data;
 			gchar *uri = g_file_get_uri (ontology_file);
 
-			g_debug ("Loading ontology %s", uri);
+			TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Loading ontology %s", uri));
 
 			load_ontology_file (manager, ontology_file,
 			                    &max_id,
@@ -4367,7 +4374,7 @@ tracker_data_manager_initable_init (GInitable     *initable,
 				if (val != last_mod) {
 					gchar *uri = g_file_get_uri (ontology_file);
 
-					g_debug ("Ontology file '%s' needs update", uri);
+					TRACKER_NOTE (ONTOLOGY_CHANGES, g_message ("Ontology file '%s' needs update", uri));
 					g_free (uri);
 
 					if (!transaction_started) {
