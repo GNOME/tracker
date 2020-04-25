@@ -7,7 +7,7 @@ It's a search engine, and a database.
 Tracker indexes content from your home directory automatically, so applications
 can provide instant search results when you need them.
 
-See the [overview](/overview) for more information.
+See the [overview](overview) for more information.
 
 ## What files will Tracker index?
 
@@ -42,7 +42,7 @@ then you might see unwanted high resource usage.
 
 If you see high resource usage from Tracker even when no files have changed on
 disk, this probably indicates a bug in Tracker or one of its dependencies.
-We can [work together](/community) to find out what the problem is.
+We can [work together](community) to find out what the problem is.
 
 ## How can I disable Tracker in GNOME?
 
@@ -59,7 +59,7 @@ are indexed. This should bring resource usage to zero.
 
 If the Tracker store is using a lot of disk space and you are sure that
 there is no unreplaceable data stored in the database, you can run `tracker
-reset --hard` to delete everything stored in the database.  
+reset --hard` to delete everything stored in the database.
 
 ## Can Tracker help me organize my music collection?
 
