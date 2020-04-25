@@ -232,12 +232,12 @@ db_set_params (TrackerDBInterface   *iface,
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".journal_size_limit = 10240000", database);
 
 	if (page_size != TRACKER_DB_PAGE_SIZE_DONT_SET) {
-		g_debug ("  Setting page size to %d", page_size);
+		TRACKER_NOTE (SQLITE, g_message ("  Setting page size to %d", page_size));
 		tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".page_size = %d", database, page_size);
 	}
 
 	tracker_db_interface_execute_query (iface, NULL, "PRAGMA \"%s\".cache_size = %d", database, cache_size);
-	g_debug ("  Setting cache size to %d", cache_size);
+	TRACKER_NOTE (SQLITE, g_message ("  Setting cache size to %d", cache_size));
 }
 
 static gboolean
@@ -550,8 +550,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 	}
 
 	/* Set up locations */
-	g_debug ("Setting database locations");
-
 	db_manager->flags = flags;
 	db_manager->s_cache_size = select_cache_size;
 	db_manager->u_cache_size = update_cache_size;
@@ -570,21 +568,17 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 		if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 
 			/* Make sure the directories exist */
-			g_debug ("Checking database directories exist");
-
 			g_mkdir_with_parents (db_manager->data_dir, 00755);
 		}
 	} else {
 		db_manager->shared_cache_key = tracker_generate_uuid (NULL);
 	}
 
-	g_debug ("Checking whether database files exist");
-
 	if ((db_manager->flags & TRACKER_DB_MANAGER_IN_MEMORY) != 0) {
 		need_to_create = TRUE;
 	} else if (!g_file_test (db_manager->db.abs_filename, G_FILE_TEST_EXISTS)) {
 		if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
-			g_info ("Could not find database file:'%s', will create it.", db_manager->db.abs_filename);
+			TRACKER_NOTE (SQLITE, g_message ("Could not find database file:'%s', will create it.", db_manager->db.abs_filename));
 			need_to_create = TRUE;
 		} else {
 			g_set_error (error,
@@ -596,8 +590,6 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 			return NULL;
 		}
 	} else {
-		g_debug ("Checking database version");
-
 		version = db_get_version (db_manager);
 
 		if (version < TRACKER_DB_VERSION_NOW) {
@@ -631,7 +623,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 
 	/* Set general database options */
 	if (shared_cache) {
-		g_info ("Enabling database shared cache");
+		TRACKER_NOTE (SQLITE, g_message ("Enabling database shared cache"));
 		tracker_db_interface_sqlite_enable_shared_cache ();
 	}
 
@@ -649,7 +641,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 			return FALSE;
 		}
 
-		g_info ("Creating database files for %s...", db_manager->db.abs_filename);
+		TRACKER_NOTE (SQLITE, g_message ("Creating database files for %s...", db_manager->db.abs_filename));
 
 		db_manager->db.iface = tracker_db_manager_create_db_interface (db_manager, FALSE, &internal_error);
 		if (internal_error) {
@@ -662,7 +654,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 
 		tracker_db_manager_update_version (db_manager);
 	} else {
-		g_info ("Loading files for database %s...", db_manager->db.abs_filename);
+		TRACKER_NOTE (SQLITE, g_message ("Loading files for database %s...", db_manager->db.abs_filename));
 
 		if ((flags & TRACKER_DB_MANAGER_READONLY) == 0) {
 			/* Check that the database was closed cleanly and do a deeper integrity
@@ -672,7 +664,7 @@ tracker_db_manager_new (TrackerDBManagerFlags   flags,
 				gsize size = 0;
 				struct stat st;
 
-				g_info ("Didn't shut down cleanly last time, doing integrity checks");
+				TRACKER_NOTE (SQLITE, g_message ("Didn't shut down cleanly last time, doing integrity checks"));
 
 				if (g_stat (db_manager->db.abs_filename, &st) == 0) {
 					size = st.st_size;
