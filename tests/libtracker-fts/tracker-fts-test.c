@@ -184,7 +184,7 @@ main (int argc, char **argv)
 {
 	gint result;
 	gint i;
-	gchar *current_dir, *path;
+	gchar *path;
 
 	g_test_init (&argc, &argv, NULL);
 
@@ -195,10 +195,6 @@ main (int argc, char **argv)
 	if (! g_getenv ("TRACKER_TESTS_VERBOSE")) {
 		g_log_set_handler ("Tracker", G_LOG_LEVEL_DEBUG | G_LOG_LEVEL_INFO, g_log_default_handler, NULL);
 	}
-
-	current_dir = g_get_current_dir ();
-	g_setenv ("TRACKER_LANGUAGE_STOP_WORDS_DIR", current_dir, TRUE);
-	g_free (current_dir);
 
 	/* add test cases */
 	for (i = 0; tests[i].test_name; i++) {
