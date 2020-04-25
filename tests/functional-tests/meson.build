@@ -47,7 +47,7 @@ foreach t: functional_tests
     args: './' + t + '.py',
     env: test_env,
     workdir: meson.current_source_dir(),
-    timeout: 60)
+    timeout: 120)
 endforeach
 
 subdir('ipc')

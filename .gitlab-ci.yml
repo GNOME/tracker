@@ -1,9 +1,21 @@
+# The container images used in this pipeline are built from this
+# GitLab project: https://gitlab.gnome.org/GNOME/tracker-oci-images
+
+variables:
+  # These can be used to see verbose log output from the functional-tests.
+  # See HACKING.md for more information.
+  G_MESSAGES_DEBUG: "Tracker"
+  TRACKER_VERBOSITY: "1"
+  TRACKER_TESTS_VERBOSE: "no"
+
+  # This can be used when debugging test failures that only occur within GitLab CI.
+  MESON_TEST_EXTRA_ARGS: ""
+
 stages:
   - test
 
-test-fedora-latest:
+.test_template: &test
   stage: test
-  image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
 
   script:
     - su tracker -c 'mkdir build'
@@ -14,10 +26,32 @@ test-fedora-latest:
       # whole environment for every failed test, and that gives a whole
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
+      su tracker -c 'cd build; env LANG=C.UTF-8 LC_ALL=C.UTF-8 eatmydata meson test --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
 
-      su tracker -c 'cd build; env LANG=C.UTF8 LC_ALL=C.UTF8 eatmydata meson test --print-errorlogs'
+  after_script:
+    - |
+      echo "Distribution: "
+      echo
+      egrep '^NAME=|^VERSION=' /etc/os-release
+      echo
+      echo "Test suite settings:"
+      echo
+      echo "TRACKER_VERBOSITY: ${TRACKER_VERBOSITY}"
+      echo "TRACKER_TESTS_VERBOSE: ${TRACKER_TESTS_VERBOSE}"
+      echo "MESON_TEST_EXTRA_ARGS: ${MESON_TEST_EXTRA_ARGS}"
+      echo
+      echo "These values can be set at https://gitlab.gnome.org/GNOME/tracker/pipelines/new"
 
   artifacts:
     when: always
     paths:
     - build/meson-logs/testlog.txt
+
+
+test-fedora-latest:
+  image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
+  <<: *test
+
+test-ubuntu-rolling:
+  image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/ubuntu:rolling
+  <<: *test
