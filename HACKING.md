@@ -39,7 +39,9 @@ The following environment variables control logging from Tracker daemons:
 
     Options for libtracker-sparql include:
 
+        - collation
         - ontology-changes
+        - sqlite
         - sql-statements
 
     See the relevant `man` page for options relevant to tracker-miner-fs.
