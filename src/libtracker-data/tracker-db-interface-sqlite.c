@@ -1948,8 +1948,9 @@ open_database (TrackerDBInterface  *db_interface,
 		             str);
 		return;
 	} else {
-		g_debug ("Opened sqlite3 database:'%s'",
-		         db_interface->filename? db_interface->filename : "memory");
+		TRACKER_NOTE (SQLITE,
+		              g_message ("Opened sqlite3 database:'%s'",
+		                         db_interface->filename? db_interface->filename : "memory"));
 	}
 
 	/* Set our unicode collation function */
@@ -2344,7 +2345,7 @@ tracker_db_interface_sqlite_fts_rebuild_tokens (TrackerDBInterface *interface,
 void
 tracker_db_interface_sqlite_reset_collator (TrackerDBInterface *db_interface)
 {
-	g_debug ("Resetting collator in db interface %p", db_interface);
+	TRACKER_NOTE (SQLITE, g_message ("Resetting collator in db interface %p", db_interface));
 
 	/* This will overwrite any other collation set before, if any */
 	if (sqlite3_create_collation_v2 (db_interface->db,
@@ -2397,11 +2398,8 @@ tracker_db_interface_sqlite_wal_checkpoint (TrackerDBInterface  *interface,
                                             GError             **error)
 {
 	int return_val;
-	GLogLevelFlags log_level;
 
-	log_level = blocking ? G_LOG_LEVEL_INFO : G_LOG_LEVEL_DEBUG;
-
-	g_log (G_LOG_DOMAIN, log_level, "Checkpointing database (%s)...", blocking ? "blocking" : "non-blocking");
+	TRACKER_NOTE (SQLITE, g_message ("Checkpointing database (%s)...", blocking ? "blocking" : "non-blocking"));
 
 	return_val = sqlite3_wal_checkpoint_v2 (interface->db, NULL,
 	                                        blocking ? SQLITE_CHECKPOINT_FULL : SQLITE_CHECKPOINT_PASSIVE,
@@ -2415,7 +2413,7 @@ tracker_db_interface_sqlite_wal_checkpoint (TrackerDBInterface  *interface,
 		return FALSE;
 	}
 
-	g_log (G_LOG_DOMAIN, log_level, "Checkpointing complete");
+	TRACKER_NOTE (SQLITE, g_message ("Checkpointing complete"));
 	return TRUE;
 }
 
@@ -2429,7 +2427,7 @@ tracker_db_interface_sqlite_finalize (GObject *object)
 	close_database (db_interface);
 	g_free (db_interface->fts_properties);
 
-	g_debug ("Closed sqlite3 database:'%s'", db_interface->filename);
+	TRACKER_NOTE (SQLITE, g_message ("Closed sqlite3 database:'%s'", db_interface->filename));
 
 	g_free (db_interface->filename);
 	g_free (db_interface->shared_cache_key);
