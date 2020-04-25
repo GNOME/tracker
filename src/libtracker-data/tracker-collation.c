@@ -23,16 +23,16 @@
 #include <string.h>
 #include <locale.h>
 
+#include <libtracker-common/tracker-debug.h>
 #include <libtracker-common/tracker-locale.h>
 #include "tracker-collation.h"
 
 /* If defined, will dump additional traces */
-#ifdef ENABLE_TRACE
-#define trace(message, ...) \
-	g_debug (message, ##__VA_ARGS__)
+#ifdef G_ENABLE_DEBUG
+#define trace(message, ...) TRACKER_NOTE (COLLATION, g_message (message, ##__VA_ARGS__))
 #else
 #define trace(...)
-#endif /* ENABLE_TRACE */
+#endif
 
 #ifdef HAVE_LIBUNISTRING
 /* libunistring versions prior to 9.1.2 need this hack */
@@ -55,7 +55,7 @@ tracker_collation_init (void)
 
 	/* Get locale! */
 	locale = tracker_locale_get (TRACKER_LOCALE_COLLATE);
-	g_debug ("[libunistring collation] Initializing collator for locale '%s'", locale);
+	TRACKER_NOTE (COLLATION, g_message ("[libunistring collation] Initializing collator for locale '%s'", locale));
 	g_free (locale);
 	/* Nothing to do */
 	return NULL;
@@ -109,7 +109,7 @@ tracker_collation_init (void)
 	/* Get locale! */
 	locale = tracker_locale_get (TRACKER_LOCALE_COLLATE);
 
-	g_debug ("[ICU collation] Initializing collator for locale '%s'", locale);
+	TRACKER_NOTE (COLLATION, g_message ("[ICU collation] Initializing collator for locale '%s'", locale));
 	collator = ucol_open (locale, &status);
 	if (!collator) {
 		g_warning ("[ICU collation] Collator for locale '%s' cannot be created: %s",
@@ -197,7 +197,7 @@ tracker_collation_init (void)
 
 	/* Get locale! */
 	locale = tracker_locale_get (TRACKER_LOCALE_COLLATE);
-	g_debug ("[GLib collation] Initializing collator for locale '%s'", locale);
+	TRACKER_NOTE (COLLATION, g_message ("[GLib collation] Initializing collator for locale '%s'", locale));
 	g_free (locale);
 	/* Nothing to do */
 	return NULL;
