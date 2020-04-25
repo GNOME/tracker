@@ -263,8 +263,6 @@ main (gint argc, gchar **argv)
 
 	setlocale (LC_ALL, "");
 
-	g_setenv ("TRACKER_DB_ONTOLOGIES_DIR", TEST_ONTOLOGIES_DIR, TRUE);
-
 	g_test_init (&argc, &argv, NULL);
 
 	/* g_test_init() enables verbose logging by default, but Tracker is too
