@@ -188,14 +188,6 @@ main (int argc, char **argv)
 
 	g_test_init (&argc, &argv, NULL);
 
-	/* g_test_init() enables verbose logging by default, but Tracker is too
-	 * verbose. To make the logs managable, we hide DEBUG and INFO messages
-	 * unless TRACKER_TESTS_VERBOSE is set.
-	 */
-	if (! g_getenv ("TRACKER_TESTS_VERBOSE")) {
-		g_log_set_handler ("Tracker", G_LOG_LEVEL_DEBUG | G_LOG_LEVEL_INFO, g_log_default_handler, NULL);
-	}
-
 	/* add test cases */
 	for (i = 0; tests[i].test_name; i++) {
 		gchar *testpath;
