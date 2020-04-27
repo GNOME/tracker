@@ -1,0 +1,326 @@
+<?xml version='1.0' encoding="ISO-8859-1"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2001/XInclude'">
+]>
+
+<part id="tracker-tutorial">
+  <title>SPARQL tutorial</title>
+  <partintro>
+    <para>
+      This tutorial aims to introduce you to RDF and SPARQL from the ground
+      up. All examples come from the Nepomuk ontology, and even though the
+      tutorial aims to be generic enough, it mentions things specific to
+      Tracker, those are clearly spelled out.
+    </para>
+  </partintro>
+
+  <chapter id="tracker-tutorial-rdf-triples">
+    <title>RDF Triples</title>
+    <para>
+      RDF data define a graph, composed by vertices and edges. This graph is
+      directed, because edges point from one vertex to another, and it is
+      labeled, as those edges have a name. The unit of data in RDF is a
+      triple of the form:
+      <informalexample>
+        <programlisting>
+	  subject  predicate  object
+        </programlisting>
+      </informalexample>
+
+      Or expressed visually:
+      <graphic fileref="triple-graph-1.png" format="PNG"></graphic>
+    </para>
+    <para>
+      Subject and object are 2 graph vertices and the predicate is the edge,
+      the accumulation of those triples form the full graph. For example,
+      the following triples:
+      <informalexample>
+        <programlisting>
+&lt;a&gt; a nfo:FileDataObject .
+&lt;a&gt; a nmm:MusicPiece .
+&lt;a&gt; nie:title "Images" .
+&lt;a&gt; nmm:musicAlbum &lt;b&gt; .
+&lt;a&gt; nmm:albumArtist &lt;c&gt; .
+&lt;a&gt; nmm:albumArtist &lt;d&gt; .
+&lt;a&gt; nmm:performer &lt;e&gt; .
+&lt;b&gt; a nmm:MusicAlbum .
+&lt;b&gt; nie:title "Go Off!" .
+&lt;c&gt; a nmm:Artist .
+&lt;c&gt; nmm:artistName "Jason Becker" .
+&lt;d&gt; a nmm:Artist .
+&lt;d&gt; nmm:artistName "Marty Friedman" .
+&lt;e&gt; a nmm:Artist .
+&lt;e&gt; nmm:artistName "Cacophony" .
+        </programlisting>
+      </informalexample>
+      Would visually generate the following graph:
+      <graphic fileref="triple-graph-2.png" format="PNG"></graphic>
+    </para>
+    <para>
+      The dot after each triple is not (just) there for legibility, but is
+      part of the syntax. The RDF triples in full length are quite repetitive
+      and cumbersome to write, luckily they can be shortened by providing multiple
+      objects (with <systemitem>,</systemitem> separator) or multiple predicate/object
+      pairs (with <systemitem>;</systemitem> separator), the previous RDF could be
+      transformed into:
+      <informalexample>
+        <programlisting>
+&lt;a&gt; a nfo:FileDataObject, nmm:MusicPiece .
+&lt;a&gt; nie:title "Images" .
+&lt;a&gt; nmm:musicAlbum &lt;b&gt; .
+&lt;a&gt; nmm:albumArtist &lt;c&gt; , &lt;d&gt; .
+&lt;a&gt; nmm:performer &lt;e&gt; .
+&lt;b&gt; a nmm:MusicAlbum .
+&lt;b&gt; nie:title "Go Off!" .
+&lt;c&gt; a nmm:Artist .
+&lt;c&gt; nmm:artistName "Jason Becker" .
+&lt;d&gt; a nmm:Artist .
+&lt;d&gt; nmm:artistName "Marty Friedman" .
+&lt;e&gt; a nmm:Artist .
+&lt;e&gt; nmm:artistName "Cacophony" .
+        </programlisting>
+      </informalexample>
+      And further into:
+      <informalexample>
+        <programlisting>
+&lt;a&gt; a nfo:FileDataObject, nmm:MusicPiece ;
+    nie:title "Images" ;
+    nmm:musicAlbum &lt;b&gt; ;
+    nmm:albumArtist &lt;c&gt;, &lt;d&gt; ;
+    nmm:performer &lt;e&gt; .
+&lt;b&gt; a nmm:MusicAlbum ;
+    nie:title "Go Off!" .
+&lt;c&gt; a nmm:Artist ;
+    nmm:artistName "Jason Becker" .
+&lt;d&gt; a nmm:Artist ;
+    nmm:artistName "Marty Friedman" .
+&lt;e&gt; a nmm:Artist ;
+    nmm:artistName "Cacophony" .
+        </programlisting>
+      </informalexample>
+    </para>
+  </chapter>
+
+  <chapter id="tracker-tutorial-sparql">
+    <title>SPARQL</title>
+    <para>
+      SPARQL defines a query language for RDF data. How does a query language
+      for graphs work? Naturally by providing a graph to be matched, it is
+      conveniently called the "graph pattern".
+    </para>
+    <para>
+      To begin simple, the simplest query would consist of a triple with all
+      3 elements defined, e.g.:
+      <informalexample>
+        <programlisting language="SPARQL">
+ASK { &lt;a&gt; nie:title "Images" }
+	</programlisting>
+      </informalexample>
+    </para>
+    <para>
+      Which would result in <systemitem>true</systemitem>, as the triple does
+      exist. The ASK query syntax is actually the simplest form of graph
+      testing, resulting in a single boolean row/column containing whether
+      the provided graph exists in the store or not. It also works for more
+      complex graphs, for example:
+
+      <informalexample>
+        <programlisting language="SPARQL">
+ASK { &lt;a&gt; nie:title "Images" ;
+          nmm:albumArtist &lt;c&gt; ;
+          nmm:musicAlbum &lt;b&gt; .
+      &lt;b&gt; nie:title "Go Off!" .
+      &lt;c&gt; nmm:artistName "Jason Becker" }
+	</programlisting>
+      </informalexample>
+    </para>
+    <para>
+      But of course the deal of a query language is being able to obtain
+      the stored data. The SELECT query syntax is used for that, and variables
+      are denoted with a '?' prefix, variables act as "placeholders" where any
+      data will match and be available to the resultset or within the query as
+      that variable name. The following query would be the opposite to the
+      first ASK query:
+
+      <informalexample>
+        <programlisting language="SPARQL">
+SELECT * { ?subject ?predicate ?object }
+	</programlisting>
+      </informalexample>
+    </para>
+    <para>
+      What does this query do? it provides a triple with 3 variables, that
+      every known triple in the database will match. The '*' is a shortcut for
+      all queried variables, the query could also be expressed as:
+
+      <informalexample>
+        <programlisting language="SPARQL">
+SELECT ?subject ?predicate ?object { ?subject ?predicate ?object }
+	</programlisting>
+      </informalexample>
+    </para>
+    <para>
+      However, querying for all known data is most often hardly useful, this
+      got unwieldly soon! Luckily, that's not necessarily the case, the variables
+      may be used anywhere in the triple definition, with other triple elements
+      consisting of literals you want to match for, e.g.:
+
+      <example>
+	<title>
+	  Give me the title of resource <systemitem>&lt;a&gt;</systemitem> (Result: "Images").
+        </title>
+        <programlisting language="SPARQL">
+SELECT ?songName { &lt;a&gt; nie:title ?songName }
+	</programlisting>
+      </example>
+
+      <example>
+	<title>
+	  What is this text to &lt;b&gt;? (Result: the nie:title)
+        </title>
+        <programlisting language="SPARQL">
+SELECT ?predicate { &lt;b&gt; ?predicate "Go Off!" }
+        </programlisting>
+      </example>
+
+      <example>
+	<title>
+	  What is the resource URI of this fine musician? (Result: <systemitem>&lt;d&gt;</systemitem>)
+        </title>
+        <programlisting language="SPARQL">
+SELECT ?subject { ?subject nmm:artistName "Marty Friedman" }
+        </programlisting>
+      </example>
+
+      <example>
+	<title>
+	  Give me all resources that are a music piece (Result: <systemitem>&lt;a&gt;</systemitem>)
+        </title>
+        <programlisting language="SPARQL">
+SELECT ?song { ?song a nmm:MusicPiece }
+        </programlisting>
+      </example>
+    </para>
+    <para>
+      And also combinations of them, for example:
+
+      <example>
+	<title>
+	  Give me all predicate/object pairs for resource <systemitem>&lt;a&gt;</systemitem>
+        </title>
+        <programlisting language="SPARQL">
+SELECT ?pred ?obj { &lt;a&gt; ?pred ?obj }
+        </programlisting>
+      </example>
+
+      <example>
+	<title>
+	  <quote>The Answer to the Ultimate Question of Life, the Universe, and Everything</quote>
+        </title>
+        <programlisting language="SPARQL">
+SELECT ?subj ?pred { ?subj ?pred 42 }
+        </programlisting>
+      </example>
+
+      <example>
+	<title>
+	  Give me all resources that have a title, and their title.
+        </title>
+        <programlisting language="SPARQL">
+SELECT ?subj ?obj { ?subj nie:title ?obj }
+        </programlisting>
+      </example>
+
+      And of course, the graph pattern can hold more complex triple
+      definitions, that will be matched as a whole across the stored
+      data. for example:
+
+      <example>
+	<title>
+	  Give me all songs from this fine album
+        </title>
+        <programlisting language="SPARQL">
+SELECT ?song { ?album nie:title "Go Off!" .
+               ?song nmm:musicAlbum ?album }
+        </programlisting>
+      </example>
+
+      <example>
+	<title>
+	  Give me all song resources, their title, and their album title
+        </title>
+        <programlisting language="SPARQL">
+SELECT ?song ?songTitle ?albumTitle { ?song a nmm:MusicPiece ;
+                                            nmm:musicAlbum ?album ;
+                                            nie:title ?songTitle .
+                                      ?album nie:title ?albumTitle }
+        </programlisting>
+      </example>
+    </para>
+    <para>
+      Stop a bit to think on the graph pattern expressed in the last query:
+      <graphic fileref="triple-graph-3.png" format="PNG"></graphic>
+    </para>
+    <para>
+      This pattern on one hand consists of specified data (eg. ?song must
+      be a <systemitem>nmm:MusicPiece</systemitem>, it must have a
+      <systemitem>nmm:musicAlbum</systemitem> and a <systemitem>nie:title</systemitem>,
+      ?album must have a <systemitem>nie:title</systemitem>), which must all
+      apply for a match to happen.
+    </para>
+    <para>
+      On the other hand, the graph pattern contains a number of variables,
+      some only used internally in the graph pattern, as a temporary
+      variable of sorts (?album, in order to express the relation between
+      ?song and its album title), while other variables are requested in
+      the result set.
+    </para>
+  </chapter>
+
+  <!-- FIXME: Keep writing! -->
+  <!--
+  <chapter id="tracker-tutorial-ontologies">
+    <title>Ontologies</title>
+  </chapter>
+  <chapter id="tracker-tutorial-inserting-data">
+    <title>Inserting data</title>
+  </chapter>
+  <chapter id="tracker-tutorial-updates-deletes">
+    <title>Updates and deletes</title>
+  </chapter>
+  <chapter id="tracker-tutorial-named-nodes">
+    <title>Named nodes</title>
+  </chapter>
+  <chapter id="tracker-tutorial-blank-nodes">
+    <title>Blank nodes</title>
+  </chapter>
+  <chapter id="tracker-tutorial-property-paths">
+    <title>Property paths</title>
+  </chapter>
+  <chapter id="tracker-tutorial-optional">
+    <title>Optional data</title>
+  </chapter>
+  <chapter id="tracker-tutorial-filtering">
+    <title>Filtering data</title>
+  </chapter>
+  <chapter id="tracker-tutorial-binding">
+    <title>Binding expressions to variables</title>
+  </chapter>
+  <chapter id="tracker-tutorial-aggregates">
+    <title>Aggregates</title>
+  </chapter>
+  <chapter id="tracker-tutorial-graphs">
+    <title>Graphs</title>
+  </chapter>
+  <chapter id="tracker-tutorial-services">
+    <title>Services</title>
+  </chapter>
+  <chapter id="tracker-tutorial-import-export">
+    <title>Importing and exporting data</title>
+  </chapter>
+  <chapter id="tracker-tutorial-graph-management">
+    <title>Graph Management</title>
+  </chapter>
+  -->
+</part>

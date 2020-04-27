@@ -53,6 +53,7 @@
   <xi:include href="examples.xml"/>
   <xi:include href="limits.xml"/>
   <xi:include href="performance.xml"/>
+  <xi:include href="tutorial.xml"/>
   <xi:include href="migrating-1to2.xml"/>
   <xi:include href="migrating-2to3.xml"/>
 

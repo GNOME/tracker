@@ -28,6 +28,12 @@ example_files = [
     'examples/writeonly-with-blank-nodes-example.c',
 ]
 
+image_files = [
+    'images/triple-graph-1.png',
+    'images/triple-graph-2.png',
+    'images/triple-graph-3.png',
+]
+
 private_headers = [
     'tracker-notifier-private.h',
 ]
@@ -37,7 +43,7 @@ gnome.gtkdoc('libtracker-sparql',
     main_xml: 'libtracker-sparql-docs.xml',
     scan_args: ['--ignore-headers=' + ' '.join(private_headers)],
     content_files: ['overview.xml', 'examples.xml', 'ontologies.xml', 'private-store.xml', 'migrating-1to2.xml', example_files],
-    html_assets: icon_images,
+    html_assets: image_files,
     gobject_typesfile: 'libtracker-sparql.types',
     dependencies: tracker_sparql_dep,
     fixxref_args: fixxref_args,
