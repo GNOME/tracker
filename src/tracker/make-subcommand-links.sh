@@ -7,9 +7,9 @@ subcommanddir=$2
 shift
 shift
 
-if [ -d $subcommanddir ]
+if [ -d $DESTDIR$subcommanddir ]
 then
-    for l in `find $subcommanddir -type l`
+    for l in `find $DESTDIR$subcommanddir -type l`
     do
 	# Delete all previous links to our own binary
 	if [ `readlink $l` = "$clicommand" ]
@@ -19,9 +19,9 @@ then
     done
 fi
 
-mkdir -p $subcommanddir
+mkdir -p $DESTDIR$subcommanddir
 
 for subcommand in $@
 do
-    ln -s $clicommand $subcommanddir/$subcommand
+    ln -s $clicommand $DESTDIR$subcommanddir/$subcommand
 done
