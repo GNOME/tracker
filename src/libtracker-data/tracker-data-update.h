@@ -76,18 +76,6 @@ void     tracker_data_insert_statement              (TrackerData               *
                                                      const gchar               *predicate,
                                                      GBytes                    *object,
                                                      GError                   **error);
-void     tracker_data_insert_statement_with_uri     (TrackerData               *data,
-                                                     const gchar               *graph,
-                                                     const gchar               *subject,
-                                                     const gchar               *predicate,
-                                                     GBytes                    *object,
-                                                     GError                   **error);
-void     tracker_data_insert_statement_with_string  (TrackerData               *data,
-                                                     const gchar               *graph,
-                                                     const gchar               *subject,
-                                                     const gchar               *predicate,
-                                                     GBytes                    *object,
-                                                     GError                   **error);
 void     tracker_data_update_statement              (TrackerData               *data,
                                                      const gchar               *graph,
                                                      const gchar               *subject,
@@ -116,8 +104,6 @@ void     tracker_data_load_turtle_file              (TrackerData               *
                                                      GFile                     *file,
                                                      const gchar               *graph,
                                                      GError                   **error);
-
-void     tracker_data_sync                          (TrackerData               *data);
 
 gint     tracker_data_ensure_graph                  (TrackerData               *data,
                                                      const gchar               *name,

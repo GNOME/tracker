@@ -1910,7 +1910,6 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
                                          const gchar        *subject,
                                          const gchar        *predicate,
                                          const gchar        *object,
-                                         gboolean            is_uri,
                                          gboolean            in_update)
 {
 	GError *error = NULL;
@@ -1991,16 +1990,9 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 
 	bytes = g_bytes_new (object, strlen (object) + 1);
 
-	if (is_uri) {
-		tracker_data_insert_statement_with_uri (manager->data_update, NULL, subject,
-		                                        predicate, bytes,
-		                                        &error);
-	} else {
-		tracker_data_insert_statement_with_string (manager->data_update, NULL, subject,
-		                                           predicate, bytes,
-		                                           &error);
-	}
-
+	tracker_data_insert_statement (manager->data_update, NULL, subject,
+	                               predicate, bytes,
+	                               &error);
 	g_bytes_unref (bytes);
 
 	if (error != NULL) {
@@ -2016,7 +2008,6 @@ import_ontology_file (TrackerDataManager *manager,
                       gboolean            in_update)
 {
 	const gchar *subject, *predicate, *object;
-	gboolean object_is_uri;
 	GError *error = NULL;
 	TrackerTurtleReader* reader;
 
@@ -2030,10 +2021,9 @@ import_ontology_file (TrackerDataManager *manager,
 
 	while (tracker_turtle_reader_next (reader,
 	                                   &subject, &predicate, &object,
-	                                   &object_is_uri, &error)) {
+	                                   NULL, &error)) {
 		tracker_data_ontology_process_statement (manager,
 		                                         subject, predicate, object,
-		                                         object_is_uri,
 		                                         in_update);
 	}
 

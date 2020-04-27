@@ -228,7 +228,7 @@ language_get_stopword_filename (const gchar *language_code)
 	testpath = g_getenv ("TRACKER_LANGUAGE_STOP_WORDS_DIR");
 	if (!testpath) {
 		filename = g_build_filename (SHAREDIR,
-		                             "tracker",
+		                             "tracker-3",
 		                             "stop-words",
 		                             str,
 		                             NULL);

@@ -82,11 +82,6 @@ typedef enum _TrackerEndpointError {
 static gboolean
 sanity_check (void)
 {
-	if (!database_path) {
-		g_printerr ("%s\n", _("No database path was provided"));
-		return FALSE;
-	}
-
 	if (!!ontology_path == !!ontology_name) {
 		/* TRANSLATORS: those are commandline arguments */
 		g_printerr ("%s\n", _("One “ontology” or “ontology-path” option should be provided"));
@@ -198,7 +193,7 @@ tracker_endpoint (int argc, const char **argv)
 	TrackerSparqlConnection *connection;
 	GOptionContext *context;
 	GError *error = NULL;
-	GFile *database, *ontology = NULL;
+	GFile *database = NULL, *ontology = NULL;
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
@@ -222,7 +217,9 @@ tracker_endpoint (int argc, const char **argv)
 		return EXIT_FAILURE;
 	}
 
-	database = g_file_new_for_commandline_arg (database_path);
+	if (database_path)
+		database = g_file_new_for_commandline_arg (database_path);
+
 	if (ontology_path) {
 		ontology = g_file_new_for_commandline_arg (ontology_path);
 	} else if (ontology_name) {
@@ -232,8 +229,14 @@ tracker_endpoint (int argc, const char **argv)
 	}
 
 	g_assert (ontology != NULL);
-	g_print (_("Opening database at %s…"), database_path);
-	g_print ("\n");
+
+	if (database_path) {
+		g_print (_("Opening database at %s…"), database_path);
+		g_print ("\n");
+	} else {
+		g_print (_("Creating in-memory database"));
+		g_print ("\n");
+	}
 
 	connection = tracker_sparql_connection_new (0, database, ontology, NULL, &error);
 	if (!connection) {
@@ -253,6 +256,7 @@ tracker_endpoint (int argc, const char **argv)
 	} else {
 		g_print (_("New database created. Use the --dbus-service option to "
 		           "share this database on a message bus."));
+		g_print ("\n");
 	}
 
 	if (connection) {
