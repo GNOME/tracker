@@ -1,0 +1,132 @@
+<?xml version='1.0' encoding="ISO-8859-1"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2001/XInclude'">
+]>
+
+<part id="tracker-limits">
+  <title>Implementation limits</title>
+  <partintro>
+    Tracker is implemented on top of SQLite, and all of its benefits and
+    <ulink url="https://www.sqlite.org/limits.html">limits</ulink> apply. This
+    document will break down how those limits apply to Tracker. Depending on
+    your distributor, the limits might be changed via SQLite build-time
+    options.
+  </partintro>
+
+  <sect2 id="tracker-max-string-length">
+    <title>Maximum string length</title>
+    <para>
+      Tracker can store by default up to 1 GiB in a text field by default. This
+      limit is controlled by <systemitem>SQLITE_MAX_LENGTH</systemitem>.
+    </para>
+  </sect2>
+
+  <sect2 id="tracker-max-properties">
+    <title>Maximum number of properties</title>
+    <para>
+      The maximum amount of properties in the domain of a single class, and
+      the maximum number of global fulltext-search properties in the ontology
+      are limited by <systemitem>SQLITE_MAX_COLUMN</systemitem> (defaults
+      to 2000).
+    </para>
+  </sect2>
+
+  <sect2 id="tracker-parser-limits">
+    <title>Underlying parser limits</title>
+    <para>
+      SQLite defines some limits to its parser. Maximum query length is 1 MiB,
+      its maximum expression tree depth is 1000, and it allows up to 500
+      elements in <systemitem>UNION/INTERSECT/EXCEPT</systemitem> statements.
+    </para>
+    <para>
+      There is no straightforward relation between the SPARQL query and the
+      SQL one, so it is undefined how this limit applies to SPARQL queries.
+      Query and ontology simplifications may help reduce its likelyhood.
+    </para>
+    <para>
+      These SQLite limits are controlled by
+      <systemitem>SQLITE_MAX_SQL_LENGTH</systemitem>,
+      <systemitem>SQLITE_MAX_EXPR_DEPTH</systemitem> and
+      <systemitem>SQLITE_MAX_COMPOUND_SELECT</systemitem>. The SPARQL parser
+      is not affected in itself by these limits.
+    </para>
+  </sect2>
+
+  <sect2 id="tracker-max-joins">
+    <title>Maximum number of tables in a Join</title>
+    <para>
+      SQLite does not allow Join operations containing more than 64 tables.
+      This limit may impact complex Tracker queries in various ways, most
+      likely culprits are operations across the whole union graph, and
+      access to multi-valued properties.
+    </para>
+    <para>
+      Such queries can be tweaked (e.g. specifying a graph, or reducing
+      the amount of accessed properties) or split into multiple ones to
+      bypass this limit.
+    </para>
+  </sect2>
+
+  <sect2 id="tracker-max-function-args">
+    <title>Maximum number or arguments in a function</title>
+    <para>
+      SQLite defines a limit of 100, controlled by
+      <systemitem>SQLITE_MAX_FUNCTION_ARG</systemitem>.
+      This affects all builtin and extra functions with variable arguments,
+      e.g. coalesce.
+    </para>
+  </sect2>
+
+  <sect2 id="tracker-max-graph-limit">
+    <title>Limits on the number of graphs</title>
+    <para>
+      SQLite has a limit on the number of databases that can be attached,
+      defined by <systemitem>SQLITE_MAX_LIMIT_ATTACHED</systemitem> (defaults
+      to 10, maximum 128).
+    </para>
+    <para>
+      Tracker uses attached databases to implement its support for multiple
+      graphs, so the maximum amount of graphs for a given
+      <type><link linkend="TrackerSparqlConnection">TrackerSparqlConnection</link></type>
+      is equally restricted.
+    </para>
+  </sect2>
+
+  <sect2 id="tracker-max-like-length">
+    <title>Limits on glob search</title>
+    <para>
+      SQLite defines a maximum length of 50 KiB for GLOB patterns. This
+      reflects in <systemitem>CONTAINS/STRSTARTS/STRENDS</systemitem>
+      SPARQL syntax.
+    </para>
+  </sect2>
+
+  <sect2 id="tracker-max-statement-parameters">
+    <title>Limits on the number of parameters in a statement</title>
+    <para>
+      SQLite defines a maximum of 999 parameters to be passed as arguments
+      to a statement, controlled by <systemitem>SQLITE_MAX_VARIABLE_NUMBER</systemitem>.
+      <type><link linkend="TrackerSparqlStatement">TrackerSparqlStatement</link></type>
+      has the same limit.
+    </para>
+  </sect2>
+
+  <sect2 id="tracker-max-database-size">
+    <title>Maximum number of pages in a database</title>
+    <para>
+      SQLite sets a default restriction of 1073741823 pages to
+      database file size (about 8 TB with Tracker settings). This limit
+      applies per graph.
+    </para>
+  </sect2>
+
+  <sect2 id="tracker-formats-and-precision">
+    <title>Type formats and precision</title>
+    <para>
+      Integers are 64 bit wide. Floating point numbers have IEEE764
+      double precision. Dates/times have microsecond precision, and may
+      range between 0000-01-01 00:00:00 and 9999-12-31 23:59:59.
+    </para>
+  </sect2>
+</part>

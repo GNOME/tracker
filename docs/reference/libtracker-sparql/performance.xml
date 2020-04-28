@@ -1,0 +1,142 @@
+<?xml version='1.0' encoding="ISO-8859-1"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2001/XInclude'">
+]>
+
+<part id="tracker-performance">
+  <title>Performance dos and donts</title>
+  <partintro>
+    <para>
+      SPARQL is a very powerful query language. As it should be
+      suspected, this means there are areas where performance is
+      sacrificed for versatility.
+    </para>
+    <para>
+      These are some tips to get the best of SPARQL as implemented
+      by Tracker.
+    </para>
+  </partintro>
+
+  <chapter id="tracker-perf-unrestricted-predicates">
+    <title>Avoid queries with unrestricted predicates</title>
+    <para>
+      Queries with unrestricted predicates are those like:
+      <informalexample>
+        <programlisting language="SPARQL">
+	  SELECT ?p { &lt;a&gt; ?p 42 }
+        </programlisting>
+      </informalexample>
+    </para>
+    <para>
+      They involve lookups across all possible triples of
+      an object, which roughly translates to a traversal
+      through all tables and columns.
+    </para>
+    <para>
+      The most pathological case is:
+      <informalexample>
+        <programlisting language="SPARQL">
+	  SELECT ?s ?p ?o { ?s ?p ?o }
+        </programlisting>
+      </informalexample>
+    </para>
+    <para>
+      Which does retrieve every triple existing in the store.
+    </para>
+    <para>
+      Queries with unrestricted predicates are most useful to
+      introspect resources, or the triple store in its entirety.
+      Production code should do this in rare occasions.
+    </para>
+  </chapter>
+
+  <chapter id="tracker-perf-negated-property-path">
+    <title>Avoid the negated property path</title>
+    <para>
+      The <systemitem>!</systemitem> negation operator in property
+      paths negate the match. For example:
+      <informalexample>
+        <programlisting language="SPARQL">
+	  SELECT ?s ?o { ?s !nie:url ?o }
+        </programlisting>
+      </informalexample>
+    </para>
+    <para>
+      This query looks for every other property that is not
+      <systemitem>nie:url</systemitem>. The same reasoning than
+      unrestricted predicates apply, since that specific query is
+      equivalent to:
+      <informalexample>
+        <programlisting language="SPARQL">
+	  SELECT ?s ?o { ?s ?p ?o .
+	                 FILTER (?p != nie:url) }
+        </programlisting>
+      </informalexample>
+    </para>
+  </chapter>
+
+  <chapter id="tracker-perf-graphs">
+    <title>Specify graphs wherever possible</title>
+    <para>
+      Queries on the union graph, or with unrestricted graphs, for
+      example:
+      <informalexample>
+        <programlisting language="SPARQL">
+	  SELECT ?u { ?u a rdfs:Resource }
+	  SELECT ?g ?u { GRAPH ?g { ?u a rdfs:Resource }}
+        </programlisting>
+      </informalexample>
+
+      Will traverse across all graphs. Query complexity will increment
+      linearly with the amount of graphs. Production code should rarely
+      need to introspect graphs, and should strive to being aware of
+      the graph(s) involved. The fastest case is accessing one graph.
+    </para>
+    <para>
+      The graph(s) may be specified through
+      <systemitem>WITH/FROM/FROM NAMED/GRAPH</systemitem> and other
+      SPARQL syntax for graphs. For example:
+      <informalexample>
+        <programlisting language="SPARQL">
+	  WITH &lt;G&gt; SELECT ?u { ?u a rdfs:Resource }
+	  WITH &lt;G&gt; SELECT ?g ?u { GRAPH ?g { ?u a rdfs:Resource }}
+        </programlisting>
+      </informalexample>
+    </para>
+  </chapter>
+
+  <chapter id="tracker-perf-avoid-contains">
+    <title>Avoid substring matching</title>
+    <para>
+      Matching for regexp/glob/substrings defeats any index text fields
+      could have. For example:
+
+      <informalexample>
+        <programlisting language="SPARQL">
+	  SELECT ?u { ?u nie:title ?title .
+	              FILTER (CONTAINS (?title, "sideshow")) }
+        </programlisting>
+      </informalexample>
+
+      Will traverse all title strings looking for the substring. It is
+      encouraged to use fulltext search for finding matches within strings
+      where possible, for example:
+
+      <informalexample>
+        <programlisting language="SPARQL">
+	  SELECT ?u { ?u fts:match "sideshow" }
+        </programlisting>
+      </informalexample>
+    </para>
+  </chapter>
+
+  <chapter id="tracker-perf-use-statements">
+    <title>Use TrackerSparqlStatement</title>
+    <para>
+      Using <type><link linkend="TrackerSparqlStatement">TrackerSparqlStatement</link></type>
+      allows to parse and compile a query once, and reuse it many times. Its usage
+      is recommended wherever possible.
+    </para>
+  </chapter>
+</part>
