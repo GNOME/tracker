@@ -5319,12 +5319,10 @@ translate_TriplesSameSubject (TrackerSparql  *sparql,
 
 	if (rule == NAMED_RULE_VarOrTerm) {
 		_call_rule (sparql, rule, error);
-		g_assert (!tracker_token_is_empty (&sparql->current_state.subject));
 		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_PropertyListNotEmpty, error);
 	} else if (rule == NAMED_RULE_TriplesNode) {
 		_call_rule (sparql, rule, error);
-		g_assert (!tracker_token_is_empty (&sparql->current_state.subject));
 		sparql->current_state.token = &sparql->current_state.object;
 		_call_rule (sparql, NAMED_RULE_PropertyList, error);
 	}
