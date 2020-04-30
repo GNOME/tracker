@@ -1,0 +1,5 @@
+SELECT * {
+  GRAPH <non-existent> {
+    ?s rdf:type/rdfs:subClassOf ?p
+  }
+}

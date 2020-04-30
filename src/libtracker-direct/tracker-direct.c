@@ -404,7 +404,7 @@ insert_statement_cb (gint         graph_id,
 	if (predicate_id == tracker_property_get_id (rdf_type)) {
 		const gchar *uri;
 
-		uri = tracker_ontologies_get_uri_by_id (ontologies, predicate_id);
+		uri = tracker_ontologies_get_uri_by_id (ontologies, object_id);
 		new_class = tracker_ontologies_get_class_by_uri (ontologies, uri);
 	}
 

@@ -1426,17 +1426,28 @@ get_property_values (TrackerData     *data,
 
 				if (G_VALUE_TYPE (&gvalue)) {
 					if (tracker_property_get_data_type (property) == TRACKER_PROPERTY_TYPE_DATETIME) {
-						gdouble time;
-
 						if (G_VALUE_TYPE (&gvalue) == G_TYPE_INT64) {
+							gdouble time;
+
 							time = g_value_get_int64 (&gvalue);
+							g_value_unset (&gvalue);
+							g_value_init (&gvalue, TRACKER_TYPE_DATE_TIME);
+							/* UTC offset is irrelevant for comparison */
+							tracker_date_time_set (&gvalue, time, 0);
 						} else {
-							time = g_value_get_double (&gvalue);
+							gchar *time;
+
+							time = g_value_dup_string (&gvalue);
+							g_value_unset (&gvalue);
+							g_value_init (&gvalue, TRACKER_TYPE_DATE_TIME);
+							tracker_date_time_set_from_string (&gvalue, time, &error);
+							g_free (time);
+
+							if (error) {
+								g_warning ("Error in date conversion: %s", error->message);
+								g_error_free (error);
+							}
 						}
-						g_value_unset (&gvalue);
-						g_value_init (&gvalue, TRACKER_TYPE_DATE_TIME);
-						/* UTC offset is irrelevant for comparison */
-						tracker_date_time_set (&gvalue, time, 0);
 					}
 
 					g_array_append_val (old_values, gvalue);

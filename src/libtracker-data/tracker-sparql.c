@@ -743,10 +743,17 @@ _prepend_path_element (TrackerSparql      *sparql,
 			const gchar *graph;
 
 			graph = tracker_token_get_idstring (&sparql->current_state.graph);
-			table_name = g_strdup_printf ("\"%s\".\"%s\"", graph,
-			                              tracker_property_get_table_name (path_elem->data.property));
-			graph_column = g_strdup_printf ("%d",
-							tracker_data_manager_find_graph (sparql->data_manager, graph));
+
+			if (tracker_data_manager_find_graph (sparql->data_manager, graph)) {
+				table_name = g_strdup_printf ("\"%s\".\"%s\"", graph,
+				                              tracker_property_get_table_name (path_elem->data.property));
+				graph_column = g_strdup_printf ("%d",
+				                                tracker_data_manager_find_graph (sparql->data_manager, graph));
+			} else {
+				/* Graph does not exist, ensure to come back empty */
+				table_name = g_strdup ("(SELECT 0 AS ID, NULL, NULL, 0, 0 LIMIT 0)");
+				graph_column = g_strdup ("0");
+			}
 		}
 
 		_append_string_printf (sparql,

@@ -137,6 +137,7 @@ const TestInfo tests[] = {
 	{ "graph/graph-5", "graph/data-4", FALSE },
 	{ "graph/graph-6", "graph/data-5", FALSE },
 	{ "graph/non-existent-1",  "graph/data-1", FALSE },
+	{ "graph/non-existent-2",  "graph/data-1", FALSE },
 	{ "graph/drop", "graph/data-drop", FALSE },
 	{ "graph/drop-non-existent", "graph/data-drop-non-existent", FALSE, TRUE },
 	{ "graph/drop-default", "graph/data-drop-default", FALSE },
@@ -252,6 +253,7 @@ const TestInfo tests[] = {
 	{ "update/delete-insert-where-query-4", "update/delete-insert-where-4", FALSE, FALSE },
 	{ "update/delete-insert-where-query-5", "update/delete-insert-where-5", FALSE, FALSE },
 	{ "update/delete-insert-where-query-6", "update/delete-insert-where-6", FALSE, FALSE },
+	{ "update/select-date-with-offset-1", "update/insert-date-with-offset-1", FALSE, FALSE },
 	{ NULL }
 };
 

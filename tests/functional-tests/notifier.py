@@ -98,10 +98,10 @@ class TrackerNotifierTests():
 
         # validate results
         self.assertEqual(len(self.results_deletes), 0)
-        self.assertEqual(len(self.results_inserts), 0)
-        self.assertEqual(len(self.results_updates), 1)
-        print(self.results_updates[0])
-        assert self.results_updates[0].get_urn() == 'test://signals-contact-add'
+        self.assertEqual(len(self.results_inserts), 1)
+        self.assertEqual(len(self.results_updates), 0)
+        print(self.results_inserts[0])
+        assert self.results_inserts[0].get_urn() == 'test://signals-contact-add'
 
     def test_02_remove_contact(self):
         CONTACT = """
@@ -121,8 +121,8 @@ class TrackerNotifierTests():
 
         # Validate results:
         self.assertEqual(len(self.results_deletes), 1)
-        self.assertEqual(len(self.results_updates), 1)
-        self.assertEqual(len(self.results_inserts), 0)
+        self.assertEqual(len(self.results_updates), 0)
+        self.assertEqual(len(self.results_inserts), 1)
 
     def test_03_update_contact(self):
         self.tracker.update(
@@ -133,8 +133,8 @@ class TrackerNotifierTests():
             "INSERT { <test://signals-contact-update> nco:fullname 'wohoo'}")
         self.__wait_for_signal()
 
-        self.assertEqual(len(self.results_updates), 2)
-        self.assertEqual(len(self.results_inserts), 0)
+        self.assertEqual(len(self.results_updates), 1)
+        self.assertEqual(len(self.results_inserts), 1)
         self.assertEqual(len(self.results_deletes), 0)
 
     def test_04_fullupdate_contact(self):
@@ -145,14 +145,14 @@ class TrackerNotifierTests():
         self.tracker.update ("""
                DELETE { <test://signals-contact-fullupdate> nco:fullname ?x }
                WHERE { <test://signals-contact-fullupdate> a nco:PersonContact; nco:fullname ?x }
-               
+
                INSERT { <test://signals-contact-fullupdate> nco:fullname 'second value'}
                """)
         self.__wait_for_signal()
 
         self.assertEqual(len(self.results_deletes), 0)
-        self.assertEqual(len(self.results_inserts), 0)
-        self.assertEqual(len(self.results_updates), 2)
+        self.assertEqual(len(self.results_inserts), 1)
+        self.assertEqual(len(self.results_updates), 1)
 
 
 class TrackerLocalNotifierTest (fixtures.TrackerSparqlDirectTest, TrackerNotifierTests):
