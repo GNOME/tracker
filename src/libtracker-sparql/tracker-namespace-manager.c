@@ -287,7 +287,7 @@ tracker_namespace_manager_expand_uri (TrackerNamespaceManager *self,
 	if (colon != NULL) {
 		int colon_pos = colon - compact_uri;
 		if (colon_pos < MAX_PREFIX_LENGTH) {
-			strncpy (prefix, compact_uri, colon_pos - 1);
+			strncpy (prefix, compact_uri, colon_pos);
 			prefix[colon_pos] = 0;
 
 			namespace = g_hash_table_lookup (priv->prefix_to_namespace, prefix);
@@ -295,7 +295,7 @@ tracker_namespace_manager_expand_uri (TrackerNamespaceManager *self,
 	}
 
 	if (namespace) {
-		return g_strconcat (namespace, colon, NULL);
+		return g_strconcat (namespace, colon + 1, NULL);
 	} else {
 		return g_strdup (compact_uri);
 	}

@@ -1300,7 +1300,7 @@ tracker_resource_print_turtle (TrackerResource         *self,
 typedef struct {
 	TrackerNamespaceManager *namespaces;
 	GString *string;
-	const char *graph_id;
+	char *graph_id;
 	GList *done_list;
 } GenerateSparqlData;
 
@@ -1519,7 +1519,7 @@ tracker_resource_print_sparql_update (TrackerResource         *resource,
                                       const char              *graph_id)
 {
 	TrackerResourcePrivate *priv;
-	GenerateSparqlData context;
+	GenerateSparqlData context = { 0, };
 
 	g_return_val_if_fail (TRACKER_IS_RESOURCE (resource), "");
 
@@ -1535,7 +1535,9 @@ tracker_resource_print_sparql_update (TrackerResource         *resource,
 
 	context.namespaces = namespaces;
 	context.string = g_string_new (NULL);
-	context.graph_id = graph_id;
+
+	if (graph_id)
+		context.graph_id = tracker_namespace_manager_expand_uri (namespaces, graph_id);
 
 	/* Resources can be recursive, and may have repeated or even cyclic
 	 * relationships. This list keeps track of what we already processed.
@@ -1553,18 +1555,19 @@ tracker_resource_print_sparql_update (TrackerResource         *resource,
 
 	/* Finally insert the data */
 	g_string_append (context.string, "INSERT DATA {\n");
-	if (graph_id) {
-		g_string_append_printf (context.string, "GRAPH <%s> {\n", graph_id);
+	if (context.graph_id) {
+		g_string_append_printf (context.string, "GRAPH <%s> {\n", context.graph_id);
 	}
 
 	generate_sparql_insert_pattern (resource, &context);
 
-	if (graph_id) {
+	if (context.graph_id) {
 		g_string_append (context.string, "}\n");
 	}
 	g_string_append (context.string, "};\n");
 
 	g_list_free (context.done_list);
+	g_free (context.graph_id);
 	context.done_list = NULL;
 
 	return g_string_free (context.string, FALSE);
