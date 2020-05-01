@@ -214,6 +214,22 @@ test_tracker_sparql_cursor_next_async (void)
 	g_main_loop_run (main_loop);
 }
 
+/* Test that we return an error if no ontology is passed. */
+static void
+test_tracker_sparql_connection_no_ontology (void)
+{
+	GError *error = NULL;
+
+	TrackerSparqlConnection *connection;
+
+	connection = tracker_sparql_connection_new (0, NULL, NULL, NULL, &error);
+
+	g_assert_null (connection);
+	g_assert_error (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_ONTOLOGY_NOT_FOUND);
+
+	g_error_free (error);
+}
+
 static void
 test_tracker_sparql_connection_interleaved (void)
 {
@@ -271,6 +287,8 @@ main (gint argc, gchar **argv)
 	                 test_tracker_sparql_escape_string);
 	g_test_add_func ("/libtracker-sparql/tracker-sparql/tracker_sparql_escape_uri_vprintf",
 	                 test_tracker_sparql_escape_uri_vprintf);
+	g_test_add_func ("/libtracker-sparql/tracker-sparql/tracker_sparql_connection_no_ontology",
+	                 test_tracker_sparql_connection_no_ontology);
 	g_test_add_func ("/libtracker-sparql/tracker-sparql/tracker_sparql_connection_interleaved",
 	                 test_tracker_sparql_connection_interleaved);
 	g_test_add_func ("/libtracker-sparql/tracker-sparql/tracker_sparql_cursor_next_async",

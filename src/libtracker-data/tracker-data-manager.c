@@ -4116,6 +4116,15 @@ tracker_data_manager_initable_init (GInitable     *initable,
 		TrackerOntology **ontologies;
 		guint n_ontologies, i;
 
+		if (!manager->ontology_location) {
+			g_set_error (error,
+			             TRACKER_DATA_ONTOLOGY_ERROR,
+			             TRACKER_DATA_ONTOLOGY_NOT_FOUND,
+			             "You must pass an ontology location. "
+			             "Use tracker_sparql_get_ontology_nepomuk() to find the default ontologies.");
+			return FALSE;
+		}
+
 		g_info ("Applying ontologies from %s", g_file_peek_path (manager->ontology_location));
 		sorted = get_ontologies (manager, manager->ontology_location, &internal_error);
 

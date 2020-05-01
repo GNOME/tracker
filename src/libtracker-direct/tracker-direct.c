@@ -235,6 +235,41 @@ translate_flags (TrackerSparqlConnectionFlags flags)
 	return db_flags;
 }
 
+static GError *
+translate_error (GError *error)
+{
+	GError *new_error = NULL;
+
+	if (error->domain == TRACKER_DATA_ONTOLOGY_ERROR) {
+		/* This is an internal error domain, so translate to a libtracker-sparql error code. */
+		switch (error->code) {
+			case TRACKER_DATA_ONTOLOGY_NOT_FOUND:
+				new_error = g_error_new_literal (TRACKER_SPARQL_ERROR,
+				                                 TRACKER_SPARQL_ERROR_ONTOLOGY_NOT_FOUND,
+				                                 error->message);
+				break;
+			case TRACKER_DATA_UNSUPPORTED_LOCATION:
+			case TRACKER_DATA_UNSUPPORTED_ONTOLOGY_CHANGE:
+				new_error = g_error_new_literal (TRACKER_SPARQL_ERROR,
+				                                 TRACKER_SPARQL_ERROR_UNSUPPORTED,
+				                                 error->message);
+				break;
+			default:
+				new_error = g_error_new_literal (TRACKER_SPARQL_ERROR,
+				                                 TRACKER_SPARQL_ERROR_INTERNAL,
+				                                 error->message);
+		}
+	}
+
+	if (new_error) {
+		g_error_free (error);
+		return new_error;
+	} else {
+		return error;
+	}
+}
+
+
 static gboolean
 tracker_direct_connection_initable_init (GInitable     *initable,
                                          GCancellable  *cancellable,
@@ -246,6 +281,7 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 	GHashTable *namespaces;
 	GHashTableIter iter;
 	gchar *prefix, *ns;
+	GError *inner_error = NULL;
 
 	conn = TRACKER_DIRECT_CONNECTION (initable);
 	priv = tracker_direct_connection_get_instance_private (conn);
@@ -264,7 +300,8 @@ tracker_direct_connection_initable_init (GInitable     *initable,
 	priv->data_manager = tracker_data_manager_new (db_flags, priv->store,
 	                                               priv->ontology,
 	                                               100, 100);
-	if (!g_initable_init (G_INITABLE (priv->data_manager), cancellable, error)) {
+	if (!g_initable_init (G_INITABLE (priv->data_manager), cancellable, &inner_error)) {
+		g_propagate_error (error, translate_error (inner_error));
 		g_clear_object (&priv->data_manager);
 		return FALSE;
 	}
