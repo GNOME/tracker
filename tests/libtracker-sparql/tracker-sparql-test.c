@@ -135,15 +135,9 @@ test_tracker_sparql_cursor_next_async_cb (GObject      *source,
 	g_assert (cursor != NULL);
 	connection = tracker_sparql_cursor_get_connection (cursor);
 
-	g_print ("  %d: %s\n",
-	         query,
-	         tracker_sparql_cursor_get_string (cursor, 0, NULL));
-
 	if (!success) {
 		finished++;
 		next = 0;
-
-		g_print ("Finished %d\n", finished);
 
 		if (finished == 1 || finished == 2) {
 			test_tracker_sparql_cursor_next_async_query (connection,
@@ -262,8 +256,6 @@ main (gint argc, gchar **argv)
 	int result;
 
 	setlocale (LC_ALL, "");
-
-	g_setenv ("TRACKER_DB_ONTOLOGIES_DIR", TEST_ONTOLOGIES_DIR, TRUE);
 
 	g_test_init (&argc, &argv, NULL);
 

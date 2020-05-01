@@ -100,6 +100,8 @@ class OntologyChangeTestTemplate (ut.TestCase):
 
         self.validate_status()
 
+        conn2.close()
+
     def set_ontology_dirs(self):
         """
         Implement this method in the subclass setting values for:

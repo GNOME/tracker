@@ -2610,6 +2610,17 @@ update_sparql (TrackerData  *data,
 
 	g_return_val_if_fail (update != NULL, NULL);
 
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (SPARQL)) {
+		gchar *update_to_print;
+
+		update_to_print = g_strdup (update);
+		g_strdelimit (update_to_print, "\n", ' ');
+		g_message ("[SPARQL] %s", update_to_print);
+		g_free (update_to_print);
+	}
+#endif
+
 	tracker_data_begin_transaction (data, &actual_error);
 	if (actual_error) {
 		g_propagate_error (error, actual_error);
