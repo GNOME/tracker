@@ -79,6 +79,8 @@ G_DECLARE_DERIVABLE_TYPE (TrackerSparqlConnection,
  * @TRACKER_SPARQL_ERROR_INTERNAL: Internal error.
  * @TRACKER_SPARQL_ERROR_UNSUPPORTED: Unsupported feature or method.
  * @TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH: Unknown graph.
+ * @TRACKER_SPARQL_ERROR_ONTOLOGY_NOT_FOUND: The specified ontology wasn't found.
+ * @TRACKER_SPARQL_N_ERRORS: The total number of error codes.
  *
  * Error domain for Tracker Sparql. Errors in this domain will be from the
  * #TrackerSparqlError enumeration. See #GError for more information on error
@@ -95,7 +97,22 @@ typedef enum {
 	TRACKER_SPARQL_ERROR_UNSUPPORTED,
 	TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH,
 	TRACKER_SPARQL_ERROR_ONTOLOGY_NOT_FOUND,
+	TRACKER_SPARQL_N_ERRORS,
 } TrackerSparqlError;
+
+static const GDBusErrorEntry tracker_sparql_error_entries[] =
+{
+	{TRACKER_SPARQL_ERROR_PARSE, "org.freedesktop.Tracker.Error.Parse"},
+	{TRACKER_SPARQL_ERROR_UNKNOWN_CLASS, "org.freedesktop.Tracker.Error.UnknownClass"},
+	{TRACKER_SPARQL_ERROR_UNKNOWN_PROPERTY, "org.freedesktop.Tracker.Error.UnknownProperty"},
+	{TRACKER_SPARQL_ERROR_TYPE, "org.freedesktop.Tracker.Error.Type"},
+	{TRACKER_SPARQL_ERROR_CONSTRAINT, "org.freedesktop.Tracker.Error.Constraint"},
+	{TRACKER_SPARQL_ERROR_NO_SPACE, "org.freedesktop.Tracker.Error.NoSpace"},
+	{TRACKER_SPARQL_ERROR_INTERNAL, "org.freedesktop.Tracker.Error.Internal"},
+	{TRACKER_SPARQL_ERROR_UNSUPPORTED, "org.freedesktop.Tracker.Error.Unsupported"},
+	{TRACKER_SPARQL_ERROR_UNKNOWN_GRAPH, "org.freedesktop.Tracker.Error.UnknownGraph"},
+	{TRACKER_SPARQL_ERROR_ONTOLOGY_NOT_FOUND, "org.freedesktop.Tracker.Error.OntologyNotFound"},
+};
 
 #define TRACKER_SPARQL_ERROR tracker_sparql_error_quark ()
 

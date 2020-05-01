@@ -24,7 +24,18 @@
 G_DEFINE_ABSTRACT_TYPE (TrackerSparqlConnection, tracker_sparql_connection,
                         G_TYPE_OBJECT)
 
-G_DEFINE_QUARK (tracker-sparql-error-quark, tracker_sparql_error)
+G_STATIC_ASSERT (G_N_ELEMENTS (tracker_sparql_error_entries) == TRACKER_SPARQL_N_ERRORS);
+
+GQuark
+tracker_sparql_error_quark (void)
+{
+       static volatile gsize quark_volatile = 0;
+       g_dbus_error_register_error_domain ("tracker-sparql-error-quark",
+                                           &quark_volatile,
+                                           tracker_sparql_error_entries,
+                                           G_N_ELEMENTS (tracker_sparql_error_entries));
+       return (GQuark) quark_volatile;
+}
 
 static void
 tracker_sparql_connection_init (TrackerSparqlConnection *connection)
