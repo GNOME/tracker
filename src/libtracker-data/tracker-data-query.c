@@ -176,17 +176,6 @@ tracker_data_query_sparql_cursor (TrackerDataManager  *manager,
 
 	g_return_val_if_fail (query != NULL, NULL);
 
-#ifdef G_ENABLE_DEBUG
-	if (TRACKER_DEBUG_CHECK (SPARQL)) {
-		gchar *query_to_print;
-
-		query_to_print = g_strdup (query);
-		g_strdelimit (query_to_print, "\n", ' ');
-		g_message ("[SPARQL] %s", query_to_print);
-		g_free (query_to_print);
-	}
-#endif
-
 	sparql_query = tracker_sparql_new (manager, query);
 
 	cursor = tracker_sparql_execute_cursor (sparql_query, NULL, error);

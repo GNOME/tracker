@@ -8756,6 +8756,17 @@ tracker_sparql_execute_cursor (TrackerSparql  *sparql,
 	const gchar * const *names;
 	guint n_types, n_names;
 
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (SPARQL)) {
+		gchar *query_to_print;
+
+		query_to_print = g_strdup (sparql->sparql);
+		g_strdelimit (query_to_print, "\n", ' ');
+		g_message ("[SPARQL] %s", query_to_print);
+		g_free (query_to_print);
+	}
+#endif
+
 	if (sparql->parser_error) {
 		g_propagate_error (error, sparql->parser_error);
 		return NULL;
