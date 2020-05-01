@@ -9,7 +9,7 @@
 
 	dsc:editor "Ivan Frade &lt;ivan.frade@nokia.com&gt;" ;
 
-	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/41-mfo.ontology";
+	dsc:gitlog "hhttps://gitlab.gnome.org/GNOME/tracker/-/commits/master/src/ontologies/41-mfo.ontology";
 
 	dsc:localPrefix "mfo" ;
 	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/mfo#" ;

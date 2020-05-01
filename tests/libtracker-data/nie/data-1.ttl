@@ -1,26 +1,5 @@
 
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix xsl: <http://www.w3.org/1999/XSL/Transform#> .
-@prefix nid3: <http://tracker.api.gnome.org/ontology/v3/nid3#> .
-@prefix nfo: <http://tracker.api.gnome.org/ontology/v3/nfo#> .
-@prefix nmo: <http://tracker.api.gnome.org/ontology/v3/nmo#> .
 @prefix nie: <http://tracker.api.gnome.org/ontology/v3/nie#> .
-@prefix exif: <http://www.kanzaki.com/ns/exif#> .
-@prefix nao: <http://tracker.api.gnome.org/ontology/v3/nao#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix protege: <http://protege.stanford.edu/system#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix ncal: <http://tracker.api.gnome.org/ontology/v3/ncal#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
-@prefix pimo: <http://www.semanticdesktop.org/ontologies/2007/11/01/pimo#> .
-@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
-@prefix tmo: <http://www.semanticdesktop.org/ontologies/2008/05/20/tmo#> .
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix nco: <http://tracker.api.gnome.org/ontology/v3/nco#> .
-@prefix nexif: <http://www.semanticdesktop.org/ontologies/2007/05/10/nexif#> .
 
 _:a1 a nie:DataObject .
 

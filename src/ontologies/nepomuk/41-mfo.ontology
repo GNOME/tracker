@@ -5,7 +5,6 @@
 @prefix nie: <http://tracker.api.gnome.org/ontology/v3/nie#> .
 @prefix nfo: <http://tracker.api.gnome.org/ontology/v3/nfo#> .
 @prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
-@prefix nmo: <http://tracker.api.gnome.org/ontology/v3/nmo#> .
 @prefix mfo: <http://tracker.api.gnome.org/ontology/v3/mfo#> .
 
 mfo: a tracker:Namespace, tracker:Ontology ;
@@ -20,14 +19,14 @@ mfo:FeedElement a rdfs:Class;
 mfo:FeedChannel a rdfs:Class ;
 	tracker:notify true ;
 	rdfs:label "Feed channel" ;
-	rdfs:comment "Represents feed channel transfer, typically a download of RSS or ATOM. It is also a communication channel of Nepomuk Messaging Ontology so that feed sources could be treated as message sources" ;
-	rdfs:subClassOf nmo:CommunicationChannel, mfo:FeedElement .
+	rdfs:comment "Represents feed channel transfer, typically a download of RSS or ATOM." ;
+	rdfs:subClassOf mfo:FeedElement .
 
 mfo:FeedMessage a rdfs:Class ;
 	tracker:notify true ;
 	rdfs:label "Feed entry" ;
-	rdfs:comment "Represents feed entry on top of Nepomuk Messaging Ontology's message. May have enclosures attached and certain settings that allow deviation from feed channel's setup" ;
-	rdfs:subClassOf nmo:Message, mfo:FeedElement .
+	rdfs:comment "Represents feed entry. May have enclosures attached and certain settings that allow deviation from feed channel's setup" ;
+	rdfs:subClassOf mfo:FeedElement .
 
 mfo:Enclosure a rdfs:Class ;
 	rdfs:label "Message enclosure" ;

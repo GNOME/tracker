@@ -4,7 +4,6 @@
 ontology_prefixes = """
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix nrl:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nrl#>.
-@prefix nid3:  <http://www.semanticdesktop.org/ontologies/2007/05/10/nid3#>.
 @prefix nao:   <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>.
 @prefix nco:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nco#>.
 @prefix nmo:   <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>.

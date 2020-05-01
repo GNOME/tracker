@@ -296,7 +296,7 @@ test_tracker_sparql_update_fast_small (DataFixture  *fixture,
                                        gconstpointer user_data)
 {
 	GError *error = NULL;
-	const gchar *query = "INSERT { _:x a nmo:Message }";
+	const gchar *query = "INSERT { _:x a nfo:Image }";
 
 	tracker_sparql_connection_update (connection, query, 0, NULL, &error);
 
@@ -315,7 +315,7 @@ test_tracker_sparql_update_fast_large (DataFixture  *fixture,
 	memset (lots, 'a', LONG_NAME_SIZE);
 	lots[LONG_NAME_SIZE-1] = '\0';
 
-	query = g_strdup_printf ("INSERT { _:x a nmo:Message; nao:identifier \"%s\" }", lots);
+	query = g_strdup_printf ("INSERT { _:x a nfo:Image; nao:identifier \"%s\" }", lots);
 
 	tracker_sparql_connection_update (connection, query, 0, NULL, &error);
 
@@ -346,12 +346,12 @@ static void
 test_tracker_sparql_update_array_async (DataFixture   *fixture,
                                         gconstpointer  user_data)
 {
-	const gchar *queries[6] = { "INSERT { _:a a nmo:Message }",
-	                            "INSERT { _:b a nmo:Message }",
-	                            "INSERT { _:c a nmo:Message }",
-	                            "INSERT { _:d syntax error a nmo:Message }",
-	                            "INSERT { _:e a nmo:Message }",
-	                            "INSERT { _:f a nmo:Message }" };
+	const gchar *queries[6] = { "INSERT { _:a a nfo:Image }",
+	                            "INSERT { _:b a nfo:Image }",
+	                            "INSERT { _:c a nfo:Image }",
+	                            "INSERT { _:d syntax error a nfo:Image }",
+	                            "INSERT { _:e a nfo:Image }",
+	                            "INSERT { _:f a nfo:Image }" };
 
 	GMainLoop *main_loop;
 	AsyncData *data;
@@ -395,7 +395,7 @@ test_tracker_sparql_update_blank_fast_small (DataFixture  *fixture,
                                              gconstpointer user_data)
 {
 	GError *error = NULL;
-	const gchar *query = "INSERT { _:x a nmo:Message }";
+	const gchar *query = "INSERT { _:x a nfo:Image }";
 	GVariant *results;
 
 	results = tracker_sparql_connection_update_blank (connection, query, 0, NULL, &error);
@@ -419,7 +419,7 @@ test_tracker_sparql_update_blank_fast_large (DataFixture  *fixture,
 	memset (lots, 'a', LONG_NAME_SIZE);
 	lots[LONG_NAME_SIZE-1] = '\0';
 
-	query = g_strdup_printf ("INSERT { _:x a nmo:Message; nao:identifier \"%s\" }", lots);
+	query = g_strdup_printf ("INSERT { _:x a nfo:Image; nao:identifier \"%s\" }", lots);
 
 	results = tracker_sparql_connection_update_blank (connection, query, 0, NULL, &error);
 
@@ -453,7 +453,7 @@ test_tracker_sparql_update_blank_fast_no_blanks (DataFixture  *fixture,
                                                  gconstpointer user_data)
 {
 	GError *error = NULL;
-	const gchar *query = "INSERT { <urn:not_blank> a nmo:Message }";
+	const gchar *query = "INSERT { <urn:not_blank> a nfo:Image }";
 	GVariant *results;
 
 	results = tracker_sparql_connection_update_blank (connection, query, 0, NULL, &error);
@@ -469,7 +469,7 @@ test_tracker_batch_sparql_update_fast (DataFixture  *fixture,
                                        gconstpointer user_data)
 {
 	/* GError *error = NULL; */
-	/* const gchar *query = "INSERT { _:x a nmo:Message }"; */
+	/* const gchar *query = "INSERT { _:x a nfo:Image }"; */
 
 	/* FIXME: batch update is missing so far
 	 * tracker_sparql_connection_batch_update (connection, query, NULL, &error); */
@@ -597,7 +597,7 @@ static void
 test_tracker_sparql_update_async (DataFixture  *fixture,
                                   gconstpointer user_data)
 {
-	const gchar *query = "INSERT { _:x a nmo:Message }";
+	const gchar *query = "INSERT { _:x a nfo:Image }";
 	GMainLoop *main_loop;
 	AsyncData *data;
 
@@ -640,7 +640,7 @@ test_tracker_sparql_update_async_cancel (DataFixture  *fixture,
                                          gconstpointer user_data)
 {
 	GCancellable *cancellable = g_cancellable_new ();
-	const gchar *query = "INSERT { _:x a nmo:Message }";
+	const gchar *query = "INSERT { _:x a nfo:Image }";
 	GMainLoop *main_loop;
 
 	main_loop = g_main_loop_new (NULL, FALSE);
@@ -679,7 +679,7 @@ static void
 test_tracker_sparql_update_blank_async (DataFixture *fixture,
                                         gconstpointer user_data)
 {
-	const gchar *query = "INSERT { _:x a nmo:Message }";
+	const gchar *query = "INSERT { _:x a nfo:Image }";
 	GMainLoop *main_loop;
 	AsyncData *data;
 

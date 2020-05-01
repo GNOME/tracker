@@ -4,7 +4,7 @@
 	dsc:title "Nepomuk File Ontology (NFO)" ;
 	dsc:description "About files and other desktop resources." ;
 
-	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/33-nfo.ontology";
+	dsc:gitlog "hhttps://gitlab.gnome.org/GNOME/tracker/-/commits/master/src/ontologies/33-nfo.ontology";
 	dsc:upstream "http://www.semanticdesktop.org/ontologies/nfo/";
 
 	dsc:author "Antoni Mylka, DFKI, &lt;antoni.mylka@dfki.de&gt;";

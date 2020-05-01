@@ -1,3 +1,0 @@
-SELECT ?messageSubject
-WHERE { ?x nmo:messageSubject ?messageSubject }
-ORDER BY ?messageSubject

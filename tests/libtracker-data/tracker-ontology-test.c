@@ -67,24 +67,6 @@ const TestInfo nie_tests[] = {
 	{ NULL, NULL }
 };
 
-const TestInfo nmo_tests[] = {
-	{ "nmo/filter-charset-1", "nmo/data-1" },
-	{ "nmo/filter-contentdescription-1", "nmo/data-1" },
-	{ "nmo/filter-contentid-1", "nmo/data-1" },
-	{ "nmo/filter-contenttransferencoding-1", "nmo/data-1" },
-	{ "nmo/filter-headername-1", "nmo/data-1" },
-	{ "nmo/filter-headervalue-1", "nmo/data-1" },
-	{ "nmo/filter-isanswered-1", "nmo/data-1" },
-	{ "nmo/filter-isdeleted-1", "nmo/data-1" },
-	{ "nmo/filter-isdraft-1", "nmo/data-1" },
-	{ "nmo/filter-isflagged-1", "nmo/data-1" },
-	{ "nmo/filter-isread-1", "nmo/data-1" },
-	{ "nmo/filter-isrecent-1", "nmo/data-1" },
-	{ "nmo/filter-messageid-1", "nmo/data-1" },
-	{ "nmo/filter-messagesubject-1", "nmo/data-1" },
-	{ NULL, NULL }
-};
-
 static void
 query_helper (TrackerDataManager *manager, const gchar *query_filename, const gchar *results_filename)
 {
@@ -322,14 +304,6 @@ main (int argc, char **argv)
 
 		testpath = g_strconcat ("/libtracker-data/nie/", nie_tests[i].test_name, NULL);
 		g_test_add (testpath, TestInfo, &nie_tests[i], setup, test_query, teardown);
-		g_free (testpath);
-	}
-
-	for (i = 0; nmo_tests[i].test_name; i++) {
-		gchar *testpath;
-
-		testpath = g_strconcat ("/libtracker-data/nmo/", nmo_tests[i].test_name, NULL);
-		g_test_add (testpath, TestInfo, &nmo_tests[i], setup, test_query, teardown);
 		g_free (testpath);
 	}
 

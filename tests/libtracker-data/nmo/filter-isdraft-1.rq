@@ -1,3 +1,0 @@
-SELECT ?isDraft
-WHERE { ?x nmo:isDraft ?isDraft }
-ORDER BY ?isDraft

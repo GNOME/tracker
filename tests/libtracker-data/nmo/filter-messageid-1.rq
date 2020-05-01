@@ -1,3 +1,0 @@
-SELECT ?messageId
-WHERE { ?x nmo:messageId ?messageId }
-ORDER BY ?messageId

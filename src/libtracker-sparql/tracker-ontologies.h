@@ -36,19 +36,16 @@ G_BEGIN_DECLS
 
 /* Our Nepomuk selection */
 #define TRACKER_PREFIX_NRL      "http://tracker.api.gnome.org/ontology/v3/nrl#"
-#define TRACKER_PREFIX_NMO      "http://tracker.api.gnome.org/ontology/v3/nmo#"
 #define TRACKER_PREFIX_NIE      "http://tracker.api.gnome.org/ontology/v3/nie#"
 #define TRACKER_PREFIX_NCO      "http://tracker.api.gnome.org/ontology/v3/nco#"
 #define TRACKER_PREFIX_NAO      "http://tracker.api.gnome.org/ontology/v3/nao#"
-#define TRACKER_PREFIX_NID3     "http://tracker.api.gnome.org/ontology/v3/nid3#"
 #define TRACKER_PREFIX_NFO      "http://tracker.api.gnome.org/ontology/v3/nfo#"
-#define TRACKER_PREFIX_OSINFO   "http://tracker.api.gnome.org/ontology/v3/osinfo#"
-
-/* Temporary */
-#define TRACKER_PREFIX_SLO      "http://tracker.api.gnome.org/ontology/v3/slo#"
 #define TRACKER_PREFIX_NMM      "http://tracker.api.gnome.org/ontology/v3/nmm#"
-#define TRACKER_PREFIX_MLO      "http://tracker.api.gnome.org/ontology/v3/mlo#"
+
+/* Addtional ontologies used by tracker-miners */
 #define TRACKER_PREFIX_MFO      "http://tracker.api.gnome.org/ontology/v3/mfo#"
+#define TRACKER_PREFIX_SLO      "http://tracker.api.gnome.org/ontology/v3/slo#"
+#define TRACKER_PREFIX_OSINFO   "http://tracker.api.gnome.org/ontology/v3/osinfo#"
 
 G_END_DECLS
 

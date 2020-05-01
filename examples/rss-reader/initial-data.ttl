@@ -1,12 +1,8 @@
 @prefix rdf: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#>.
-@prefix nid3: <http://tracker.api.gnome.org/ontology/v3/nid3#>.
 @prefix nao: <http://tracker.api.gnome.org/ontology/v3/nao#>.
-@prefix nco: <http://tracker.api.gnome.org/ontology/v3/nco#>.
-@prefix nmo: <http://tracker.api.gnome.org/ontology/v3/nmo#>.
 @prefix nfo: <http://tracker.api.gnome.org/ontology/v3/nfo#>.
 @prefix nie: <http://tracker.api.gnome.org/ontology/v3/nie#>.
-@prefix ncal: <http://tracker.api.gnome.org/ontology/v3/ncal#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix mfo: <http://tracker.api.gnome.org/ontology/v3/mfo#>.
 

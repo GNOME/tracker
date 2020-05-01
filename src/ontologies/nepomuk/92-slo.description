@@ -1,13 +1,13 @@
 @prefix dsc: <http://tracker.api.gnome.org/ontology/v3/dsc#> .
 
 <virtual-ontology-uri:40-mlo.ontology> a dsc:Ontology ;
-	dsc:title "Simplified Maemo Location Ontology (SLO) (experimental/for testing)" ;
-	dsc:description "Simpler, faster, better ontology for locations and landmarks" ;
+	dsc:title "Simplified Maemo Location Ontology (SLO)" ;
+	dsc:description "Ontology for locations and landmarks" ;
 
 	dsc:author "Ivan Frade &lt;ivan.frade@nokia.com&gt;" ;
 	dsc:editor "Ivan Frade &lt;ivan.frade@nokia.com&gt;" ;
 
-	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/92-slo.ontology";
+	dsc:gitlog "hhttps://gitlab.gnome.org/GNOME/tracker/-/commits/master/src/ontologies/92-slo.ontology";
 
 	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/slo#" ;
 	dsc:localPrefix "slo" ;

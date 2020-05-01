@@ -1,3 +1,0 @@
-SELECT ?contentId
-WHERE { ?x nmo:contentId ?contentId }
-ORDER BY ?contentId

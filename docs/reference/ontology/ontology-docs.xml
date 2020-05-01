@@ -43,17 +43,10 @@
     <xi:include href="xml/nao-ontology.xml"/>
     <xi:include href="xml/nfo-ontology.xml" />
     <xi:include href="xml/nco-ontology.xml" />
-    <xi:include href="xml/nmo-ontology.xml" />
-    <xi:include href="xml/ncal-ontology.xml" />
-    <xi:include href="xml/scal-ontology.xml" />
     <xi:include href="xml/nmm-ontology.xml" />
-    <xi:include href="xml/mto-ontology.xml" />
-    <xi:include href="xml/mlo-ontology.xml" />
     <xi:include href="xml/mfo-ontology.xml" />
-    <xi:include href="xml/mtp-ontology.xml" />
     <xi:include href="xml/slo-ontology.xml" />
     <xi:include href="xml/tracker-ontology.xml" />
     <xi:include href="xml/osinfo-ontology.xml" />
-    <xi:include href="xml/nid3-ontology.xml" />
   </part>
 </book>

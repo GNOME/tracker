@@ -17,7 +17,7 @@
 	dsc:contributor "Christiaan Fluit, Aduna, &lt;christiaan.fluit@aduna-software.com&gt;";
 
 	dsc:upstream "http://www.semanticdesktop.org/ontologies/nco/";
-	dsc:gitlog "http://git.gnome.org/cgit/tracker/log/src/ontologies/32-nco.ontology";
+	dsc:gitlog "hhttps://gitlab.gnome.org/GNOME/tracker/-/commits/master/src/ontologies/32-nco.ontology";
 
 	dsc:localPrefix "nco" ;
 	dsc:baseUrl "http://tracker.api.gnome.org/ontology/v3/nco#" ;
