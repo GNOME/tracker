@@ -21,7 +21,8 @@ nfo:Document a rdfs:Class ;
 nfo:FileDataObject a rdfs:Class ;
 	rdfs:label "FileDataObject" ;
 	rdfs:comment "A resource containing a finite sequence of bytes with arbitrary information, that is available to a computer program and is usually based on some kind of durable storage. A file is durable in the sense that it remains available for programs to use after the current program has finished." ;
-	rdfs:subClassOf nie:DataObject .
+	rdfs:subClassOf nie:DataObject ;
+	tracker:notify true .
 
 nfo:Software a rdfs:Class ;
 	rdfs:label "Software" ;
