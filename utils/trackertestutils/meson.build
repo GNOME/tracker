@@ -20,6 +20,7 @@ if get_option('test_utils')
   install_data(sources, install_dir: testutils_dir / 'trackertestutils')
 
   script_conf = configuration_data()
+  script_conf.set('libdir', get_option('libdir'))
   script_conf.set('prefix', get_option('prefix'))
   script_conf.set('testutils_dir', testutils_dir)
   configure_file(

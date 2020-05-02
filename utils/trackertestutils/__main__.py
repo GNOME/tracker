@@ -25,7 +25,6 @@
 
 import argparse
 import collections
-import configparser
 import contextlib
 import locale
 import logging
@@ -41,10 +40,8 @@ import time
 from gi.repository import Gio
 from gi.repository import GLib
 
-from . import dbusdaemon
 from . import dconf
 from . import helpers
-from . import mainloop
 
 # Script
 script_name = 'tracker-sandbox'

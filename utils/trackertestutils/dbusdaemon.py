@@ -113,6 +113,9 @@ class DBusDaemon:
         log.debug("Pinging the new D-Bus daemon...")
         self.ping_sync()
 
+        # Uncomment to output D-Bus events to the console.
+        #monitor = subprocess.Popen(['dbus-monitor', '--address', self.address])
+
     def stop(self):
         if self.process:
             log.debug("  Stopping DBus daemon")
@@ -179,11 +182,20 @@ class DBusDaemon:
     def get_connection_unix_process_id_sync(self, name):
         """Get the process ID for one of the names connected to the bus."""
         conn = self.get_connection()
-        result = conn.call_sync('org.freedesktop.DBus',
-                                '/org/freedesktop/DBus',
-                                'org.freedesktop.DBus',
-                                'GetConnectionUnixProcessID',
-                                GLib.Variant('(s)', [name]),
-                                GLib.VariantType('(u)'),
-                                Gio.DBusCallFlags.NONE, -1, None)
-        return result[0]
+        try:
+            result = conn.call_sync('org.freedesktop.DBus',
+                                    '/org/freedesktop/DBus',
+                                    'org.freedesktop.DBus',
+                                    'GetConnectionUnixProcessID',
+                                    GLib.Variant('(s)', [name]),
+                                    GLib.VariantType('(u)'),
+                                    Gio.DBusCallFlags.NONE, -1, None)
+            return result[0]
+        except GLib.GError as e:
+            if e.message.startswith('GDBus.Error:org.freedesktop.DBus.Error.NameHasNoOwner'):
+                # This can happen if a daemon disconnects between when we call
+                # list_names_sync() and when we query its PID.
+                log.debug("Received %s", e)
+                return None
+            else:
+                raise
