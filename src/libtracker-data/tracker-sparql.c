@@ -468,7 +468,8 @@ _append_placeholder (TrackerSparql *sparql)
 }
 
 static inline gchar *
-_escape_sql_string (const gchar *str)
+_escape_sql_string (const gchar *str,
+                    gchar        ch)
 {
 	int i, j, len;
 	gchar *copy;
@@ -478,8 +479,8 @@ _escape_sql_string (const gchar *str)
 	i = j = 0;
 
 	while (i < len) {
-		if (str[i] == '\'') {
-			copy[j] = '\'';
+		if (str[i] == ch) {
+			copy[j] = ch;
 			j++;
 		}
 
@@ -519,7 +520,7 @@ _append_literal_sql (TrackerSparql         *sparql,
 		switch (TRACKER_BINDING (binding)->data_type) {
 		case TRACKER_PROPERTY_TYPE_DATE:
 			full_str = g_strdup_printf ("%sT00:00:00Z", binding->literal);
-			escaped = _escape_sql_string (full_str);
+			escaped = _escape_sql_string (full_str, '"');
 			_append_string (sparql, escaped);
 			g_free (escaped);
 			g_free (full_str);
@@ -528,7 +529,7 @@ _append_literal_sql (TrackerSparql         *sparql,
 		case TRACKER_PROPERTY_TYPE_STRING:
 		case TRACKER_PROPERTY_TYPE_LANGSTRING:
 		case TRACKER_PROPERTY_TYPE_RESOURCE:
-			escaped = _escape_sql_string (binding->literal);
+			escaped = _escape_sql_string (binding->literal, '"');
 			_append_string (sparql, escaped);
 			g_free (escaped);
 			break;
@@ -4662,7 +4663,7 @@ translate_ServiceGraphPattern (TrackerSparql  *sparql,
 
 	tracker_parser_node_get_extents (pattern, &pattern_start, &pattern_end);
 	pattern_str = g_strndup (&sparql->sparql[pattern_start], pattern_end - pattern_start);
-	escaped_str = _escape_sql_string (pattern_str);
+	escaped_str = _escape_sql_string (pattern_str, '"');
 	g_string_append (service_sparql, escaped_str);
 	g_free (pattern_str);
 	g_free (escaped_str);
