@@ -212,6 +212,30 @@ service_close (sqlite3_vtab_cursor *vtab_cursor)
 }
 
 static void
+apply_to_statement (TrackerSparqlStatement *statement,
+                    const gchar            *name,
+                    sqlite3_value          *value)
+{
+	switch (sqlite3_value_type (value)) {
+	case SQLITE_INTEGER:
+		tracker_sparql_statement_bind_int (statement,
+		                                   sqlite3_value_int64 (value));
+		break;
+	case SQLITE_FLOAT:
+		tracker_sparql_statement_bind_double (statement,
+		                                      sqlite3_value_double (value));
+		break;
+	case SQLITE_TEXT:
+	case SQLITE_BLOB:
+		tracker_sparql_statement_bind_string (statement,
+		                                      sqlite3_value_text (value));
+	case SQLITE_NULL:
+	default:
+		break;
+	}
+}
+
+static void
 apply_statement_parameters (TrackerSparqlStatement *statement,
                             GHashTable             *names,
                             GHashTable             *values)
@@ -230,10 +254,9 @@ apply_statement_parameters (TrackerSparqlStatement *statement,
 		if (!value)
 			continue;
 
-		/* FIXME: Handle other types better */
-		tracker_sparql_statement_bind_string (statement,
-		                                      sqlite3_value_text (name),
-		                                      sqlite3_value_text (value));
+		apply_to_statement (statement,
+		                    sqlite3_value_string (name),
+		                    value);
 	}
 }
 
