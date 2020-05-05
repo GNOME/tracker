@@ -32,6 +32,7 @@ typedef struct {
 	const gchar *arg1;
 	const gchar *arg2;
 	const gchar *arg3;
+	gboolean service;
 	TrackerSparqlConnection *conn;
 } TestInfo;
 
@@ -43,6 +44,7 @@ TestInfo tests[] = {
 	{ "subject", "statement/subject.rq", "statement/subject.out", "http://tracker.api.gnome.org/ontology/v3/nmm#MusicAlbum" },
 	{ "subject-2", "statement/subject.rq", "statement/subject-2.out", "urn:nonexistent" },
 	{ "filter", "statement/filter.rq", "statement/filter.out", "http://tracker.api.gnome.org/ontology/v3/nmm#MusicAlbum", "Music album" },
+	{ "service", "statement/service.rq", "statement/service.out", "Music album", NULL, NULL, TRUE },
 };
 
 typedef struct {
@@ -51,6 +53,7 @@ typedef struct {
 } StartupData;
 
 static gboolean started = FALSE;
+static const gchar *bus_name = NULL;
 
 static void
 check_result (TrackerSparqlCursor *cursor,
@@ -160,6 +163,14 @@ query_statement (TestInfo      *test_info,
 	g_assert_no_error (error);
 	g_free (path);
 
+	if (test_info->service) {
+		gchar *service_query;
+
+		service_query = g_strdup_printf (query, bus_name);
+		g_free (query);
+		query = service_query;
+	}
+
 	stmt = tracker_sparql_connection_query_statement (test_info->conn, query,
 	                                                  NULL, &error);
 	g_free (query);
@@ -203,7 +214,7 @@ create_local_connection (GError **error)
 static gpointer
 thread_func (gpointer user_data)
 {
-	StartupData *data = user_data;;
+	StartupData *data = user_data;
 	TrackerEndpointDBus *endpoint;
 	GMainContext *context;
 	GMainLoop *main_loop;
@@ -242,21 +253,26 @@ create_connections (TrackerSparqlConnection **dbus,
 	while (!started)
 		g_usleep (100);
 
-	*dbus = tracker_sparql_connection_bus_new (g_dbus_connection_get_unique_name (data.dbus_conn),
+	bus_name = g_dbus_connection_get_unique_name (data.dbus_conn);
+	*dbus = tracker_sparql_connection_bus_new (bus_name,
 	                                           NULL, data.dbus_conn, error);
-	*direct = data.direct;
+	*direct = create_local_connection (error);
 
 	return TRUE;
 }
 
 static void
 add_tests (TrackerSparqlConnection *conn,
-           const gchar             *name)
+           const gchar             *name,
+           gboolean                 run_service_tests)
 {
 	gint i;
 
 	for (i = 0; i < G_N_ELEMENTS (tests); i++) {
 		gchar *testpath;
+
+		if (tests[i].service && !run_service_tests)
+			continue;
 
 		tests[i].conn = conn;
 		testpath = g_strconcat ("/libtracker-sparql/statement/", name, "/", tests[i].test_name, NULL);
@@ -276,8 +292,8 @@ main (gint argc, gchar **argv)
 	g_assert_true (create_connections (&dbus, &direct, &error));
 	g_assert_no_error (error);
 
-	add_tests (direct, "direct");
-	add_tests (dbus, "dbus");
+	add_tests (direct, "direct", TRUE);
+	add_tests (dbus, "dbus", FALSE);
 
 	return g_test_run ();
 }
