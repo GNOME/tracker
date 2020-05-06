@@ -47,7 +47,7 @@ from . import helpers
 script_name = 'tracker-sandbox'
 script_about = "Tracker Sandbox developer tool."
 
-default_index_location = '/tmp/tracker-sandbox'
+default_store_location = '/tmp/tracker-sandbox'
 
 store_pid = -1
 store_proc = None
@@ -83,17 +83,17 @@ def environment_set_and_add_path(env, var, prefix, suffix):
     env[var] = full
 
 
-def create_sandbox(index_location, prefix=None, dbus_config=None,
+def create_sandbox(store_location, prefix=None, dbus_config=None,
                    interactive=False):
     assert prefix is None or dbus_config is None
 
     extra_env = {}
 
     # Data
-    extra_env['XDG_DATA_HOME'] = '%s/data/' % index_location
-    extra_env['XDG_CONFIG_HOME'] = '%s/config/' % index_location
-    extra_env['XDG_CACHE_HOME'] = '%s/cache/' % index_location
-    extra_env['XDG_RUNTIME_DIR'] = '%s/run/' % index_location
+    extra_env['XDG_DATA_HOME'] = '%s/data/' % store_location
+    extra_env['XDG_CONFIG_HOME'] = '%s/config/' % store_location
+    extra_env['XDG_CACHE_HOME'] = '%s/cache/' % store_location
+    extra_env['XDG_RUNTIME_DIR'] = '%s/run/' % store_location
 
     # Prefix - only set if non-standard
     if prefix and prefix != '/usr':
@@ -105,7 +105,7 @@ def create_sandbox(index_location, prefix=None, dbus_config=None,
     extra_env['G_MESSAGES_PREFIXED'] = 'all'
 
     log.debug('Using prefix location "%s"' % prefix)
-    log.debug('Using index location "%s"' % index_location)
+    log.debug('Using store location "%s"' % store_location)
 
     sandbox = helpers.TrackerDBusSandbox(dbus_config, extra_env=extra_env)
     sandbox.start(new_session=True)
@@ -137,15 +137,19 @@ def config_set(sandbox, content_locations_recursive=None,
                      for dir in locations]
         return GLib.Variant('as', locations)
 
-    dconfclient.write('org.freedesktop.Tracker.Miner.Files',
+    dconfclient.write('org.freedesktop.Tracker3.Miner.Files',
                       'index-recursive-directories',
                       locations_gsetting(content_locations_recursive or []))
-    dconfclient.write('org.freedesktop.Tracker.Miner.Files',
+    dconfclient.write('org.freedesktop.Tracker3.Miner.Files',
                       'index-single-directories',
-                      locations_gsetting(content_locations_recursive or []))
-    dconfclient.write('org.freedesktop.Tracker.Miner.Files',
+                      locations_gsetting(content_locations_single or []))
+    dconfclient.write('org.freedesktop.Tracker3.Miner.Files',
                       'index-applications',
                       GLib.Variant('b', applications))
+
+    dconfclient.write('org.freedesktop.Tracker3.Miner.Files',
+                      'initial-sleep',
+                      GLib.Variant('i', 0))
 
 def link_to_mime_data():
     '''Create symlink to $XDG_DATA_HOME/mime in our custom data home dir.
@@ -183,12 +187,17 @@ def argument_parser():
                         help="run Tracker from the given install prefix. You "
                              "can run the system version of Tracker by "
                              "specifying --prefix=/usr")
-    parser.add_argument('-i', '--index', metavar='DIR', action=expand_path,
-                        default=default_index_location, dest='index_location',
-                        help=f"directory to the index (default={default_index_location})")
-    parser.add_argument('--index-tmpdir', action='store_true',
+    parser.add_argument('-s', '--store', metavar='DIR', action=expand_path,
+                        default=default_store_location, dest='store_location',
+                        help=f"directory to store the index (default={default_store_location})")
+    parser.add_argument('--store-tmpdir', action='store_true',
                         help="create index in a temporary directory and "
                              "delete it on exit (useful for automated testing)")
+    parser.add_argument('--index-recursive-directories', nargs='+',
+                        help="override the default locations Tracker should index")
+    parser.add_argument('--index-recursive-tmpdir', action='store_true',
+                        help="create a temporary directory and configure Tracker "
+                             "to only index that location (useful for automated testing)")
     parser.add_argument('--wait-for-miner', type=str, action='append',
                         help="wait for one or more daemons to start, and "
                              "return to idle for at least 1 second, before "
@@ -339,23 +348,37 @@ def main():
         raise RuntimeError("--wait-for-miner cannot be used when opening an "
                            "interactive shell.")
 
-    index_location = None
-    index_tmpdir = None
+    store_location = None
+    store_tmpdir = None
 
-    if args.index_location != default_index_location and args.index_tmpdir:
-        raise RuntimeError("The --index-tmpdir flag is enabled, but --index= was also passed.")
-    if args.index_tmpdir:
-        index_location = index_tmpdir = tempfile.mkdtemp(prefix='tracker-sandbox')
+    if args.store_location != default_store_location and args.store_tmpdir:
+        raise RuntimeError("The --store-tmpdir flag is enabled, but --store= was also passed.")
+    if args.store_tmpdir:
+        store_location = store_tmpdir = tempfile.mkdtemp(prefix='tracker-sandbox-store')
     else:
-        index_location = args.index_location
+        store_location = args.store_location
+
+    index_recursive_directories = None
+    index_recursive_tmpdir = None
+
+    if args.index_recursive_directories and args.index_recursive_tmpdir:
+        raise RuntimeError("The --index-recursive-tmpdir flag is enabled, but "
+                           "--index-recursive-directories= was also passed.")
+    if args.index_recursive_tmpdir:
+        # This tmpdir goes in cwd because paths under /tmp are ignored for indexing
+        index_recursive_tmpdir = tempfile.mkdtemp(prefix='tracker-indexed-tmpdir', dir=os.getcwd())
+        index_recursive_directories = [index_recursive_tmpdir]
+        os.environ['TRACKER_INDEXED_TMPDIR'] = index_recursive_tmpdir
+    else:
+        index_recursive_directories = args.index_recursive_directories
 
     interactive = not (args.command)
 
     # Set up environment variables and foo needed to get started.
-    sandbox = create_sandbox(index_location, args.prefix,
+    sandbox = create_sandbox(store_location, args.prefix,
                              dbus_config=args.dbus_config,
                              interactive=interactive)
-    config_set(sandbox)
+    config_set(sandbox, index_recursive_directories)
 
     link_to_mime_data()
 
@@ -397,8 +420,10 @@ def main():
                 sys.exit(result.returncode)
     finally:
         sandbox.stop()
-        if index_tmpdir:
-            shutil.rmtree(index_tmpdir, ignore_errors=True)
+        if store_tmpdir:
+            shutil.rmtree(store_tmpdir, ignore_errors=True)
+        if index_recursive_tmpdir:
+            shutil.rmtree(index_recursive_tmpdir, ignore_errors=True)
 
 
 # Entry point/start
