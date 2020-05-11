@@ -83,17 +83,18 @@ def environment_set_and_add_path(env, var, prefix, suffix):
     env[var] = full
 
 
-def create_sandbox(store_location, prefix=None, dbus_config=None,
-                   interactive=False):
+def create_sandbox(store_location, prefix=None, use_session_dirs=False,
+                   dbus_config=None, interactive=False):
     assert prefix is None or dbus_config is None
 
     extra_env = {}
 
     # Data
-    extra_env['XDG_DATA_HOME'] = '%s/data/' % store_location
-    extra_env['XDG_CONFIG_HOME'] = '%s/config/' % store_location
-    extra_env['XDG_CACHE_HOME'] = '%s/cache/' % store_location
-    extra_env['XDG_RUNTIME_DIR'] = '%s/run/' % store_location
+    if not use_session_dirs:
+        extra_env['XDG_DATA_HOME'] = '%s/data/' % store_location
+        extra_env['XDG_CONFIG_HOME'] = '%s/config/' % store_location
+        extra_env['XDG_CACHE_HOME'] = '%s/cache/' % store_location
+        extra_env['XDG_RUNTIME_DIR'] = '%s/run/' % store_location
 
     # Prefix - only set if non-standard
     if prefix and prefix != '/usr':
@@ -190,6 +191,8 @@ def argument_parser():
     parser.add_argument('-s', '--store', metavar='DIR', action=expand_path,
                         default=default_store_location, dest='store_location',
                         help=f"directory to store the index (default={default_store_location})")
+    parser.add_argument('--use-session-dirs', action='store_true',
+                        help=f"update the real Tracker index (use with care!)")
     parser.add_argument('--store-tmpdir', action='store_true',
                         help="create index in a temporary directory and "
                              "delete it on exit (useful for automated testing)")
@@ -348,15 +351,22 @@ def main():
         raise RuntimeError("--wait-for-miner cannot be used when opening an "
                            "interactive shell.")
 
+    use_session_dirs = False
     store_location = None
     store_tmpdir = None
 
-    if args.store_location != default_store_location and args.store_tmpdir:
-        raise RuntimeError("The --store-tmpdir flag is enabled, but --store= was also passed.")
-    if args.store_tmpdir:
-        store_location = store_tmpdir = tempfile.mkdtemp(prefix='tracker-sandbox-store')
+    if args.use_session_dirs:
+        if args.store_location != default_store_location or args.store_tmpdir:
+            raise RuntimeError("The --use-session-dirs flag cannot be combined "
+                               " with --store= or --store-tmpdir")
+        use_session_dirs = True
     else:
-        store_location = args.store_location
+        if args.store_location != default_store_location and args.store_tmpdir:
+            raise RuntimeError("The --store-tmpdir flag is enabled, but --store= was also passed.")
+        if args.store_tmpdir:
+            store_location = store_tmpdir = tempfile.mkdtemp(prefix='tracker-sandbox-store')
+        else:
+            store_location = args.store_location
 
     index_recursive_directories = None
     index_recursive_tmpdir = None
@@ -376,11 +386,13 @@ def main():
 
     # Set up environment variables and foo needed to get started.
     sandbox = create_sandbox(store_location, args.prefix,
+                             use_session_dirs=use_session_dirs,
                              dbus_config=args.dbus_config,
                              interactive=interactive)
     config_set(sandbox, index_recursive_directories)
 
-    link_to_mime_data()
+    if not use_session_dirs:
+        link_to_mime_data()
 
     miner_watches = {}
     for miner in (args.wait_for_miner or []):
