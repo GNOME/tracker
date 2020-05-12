@@ -2054,7 +2054,7 @@ _end_triples_block (TrackerSparql  *sparql,
 
 	/* Add select variables */
 	while (g_hash_table_iter_next (&iter, (gpointer *) &var, NULL)) {
-		TrackerBinding *binding;
+		TrackerBinding *binding, *sample;
 		GPtrArray *binding_list;
 
 		binding_list = tracker_triple_context_get_variable_binding_list (triple_context,
@@ -2067,9 +2067,28 @@ _end_triples_block (TrackerSparql  *sparql,
 
 		first = FALSE;
 		binding = g_ptr_array_index (binding_list, 0);
-		_append_string_printf (sparql, "%s AS %s ",
-				       tracker_binding_get_sql_expression (binding),
-				       tracker_variable_get_sql_expression (var));
+		sample = TRACKER_BINDING (tracker_variable_get_sample_binding (var));
+
+		if (sample &&
+		    sample->data_type == TRACKER_PROPERTY_TYPE_STRING &&
+		    binding->data_type == TRACKER_PROPERTY_TYPE_RESOURCE) {
+			TrackerStringBuilder *str, *old;
+
+			str = _append_placeholder (sparql);
+			old = tracker_sparql_swap_builder (sparql, str);
+
+			_append_string_printf (sparql, "%s ",
+					       tracker_binding_get_sql_expression (binding));
+
+			convert_expression_to_string (sparql, binding->data_type);
+			_append_string_printf (sparql, "AS %s ", tracker_variable_get_sql_expression (var));
+
+			tracker_sparql_swap_builder (sparql, old);
+		} else {
+			_append_string_printf (sparql, "%s AS %s ",
+					       tracker_binding_get_sql_expression (binding),
+					       tracker_variable_get_sql_expression (var));
+		}
 	}
 
 	if (first)
