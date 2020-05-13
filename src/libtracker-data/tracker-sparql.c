@@ -4670,6 +4670,9 @@ translate_ServiceGraphPattern (TrackerSparql  *sparql,
 		var_str = _extract_node_string (node, sparql);
 		var = _extract_node_variable (node, sparql);
 
+		if (g_list_find (variables, var))
+			continue;
+
 		/* Variable was used before in the graph pattern, preserve
 		* for later so we join on it properly.
 		*/
@@ -4692,6 +4695,7 @@ translate_ServiceGraphPattern (TrackerSparql  *sparql,
 	pattern_str = g_strndup (&sparql->sparql[pattern_start], pattern_end - pattern_start);
 	escaped_str = _escape_sql_string (pattern_str, '"');
 	g_string_append (service_sparql, escaped_str);
+	g_list_free (variables);
 	g_free (pattern_str);
 	g_free (escaped_str);
 
