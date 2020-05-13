@@ -1,0 +1,7 @@
+SELECT ?u {
+  SERVICE <dbus:%s> {
+    ?u tracker:indexed true;
+       rdfs:label ?l
+  }
+  FILTER (STRSTARTS(?l, "Alb"))
+}
