@@ -67,6 +67,8 @@ const ChangeInfo changes[] = {
 	{ "99-example.ontology.v9", "99-example.queries.v9", NULL, NULL },
 	{ "99-example.ontology.v10", "99-example.queries.v10", NULL, NULL },
 	{ "99-example.ontology.v11", "99-example.queries.v11", "change/change-test-5", NULL },
+	{ "99-example.ontology.v12", "99-example.queries.v11", "change/change-test-5", NULL },
+	{ "99-example.ontology.v13", "99-example.queries.v11", "change/change-test-6", NULL },
 	{ NULL }
 };
 

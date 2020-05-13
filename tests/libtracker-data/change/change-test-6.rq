@@ -1,0 +1,2 @@
+SELECT ?l ?c { example:labeled rdfs:label ?l ;
+                               rdfs:comment ?c }

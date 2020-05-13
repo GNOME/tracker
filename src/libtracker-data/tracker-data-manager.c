@@ -1917,6 +1917,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
                                          const gchar        *object,
                                          gboolean            in_update)
 {
+	TrackerProperty *property;
 	GError *error = NULL;
 	GBytes *bytes;
 
@@ -1994,10 +1995,19 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 	}
 
 	bytes = g_bytes_new (object, strlen (object) + 1);
+	property = tracker_ontologies_get_property_by_uri (manager->ontologies, predicate);
 
-	tracker_data_insert_statement (manager->data_update, NULL, subject,
-	                               predicate, bytes,
-	                               &error);
+	if (tracker_property_get_is_new (property) ||
+	    tracker_property_get_multiple_values (property)) {
+		tracker_data_insert_statement (manager->data_update, NULL,
+		                               subject, predicate, bytes,
+		                               &error);
+	} else {
+		tracker_data_update_statement (manager->data_update, NULL,
+					       subject, predicate, bytes,
+		                               &error);
+	}
+
 	g_bytes_unref (bytes);
 
 	if (error != NULL) {
