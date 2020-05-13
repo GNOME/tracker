@@ -2054,7 +2054,7 @@ _end_triples_block (TrackerSparql  *sparql,
 
 	/* Add select variables */
 	while (g_hash_table_iter_next (&iter, (gpointer *) &var, NULL)) {
-		TrackerBinding *binding;
+		TrackerBinding *binding, *sample;
 		GPtrArray *binding_list;
 
 		binding_list = tracker_triple_context_get_variable_binding_list (triple_context,
@@ -2067,9 +2067,28 @@ _end_triples_block (TrackerSparql  *sparql,
 
 		first = FALSE;
 		binding = g_ptr_array_index (binding_list, 0);
-		_append_string_printf (sparql, "%s AS %s ",
-				       tracker_binding_get_sql_expression (binding),
-				       tracker_variable_get_sql_expression (var));
+		sample = TRACKER_BINDING (tracker_variable_get_sample_binding (var));
+
+		if (sample &&
+		    sample->data_type == TRACKER_PROPERTY_TYPE_STRING &&
+		    binding->data_type == TRACKER_PROPERTY_TYPE_RESOURCE) {
+			TrackerStringBuilder *str, *old;
+
+			str = _append_placeholder (sparql);
+			old = tracker_sparql_swap_builder (sparql, str);
+
+			_append_string_printf (sparql, "%s ",
+					       tracker_binding_get_sql_expression (binding));
+
+			convert_expression_to_string (sparql, binding->data_type);
+			_append_string_printf (sparql, "AS %s ", tracker_variable_get_sql_expression (var));
+
+			tracker_sparql_swap_builder (sparql, old);
+		} else {
+			_append_string_printf (sparql, "%s AS %s ",
+					       tracker_binding_get_sql_expression (binding),
+					       tracker_variable_get_sql_expression (var));
+		}
 	}
 
 	if (first)
@@ -4629,6 +4648,7 @@ translate_ServiceGraphPattern (TrackerSparql  *sparql,
 	TrackerContext *context;
 	GList *variables = NULL;
 	GList *variable_rules = NULL, *l;
+	GList *join_vars = NULL;
 	TrackerToken service;
 	GString *service_sparql;
 	gboolean silent = FALSE, do_join;
@@ -4640,7 +4660,7 @@ translate_ServiceGraphPattern (TrackerSparql  *sparql,
 
 	if (do_join) {
 		_prepend_string (sparql, "SELECT * FROM (");
-		_append_string (sparql, ") NATURAL INNER JOIN (");
+		_append_string (sparql, ") AS Left INNER JOIN (");
 	}
 
 	context = tracker_triple_context_new ();
@@ -4672,13 +4692,24 @@ translate_ServiceGraphPattern (TrackerSparql  *sparql,
 		                               TERMINAL_TYPE_PARAMETERIZED_VAR))
 			continue;
 
+		var_str = _extract_node_string (node, sparql);
+		var = _extract_node_variable (node, sparql);
+
+		if (g_list_find (variables, var))
+			continue;
+
 		if (i > 0)
 			_append_string (sparql, ", ");
 
-		var_str = _extract_node_string (node, sparql);
-		var = _extract_node_variable (node, sparql);
+		/* Variable was used before in the graph pattern, preserve
+		* for later so we join on it properly.
+		*/
+		if (do_join && tracker_variable_get_sample_binding (var))
+			join_vars = g_list_prepend (join_vars, var);
+
 		variables = g_list_prepend (variables, var);
 		binding = tracker_variable_binding_new (var, NULL, NULL);
+		tracker_binding_set_data_type (binding, TRACKER_PROPERTY_TYPE_STRING);
 		_add_binding (sparql, binding);
 
 		_append_string_printf (sparql, "col%d AS %s ",
@@ -4692,6 +4723,7 @@ translate_ServiceGraphPattern (TrackerSparql  *sparql,
 	pattern_str = g_strndup (&sparql->sparql[pattern_start], pattern_end - pattern_start);
 	escaped_str = _escape_sql_string (pattern_str, '"');
 	g_string_append (service_sparql, escaped_str);
+	g_list_free (variables);
 	g_free (pattern_str);
 	g_free (escaped_str);
 
@@ -4732,8 +4764,33 @@ translate_ServiceGraphPattern (TrackerSparql  *sparql,
 	g_string_free (service_sparql, TRUE);
 	g_list_free (variable_rules);
 
-	if (do_join)
-		_append_string (sparql, ") ");
+	if (do_join) {
+		_append_string (sparql, ") AS Right ");
+
+		for (l = join_vars; l; l = l->next) {
+			TrackerBinding *sample;
+
+			if (l == join_vars)
+				_append_string (sparql, "ON ");
+			else
+				_append_string (sparql, "AND ");
+
+			sample = TRACKER_BINDING (tracker_variable_get_sample_binding (l->data));
+
+			if (sample && sample->data_type == TRACKER_PROPERTY_TYPE_RESOURCE) {
+				_append_string_printf (sparql, "(SELECT Uri FROM Resource WHERE ID = Left.%s) ",
+						       tracker_variable_get_sql_expression (l->data));
+			} else {
+				_append_string_printf (sparql, "Left.%s ",
+						       tracker_variable_get_sql_expression (l->data));
+			}
+
+			_append_string_printf (sparql, "= Right.%s ",
+					       tracker_variable_get_sql_expression (l->data));
+		}
+	}
+
+	g_list_free (join_vars);
 
 	return TRUE;
 }

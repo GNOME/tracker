@@ -46,7 +46,6 @@ public static Tracker.Sparql.Connection tracker_sparql_connection_new (Tracker.S
 
 public static async Tracker.Sparql.Connection tracker_sparql_connection_new_async (Tracker.Sparql.ConnectionFlags flags, File store, File ontology, Cancellable? cancellable = null) throws GLib.Error, Tracker.Sparql.Error, IOError {
 	var conn = new Tracker.Direct.Connection (flags, store, ontology);
-	conn.init_async.begin (Priority.DEFAULT, cancellable);
-	yield;
+	yield conn.init_async (Priority.DEFAULT, cancellable);
 	return conn;
 }

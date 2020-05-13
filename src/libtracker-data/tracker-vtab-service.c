@@ -150,7 +150,7 @@ service_best_index (sqlite3_vtab       *vtab,
 		if (!info->aConstraint[i].usable)
 			continue;
 
-		if (info->aConstraint[i].iColumn > COL_FIRST_VARIABLE) {
+		if (info->aConstraint[i].iColumn >= COL_FIRST_VARIABLE) {
 			info->aConstraintUsage[i].argvIndex = -1;
 			continue;
 		}
