@@ -7,6 +7,7 @@ libtracker_data_tests = [
     'ontology-change',
     'sparql-blank',
     'insert-or-replace',
+    'service',
 ]
 
 libtracker_data_slow_tests = [
