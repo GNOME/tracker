@@ -258,6 +258,9 @@ tracker_ontologies_dir = join_paths(get_option('prefix'), get_option('datadir'),
 
 vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi')
 
+typelib_dir = gobject_introspection.get_pkgconfig_variable('typelibdir',
+                                                           define_variable:  [ 'libdir', libdir ])
+
 subdir('src')
 subdir('docs')
 subdir('examples')

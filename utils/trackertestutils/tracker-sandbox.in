@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export GI_TYPELIB_PATH=@prefix@/@libdir@/girepository-1.0/:$GI_TYPELIB_PATH
+export GI_TYPELIB_PATH=@typelibdir@/:$GI_TYPELIB_PATH
 export PYTHONPATH=@testutils_dir@
 
 python3 -m trackertestutils --prefix=@prefix@ $@
