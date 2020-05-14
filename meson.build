@@ -38,7 +38,6 @@ glib_required = '2.52.0'
 # 3.15.0 for https://sqlite.org/rowvalue.html
 sqlite_required = '3.15.0'
 
-dbus = dependency('dbus-1', version: '> 1.3.1')
 gio = dependency('gio-2.0', version: '>' + glib_required)
 gio_unix = dependency('gio-unix-2.0', version: '>' + glib_required)
 glib = dependency('glib-2.0', version: '>' + glib_required)
@@ -250,8 +249,6 @@ source_root = meson.current_source_dir()
 build_root = meson.current_build_dir()
 po_subdir = join_paths(source_root, 'po')
 
-gsettings_schema_dir = join_paths(get_option('prefix'), get_option('datadir'), 'glib-2.0', 'schemas')
-
 tracker_internal_libs_dir = join_paths(get_option('prefix'), get_option('libdir'), 'tracker-' + tracker_api_version)
 tracker_install_rpath = ':'.join([tracker_internal_libs_dir, libdir])
 
@@ -260,16 +257,6 @@ tracker_install_rpath = ':'.join([tracker_internal_libs_dir, libdir])
 tracker_ontologies_dir = join_paths(get_option('prefix'), get_option('datadir'), tracker_versioned_name, 'ontologies')
 
 vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi')
-
-glib_compile_schemas = find_program('glib-compile-schemas')
-glib_mkenums = find_program('glib-mkenums')
-g_ir_compiler = find_program('g-ir-compiler', gobject_introspection.get_pkgconfig_variable('g_ir_compiler'))
-dbus_run_session = find_program('dbus-run-session')
-
-gir_dir = gobject_introspection.get_pkgconfig_variable('girdir',
-                                                       define_variable:  [ 'datadir', datadir ])
-typelib_dir = gobject_introspection.get_pkgconfig_variable('typelibdir',
-                                                           define_variable:  [ 'libdir', libdir ])
 
 subdir('src')
 subdir('docs')
