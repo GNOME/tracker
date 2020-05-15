@@ -65,6 +65,8 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
                  '--ontology-path', ontology_path])
             self.run_cli(
                 ['tracker3', 'export', '--database', tmpdir]);
+            self.run_cli(
+                ['tracker3', 'export', '--database', tmpdir, '--show-graphs']);
 
     def test_import(self):
         """Import a Turtle file into a Tracker database."""

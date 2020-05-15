@@ -40,6 +40,7 @@
 	 list_properties || \
 	 list_notifies || \
 	 list_indexes || \
+	 list_graphs || \
 	 tree || \
 	 search || \
 	 get_shorthand || \
@@ -94,6 +95,7 @@ static gboolean list_class_prefixes;
 static gchar *list_properties;
 static gchar *list_notifies;
 static gchar *list_indexes;
+static gchar *list_graphs;
 static gchar *tree;
 static gchar *get_shorthand;
 static gchar *get_longhand;
@@ -146,6 +148,10 @@ static GOptionEntry entries[] = {
 	{ "list-indexes", 'i', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, parse_list_indexes,
 	  N_("Retrieve indexes used in database to improve performance (PROPERTY is optional)"),
 	  N_("PROPERTY"),
+	},
+	{ "list-graphs", 'g', 0, G_OPTION_ARG_NONE, &list_graphs,
+	  N_("Retrieve all named graphs"),
+	  NULL,
 	},
 	{ "tree", 't', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, parse_tree,
 	  N_("Describe subclasses, superclasses (can be used with -s to highlight parts of the tree and -p to show properties)"),
@@ -1286,6 +1292,30 @@ sparql_run (void)
 		}
 
 		print_cursor (cursor, _("No indexes were found"), _("Indexes"), TRUE);
+	}
+
+	if (list_graphs) {
+		const gchar *query;
+
+		/* First list classes */
+		query = g_strdup_printf ("SELECT DISTINCT ?g "
+		                         "WHERE {"
+		                         "  GRAPH ?g { ?s ?p ?o }"
+		                         "}");
+
+		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
+
+		if (error) {
+			g_printerr ("%s, %s\n",
+			            _("Could not list named graphs"),
+			            error->message);
+			g_error_free (error);
+			g_object_unref (connection);
+
+			return EXIT_FAILURE;
+		}
+
+		print_cursor (cursor, _("No graphs were found"), _("Named graphs"), TRUE);
 	}
 
 	if (tree) {

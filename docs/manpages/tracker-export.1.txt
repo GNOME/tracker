@@ -17,6 +17,18 @@ Turtle format.
 The output is intended to be machine-readable, not human readable. Use a
 tool such as rapper(1) to convert the data to different formats.
 
+== OPTIONS
+
+*-g, --show-graphs*::
+  Tracker can separate data into multiple graphs. This feature is used
+  by the filesystem miner to separate different types of content. This
+  flag causes the releveant GRAPH statements to be output along with
+  the data.
+
+  In this mode the output is TriG syntax rather than Turtle, due to
+  the extra GRAPH statements. Some tools which understand Turtle do not
+  understand TriG.
+
 == EXAMPLES
 
 Export all data from Tracker Index and prettify the output using

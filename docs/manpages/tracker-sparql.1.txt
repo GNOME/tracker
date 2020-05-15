@@ -88,7 +88,10 @@ See also *--tree* and *--query*.
   _property_ does not have to be supplied here. This is optional and
   filters the results according to any argument supplied. With no
   _property_, all properties are listed.
-
+* -g, --list-graphs::
+  List all the named graphs in the database. These are used by the
+  filesystem miner to separate metadata so that apps can only see
+  the information relevant to them.
 *-t, --tree=[_class_]*::
   Prints a tree showing all parent classes of _class_ in the ontology.
   The _class_ can be provided in shorthand or longhand (see

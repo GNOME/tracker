@@ -35,6 +35,7 @@
 static gchar *database_path;
 static gchar *dbus_service;
 static gchar *remote_service;
+static gboolean show_graphs;
 
 static GOptionEntry entries[] = {
 	{ "database", 'd', 0, G_OPTION_ARG_FILENAME, &database_path,
@@ -48,6 +49,10 @@ static GOptionEntry entries[] = {
 	{ "remote-service", 'r', 0, G_OPTION_ARG_STRING, &remote_service,
 	  N_("Connects to a remote service"),
 	  N_("Remote service URI")
+	},
+	{ "show-graphs", 'g', 0, G_OPTION_ARG_NONE, &show_graphs,
+	  N_("Output TriG format which includes named graph information"),
+	  NULL
 	},
 	{ NULL }
 };
@@ -125,7 +130,7 @@ print_prefix (gpointer key,
 	g_print ("@prefix %s: <%s#> .\n", (gchar *) value, (gchar *) key);
 }
 
-/* Print triples for a urn in Turtle format */
+/* Print triples in Turtle format */
 static void
 print_turtle (TrackerSparqlCursor *cursor,
               GHashTable          *prefixes,
@@ -135,10 +140,10 @@ print_turtle (TrackerSparqlCursor *cursor,
 	gchar *object;
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		const gchar *resource = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-		const gchar *key = tracker_sparql_cursor_get_string (cursor, 1, NULL);
-		const gchar *value = tracker_sparql_cursor_get_string (cursor, 2, NULL);
-		const gchar *value_is_resource = tracker_sparql_cursor_get_string (cursor, 3, NULL);
+		const gchar *resource = tracker_sparql_cursor_get_string (cursor, 1, NULL);
+		const gchar *key = tracker_sparql_cursor_get_string (cursor, 2, NULL);
+		const gchar *value = tracker_sparql_cursor_get_string (cursor, 3, NULL);
+		const gchar *value_is_resource = tracker_sparql_cursor_get_string (cursor, 4, NULL);
 
 		if (!resource || !key || !value || !value_is_resource) {
 			continue;
@@ -170,6 +175,69 @@ print_turtle (TrackerSparqlCursor *cursor,
 	}
 }
 
+/* Print graphs and triples in TriG format */
+static void
+print_trig (TrackerSparqlCursor *cursor,
+            GHashTable          *prefixes,
+            gboolean             full_namespaces)
+{
+	gchar *predicate;
+	gchar *object;
+	gchar *previous_graph = NULL;
+	const gchar *graph;
+
+	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+		graph = tracker_sparql_cursor_get_string (cursor, 0, NULL);
+		const gchar *resource = tracker_sparql_cursor_get_string (cursor, 1, NULL);
+		const gchar *key = tracker_sparql_cursor_get_string (cursor, 2, NULL);
+		const gchar *value = tracker_sparql_cursor_get_string (cursor, 3, NULL);
+		const gchar *value_is_resource = tracker_sparql_cursor_get_string (cursor, 4, NULL);
+
+		if (!resource || !key || !value || !value_is_resource) {
+			continue;
+		}
+
+		if (g_strcmp0 (previous_graph, graph) != 0) {
+			if (previous_graph != NULL) {
+				/* Close previous graph */
+				g_print ("}\n");
+				g_free (previous_graph);
+			}
+			previous_graph = g_strdup (graph);
+			g_print ("GRAPH <%s>\n{\n", graph);
+		}
+
+		/* Don't display nie:plainTextContent */
+		//if (!plain_text_content && strcmp (key, "http://tracker.api.gnome.org/ontology/v3/nie#plainTextContent") == 0) {
+		//	continue;
+		//}
+
+		predicate = format_urn (prefixes, key, full_namespaces);
+
+		if (g_ascii_strcasecmp (value_is_resource, "true") == 0) {
+			object = g_strdup_printf ("<%s>", value);
+		} else {
+			gchar *escaped_value;
+
+			/* Escape value and make sure it is encapsulated properly */
+			escaped_value = tracker_sparql_escape_string (value);
+			object = g_strdup_printf ("\"%s\"", escaped_value);
+			g_free (escaped_value);
+		}
+
+		/* Print final statement */
+		g_print ("  <%s> %s %s .\n", resource, predicate, object);
+
+		g_free (predicate);
+		g_free (object);
+	}
+
+	if (graph != NULL) {
+		g_print ("}\n");
+	}
+	g_free (previous_graph);
+}
+
 static int
 export_run_default (void)
 {
@@ -190,14 +258,16 @@ export_run_default (void)
 
 	prefixes = tracker_sparql_get_prefixes (connection);
 
-	query = "SELECT ?u ?p ?v "
+	query = "SELECT ?g ?u ?p ?v "
 	        "       (EXISTS { ?p rdfs:range [ rdfs:subClassOf rdfs:Resource ] }) AS ?is_resource "
 	        "{ "
-	        "    ?u ?p ?v "
-	        "    FILTER NOT EXISTS { ?u a rdf:Property } "
-	        "    FILTER NOT EXISTS { ?u a rdfs:Class } "
-	        "    FILTER NOT EXISTS { ?u a tracker:Namespace } "
-	        "} ORDER BY ?u";
+	        "    GRAPH ?g { "
+	        "        ?u ?p ?v "
+	        "        FILTER NOT EXISTS { ?u a rdf:Property } "
+	        "        FILTER NOT EXISTS { ?u a rdfs:Class } "
+	        "        FILTER NOT EXISTS { ?u a tracker:Namespace } "
+	        "    } "
+	        "} ORDER BY ?g ?u";
 
 	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
 
@@ -211,7 +281,11 @@ export_run_default (void)
 	g_hash_table_foreach (prefixes, (GHFunc) print_prefix, NULL);
 	g_print ("\n");
 
-	print_turtle (cursor, prefixes, FALSE);
+	if (show_graphs) {
+		print_trig (cursor, prefixes, FALSE);
+	} else {
+		print_turtle (cursor, prefixes, FALSE);
+	}
 
 	return EXIT_SUCCESS;
 }
