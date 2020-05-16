@@ -105,13 +105,15 @@ rdf:first a rdf:Property ;
 	rdfs:label "first" ;
 	rdfs:comment "The first item in the subject RDF list." ;
 	rdfs:domain rdf:List ;
-	rdfs:range rdfs:Resource .
+	rdfs:range rdfs:Resource ;
+	nrl:maxCardinality 1 .
 
 rdf:rest a rdf:Property ;
 	rdfs:label "rest" ;
 	rdfs:comment "The rest of the subject RDF list after the first item." ;
 	rdfs:domain rdf:List ;
-	rdfs:range rdf:List .
+	rdfs:range rdf:List ;
+	nrl:maxCardinality 1 .
 
 tracker: a tracker:Namespace ;
 	tracker:prefix "tracker" .

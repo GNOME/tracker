@@ -529,6 +529,7 @@ nco:contactMediumComment a rdf:Property ;
 nco:foafUrl a rdf:Property ;
 	rdfs:label "foafUrl" ;
 	rdfs:comment "The URL of the FOAF file." ;
+	nrl:maxCardinality 1 ;
 	rdfs:subPropertyOf nco:url ;
 	rdfs:domain nco:Role ;
 	rdfs:range rdfs:Resource .

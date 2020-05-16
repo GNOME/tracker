@@ -55,6 +55,7 @@ nao:numericRating a rdf:Property ;
 nao:deprecated a rdf:Property;
 	rdfs:domain rdfs:Resource;
 	rdfs:range xsd:boolean;
+	nrl:maxCardinality 1 ;
 	rdfs:label "deprecated";
 	rdfs:comment "If this property is assigned, the subject class, property, or resource, is deprecated and should not be used in production systems any longer. It may be removed without further notice." .
 
