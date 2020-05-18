@@ -155,6 +155,7 @@ struct _TrackerSparql
 		TrackerPathElement *path;
 
 		GHashTable *blank_node_map;
+		GHashTable *update_blank_nodes;
 		TrackerVariableBinding *as_in_group_by;
 
 		GHashTable *union_views;
@@ -194,6 +195,8 @@ tracker_sparql_finalize (GObject *object)
 	tracker_token_unset (&sparql->current_state.subject);
 	tracker_token_unset (&sparql->current_state.predicate);
 	tracker_token_unset (&sparql->current_state.object);
+	g_clear_pointer (&sparql->current_state.blank_node_map,
+	                 g_hash_table_unref);
 	g_clear_pointer (&sparql->current_state.union_views, g_hash_table_unref);
 	g_clear_pointer (&sparql->current_state.construct_query,
 	                 tracker_string_builder_free);
@@ -2338,8 +2341,11 @@ translate_Update (TrackerSparql  *sparql,
 	 */
 	_call_rule (sparql, NAMED_RULE_Prologue, error);
 
-	sparql->current_state.blank_node_map =
-		g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+	if (!sparql->current_state.blank_node_map) {
+		sparql->current_state.blank_node_map =
+			g_hash_table_new_full (g_str_hash, g_str_equal,
+			                       g_free, g_free);
+	}
 
 	if (_check_in_rule (sparql, NAMED_RULE_Update1)) {
 		if (sparql->blank_nodes)
@@ -2355,9 +2361,6 @@ translate_Update (TrackerSparql  *sparql,
 		if (_check_in_rule (sparql, NAMED_RULE_Update))
 			_call_rule (sparql, NAMED_RULE_Update, error);
 	}
-
-	g_clear_pointer (&sparql->current_state.blank_node_map,
-	                 g_hash_table_unref);
 
 	return TRUE;
 }
@@ -3866,6 +3869,8 @@ translate_InsertData (TrackerSparql  *sparql,
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_DATA);
 
 	if (sparql->blank_nodes) {
+		sparql->current_state.update_blank_nodes =
+			g_hash_table_new (g_str_hash, g_str_equal);
 		g_variant_builder_open (sparql->blank_nodes, G_VARIANT_TYPE ("a{ss}"));
 	}
 
@@ -3873,6 +3878,8 @@ translate_InsertData (TrackerSparql  *sparql,
 	_call_rule (sparql, NAMED_RULE_QuadData, error);
 
 	if (sparql->blank_nodes) {
+		g_clear_pointer (&sparql->current_state.update_blank_nodes,
+		                 g_hash_table_unref);
 		g_variant_builder_close (sparql->blank_nodes);
 	}
 
@@ -4197,6 +4204,8 @@ translate_InsertClause (TrackerSparql  *sparql,
 	 * 'INSERT' ('OR' 'REPLACE')? ('SILENT')? ('INTO' iri)?
 	 */
 	if (sparql->blank_nodes) {
+		sparql->current_state.update_blank_nodes =
+			g_hash_table_new (g_str_hash, g_str_equal);
 		g_variant_builder_open (sparql->blank_nodes, G_VARIANT_TYPE ("a{ss}"));
 	}
 
@@ -4228,6 +4237,8 @@ translate_InsertClause (TrackerSparql  *sparql,
 	}
 
 	if (sparql->blank_nodes) {
+		g_clear_pointer (&sparql->current_state.update_blank_nodes,
+		                 g_hash_table_unref);
 		g_variant_builder_close (sparql->blank_nodes);
 	}
 
@@ -8512,8 +8523,13 @@ translate_BlankNode (TrackerSparql  *sparql,
 				        bnode_id = tracker_data_query_unused_uuid (sparql->data_manager, iface);
 				        g_hash_table_insert (sparql->current_state.blank_node_map,
 				                             g_strdup (str), bnode_id);
-					if (sparql->blank_nodes)
-						g_variant_builder_add (sparql->blank_nodes, "{ss}", str, bnode_id);
+			        }
+
+			        if (sparql->blank_nodes &&
+			            sparql->current_state.update_blank_nodes &&
+			            !g_hash_table_contains (sparql->current_state.update_blank_nodes, str)) {
+				        g_hash_table_add (sparql->current_state.update_blank_nodes, str);
+				        g_variant_builder_add (sparql->blank_nodes, "{ss}", str, bnode_id);
 			        }
 
 			        tracker_token_literal_init (sparql->current_state.token, bnode_id, -1);

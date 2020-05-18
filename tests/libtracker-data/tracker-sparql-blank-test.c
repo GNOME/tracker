@@ -103,8 +103,12 @@ test_blank (TestInfo      *info,
 	g_assert_cmpstr (solutions[1][0], ==, "foo");
 	g_assert (solutions[1][1] != NULL);
 
+	g_assert_cmpstr (solutions[0][1], ==, solutions[1][1]);
+
 	g_assert_cmpstr (solutions[2][0], ==, "bar");
 	g_assert (solutions[2][1] != NULL);
+
+	g_assert_cmpstr (solutions[2][1], !=, solutions[1][1]);
 
 	/* cleanup */
 
