@@ -194,6 +194,8 @@ tracker_sparql_finalize (GObject *object)
 	tracker_token_unset (&sparql->current_state.subject);
 	tracker_token_unset (&sparql->current_state.predicate);
 	tracker_token_unset (&sparql->current_state.object);
+	g_clear_pointer (&sparql->current_state.blank_node_map,
+	                 g_hash_table_unref);
 	g_clear_pointer (&sparql->current_state.union_views, g_hash_table_unref);
 	g_clear_pointer (&sparql->current_state.construct_query,
 	                 tracker_string_builder_free);
@@ -2320,8 +2322,11 @@ translate_Update (TrackerSparql  *sparql,
 	 */
 	_call_rule (sparql, NAMED_RULE_Prologue, error);
 
-	sparql->current_state.blank_node_map =
-		g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+	if (!sparql->current_state.blank_node_map) {
+		sparql->current_state.blank_node_map =
+			g_hash_table_new_full (g_str_hash, g_str_equal,
+			                       g_free, g_free);
+	}
 
 	if (_check_in_rule (sparql, NAMED_RULE_Update1)) {
 		if (sparql->blank_nodes)
@@ -2337,9 +2342,6 @@ translate_Update (TrackerSparql  *sparql,
 		if (_check_in_rule (sparql, NAMED_RULE_Update))
 			_call_rule (sparql, NAMED_RULE_Update, error);
 	}
-
-	g_clear_pointer (&sparql->current_state.blank_node_map,
-	                 g_hash_table_unref);
 
 	return TRUE;
 }
