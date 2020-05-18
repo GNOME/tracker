@@ -1,0 +1,1 @@
+select ?u { <file:///a/b/c/d> (ex:belongsToContainer/ex:isStoredAs)+ ?u } order by desc str(?u)

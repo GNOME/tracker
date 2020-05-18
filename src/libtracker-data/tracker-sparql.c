@@ -800,17 +800,31 @@ _prepend_path_element (TrackerSparql      *sparql,
 		break;
 	case TRACKER_PATH_OPERATOR_ZEROORMORE:
 		_append_string_printf (sparql,
+		                       "\"%s_helper\" (ID, value, graph, ID_type, value_type) AS "
+		                       "(SELECT ID, value, graph, ID_type, value_type "
+				       "FROM \"%s\" "
+				       "UNION "
+				       "SELECT a.ID, b.value, b.graph, a.ID_type, b.value_type "
+				       "FROM \"%s\" AS a, \"%s_helper\" AS b "
+				       "WHERE a.value = b.ID), ",
+				       path_elem->name,
+				       path_elem->data.composite.child1->name,
+		                       path_elem->data.composite.child1->name,
+				       path_elem->name);
+		_append_string_printf (sparql,
 		                       "\"%s\" (ID, value, graph, ID_type, value_type) AS "
-		                       "(SELECT ID, ID, graph, ID_type, ID_type "
+		                       "(SELECT ID, value, graph, ID_type, value_type "
+		                       "FROM \"%s_helper\" "
+		                       "UNION "
+		                       "SELECT ID, ID, graph, ID_type, ID_type "
 		                       "FROM \"%s\" "
 		                       "UNION "
-		                       "SELECT a.ID, b.value, b.graph, a.ID_type, b.value_type "
-		                       "FROM \"%s\" AS a, \"%s\" AS b "
-		                       "WHERE b.ID = a.value) ",
+		                       "SELECT value, value, graph, value_type, value_type "
+		                       "FROM \"%s\") ",
+		                       path_elem->name,
 		                       path_elem->name,
 		                       path_elem->data.composite.child1->name,
-		                       path_elem->data.composite.child1->name,
-		                       path_elem->name);
+		                       path_elem->data.composite.child1->name);
 		break;
 	case TRACKER_PATH_OPERATOR_ONEORMORE:
 		_append_string_printf (sparql,
@@ -833,8 +847,12 @@ _prepend_path_element (TrackerSparql      *sparql,
 				       "FROM \"%s\" "
 				       "UNION "
 				       "SELECT ID, value, graph, ID_type, value_type "
+				       "FROM \"%s\" "
+				       "UNION "
+				       "SELECT value, value, graph, value_type, value_type "
 				       "FROM \"%s\") ",
 				       path_elem->name,
+				       path_elem->data.composite.child1->name,
 				       path_elem->data.composite.child1->name,
 				       path_elem->data.composite.child1->name);
 		break;

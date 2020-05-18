@@ -1,0 +1,21 @@
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:	    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex:         <http://example.com/#> .
+
+_:d rdf:type ex:InformationElement ;
+    ex:isStoredAs <file:///a/b/c/d> .
+_:c rdf:type ex:InformationElement ;
+    ex:isStoredAs <file:///a/b/c> .
+_:b rdf:type ex:InformationElement ;
+    ex:isStoredAs <file:///a/b> .
+_:a rdf:type ex:InformationElement ;
+    ex:isStoredAs <file:///a> .
+
+<file:///a/b/c/d> rdf:type ex:DataObject ;
+    ex:belongsToContainer _:c .
+<file:///a/b/c> rdf:type ex:DataObject ;
+    ex:belongsToContainer _:b .
+<file:///a/b> rdf:type ex:DataObject ;
+    ex:belongsToContainer _:a .
+<file:///a> rdf:type ex:DataObject .

@@ -1,0 +1,1 @@
+select ?u { <file:///a> (ex:belongsToContainer/ex:isStoredAs)* ?u } order by STR(?u)

@@ -140,4 +140,7 @@ class Tracker.Bus.FDCursor : Tracker.Sparql.Cursor {
 		data = buffer;
 		cursor_finished = false;
 	}
+
+        public override void close () {
+        }
 }

@@ -3,6 +3,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.com/#> .
 
 foaf: a tracker:Namespace ;
 	tracker:prefix "foaf" .
@@ -32,3 +33,19 @@ foaf:member a rdf:Property ;
 	rdfs:domain foaf:Person ;
 	rdfs:range foaf:Group .
 
+ex: a tracker:Namespace ;
+    tracker:prefix "ex" .
+
+ex:DataObject a rdfs:Class ;
+    rdfs:subClassOf rdfs:Resource .
+
+ex:InformationElement a rdfs:Class ;
+    rdfs:subClassOf rdfs:Resource .
+
+ex:belongsToContainer a rdf:Property ;
+    rdfs:domain ex:DataObject ;
+    rdfs:range ex:InformationElement .
+
+ex:isStoredAs a rdf:Property ;
+    rdfs:domain ex:InformationElement ;
+    rdfs:range ex:DataObject .
