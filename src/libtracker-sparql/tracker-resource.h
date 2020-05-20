@@ -97,6 +97,9 @@ TRACKER_AVAILABLE_IN_ALL
 gint tracker_resource_identifier_compare_func (TrackerResource *resource, const char *identifier);
 
 TRACKER_AVAILABLE_IN_ALL
+GList *tracker_resource_get_properties (TrackerResource *resource);
+
+TRACKER_AVAILABLE_IN_ALL
 char *tracker_resource_print_turtle(TrackerResource *self, TrackerNamespaceManager *namespaces);
 
 TRACKER_AVAILABLE_IN_ALL

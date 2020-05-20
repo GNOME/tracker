@@ -692,8 +692,8 @@ ADD_PROPERTY_FOR_GTYPE (tracker_resource_add_uri, const char *, TRACKER_TYPE_URI
  *
  * Returns the list of all known values of the given property.
  *
- * Returns: (transfer full) (element-type GValue): a #GList of #GValue
- * instances, which must be freed by the caller.
+ * Returns: (transfer container) (element-type GValue): a #GList of #GValue
+ * instances. The list should be freed with g_list_free()
  *
  * Since: 1.10
  */
@@ -962,6 +962,29 @@ tracker_resource_compare (TrackerResource *a,
 
 	return strcmp (a_priv->identifier, b_priv->identifier);
 };
+
+/**
+ * tracker_resource_get_properties:
+ * @resource: a #TrackerResource
+ *
+ * Gets the list of properties defined in @resource
+ *
+ * Returns: (transfer container) (element-type utf8): The list of properties.
+ *          The list should be freed with g_list_free().
+ *
+ * Since: 3.0
+ **/
+GList *
+tracker_resource_get_properties (TrackerResource *resource)
+{
+	TrackerResourcePrivate *priv;
+
+	g_return_val_if_fail (TRACKER_IS_RESOURCE (resource), NULL);
+
+	priv = GET_PRIVATE (resource);
+
+	return g_hash_table_get_keys (priv->properties);
+}
 
 /* Helper function for serialization code. This allows you to selectively
  * populate 'interned_namespaces' from 'all_namespaces' based on when a
