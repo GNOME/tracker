@@ -7019,6 +7019,8 @@ handle_property_function (TrackerSparql    *sparql,
 
 	_append_string (sparql, "WHERE ID = ");
 	_call_rule (sparql, NAMED_RULE_ArgList, error);
+	_append_string_printf (sparql, "AND \"%s\" IS NOT NULL",
+	                       tracker_property_get_name (property));
 	_append_string (sparql, ") ");
 
 	sparql->current_state.expression_type = type;
