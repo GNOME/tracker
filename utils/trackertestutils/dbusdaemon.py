@@ -26,6 +26,10 @@ import signal
 import subprocess
 import threading
 
+from . import mainloop
+
+DEFAULT_TIMEOUT = 10
+
 log = logging.getLogger(__name__)
 dbus_stderr_log = logging.getLogger(__name__ + '.stderr')
 dbus_stdout_log = logging.getLogger(__name__ + '.stdout')
@@ -33,6 +37,31 @@ dbus_stdout_log = logging.getLogger(__name__ + '.stdout')
 
 class DaemonNotStartedError(Exception):
     pass
+
+
+def await_bus_name(conn, bus_name, timeout=DEFAULT_TIMEOUT):
+    """Blocks until 'bus_name' has an owner."""
+
+    log.info("Blocking until name %s has owner", bus_name)
+    loop = mainloop.MainLoop()
+
+    def name_appeared_cb(connection, name, name_owner):
+        log.info("Name %s appeared (owned by %s)", name, name_owner)
+        loop.quit()
+
+    def timeout_cb():
+        log.info("Timeout fired after %s seconds", timeout)
+        raise AwaitTimeoutException(
+            f"Timeout awaiting bus name '{bus_name}'")
+
+    watch_id = Gio.bus_watch_name_on_connection(
+        conn, bus_name, Gio.BusNameWatcherFlags.NONE, name_appeared_cb, None)
+    timeout_id = GLib.timeout_add_seconds(timeout, timeout_cb)
+
+    loop.run_checked()
+
+    Gio.bus_unwatch_name(watch_id)
+    GLib.source_remove(timeout_id)
 
 
 class DBusDaemon:
@@ -199,3 +228,6 @@ class DBusDaemon:
                 return None
             else:
                 raise
+
+    def await_bus_name(self, bus_name, timeout=DEFAULT_TIMEOUT):
+        await_bus_name(self.get_connection(), bus_name, timeout)

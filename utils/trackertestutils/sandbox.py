@@ -27,8 +27,10 @@ import atexit
 import logging
 import os
 import signal
+import subprocess
 
 from . import dbusdaemon
+from . import devices
 from . import psutil_mini as psutil
 
 log = logging.getLogger(__name__)
@@ -58,6 +60,7 @@ class TrackerSandbox:
         self.extra_env = extra_env or {}
 
         self.daemon = dbusdaemon.DBusDaemon()
+        self.umockdev_testbed = None
 
     def start(self, new_session=False):
         env = os.environ
@@ -83,6 +86,22 @@ class TrackerSandbox:
         log.info("Starting D-Bus daemon for sandbox.")
         log.debug("Added environment variables: %s", self.extra_env)
         self.daemon.start(self.dbus_daemon_config_file, env=env, new_session=new_session)
+
+    def start_upowerd(self, testbed):
+        """Start the upower daemon.
+
+        Needed only for tests that use mock power devices.
+
+        """
+        # FIXME: -> start_system_daemon ()
+        # FIXME: We could use auto activation here ?
+        env = os.environ.copy()
+        env['DBUS_SYSTEM_BUS_ADDRESS'] = self.daemon.get_address()
+        env['UMOCKDEV_DIR'] = testbed.get_root_dir()
+        # FIXME: need to capture the logs  - maybe factor pipe_to_log out from
+        # dbusdaemon.py
+        self.upower = subprocess.Popen([devices.upowerd_path(), '--verbose'], env=env)
+        self.daemon.await_bus_name('org.freedesktop.UPower')
 
     def stop(self):
         tracker_processes = []
@@ -128,4 +147,18 @@ class TrackerSandbox:
             log.info("Couldn't find a process owning %s.", busname)
 
     def get_connection(self):
+        """Return a Gio.BusConnection to the sandbox's private D-Bus daemon."""
         return self.daemon.get_connection()
+
+    def get_umockdev_testbed(self):
+        """Returns the UMockDev.TestBed used to control mock hardware devices.
+
+        Raises `devices.UMockDevNotFound` if the umockdev library is not
+        available. You can use `devices.HAVE_UMOCKDEV` to check before calling.
+
+        The `devices` module provides helpers for use with this object.
+
+        """
+        if not self.umockdev_testbed:
+            self.umockdev_testbed = devices.create_testbed()
+        return self.umockdev_testbed
