@@ -17,5 +17,5 @@
 
 # FIXME: Compatibility module due to recent API breaks.
 # Remove this before 3.0.
-from .dbussandbox import TrackerDBusSandbox
+from .sandbox import TrackerSandbox
 from .storehelper import StoreHelper

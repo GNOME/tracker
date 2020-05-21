@@ -48,7 +48,7 @@ def _cleanup_processes():
 atexit.register(_cleanup_processes)
 
 
-class TrackerDBusSandbox:
+class TrackerSandbox:
     """
     Private D-Bus session bus which executes a sandboxed Tracker instance.
 
