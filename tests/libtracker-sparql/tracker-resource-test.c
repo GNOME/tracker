@@ -145,6 +145,68 @@ test_resource_get_set_pointer_validation (void)
 	g_test_trap_assert_stderr ("*tracker_resource_set_string: NULL is not a valid value.*");
 }
 
+static void
+test_resource_serialization (void)
+{
+	TrackerResource *res, *child, *child2, *copy;
+	GVariant *variant, *variant2;
+
+	/* Create sample data */
+	res = tracker_resource_new (NULL);
+	tracker_resource_set_string (res, "nie:title", "foo");
+	tracker_resource_set_double (res, "nfo:duration", 25.4);
+	tracker_resource_set_boolean (res, "nfo:isBootable", TRUE);
+	tracker_resource_set_int64 (res, "nie:usageCounter", 4);
+	tracker_resource_add_uri (res, "rdf:type", "nfo:Audio");
+	tracker_resource_add_uri (res, "rdf:type", "nfo:Media");
+
+	child = tracker_resource_new ("uriuri");
+	tracker_resource_set_string (child, "nfo:fileName", "bar");
+	tracker_resource_set_take_relation (res, "nie:isStoredAs", child);
+
+	child2 = tracker_resource_new (NULL);
+	tracker_resource_set_string (child2, "nie:title", "baz");
+	tracker_resource_set_take_relation (child, "nfo:belongsToContainer", child2);
+
+	/* Ensure multiple serialize calls produce the same variant */
+	variant = tracker_resource_serialize (res);
+	g_assert_true (variant != NULL);
+	variant2 = tracker_resource_serialize (res);
+	g_assert_true (variant != NULL);
+	g_assert_true (g_variant_equal (variant, variant2));
+	g_variant_unref (variant2);
+
+	/* Deserialize to a copy and check its content */
+	copy = tracker_resource_deserialize (variant);
+	g_assert_true (copy != NULL);
+
+	g_assert_true (tracker_resource_get_first_boolean (copy, "nfo:isBootable"));
+	g_assert_true (strncmp (tracker_resource_get_identifier (copy), "_:", 2) == 0);
+	g_assert_cmpstr (tracker_resource_get_first_string (copy, "nie:title"), ==, "foo");
+	g_assert_cmpint (tracker_resource_get_first_int64 (copy, "nie:usageCounter"), ==, 4);
+
+	child = tracker_resource_get_first_relation (copy, "nie:isStoredAs");
+	g_assert_true (child != NULL);
+	g_assert_cmpstr (tracker_resource_get_identifier (child), ==, "uriuri");
+	g_assert_cmpstr (tracker_resource_get_first_string (child, "nfo:fileName"), ==, "bar");
+
+	child2 = tracker_resource_get_first_relation (child, "nfo:belongsToContainer");
+	g_assert_true (child2 != NULL);
+	g_assert_true (strncmp (tracker_resource_get_identifier (child2), "_:", 2) == 0);
+	g_assert_cmpstr (tracker_resource_get_first_string (child2, "nie:title"), ==, "baz");
+
+	/* Also ensure the copy serializes the same */
+	variant2 = tracker_resource_serialize (copy);
+	g_assert_true (variant2 != NULL);
+
+	g_assert_true (g_variant_equal (variant, variant2));
+	g_variant_unref (variant);
+	g_variant_unref (variant2);
+
+	g_object_unref (res);
+	g_object_unref (copy);
+}
+
 int
 main (int    argc,
       char **argv)
@@ -163,6 +225,8 @@ main (int    argc,
 	                 test_resource_get_set_many);
 	g_test_add_func ("/libtracker-sparql/tracker-resource/get_set_pointer_validation",
 	                 test_resource_get_set_pointer_validation);
+	g_test_add_func ("/libtracker-sparql/tracker-resource/serialization",
+	                 test_resource_serialization);
 
 	return g_test_run ();
 }

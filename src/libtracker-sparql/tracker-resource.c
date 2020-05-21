@@ -1772,3 +1772,234 @@ tracker_resource_print_jsonld (TrackerResource         *self,
 
 	return result;
 }
+
+static GVariant *
+tracker_serialize_single_value (TrackerResource         *resource,
+                                const GValue            *value)
+{
+	if (G_VALUE_HOLDS_BOOLEAN (value)) {
+		return g_variant_new_boolean (g_value_get_boolean (value));
+	} else if (G_VALUE_HOLDS_INT (value)) {
+		return g_variant_new_int32 (g_value_get_int (value));
+	} else if (G_VALUE_HOLDS_INT64 (value)) {
+		return g_variant_new_int64 (g_value_get_int64 (value));
+	} else if (G_VALUE_HOLDS_DOUBLE (value)) {
+		return g_variant_new_double (g_value_get_double (value));
+	} else if (G_VALUE_HOLDS (value, TRACKER_TYPE_URI)) {
+		/* Use bytestring for URIs, so they can be distinguised
+		 * from plain strings
+		 */
+		return g_variant_new_bytestring (g_value_get_string (value));
+	} else if (G_VALUE_HOLDS_STRING (value)) {
+		return g_variant_new_string (g_value_get_string (value));
+	} else if (G_VALUE_HOLDS (value, TRACKER_TYPE_RESOURCE)) {
+		return tracker_resource_serialize (g_value_get_object (value));
+	}
+
+	g_warn_if_reached ();
+
+	return NULL;
+}
+
+/**
+ * tracker_resource_serialize:
+ * @resource: A #TrackerResource
+ *
+ * Serializes a #TrackerResource to a #GVariant in a lossless way.
+ * All child resources are subsequently serialized. It is implied
+ * that both ends use a common #TrackerNamespaceManager.
+ *
+ * Returns: (transfer full): A variant describing the resource,
+ *          the reference is floating.
+ *
+ * Since: 3.0
+ **/
+GVariant *
+tracker_resource_serialize (TrackerResource *resource)
+{
+	TrackerResourcePrivate *priv = GET_PRIVATE (resource);
+	GVariantBuilder builder;
+	GHashTableIter iter;
+	GList *properties, *l;
+	const gchar *pred;
+	GValue *value;
+
+	g_return_val_if_fail (TRACKER_IS_RESOURCE (resource), NULL);
+
+	g_variant_builder_init (&builder, G_VARIANT_TYPE_ARRAY);
+
+	if (priv->identifier &&
+	    strncmp (priv->identifier, "_:", 2) != 0) {
+		g_variant_builder_add (&builder, "{sv}", "@id",
+		                       g_variant_new_string (priv->identifier));
+	}
+
+	g_hash_table_iter_init (&iter, priv->properties);
+
+	/* Use a stable sort, so that GVariants are byte compatible */
+	properties = tracker_resource_get_properties (resource);
+	properties = g_list_sort (properties, g_strcmp0);
+
+	for (l = properties; l; l = l->next) {
+		pred = l->data;
+		value = g_hash_table_lookup (priv->properties, pred);
+
+		if (G_VALUE_HOLDS (value, G_TYPE_PTR_ARRAY)) {
+			GPtrArray *array = g_value_get_boxed (value);
+			GVariantBuilder array_builder;
+			guint i;
+
+			g_variant_builder_init (&array_builder, G_VARIANT_TYPE_ARRAY);
+
+			for (i = 0; i < array->len; i++) {
+				GValue *child = g_ptr_array_index (array, i);
+				GVariant *variant;
+
+				variant = tracker_serialize_single_value (resource, child);
+				if (!variant)
+					return NULL;
+
+				g_variant_builder_add_value (&array_builder, variant);
+			}
+
+			g_variant_builder_add (&builder, "{sv}", pred,
+			                       g_variant_builder_end (&array_builder));
+		} else {
+			GVariant *variant;
+
+			variant = tracker_serialize_single_value (resource, value);
+			if (!variant)
+				return NULL;
+
+			g_variant_builder_add (&builder, "{sv}", pred, variant);
+		}
+	}
+
+	g_list_free (properties);
+
+	return g_variant_builder_end (&builder);
+}
+
+/**
+ * tracker_resource_deserialize:
+ * @variant: a #GVariant
+ * @error: return location for errors
+ *
+ * Deserializes a #TrackerResource previously serialized with
+ * tracker_resource_serialize(). It is implied that both ends
+ * use a common #TrackerNamespaceManager.
+ *
+ * Returns: (transfer full): A TrackerResource, or %NULL if
+ *          deserialization fails.
+ *
+ * Since: 3.0
+ **/
+TrackerResource *
+tracker_resource_deserialize (GVariant *variant)
+{
+	TrackerResource *resource;
+	GVariantIter iter;
+	GVariant *obj;
+	gchar *pred;
+
+	g_return_val_if_fail (g_variant_is_of_type (variant, G_VARIANT_TYPE_VARDICT), NULL);
+
+	resource = tracker_resource_new (NULL);
+
+	g_variant_iter_init (&iter, variant);
+
+	while (g_variant_iter_next (&iter, "{sv}", &pred, &obj)) {
+		/* Special case, "@id" for the resource identifier */
+		if (g_strcmp0 (pred, "@id") == 0 &&
+		    g_variant_is_of_type (obj, G_VARIANT_TYPE_STRING)) {
+			tracker_resource_set_identifier (resource, g_variant_get_string (obj, NULL));
+			continue;
+		}
+
+		if (g_variant_is_of_type (obj, G_VARIANT_TYPE_STRING)) {
+			tracker_resource_set_string (resource, pred,
+			                             g_variant_get_string (obj, NULL));
+		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_BOOLEAN)) {
+			tracker_resource_set_boolean (resource, pred,
+			                              g_variant_get_boolean (obj));
+		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_INT16)) {
+			tracker_resource_set_int64 (resource, pred,
+			                            (gint64) g_variant_get_int16 (obj));
+		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_INT32)) {
+			tracker_resource_set_int64 (resource, pred,
+			                            (gint64) g_variant_get_int32 (obj));
+		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_INT64)) {
+			tracker_resource_set_int64 (resource, pred,
+			                            (gint64) g_variant_get_int64 (obj));
+		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_DOUBLE)) {
+			tracker_resource_set_double (resource, pred,
+			                             g_variant_get_double (obj));
+		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_BYTESTRING)) {
+			tracker_resource_set_uri (resource, pred,
+			                          g_variant_get_bytestring (obj));
+		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_VARDICT)) {
+			TrackerResource *child;
+
+			child = tracker_resource_deserialize (obj);
+			if (!child) {
+				g_object_unref (resource);
+				return NULL;
+			}
+
+			tracker_resource_set_relation (resource, pred, child);
+		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_ARRAY)) {
+			GVariant *elem;
+			GVariantIter iter2;
+
+			g_variant_iter_init (&iter2, obj);
+
+			/* Other arrays are multi-valued */
+			while ((elem = g_variant_iter_next_value (&iter2)) != NULL) {
+				if (g_variant_is_of_type (elem, G_VARIANT_TYPE_STRING)) {
+					tracker_resource_add_string (resource, pred,
+					                             g_variant_get_string (elem, NULL));
+				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_BOOLEAN)) {
+					tracker_resource_add_boolean (resource, pred,
+					                              g_variant_get_boolean (elem));
+				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_INT16)) {
+					tracker_resource_add_int64 (resource, pred,
+					                            (gint64) g_variant_get_int16 (elem));
+				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_INT32)) {
+					tracker_resource_add_int64 (resource, pred,
+					                            (gint64) g_variant_get_int32 (elem));
+				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_INT64)) {
+					tracker_resource_add_int64 (resource, pred,
+					                            (gint64) g_variant_get_int16 (elem));
+				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_DOUBLE)) {
+					tracker_resource_add_double (resource, pred,
+					                             g_variant_get_double (elem));
+				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_BYTESTRING)) {
+					tracker_resource_add_uri (resource, pred,
+					                          g_variant_get_bytestring (elem));
+				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_VARDICT)) {
+					TrackerResource *child;
+
+					child = tracker_resource_deserialize (elem);
+					if (!child) {
+						g_object_unref (resource);
+						return NULL;
+					}
+
+					tracker_resource_add_relation (resource, pred, child);
+				} else {
+					g_warning ("Unhandled GVariant signature '%s'",
+					           g_variant_get_type_string (elem));
+					g_object_unref (resource);
+					return NULL;
+				}
+			}
+		} else {
+			g_warning ("Unhandled GVariant signature '%s'",
+			           g_variant_get_type_string (obj));
+			g_object_unref (resource);
+			return NULL;
+		}
+	}
+
+	return resource;
+}

@@ -108,6 +108,12 @@ char *tracker_resource_print_sparql_update (TrackerResource *self, TrackerNamesp
 TRACKER_AVAILABLE_IN_ALL
 char *tracker_resource_print_jsonld (TrackerResource *self, TrackerNamespaceManager *namespaces);
 
+TRACKER_AVAILABLE_IN_ALL
+GVariant * tracker_resource_serialize (TrackerResource *resource);
+
+TRACKER_AVAILABLE_IN_ALL
+TrackerResource * tracker_resource_deserialize (GVariant *variant);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_RESOURCE_H__ */
