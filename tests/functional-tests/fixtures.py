@@ -55,9 +55,9 @@ def tracker_test_main():
         # only errors and warnings should be output here unless the environment
         # contains G_MESSAGES_DEBUG=.
         handler_stderr = logging.StreamHandler(stream=sys.stderr)
-        handler_stderr.addFilter(logging.Filter('trackertestutils.dbusdaemon.stderr'))
+        handler_stderr.addFilter(logging.Filter('sandbox-session-bus.stderr'))
         handler_stdout = logging.StreamHandler(stream=sys.stderr)
-        handler_stdout.addFilter(logging.Filter('trackertestutils.dbusdaemon.stdout'))
+        handler_stdout.addFilter(logging.Filter('sandbox-session-bus.stdout'))
         logging.basicConfig(level=logging.INFO,
                             handlers=[handler_stderr, handler_stdout],
                             format='%(message)s')
