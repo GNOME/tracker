@@ -17,5 +17,5 @@
 
 # FIXME: Compatibility module due to recent API breaks.
 # Remove this before 3.0.
-from .sandbox import TrackerSandbox
+from .sandbox import TrackerSandbox as TrackerDBusSandbox
 from .storehelper import StoreHelper

@@ -1,4 +1,4 @@
-# Copyright (C) 2018,2019, Sam Thursfield <sam@afuera.me.uk>
+# Copyright (C) 2018-2020, Sam Thursfield <sam@afuera.me.uk>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -26,19 +26,49 @@ import signal
 import subprocess
 import threading
 
+from . import mainloop
+
+DEFAULT_TIMEOUT = 10
+
 log = logging.getLogger(__name__)
-dbus_stderr_log = logging.getLogger(__name__ + '.stderr')
-dbus_stdout_log = logging.getLogger(__name__ + '.stdout')
 
 
 class DaemonNotStartedError(Exception):
     pass
 
 
-class DBusDaemon:
-    """The private D-Bus instance that provides the sandbox's session bus."""
+def await_bus_name(conn, bus_name, timeout=DEFAULT_TIMEOUT):
+    """Blocks until 'bus_name' has an owner."""
 
-    def __init__(self):
+    log.info("Blocking until name %s has owner", bus_name)
+    loop = mainloop.MainLoop()
+
+    def name_appeared_cb(connection, name, name_owner):
+        log.info("Name %s appeared (owned by %s)", name, name_owner)
+        loop.quit()
+
+    def timeout_cb():
+        log.info("Timeout fired after %s seconds", timeout)
+        raise AwaitTimeoutException(
+            f"Timeout awaiting bus name '{bus_name}'")
+
+    watch_id = Gio.bus_watch_name_on_connection(
+        conn, bus_name, Gio.BusNameWatcherFlags.NONE, name_appeared_cb, None)
+    timeout_id = GLib.timeout_add_seconds(timeout, timeout_cb)
+
+    loop.run_checked()
+
+    Gio.bus_unwatch_name(watch_id)
+    GLib.source_remove(timeout_id)
+
+
+class DBusDaemon:
+    """A private D-Bus daemon instance."""
+
+    def __init__(self, config_file=None, name='dbus-daemon'):
+        self.name = name
+        self.config_file = config_file
+
         self.process = None
 
         self.address = None
@@ -77,12 +107,13 @@ class DBusDaemon:
 
         return dbus_daemon
 
-    def start(self, config_file=None, env=None, new_session=False):
+    def start(self, env=None, new_session=False):
         dbus_command = [self._dbus_daemon_path(), '--print-address=1', '--print-pid=1']
-        if config_file:
-            dbus_command += ['--config-file=' + config_file]
+        if self.config_file:
+            dbus_command += ['--config-file=' + self.config_file]
         else:
             dbus_command += ['--session']
+
         log.debug("Running: %s", dbus_command)
         self.process = subprocess.Popen(
             dbus_command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -101,10 +132,13 @@ class DBusDaemon:
         log.debug("Using new D-Bus session with address '%s' with PID %d",
                     self.address, self.pid)
 
+        stderr_log = logging.getLogger(self.name + '.stderr')
+        stdout_log = logging.getLogger(self.name + '.stdout')
+
         # We must read from the pipes continuously, otherwise the daemon
         # process will block.
-        self._threads=[threading.Thread(target=self.pipe_to_log, args=(self.process.stdout, dbus_stdout_log), daemon=True),
-                        threading.Thread(target=self.pipe_to_log, args=(self.process.stderr, dbus_stdout_log), daemon=True)]
+        self._threads=[threading.Thread(target=self.pipe_to_log, args=(self.process.stdout, stdout_log), daemon=True),
+                        threading.Thread(target=self.pipe_to_log, args=(self.process.stderr, stderr_log), daemon=True)]
         self._threads[0].start()
         self._threads[1].start()
 
@@ -199,3 +233,13 @@ class DBusDaemon:
                 return None
             else:
                 raise
+
+    def activate_service(self, bus_name, object_path):
+        GDBUS_DEFAULT_TIMEOUT = -1
+        self.get_connection().call_sync(
+            bus_name, object_path, 'org.freedesktop.DBus.Peer', 'Ping',
+            None, None, Gio.DBusCallFlags.NONE, GDBUS_DEFAULT_TIMEOUT, None)
+        self.await_bus_name(bus_name)
+
+    def await_bus_name(self, bus_name, timeout=DEFAULT_TIMEOUT):
+        await_bus_name(self.get_connection(), bus_name, timeout)

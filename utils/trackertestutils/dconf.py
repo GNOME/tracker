@@ -42,7 +42,7 @@ class DConfClient(object):
     def __init__(self, sandbox):
         self.env = os.environ
         self.env.update(sandbox.extra_env)
-        self.env['DBUS_SESSION_BUS_ADDRESS'] = sandbox.daemon.get_address()
+        self.env['DBUS_SESSION_BUS_ADDRESS'] = sandbox.session_bus.get_address()
 
     def _check_using_correct_dconf_profile(self):
         profile = self.env.get("DCONF_PROFILE")
