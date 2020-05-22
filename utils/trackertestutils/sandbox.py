@@ -29,6 +29,7 @@ import os
 import signal
 
 from . import dbusdaemon
+from . import dconf
 from . import psutil_mini as psutil
 
 log = logging.getLogger(__name__)
@@ -129,3 +130,21 @@ class TrackerSandbox:
 
     def get_connection(self):
         return self.daemon.get_connection()
+
+    def set_config(self, schema_config_dict):
+        """Set config values in multiple GSettings schemas.
+
+        Example input:
+
+            set_all({
+                'org.freedesktop.Tracker3.Miner.Files': {
+                    'enable-writeback': GLib.Variant.new_boolean(False),
+                }
+            })
+
+        """
+
+        for schema_name, contents in schema_config_dict.items():
+            dconfclient = dconf.DConfClient(self)
+            for key, value in contents.items():
+                dconfclient.write(schema_name, key, value)
