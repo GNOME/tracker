@@ -2522,7 +2522,10 @@ translate_SelectClause (TrackerSparql  *sparql,
 				if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_AS)) {
 					if (!handle_as (sparql, sparql->current_state.expression_type, error))
 						return FALSE;
-				} else {
+				} else if (sparql->current_state.select_context == sparql->context) {
+					/* This is only allowed on the topmost context, an
+					 * expression without AS in a subselect is meaningless
+					 */
 					tracker_sparql_add_select_var (sparql, "", sparql->current_state.expression_type);
 				}
 
