@@ -3374,7 +3374,8 @@ translate_LimitClause (TrackerSparql  *sparql,
 	/* LimitClause ::= 'LIMIT' INTEGER
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_LIMIT);
-	_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER);
+	if (!_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR))
+		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER);
 	sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 
 	return TRUE;
@@ -3387,7 +3388,8 @@ translate_OffsetClause (TrackerSparql  *sparql,
 	/* OffsetClause ::= 'OFFSET' INTEGER
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OFFSET);
-	_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER);
+	if (!_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR))
+		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER);
 	sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 
 	return TRUE;

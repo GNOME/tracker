@@ -1358,12 +1358,20 @@ static const TrackerGrammarRule helper_ValuesClause_opt[] = { S(helper_ValuesCla
 static const TrackerGrammarRule rule_ValuesClause[] = { OPT(helper_ValuesClause_opt), NIL };
 
 /* OffsetClause ::= 'OFFSET' INTEGER
+ *
+ * TRACKER EXTENSION:
+ * The terminal PARAMETERIZED_VAR is additionally accepted
  */
-static const TrackerGrammarRule rule_OffsetClause[] = { L(OFFSET), T(INTEGER), NIL };
+static const TrackerGrammarRule helper_OffsetClause_or[] = { T(INTEGER), T(PARAMETERIZED_VAR), NIL };
+static const TrackerGrammarRule rule_OffsetClause[] = { L(OFFSET), OR(helper_OffsetClause_or), NIL };
 
 /* LimitClause ::= 'LIMIT' INTEGER
+ *
+ * TRACKER EXTENSION:
+ * The terminal PARAMETERIZED_VAR is additionally accepted
  */
-static const TrackerGrammarRule rule_LimitClause[] = { L(LIMIT), T(INTEGER), NIL };
+static const TrackerGrammarRule helper_LimitClause_or[] = { T(INTEGER), T(PARAMETERIZED_VAR), NIL };
+static const TrackerGrammarRule rule_LimitClause[] = { L(LIMIT), OR(helper_LimitClause_or), NIL };
 
 /* LimitOffsetClauses ::= LimitClause OffsetClause? | OffsetClause LimitClause?
  */
