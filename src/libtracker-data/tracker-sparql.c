@@ -4865,7 +4865,7 @@ translate_Bind (TrackerSparql  *sparql,
 	variable = _last_node_variable (sparql);
 
 	if (tracker_variable_has_bindings (variable))
-		_raise (PARSE, "Expected undefined variable", "BIND");
+		_raise (PARSE, "Expected undefined variable in BIND", variable->name);
 
 	_append_string_printf (sparql, "AS %s ",
 			       tracker_variable_get_sql_expression (variable));
