@@ -56,6 +56,10 @@ class Tracker.Bus.FDCursor : Tracker.Sparql.Cursor {
 
 	public override Sparql.ValueType get_value_type (int column)
 	requires (types != null) {
+		if (column >= n_columns) {
+			return Sparql.ValueType.UNBOUND;
+		}
+
 		/* Cast from int to enum */
 		return (Sparql.ValueType) types[column];
 	}
