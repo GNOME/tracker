@@ -1,0 +1,6 @@
+SELECT ?s {
+  ?s tracker:indexed true
+}
+ORDER BY ?s
+LIMIT 1
+OFFSET ~arg1

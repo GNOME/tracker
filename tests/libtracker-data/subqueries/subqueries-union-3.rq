@@ -1,0 +1,9 @@
+SELECT ?s COALESCE(?a, '') COALESCE(?b, '') WHERE {
+	{
+		SELECT ?s "message" AS ?a
+		WHERE { ?s a example:Message }
+	} UNION {
+		SELECT ?s "group" AS ?b
+		WHERE { ?s a example:Group }
+	}
+} ORDER BY ?s ?a ?b

@@ -45,6 +45,10 @@ TestInfo tests[] = {
 	{ "subject-2", "statement/subject.rq", "statement/subject-2.out", "urn:nonexistent" },
 	{ "filter", "statement/filter.rq", "statement/filter.out", "http://tracker.api.gnome.org/ontology/v3/nmm#MusicAlbum", "Music album" },
 	{ "service", "statement/service.rq", "statement/service.out", "Music album", NULL, NULL, TRUE },
+	{ "limit", "statement/limit.rq", "statement/limit.out", "1" },
+	{ "limit-2", "statement/limit.rq", "statement/limit-2.out", "2" },
+	{ "offset", "statement/offset.rq", "statement/offset.out", "0" },
+	{ "offset-2", "statement/offset.rq", "statement/offset-2.out", "1" },
 };
 
 typedef struct {

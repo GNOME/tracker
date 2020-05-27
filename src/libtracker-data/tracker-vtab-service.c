@@ -62,6 +62,18 @@ typedef struct {
 } ConstraintData;
 
 static void
+tracker_service_cursor_set_vtab_error (TrackerServiceCursor *cursor,
+                                       const gchar          *message)
+{
+	TrackerServiceVTab *vtab = cursor->vtab;
+
+	if (vtab->parent.zErrMsg)
+		sqlite3_free (vtab->parent.zErrMsg);
+	vtab->parent.zErrMsg = sqlite3_mprintf ("In service '%s': %s",
+	                                        cursor->service, message);
+}
+
+static void
 tracker_service_module_free (gpointer data)
 {
 	TrackerServiceModule *module = data;
@@ -399,7 +411,7 @@ fail:
 		g_error_free (error);
 		return SQLITE_OK;
 	} else {
-		g_warning ("Could not create remote cursor: %s\n", error->message);
+		tracker_service_cursor_set_vtab_error (cursor, error->message);
 		g_error_free (error);
 		return SQLITE_ERROR;
 	}

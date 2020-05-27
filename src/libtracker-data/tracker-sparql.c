@@ -2370,8 +2370,21 @@ tracker_sparql_add_select_var (TrackerSparql       *sparql,
 			       const gchar         *name,
 			       TrackerPropertyType  type)
 {
-	g_ptr_array_add (sparql->var_names, g_strdup (name));
-	g_array_append_val (sparql->var_types, type);
+	if (sparql->current_state.select_context == sparql->context) {
+		/* Topmost select context */
+		g_ptr_array_add (sparql->var_names, g_strdup (name));
+		g_array_append_val (sparql->var_types, type);
+	} else {
+		TrackerContext *parent;
+		TrackerVariable *var;
+
+		/* Propagate the variable upwards */
+		parent = tracker_context_get_parent (sparql->current_state.select_context);
+		if (parent) {
+			var = _ensure_variable (sparql, name);
+			tracker_context_add_variable_ref (parent, var);
+		}
+	}
 }
 
 static gboolean
@@ -2391,8 +2404,7 @@ handle_as (TrackerSparql        *sparql,
 	_append_string_printf (sparql, "AS %s ",
 			       tracker_variable_get_sql_expression (var));
 
-	if (sparql->current_state.select_context == sparql->context)
-		tracker_sparql_add_select_var (sparql, var->name, type);
+	tracker_sparql_add_select_var (sparql, var->name, type);
 
 	return TRUE;
 }
@@ -2494,7 +2506,7 @@ translate_SelectClause (TrackerSparql  *sparql,
 				if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_AS)) {
 					if (!handle_as (sparql, binding->data_type, error))
 						return FALSE;
-				} else if (sparql->current_state.select_context == sparql->context) {
+				} else {
 					tracker_sparql_add_select_var (sparql, var->name, binding->data_type);
 				}
 
@@ -2522,7 +2534,10 @@ translate_SelectClause (TrackerSparql  *sparql,
 				if (_accept (sparql, RULE_TYPE_LITERAL, LITERAL_AS)) {
 					if (!handle_as (sparql, sparql->current_state.expression_type, error))
 						return FALSE;
-				} else {
+				} else if (sparql->current_state.select_context == sparql->context) {
+					/* This is only allowed on the topmost context, an
+					 * expression without AS in a subselect is meaningless
+					 */
 					tracker_sparql_add_select_var (sparql, "", sparql->current_state.expression_type);
 				}
 
@@ -3374,7 +3389,8 @@ translate_LimitClause (TrackerSparql  *sparql,
 	/* LimitClause ::= 'LIMIT' INTEGER
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_LIMIT);
-	_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER);
+	if (!_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR))
+		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER);
 	sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 
 	return TRUE;
@@ -3387,7 +3403,8 @@ translate_OffsetClause (TrackerSparql  *sparql,
 	/* OffsetClause ::= 'OFFSET' INTEGER
 	 */
 	_expect (sparql, RULE_TYPE_LITERAL, LITERAL_OFFSET);
-	_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER);
+	if (!_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PARAMETERIZED_VAR))
+		_expect (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_INTEGER);
 	sparql->current_state.expression_type = TRACKER_PROPERTY_TYPE_INTEGER;
 
 	return TRUE;
@@ -4860,7 +4877,7 @@ translate_Bind (TrackerSparql  *sparql,
 	variable = _last_node_variable (sparql);
 
 	if (tracker_variable_has_bindings (variable))
-		_raise (PARSE, "Expected undefined variable", "BIND");
+		_raise (PARSE, "Expected undefined variable in BIND", variable->name);
 
 	_append_string_printf (sparql, "AS %s ",
 			       tracker_variable_get_sql_expression (variable));

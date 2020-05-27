@@ -194,6 +194,7 @@ const TestInfo tests[] = {
 	{ "subqueries/subqueries-1", "subqueries/data-1", FALSE },
 	{ "subqueries/subqueries-union-1", "subqueries/data-1", FALSE },
 	{ "subqueries/subqueries-union-2", "subqueries/data-1", FALSE },
+	{ "subqueries/subqueries-union-3", "subqueries/data-1", FALSE },
 	{ "subqueries/subqueries-minus-1", "subqueries/data-1", FALSE },
 	{ "subqueries/subqueries-minus-2", "subqueries/data-1", FALSE },
 	{ "subqueries/subqueries-minus-3", "subqueries/data-1", FALSE },
