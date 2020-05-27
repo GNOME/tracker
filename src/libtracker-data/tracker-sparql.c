@@ -7029,9 +7029,19 @@ handle_property_function (TrackerSparql    *sparql,
 		_append_string_printf (sparql, "FROM \"unionGraph_%s\" ",
 		                       tracker_property_get_table_name (property));
 	} else {
-		_append_string_printf (sparql, "FROM \"%s\".\"%s\" ",
-		                       tracker_token_get_idstring (&sparql->current_state.graph),
-		                       tracker_property_get_table_name (property));
+		const gchar *graph;
+
+		graph = tracker_token_get_idstring (&sparql->current_state.graph);
+
+		if (tracker_data_manager_find_graph (sparql->data_manager, graph)) {
+			_append_string_printf (sparql, "FROM \"%s\".\"%s\" ",
+			                       graph,
+			                       tracker_property_get_table_name (property));
+		} else {
+			/* Graph does not exist, ensure to come back empty */
+			_append_string_printf (sparql, "FROM (SELECT 0 AS ID, NULL AS \"%s\" LIMIT 0) ",
+			                       tracker_property_get_name (property));
+		}
 	}
 
 	_append_string (sparql, "WHERE ID = ");

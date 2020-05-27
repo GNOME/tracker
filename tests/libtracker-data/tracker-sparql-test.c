@@ -138,6 +138,7 @@ const TestInfo tests[] = {
 	{ "graph/graph-6", "graph/data-5", FALSE },
 	{ "graph/non-existent-1",  "graph/data-1", FALSE },
 	{ "graph/non-existent-2",  "graph/data-1", FALSE },
+	{ "graph/non-existent-3",  "graph/data-1", FALSE },
 	{ "graph/drop", "graph/data-drop", FALSE },
 	{ "graph/drop-non-existent", "graph/data-drop-non-existent", FALSE, TRUE },
 	{ "graph/drop-default", "graph/data-drop-default", FALSE },

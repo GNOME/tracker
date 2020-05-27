@@ -1,0 +1,9 @@
+SELECT DISTINCT COUNT(?urn)
+WHERE {
+  GRAPH <whatwhat> {
+    SELECT ?urn (rdf:type(?urn) AS ?type)
+    WHERE {
+      ?urn a rdfs:Resource
+    }
+  }
+}
