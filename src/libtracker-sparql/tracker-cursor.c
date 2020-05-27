@@ -55,11 +55,20 @@ tracker_sparql_cursor_init (TrackerSparqlCursor *cursor)
 {
 }
 
+static gboolean
+tracker_sparql_cursor_real_is_bound (TrackerSparqlCursor *cursor,
+                                     gint                 column)
+{
+	return tracker_sparql_cursor_get_value_type (cursor, column) != TRACKER_SPARQL_VALUE_TYPE_UNBOUND;
+}
+
 static gint64
 tracker_sparql_cursor_real_get_integer (TrackerSparqlCursor *cursor,
                                         gint                 column)
 {
 	const gchar *text;
+
+	g_return_val_if_fail (tracker_sparql_cursor_real_is_bound (cursor, column), 0);
 
 	text = tracker_sparql_cursor_get_string (cursor, column, NULL);
 	return g_ascii_strtoll (text, NULL, 10);
@@ -71,7 +80,10 @@ tracker_sparql_cursor_real_get_double (TrackerSparqlCursor *cursor,
 {
 	const gchar *text;
 
+	g_return_val_if_fail (tracker_sparql_cursor_real_is_bound (cursor, column), 0);
+
 	text = tracker_sparql_cursor_get_string (cursor, column, NULL);
+
 	return g_ascii_strtod (text, NULL);
 }
 
@@ -81,15 +93,11 @@ tracker_sparql_cursor_real_get_boolean (TrackerSparqlCursor *cursor,
 {
 	const gchar *text;
 
-	text = tracker_sparql_cursor_get_string (cursor, column, NULL);
-	return g_ascii_strcasecmp (text, "true") == 0;
-}
+	g_return_val_if_fail (tracker_sparql_cursor_real_is_bound (cursor, column), FALSE);
 
-static gboolean
-tracker_sparql_cursor_real_is_bound (TrackerSparqlCursor *cursor,
-                                     gint                 column)
-{
-	return tracker_sparql_cursor_get_value_type (cursor, column) != TRACKER_SPARQL_VALUE_TYPE_UNBOUND;
+	text = tracker_sparql_cursor_get_string (cursor, column, NULL);
+
+	return g_ascii_strcasecmp (text, "true") == 0;
 }
 
 static void
