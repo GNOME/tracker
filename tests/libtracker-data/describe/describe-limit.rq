@@ -1,1 +1,1 @@
-describe ?u { ?u a example:A } limit 2 order by ?u
+describe ?u { ?u a example:A } order by ?u limit 2

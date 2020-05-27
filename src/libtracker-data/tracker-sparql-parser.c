@@ -33,6 +33,7 @@ typedef struct _TrackerGrammarParser TrackerGrammarParser;
 
 #define NODES_PER_CHUNK 128
 #define RULE_STATE_DEFAULT_SIZE 128
+#define SNIPPET_LENGTH 30
 
 struct _TrackerRuleState {
 	const TrackerGrammarRule *rule;
@@ -69,7 +70,7 @@ struct _TrackerParserState {
 	} rule_states;
 
 
-	const TrackerGrammarRule *error_rule;
+	GPtrArray *error_rules;
 	gssize error_len;
 };
 
@@ -77,86 +78,6 @@ struct _TrackerGrammarParser {
 	const gchar *query;
 	gsize query_len;
 };
-
-static void tracker_grammar_rule_print_helper (GString                  *str,
-					       const TrackerGrammarRule *rule,
-					       gint                      depth);
-
-static void
-tracker_grammar_rule_print_children (GString                  *str,
-				     const TrackerGrammarRule *rules,
-				     const gchar              *start,
-				     const gchar              *sep,
-				     const gchar              *end,
-				     gint                      depth)
-{
-	gint i;
-
-	g_string_append (str, start);
-
-	for (i = 0; rules[i].type != RULE_TYPE_NIL; i++) {
-		if (i != 0)
-			g_string_append (str, sep);
-		tracker_grammar_rule_print_helper (str, &rules[i], depth);
-	}
-
-	g_string_append (str, end);
-}
-
-static void
-tracker_grammar_rule_print_helper (GString                  *str,
-				   const TrackerGrammarRule *rule,
-				   gint                      depth)
-{
-	if (depth == 0) {
-		g_string_append (str, "…");
-		return;
-	}
-
-	depth--;
-
-	switch (rule->type) {
-	case RULE_TYPE_LITERAL:
-		g_string_append_printf (str, "'%s'", rule->string);
-		break;
-	case RULE_TYPE_RULE:
-	case RULE_TYPE_TERMINAL:
-		g_string_append_printf (str, "%s", rule->string);
-		break;
-	case RULE_TYPE_SEQUENCE:
-		tracker_grammar_rule_print_children (str, rule->data.children,
-						     "(", " ", ")", depth);
-		break;
-	case RULE_TYPE_OR:
-		tracker_grammar_rule_print_children (str, rule->data.children,
-						     "(", " | ", ")", depth);
-		break;
-	case RULE_TYPE_GTE0:
-		tracker_grammar_rule_print_children (str, rule->data.children,
-						     "(", " ", ")*", depth);
-		break;
-	case RULE_TYPE_GT0:
-		tracker_grammar_rule_print_children (str, rule->data.children,
-						     "(", " ", ")+", depth);
-		break;
-	case RULE_TYPE_OPTIONAL:
-		tracker_grammar_rule_print_children (str, rule->data.children,
-						     "(", " ", ")?", depth);
-		break;
-	case RULE_TYPE_NIL:
-		break;
-	}
-}
-
-static gchar *
-tracker_grammar_rule_print (const TrackerGrammarRule *rule)
-{
-	GString *str;
-
-	str = g_string_new (NULL);
-	tracker_grammar_rule_print_helper (str, rule, 5);
-	return g_string_free (str, FALSE);
-}
 
 static TrackerNodeTree *
 tracker_node_tree_new (void)
@@ -431,8 +352,19 @@ tracker_parser_state_take_error (TrackerParserState       *state,
 		return;
 	}
 
+	/* If we advance in parsing, reset the expect token stack */
+	if (state->current > state->error_len)
+		g_ptr_array_set_size (state->error_rules, 0);
+
+	if (rule->type == RULE_TYPE_LITERAL ||
+	    rule->type == RULE_TYPE_TERMINAL) {
+		/* We only want literals and terminals here, these are the
+		 * actual string tokens.
+		 */
+		g_ptr_array_add (state->error_rules, (gpointer) rule);
+	}
+
 	state->error_len = state->current;
-	state->error_rule = rule;
 }
 
 static void
@@ -693,34 +625,147 @@ tracker_grammar_parser_read (TrackerGrammarParser *parser,
 				break;
 
 			/* We rolled back successfully, keep going. */
-			tracker_parser_state_take_error (state, NULL);
+			//tracker_parser_state_take_error (state, NULL);
 		}
 	}
 
-	return state->error_rule == NULL;
+	return parser->query[state->current] == '\0';
 }
 
 static void
-tracker_parser_state_propagate_error (TrackerParserState  *state,
-                                      GError             **error)
+append_rule (GString                  *str,
+             const TrackerGrammarRule *rule)
 {
-	const TrackerGrammarRule *rule = state->error_rule;
-	gchar *expected;
-
 	if (rule->type == RULE_TYPE_LITERAL)
-		expected = g_strdup_printf ("literal '%s'", rule->string);
+		g_string_append_printf (str, "\'%s\'", rule->string);
 	else if (rule->type == RULE_TYPE_TERMINAL)
-		expected = g_strdup_printf ("terminal '%s'", rule->string);
-	else
-		expected = tracker_grammar_rule_print (rule);
+		g_string_append_printf (str, "%s", rule->string);
+}
+
+static guint
+rule_hash (gconstpointer a)
+{
+	const TrackerGrammarRule *rule_a = a;
+
+	return rule_a->type << 16 & rule_a->data.literal;
+}
+
+static gboolean
+rule_equals (gconstpointer a,
+             gconstpointer b)
+{
+	const TrackerGrammarRule *rule_a = a;
+	const TrackerGrammarRule *rule_b = b;
+
+	if (rule_a->type != rule_b->type)
+		return FALSE;
+
+	switch (rule_a->type) {
+	case RULE_TYPE_LITERAL:
+		return rule_a->data.literal == rule_b->data.literal;
+	case RULE_TYPE_TERMINAL:
+		return rule_a->data.terminal == rule_b->data.terminal;
+	default:
+		return FALSE;
+	}
+}
+
+static gchar *
+get_error_snippet (TrackerGrammarParser *parser,
+                   TrackerParserState   *state)
+{
+	gssize start, end, error_pos;
+	gchar *sample, *snippet;
+
+	start = state->error_len - SNIPPET_LENGTH / 2;
+	end = state->error_len + SNIPPET_LENGTH / 2;
+	error_pos = SNIPPET_LENGTH / 2;
+
+	if (start < 0) {
+		end += ABS (start);
+		error_pos += start;
+		start = 0;
+	}
+
+	if (end > parser->query_len) {
+		gint move = end - parser->query_len;
+
+		if (start >= move) {
+			start -= move;
+			error_pos += move;
+		}
+
+		end -= move;
+	}
+
+	sample = g_strndup (&parser->query[start], end - start);
+	snippet = g_strdup_printf ("%s%s%s\n%*c‸",
+	                           start == 0 ? " " : "…",
+	                           sample,
+	                           end == parser->query_len ? " " : "…",
+	                           (gint) error_pos + 1, ' ');
+	g_free (sample);
+
+	return snippet;
+}
+
+static void
+tracker_parser_state_propagate_error (TrackerGrammarParser  *parser,
+                                      TrackerParserState    *state,
+                                      GError               **error)
+{
+	const TrackerGrammarRule *rule;
+	GString *str = g_string_new (NULL);
+	GHashTable *repeated;
+	gchar *snippet;
+
+	if (state->current > state->error_len) {
+		/* The errors gathered are outdated, but we are propagating
+		 * an error. This means we have reached the end of the string.
+		 */
+		g_ptr_array_set_size (state->error_rules, 0);
+		state->error_len = state->current;
+	}
+
+	g_string_append_printf (str, "Parser error at byte %ld, expected ",
+	                        state->error_len);
+
+	if (state->error_rules->len == 0) {
+		g_string_append (str, "'\\0'");
+	} else if (state->error_rules->len == 1) {
+		rule = g_ptr_array_index (state->error_rules, 0);
+		append_rule (str, rule);
+	} else {
+		gint i;
+
+		g_string_append (str, "one of ");
+		repeated = g_hash_table_new (rule_hash, rule_equals);
+
+		for (i = 0; i < state->error_rules->len; i++) {
+			rule = g_ptr_array_index (state->error_rules, i);
+
+			if (g_hash_table_contains (repeated, rule))
+				continue;
+			if (i != 0)
+				g_string_append (str, ", ");
+
+			append_rule (str, rule);
+			g_hash_table_add (repeated, (gpointer) rule);
+		}
+
+		g_hash_table_unref (repeated);
+	}
+
+	snippet = get_error_snippet (parser, state);
+	g_string_append_printf (str, ":\n%s", snippet);
+	g_free (snippet);
 
 	g_set_error (error,
 	             TRACKER_SPARQL_ERROR,
 	             TRACKER_SPARQL_ERROR_PARSE,
-	             "Parser error at byte %ld: Expected %s",
-	             state->error_len, expected);
+	             "%s", str->str);
 
-	g_free (expected);
+	g_string_free (str, TRUE);
 }
 
 TrackerNodeTree *
@@ -735,12 +780,13 @@ tracker_grammar_parser_apply (TrackerGrammarParser      *parser,
 	state.rule_states.array_size = RULE_STATE_DEFAULT_SIZE;
 	state.rule_states.rules = g_new0 (TrackerRuleState,
 	                                  state.rule_states.array_size);
+	state.error_rules = g_ptr_array_new ();
 
 	tracker_parser_state_push (&state, rule);
 	state.node_tree->root = tracker_parser_state_transact_match (&state);
 
 	if (!tracker_grammar_parser_read (parser, &state)) {
-		tracker_parser_state_propagate_error (&state, error);
+		tracker_parser_state_propagate_error (parser, &state, error);
 		tracker_node_tree_free (state.node_tree);
 		g_free (state.rule_states.rules);
 		return NULL;
@@ -749,6 +795,7 @@ tracker_grammar_parser_apply (TrackerGrammarParser      *parser,
 	if (len_out)
 		*len_out = state.current;
 
+	g_ptr_array_unref (state.error_rules);
 	g_free (state.rule_states.rules);
 
 	return state.node_tree;
