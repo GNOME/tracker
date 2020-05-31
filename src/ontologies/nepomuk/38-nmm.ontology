@@ -145,12 +145,10 @@ nmm:artist a rdf:Property ;
 	tracker:writeback true ;
 	tracker:indexed true .
 
-# Todo: change cardinality
 nmm:performer a rdf:Property ;
 	rdfs:label "Performer" ;
 	rdfs:comment "Performer" ;
 	rdfs:subPropertyOf nco:contributor ;
-	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicPiece ;
 	rdfs:range nmm:Artist ;
 	tracker:weight 4 ;
