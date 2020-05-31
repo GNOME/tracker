@@ -32,12 +32,17 @@
 #include "tracker-sparql.h"
 #include "tracker-color.h"
 
-static gboolean show_graphs;
+static gchar *data_type;
+static gboolean show_graphs_option;
 
 static GOptionEntry entries[] = {
-	{ "show-graphs", 'g', 0, G_OPTION_ARG_NONE, &show_graphs,
+	{ "show-graphs", 'g', 0, G_OPTION_ARG_NONE, &show_graphs_option,
 	  N_("Output TriG format which includes named graph information"),
 	  NULL
+	},
+	{ "type", 't', 0, G_OPTION_ARG_STRING, &data_type,
+	  N_("Export a specific type of data."),
+	  N_("TYPE")
 	},
 	{ NULL }
 };
@@ -98,18 +103,24 @@ print_prefix (gpointer key,
 static void
 print_turtle (TrackerSparqlCursor *cursor,
               GHashTable          *prefixes,
-              gboolean             full_namespaces)
+              gboolean             full_namespaces,
+              gboolean             show_prefixes)
 {
 	gchar *predicate;
 	gchar *object;
+
+	if (show_prefixes) {
+		g_hash_table_foreach (prefixes, (GHFunc) print_prefix, NULL);
+		g_print ("\n");
+	}
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 		const gchar *resource = tracker_sparql_cursor_get_string (cursor, 1, NULL);
 		const gchar *key = tracker_sparql_cursor_get_string (cursor, 2, NULL);
 		const gchar *value = tracker_sparql_cursor_get_string (cursor, 3, NULL);
-		const gchar *value_is_resource = tracker_sparql_cursor_get_string (cursor, 4, NULL);
+		gboolean value_is_resource = tracker_sparql_cursor_get_boolean (cursor, 4);
 
-		if (!resource || !key || !value || !value_is_resource) {
+		if (!resource || !key || !value) {
 			continue;
 		}
 
@@ -120,7 +131,7 @@ print_turtle (TrackerSparqlCursor *cursor,
 
 		predicate = format_urn (prefixes, key, full_namespaces);
 
-		if (g_ascii_strcasecmp (value_is_resource, "true") == 0) {
+		if (value_is_resource) {
 			object = g_strdup_printf ("<%s>", value);
 		} else {
 			gchar *escaped_value;
@@ -136,19 +147,25 @@ print_turtle (TrackerSparqlCursor *cursor,
 
 		g_free (predicate);
 		g_free (object);
-	}
+	};
 }
 
 /* Print graphs and triples in TriG format */
 static void
 print_trig (TrackerSparqlCursor *cursor,
             GHashTable          *prefixes,
-            gboolean             full_namespaces)
+            gboolean             full_namespaces,
+            gboolean             show_prefixes)
 {
 	gchar *predicate;
 	gchar *object;
 	gchar *previous_graph = NULL;
 	const gchar *graph;
+
+	if (show_prefixes) {
+		g_hash_table_foreach (prefixes, (GHFunc) print_prefix, NULL);
+		g_print ("\n");
+	}
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 		graph = tracker_sparql_cursor_get_string (cursor, 0, NULL);
@@ -194,7 +211,7 @@ print_trig (TrackerSparqlCursor *cursor,
 
 		g_free (predicate);
 		g_free (object);
-	}
+	};
 
 	if (graph != NULL) {
 		g_print ("}\n");
@@ -202,25 +219,149 @@ print_trig (TrackerSparqlCursor *cursor,
 	g_free (previous_graph);
 }
 
-static int
-export_run_default (void)
+/* Execute a query and export the resulting triples or quads to stdout.
+ *
+ * The query should return quads (graph, subject, predicate, object) plus an extra
+ * boolean column that is false when the 'object' value is a simple type or a resource.
+ */
+static gboolean
+export_with_query (const gchar  *query,
+                   gboolean      show_graphs,
+                   gboolean      show_prefixes,
+                   GError      **error)
 {
 	g_autoptr(TrackerSparqlConnection) connection = NULL;
 	g_autoptr(TrackerSparqlCursor) cursor = NULL;
-	g_autoptr(GError) error = NULL;
+	g_autoptr(GError) inner_error = NULL;
 	g_autoptr(GHashTable) prefixes = NULL;
-	const gchar *query;
 
-	connection = create_connection (&error);
+	connection = create_connection (&inner_error);
 
 	if (!connection) {
-		g_printerr ("%s: %s\n",
-		            _("Could not establish a connection to Tracker"),
-		            error ? error->message : _("No error given"));
-		return EXIT_FAILURE;
+		g_propagate_prefixed_error (error, inner_error,
+		                            "%s: ", _("Could not establish a connection to Tracker"));
+		return FALSE;
 	}
 
 	prefixes = tracker_sparql_get_prefixes ();
+
+	cursor = tracker_sparql_connection_query (connection, query, NULL, &inner_error);
+
+	if (!cursor) {
+		g_propagate_prefixed_error (error, inner_error,
+		                            "%s: ", _("Could not run query"));
+		return FALSE;
+	}
+
+	g_hash_table_foreach (prefixes, (GHFunc) print_prefix, NULL);
+	g_print ("\n");
+
+	if (show_graphs) {
+		print_trig (cursor, prefixes, FALSE, show_prefixes);
+	} else {
+		print_turtle (cursor, prefixes, FALSE, show_prefixes);
+	}
+
+	return TRUE;
+}
+
+static int
+export_run_photo_albums (void)
+{
+	const gchar *albums_query, *contents_query;
+	g_autoptr(GError) error = NULL;
+
+	/* We must use two separate queries due to
+	 * https://gitlab.gnome.org/GNOME/tracker/-/issues/216 */
+
+	albums_query = "SELECT (\"\" as ?graph) ?u ?p ?v "
+	               "       (EXISTS { ?p rdfs:range [ rdfs:subClassOf rdfs:Resource ] }) AS ?is_resource "
+	               "{ "
+	               "    { "
+	               "        ?u a nfo:DataContainer ; "
+	               "           nao:identifier ?id . "
+	               "        FILTER (fn:starts-with (?id, \"photos:collection:local:\")) "
+	               "        ?u ?p ?v . "
+	               "    } "
+	               "} ORDER BY ?u ";
+
+	contents_query = "SELECT \"\" (?url AS ?u) (nie:isPartOf as ?p) (?collection AS ?v) (true AS ?is_resource) "
+	                 "{"
+	                 "    ?collection a nfo:DataContainer ; "
+	                 "        nao:identifier ?id . "
+	                 "    FILTER (fn:starts-with (?id, \"photos:collection:local:\")) "
+	                 "    ?u nie:isPartOf ?collection . "
+	                 "    ?u nie:url ?url . "
+	                 "} ORDER BY ?url";
+
+	export_with_query (albums_query, FALSE, TRUE, &error);
+
+	if (error) {
+		g_printerr ("%s\n", error->message);
+		return EXIT_FAILURE;
+	}
+
+	export_with_query (contents_query, FALSE, FALSE, &error);
+
+	if (error) {
+		g_printerr ("%s\n", error->message);
+		return EXIT_FAILURE;
+	} else {
+		return EXIT_SUCCESS;
+	}
+}
+
+static int
+export_run_photo_favourites (void)
+{
+	const gchar *query;
+	g_autoptr(GError) error = NULL;
+
+	query = "SELECT \"\" (?url AS ?u) (nao:hasTag as ?p) (nao:predefined-tag-favorite AS ?v) (true AS ?is_resource) "
+	        "{"
+	        "    ?u a nmm:Photo ; "
+	        "       nie:url ?url ; "
+	        "       nao:hasTag nao:predefined-tag-favorite . "
+	        "} ORDER BY ?url";
+
+	export_with_query (query, FALSE, FALSE, &error);
+
+	if (error) {
+		g_printerr ("%s\n", error->message);
+		return EXIT_FAILURE;
+	} else {
+		return EXIT_SUCCESS;
+	}
+}
+
+static int
+export_run_files_starred (void)
+{
+	const gchar *query;
+	g_autoptr(GError) error = NULL;
+
+	query = "SELECT \"\" (?url AS ?u) (nao:hasTag as ?p) (<urn:gnome:nautilus:starred> AS ?v) (true AS ?is_resource) "
+	        "{"
+	        "    ?u a nfo:FileDataObject ; "
+	        "       nie:url ?url ; "
+	        "       nao:hasTag <urn:gnome:nautilus:starred> . "
+	        "} ORDER BY ?url";
+
+	export_with_query (query, FALSE, FALSE, &error);
+
+	if (error) {
+		g_printerr ("%s\n", error->message);
+		return EXIT_FAILURE;
+	} else {
+		return EXIT_SUCCESS;
+	}
+}
+
+static int
+export_run_default (void)
+{
+	g_autoptr(GError) error = NULL;
+	const gchar *query;
 
 	query = "SELECT ?g ?u ?p ?v "
 	        "       (EXISTS { ?p rdfs:range [ rdfs:subClassOf rdfs:Resource ] }) AS ?is_resource "
@@ -233,25 +374,14 @@ export_run_default (void)
 	        "    } "
 	        "} ORDER BY ?g ?u";
 
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
+	export_with_query (query, show_graphs_option, TRUE, &error);
 
 	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not run query"),
-		            error->message);
+		g_printerr ("%s\n", error->message);
 		return EXIT_FAILURE;
-	}
-
-	g_hash_table_foreach (prefixes, (GHFunc) print_prefix, NULL);
-	g_print ("\n");
-
-	if (show_graphs) {
-		print_trig (cursor, prefixes, FALSE);
 	} else {
-		print_turtle (cursor, prefixes, FALSE);
+		return EXIT_SUCCESS;
 	}
-
-	return EXIT_SUCCESS;
 }
 
 int
@@ -274,5 +404,16 @@ tracker_export (int argc, const char **argv)
 
 	g_option_context_free (context);
 
-	return export_run_default ();
+	if (data_type == NULL) {
+		return export_run_default ();
+	} else if (strcmp (data_type, "photos-albums") == 0) {
+		return export_run_photo_albums ();
+	} else if (strcmp (data_type, "photos-favorites") == 0 || strcmp (data_type, "photos-favourites") == 0) {
+		return export_run_photo_favourites ();
+	} else if (strcmp (data_type, "files-starred") == 0) {
+		return export_run_files_starred ();
+	} else {
+		g_printerr ("%s: %s\n", _("Unrecognized value for '--type' option"), data_type);
+		return EXIT_FAILURE;
+	}
 }
