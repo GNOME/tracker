@@ -11,6 +11,7 @@
 "http://tracker.api.gnome.org/ontology/v3/nfo#fileLastModified"
 "http://tracker.api.gnome.org/ontology/v3/nmm#artistName"
 "http://tracker.api.gnome.org/ontology/v3/nmm#musicAlbum"
+"http://tracker.api.gnome.org/ontology/v3/nmm#artist"
 "http://tracker.api.gnome.org/ontology/v3/nmm#performer"
 "http://tracker.api.gnome.org/ontology/v3/slo#postalAddress"
 "http://tracker.api.gnome.org/ontology/v3/slo#location"
