@@ -109,12 +109,17 @@ print_turtle (TrackerSparqlCursor *cursor,
 	gchar *predicate;
 	gchar *object;
 
+	if (!tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+		g_print ("# No data to export\n");
+		return;
+	}
+
 	if (show_prefixes) {
 		g_hash_table_foreach (prefixes, (GHFunc) print_prefix, NULL);
 		g_print ("\n");
 	}
 
-	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+	do {
 		const gchar *resource = tracker_sparql_cursor_get_string (cursor, 1, NULL);
 		const gchar *key = tracker_sparql_cursor_get_string (cursor, 2, NULL);
 		const gchar *value = tracker_sparql_cursor_get_string (cursor, 3, NULL);
@@ -147,7 +152,7 @@ print_turtle (TrackerSparqlCursor *cursor,
 
 		g_free (predicate);
 		g_free (object);
-	};
+	} while (tracker_sparql_cursor_next (cursor, NULL, NULL));
 }
 
 /* Print graphs and triples in TriG format */
@@ -162,12 +167,17 @@ print_trig (TrackerSparqlCursor *cursor,
 	gchar *previous_graph = NULL;
 	const gchar *graph;
 
+	if (!tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+		g_print ("# No data to export\n");
+		return;
+	}
+
 	if (show_prefixes) {
 		g_hash_table_foreach (prefixes, (GHFunc) print_prefix, NULL);
 		g_print ("\n");
 	}
 
-	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+	do {
 		graph = tracker_sparql_cursor_get_string (cursor, 0, NULL);
 		const gchar *resource = tracker_sparql_cursor_get_string (cursor, 1, NULL);
 		const gchar *key = tracker_sparql_cursor_get_string (cursor, 2, NULL);
@@ -211,7 +221,7 @@ print_trig (TrackerSparqlCursor *cursor,
 
 		g_free (predicate);
 		g_free (object);
-	};
+	} while (tracker_sparql_cursor_next (cursor, NULL, NULL));
 
 	if (graph != NULL) {
 		g_print ("}\n");
@@ -252,9 +262,6 @@ export_with_query (const gchar  *query,
 		                            "%s: ", _("Could not run query"));
 		return FALSE;
 	}
-
-	g_hash_table_foreach (prefixes, (GHFunc) print_prefix, NULL);
-	g_print ("\n");
 
 	if (show_graphs) {
 		print_trig (cursor, prefixes, FALSE, show_prefixes);
