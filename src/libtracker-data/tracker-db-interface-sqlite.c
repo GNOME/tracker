@@ -2937,11 +2937,15 @@ tracker_db_statement_sqlite_release (TrackerDBStatement *stmt)
 	TrackerDBInterface *iface = stmt->db_interface;
 
 	g_assert (stmt->stmt_is_owned);
-	stmt->stmt_is_used = FALSE;
+
+	if (stmt->stmt_is_used) {
+		stmt->stmt_is_used = FALSE;
+		tracker_db_statement_sqlite_reset (stmt);
+		g_object_unref (stmt);
+		g_object_unref (iface);
+	}
+
 	stmt->stmt_is_owned = FALSE;
-	tracker_db_statement_sqlite_reset (stmt);
-	g_object_unref (stmt);
-	g_object_unref (iface);
 }
 
 static void
@@ -3490,6 +3494,7 @@ tracker_db_statement_execute (TrackerDBStatement  *stmt,
 	g_return_if_fail (!stmt->stmt_is_used);
 
 	execute_stmt (stmt->db_interface, stmt->stmt, NULL, error);
+	tracker_db_statement_sqlite_release (stmt);
 }
 
 TrackerDBCursor *

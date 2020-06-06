@@ -67,8 +67,9 @@ struct _TrackerParserState {
 		TrackerRuleState *rules;
 		guint array_size;
 		guint len;
+		gint64 last_matched;
+		TrackerParserNode *last_matched_node;
 	} rule_states;
-
 
 	GPtrArray *error_rules;
 	gssize error_len;
@@ -235,9 +236,16 @@ tracker_parser_state_pop (TrackerParserState *state)
 	if (rule_state->node) {
 		node = rule_state->node;
 		node->end = state->current;
+
+		if (node == state->rule_states.last_matched_node) {
+			state->rule_states.last_matched_node =
+				(TrackerParserNode *) node->node.parent;
+		}
 	}
 
 	state->rule_states.len--;
+	state->rule_states.last_matched = MIN (state->rule_states.last_matched,
+	                                       state->rule_states.len);
 
 	return node;
 }
@@ -317,13 +325,14 @@ tracker_parser_state_next_child (TrackerParserState *state,
 static TrackerParserNode *
 tracker_parser_state_transact_match (TrackerParserState *state)
 {
-	TrackerParserNode *parser_node = NULL;
-	guint i;
+	TrackerParserNode *parser_node = state->rule_states.last_matched_node;
+	guint i = 0;
 
-	for (i = 0; i < state->rule_states.len; i++) {
+	for (i = state->rule_states.last_matched; i < state->rule_states.len; i++) {
 		TrackerRuleState *rule_state = &state->rule_states.rules[i];
 
 		rule_state->visited = TRUE;
+		state->rule_states.last_matched = i;
 
 		if (rule_state->rule->type != RULE_TYPE_LITERAL &&
 		    rule_state->rule->type != RULE_TYPE_TERMINAL &&
@@ -339,6 +348,7 @@ tracker_parser_state_transact_match (TrackerParserState *state)
 		}
 
 		parser_node = rule_state->node;
+		state->rule_states.last_matched_node = parser_node;
 	}
 
 	return parser_node;

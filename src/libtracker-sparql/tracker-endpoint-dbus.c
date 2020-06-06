@@ -224,14 +224,18 @@ write_cursor (QueryRequest          *request,
 	while (tracker_sparql_cursor_next (cursor, NULL, &inner_error)) {
 		glong cur_offset = -1;
 
-		g_data_output_stream_put_int32 (request->data_stream, n_columns, NULL, NULL);
+		if (!g_data_output_stream_put_int32 (request->data_stream, n_columns,
+		                                     NULL, &inner_error))
+			break;
 
 		for (i = 0; i < n_columns; i++) {
 			glong len;
 
-			g_data_output_stream_put_int32 (request->data_stream,
-			                                tracker_sparql_cursor_get_value_type (cursor, i),
-			                                NULL, NULL);
+			if (!g_data_output_stream_put_int32 (request->data_stream,
+			                                     tracker_sparql_cursor_get_value_type (cursor, i),
+			                                     NULL, &inner_error))
+				goto out;
+
 			values[i] = tracker_sparql_cursor_get_string (cursor, i, &len);
 			len++;
 			cur_offset += len;
@@ -239,17 +243,24 @@ write_cursor (QueryRequest          *request,
 		}
 
 		for (i = 0; i < n_columns; i++) {
-			g_data_output_stream_put_int32 (request->data_stream,
-			                                offsets[i], NULL, NULL);
+			if (!g_data_output_stream_put_int32 (request->data_stream,
+			                                     offsets[i], NULL, &inner_error))
+				goto out;
 		}
 
 		for (i = 0; i < n_columns; i++) {
-			g_data_output_stream_put_string (request->data_stream,
-			                                 values[i] ? values[i] : "",
-			                                 NULL, NULL);
-			g_data_output_stream_put_byte (request->data_stream, 0, NULL, NULL);
+			if (!g_data_output_stream_put_string (request->data_stream,
+			                                      values[i] ? values[i] : "",
+			                                      NULL, &inner_error))
+				goto out;
+
+			if (!g_data_output_stream_put_byte (request->data_stream, 0, NULL,
+			                                    &inner_error))
+				goto out;
 		}
 	}
+
+out:
 
 	g_free (values);
 	g_free (offsets);

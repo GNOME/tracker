@@ -761,41 +761,6 @@ tracker_direct_connection_update_finish (TrackerSparqlConnection  *self,
 }
 
 static void
-error_free (GError *error)
-{
-	if (error)
-		g_error_free (error);
-}
-
-static void
-update_array_async_thread_func (GTask        *task,
-                                gpointer      source_object,
-                                gpointer      task_data,
-                                GCancellable *cancellable)
-{
-	gchar **updates = task_data;
-	gchar *concatenated;
-	GPtrArray *errors;
-	GError *error = NULL;
-
-	errors = g_ptr_array_new_with_free_func ((GDestroyNotify) error_free);
-	g_ptr_array_set_size (errors, g_strv_length (updates));
-
-	concatenated = g_strjoinv ("\n", updates);
-	tracker_sparql_connection_update (source_object, concatenated,
-	                                  g_task_get_priority (task),
-	                                  cancellable, &error);
-	g_free (concatenated);
-
-	if (error)
-		g_task_return_error (task, error);
-	else
-		g_task_return_boolean (task, TRUE);
-
-	g_object_unref (task);
-}
-
-static void
 tracker_direct_connection_update_array_async (TrackerSparqlConnection  *self,
                                               gchar                   **updates,
                                               gint                      n_updates,
@@ -804,22 +769,31 @@ tracker_direct_connection_update_array_async (TrackerSparqlConnection  *self,
                                               GAsyncReadyCallback       callback,
                                               gpointer                  user_data)
 {
+	TrackerDirectConnectionPrivate *priv;
+	TrackerDirectConnection *conn;
+	TaskData *task_data;
 	GTask *task;
-	gchar **copy;
-	gint i = 0;
+	gchar *concatenated;
+	gchar **array_copy;
 
-	copy = g_new0 (gchar*, n_updates + 1);
+	conn = TRACKER_DIRECT_CONNECTION (self);
+	priv = tracker_direct_connection_get_instance_private (conn);
 
-	for (i = 0; i < n_updates; i++) {
-		g_return_if_fail (updates[i] != NULL);
-		copy[i] = g_strdup (updates[i]);
-	}
+	/* Make a NULL-terminated array and concatenate it */
+	array_copy = g_new0 (gchar *, n_updates + 1);
+	memcpy (array_copy, updates, n_updates * sizeof (gchar *));
+	concatenated = g_strjoinv ("\n", array_copy);
+	g_free (array_copy);
+
+	task_data = task_data_query_new (TASK_TYPE_UPDATE, NULL);
+	task_data->query = concatenated;
 
 	task = g_task_new (self, cancellable, callback, user_data);
 	g_task_set_priority (task, priority);
-	g_task_set_task_data (task, copy, (GDestroyNotify) g_strfreev);
+	g_task_set_task_data (task, task_data,
+	                      (GDestroyNotify) task_data_free);
 
-	g_task_run_in_thread (task, update_array_async_thread_func);
+	g_thread_pool_push (priv->update_thread, task, NULL);
 }
 
 static gboolean

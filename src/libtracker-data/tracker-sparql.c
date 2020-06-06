@@ -8808,7 +8808,10 @@ tracker_sparql_new (TrackerDataManager *manager,
 
 	sparql = g_object_new (TRACKER_TYPE_SPARQL, NULL);
 	sparql->data_manager = g_object_ref (manager);
-	sparql->sparql = tracker_unescape_unichars (query, -1);
+	if (strcasestr (query, "\\u"))
+		sparql->sparql = tracker_unescape_unichars (query, -1);
+	else
+		sparql->sparql = g_strdup (query);
 
 	tree = tracker_sparql_parse_query (sparql->sparql, -1, NULL,
 					   &sparql->parser_error);
@@ -8989,7 +8992,10 @@ tracker_sparql_new_update (TrackerDataManager *manager,
 
 	sparql = g_object_new (TRACKER_TYPE_SPARQL, NULL);
 	sparql->data_manager = g_object_ref (manager);
-	sparql->sparql = tracker_unescape_unichars (query, -1);
+	if (strcasestr (query, "\\u"))
+		sparql->sparql = tracker_unescape_unichars (query, -1);
+	else
+		sparql->sparql = g_strdup (query);
 
 	tree = tracker_sparql_parse_update (sparql->sparql, -1, &len,
 	                                    &sparql->parser_error);
