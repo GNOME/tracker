@@ -1,6 +1,7 @@
 @prefix fts: <http://tracker.api.gnome.org/ontology/v3/fts#> .
 @prefix nao: <http://tracker.api.gnome.org/ontology/v3/nao#> .
 @prefix nie: <http://tracker.api.gnome.org/ontology/v3/nie#> .
+@prefix nfo: <http://tracker.api.gnome.org/ontology/v3/nfo#> .
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -19,39 +20,29 @@ tracker:tagRelatedTo a rdf:Property ;
 	rdfs:domain nao:Tag ;
 	rdfs:range rdfs:Class .
 
-tracker:Volume a rdfs:Class ;
-	rdfs:label "Storage media" ;
-        rdfs:subClassOf nie:InformationElement ;
-	rdfs:subClassOf nie:DataSource .
-
-tracker:isMounted a rdf:Property ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain tracker:Volume ;
-	rdfs:range xsd:boolean .
+tracker:IndexedFolder a rdfs:Class ;
+        rdfs:label "Indexed Folder" ;
+        rdfs:subClassOf nfo:Folder ;
+        rdfs:subClassOf nie:DataSource .
 
 tracker:unmountDate a rdf:Property ;
 	nrl:maxCardinality 1 ;
-	rdfs:domain tracker:Volume ;
+	rdfs:domain tracker:IndexedFolder ;
 	rdfs:range xsd:dateTime .
-
-tracker:mountPoint a rdf:Property ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain tracker:Volume ;
-	rdfs:range rdfs:Resource .
 
 tracker:isRemovable a rdf:Property ;
 	nrl:maxCardinality 1 ;
-	rdfs:domain tracker:Volume ;
+	rdfs:domain tracker:IndexedFolder ;
 	rdfs:range xsd:boolean .
 
 tracker:isOptical a rdf:Property ;
 	nrl:maxCardinality 1 ;
-	rdfs:domain tracker:Volume ;
+	rdfs:domain tracker:IndexedFolder ;
 	rdfs:range xsd:boolean .
 
 tracker:available a rdf:Property ;
 	nrl:maxCardinality 1 ;
-	rdfs:domain nie:DataObject ;
+	rdfs:domain tracker:IndexedFolder ;
 	rdfs:range xsd:boolean .
 
 fts: a tracker:Namespace ;
