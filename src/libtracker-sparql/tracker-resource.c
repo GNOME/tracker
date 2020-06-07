@@ -150,8 +150,8 @@ dispose (GObject *object)
 
 	priv = GET_PRIVATE (TRACKER_RESOURCE (object));
 
-	g_hash_table_remove_all (priv->overwrite);
-	g_hash_table_remove_all (priv->properties);
+	g_clear_pointer (&priv->overwrite, g_hash_table_unref);
+	g_clear_pointer (&priv->properties, g_hash_table_unref);
 
 	G_OBJECT_CLASS (tracker_resource_parent_class)->dispose (object);
 }
@@ -180,9 +180,6 @@ finalize (GObject *object)
 	if (priv->identifier) {
 		g_free (priv->identifier);
 	}
-
-	g_hash_table_unref (priv->overwrite);
-	g_hash_table_unref (priv->properties);
 
 	(G_OBJECT_CLASS (tracker_resource_parent_class)->finalize)(object);
 }

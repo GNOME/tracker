@@ -1103,6 +1103,8 @@ tracker_db_manager_attach_database (TrackerDBManager    *db_manager,
 					g_propagate_error (error, inner_error);
 					return FALSE;
 				}
+
+				g_clear_error (&inner_error);
 			}
 		}
 	}

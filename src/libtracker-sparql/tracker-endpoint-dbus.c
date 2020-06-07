@@ -277,9 +277,10 @@ out:
 static void
 handle_cursor_reply (QueryRequest        *request,
                      TrackerSparqlCursor *cursor,
-                     GError              *error)
+                     const GError        *error)
 {
 	const gchar **variable_names = NULL;
+	GError *write_error = NULL;
 	gint i, n_columns;
 
 	if (!error) {
@@ -288,16 +289,19 @@ handle_cursor_reply (QueryRequest        *request,
 		for (i = 0; i < n_columns; i++)
 			variable_names[i] = tracker_sparql_cursor_get_variable_name (cursor, i);
 
-		write_cursor (request, cursor, &error);
+		write_cursor (request, cursor, &write_error);
 	}
 
 	if (error)
 		g_dbus_method_invocation_return_gerror (request->invocation, error);
+	else if (write_error)
+		g_dbus_method_invocation_return_gerror (request->invocation, write_error);
 	else
 		g_dbus_method_invocation_return_value (request->invocation, g_variant_new ("(^as)", variable_names));
 
 	g_free (variable_names);
 	g_clear_object (&cursor);
+	g_clear_error (&write_error);
 }
 
 static void
@@ -313,6 +317,7 @@ query_cb (GObject      *object,
 	                                                 res, &error);
 	handle_cursor_reply (request, cursor, error);
 	query_request_free (request);
+	g_clear_error (&error);
 }
 
 static void
@@ -328,6 +333,7 @@ stmt_execute_cb (GObject      *object,
 	                                                  res, &error);
 	handle_cursor_reply (request, cursor, error);
 	query_request_free (request);
+	g_clear_error (&error);
 }
 
 static void
@@ -531,6 +537,7 @@ endpoint_dbus_iface_method_call (GDBusConnection       *connection,
 			}
 		}
 
+		g_variant_iter_free (arguments);
 		g_free (query);
 	} else if (g_strcmp0 (method_name, "Update") == 0 ||
 	           g_strcmp0 (method_name, "UpdateArray") == 0) {
