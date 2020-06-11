@@ -129,6 +129,7 @@ struct _TrackerSparql
 
 	gboolean silent;
 	gboolean cacheable;
+	guint generation;
 
 	GHashTable *parameters;
 
@@ -1982,8 +1983,8 @@ convert_expression_to_string (TrackerSparql       *sparql,
 		 */
 		break;
 	case TRACKER_PROPERTY_TYPE_RESOURCE:
-		/* ID => Uri */
-		_prepend_string (sparql, "(SELECT Uri FROM Resource WHERE ID = ");
+		/* ID (or string) => Uri */
+		_prepend_string (sparql, "SparqlPrintIRI(");
 		_append_string (sparql, ") ");
 		break;
 	case TRACKER_PROPERTY_TYPE_BOOLEAN:
@@ -8796,6 +8797,21 @@ tracker_sparql_init (TrackerSparql *sparql)
 	sparql->cacheable = TRUE;
 }
 
+static gboolean
+tracker_sparql_needs_update (TrackerSparql *sparql)
+{
+	guint generation;
+
+	generation = tracker_data_manager_get_generation (sparql->data_manager);
+
+	if (sparql->generation != generation) {
+		sparql->generation = generation;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 TrackerSparql*
 tracker_sparql_new (TrackerDataManager *manager,
                     const gchar        *query)
@@ -8819,6 +8835,9 @@ tracker_sparql_new (TrackerDataManager *manager,
 		sparql->tree = tree;
 		sparql->current_state.node = tracker_node_tree_get_root (sparql->tree);
 		tracker_sparql_init_string_builder (sparql);
+
+		if (tracker_sparql_needs_update (sparql))
+			_call_rule_func (sparql, NAMED_RULE_Query, &sparql->parser_error);
 	}
 
 	return sparql;
@@ -8925,6 +8944,22 @@ prepare_query (TrackerSparql         *sparql,
 	return stmt;
 }
 
+static void
+tracker_sparql_reset_state (TrackerSparql *sparql)
+{
+	sparql->current_state.node = tracker_node_tree_get_root (sparql->tree);
+	tracker_sparql_init_string_builder (sparql);
+	g_clear_object (&sparql->context);
+	g_list_free (sparql->filter_clauses);
+	sparql->filter_clauses = NULL;
+	g_ptr_array_set_size (sparql->var_names, 0);
+	g_array_set_size (sparql->var_types, 0);
+	g_hash_table_remove_all (sparql->cached_bindings);
+	g_hash_table_remove_all (sparql->parameters);
+	g_ptr_array_set_size (sparql->anon_graphs, 0);
+	g_ptr_array_set_size (sparql->named_graphs, 0);
+}
+
 TrackerSparqlCursor *
 tracker_sparql_execute_cursor (TrackerSparql  *sparql,
                                GHashTable     *parameters,
@@ -8953,8 +8988,12 @@ tracker_sparql_execute_cursor (TrackerSparql  *sparql,
 		return NULL;
 	}
 
-	if (!_call_rule_func (sparql, NAMED_RULE_Query, error))
-		return NULL;
+	if (tracker_sparql_needs_update (sparql)) {
+		tracker_sparql_reset_state (sparql);
+
+		if (!_call_rule_func (sparql, NAMED_RULE_Query, error))
+			return NULL;
+	}
 
 	iface = tracker_data_manager_get_db_interface (sparql->data_manager);
 	stmt = prepare_query (sparql, iface, sparql->sql,

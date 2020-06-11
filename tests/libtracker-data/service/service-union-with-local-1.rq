@@ -1,0 +1,10 @@
+SELECT ?u {
+  {
+    ?u tracker:indexed true;
+  } UNION {
+    SERVICE <dbus:%s> {
+      ?u tracker:indexed true;
+    }
+  }
+}
+ORDER BY ?u

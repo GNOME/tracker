@@ -1110,7 +1110,7 @@ tracker_db_manager_attach_database (TrackerDBManager    *db_manager,
 	}
 
 	if (!tracker_db_interface_attach_database (iface, file, name, error)) {
-		g_object_unref (file);
+		g_clear_object (&file);
 		return FALSE;
 	}
 

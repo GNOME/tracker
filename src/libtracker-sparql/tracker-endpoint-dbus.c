@@ -273,35 +273,50 @@ out:
 	}
 }
 
-/* Takes ownership on both cursor and error */
 static void
-handle_cursor_reply (QueryRequest        *request,
-                     TrackerSparqlCursor *cursor,
-                     const GError        *error)
+handle_cursor_reply (GTask        *task,
+                     gpointer      source_object,
+                     gpointer      task_data,
+                     GCancellable *cancellable)
 {
+	TrackerSparqlCursor *cursor = source_object;
+	QueryRequest *request = task_data;
 	const gchar **variable_names = NULL;
 	GError *write_error = NULL;
 	gint i, n_columns;
 
-	if (!error) {
-		n_columns = tracker_sparql_cursor_get_n_columns (cursor);
-		variable_names = g_new0 (const gchar *, n_columns + 1);
-		for (i = 0; i < n_columns; i++)
-			variable_names[i] = tracker_sparql_cursor_get_variable_name (cursor, i);
+	n_columns = tracker_sparql_cursor_get_n_columns (cursor);
+	variable_names = g_new0 (const gchar *, n_columns + 1);
+	for (i = 0; i < n_columns; i++)
+		variable_names[i] = tracker_sparql_cursor_get_variable_name (cursor, i);
 
-		write_cursor (request, cursor, &write_error);
-	}
+	write_cursor (request, cursor, &write_error);
 
-	if (error)
-		g_dbus_method_invocation_return_gerror (request->invocation, error);
-	else if (write_error)
+	if (write_error)
 		g_dbus_method_invocation_return_gerror (request->invocation, write_error);
 	else
 		g_dbus_method_invocation_return_value (request->invocation, g_variant_new ("(^as)", variable_names));
 
 	g_free (variable_names);
-	g_clear_object (&cursor);
 	g_clear_error (&write_error);
+
+	g_task_return_boolean (task, TRUE);
+}
+
+static void
+finish_query (GObject      *source_object,
+              GAsyncResult *res,
+              gpointer      user_data)
+{
+	TrackerSparqlCursor *cursor = TRACKER_SPARQL_CURSOR (source_object);
+	GError *error = NULL;
+
+	if (!g_task_propagate_boolean (G_TASK (res), &error))
+		g_critical ("Error writing cursor: %s\n", error->message);
+
+	tracker_sparql_cursor_close (cursor);
+	g_object_unref (cursor);
+	g_clear_error (&error);
 }
 
 static void
@@ -312,12 +327,21 @@ query_cb (GObject      *object,
 	QueryRequest *request = user_data;
 	TrackerSparqlCursor *cursor;
 	GError *error = NULL;
+	GTask *task;
 
 	cursor = tracker_sparql_connection_query_finish (TRACKER_SPARQL_CONNECTION (object),
 	                                                 res, &error);
-	handle_cursor_reply (request, cursor, error);
-	query_request_free (request);
-	g_clear_error (&error);
+	if (!cursor) {
+		g_dbus_method_invocation_return_gerror (request->invocation, error);
+		g_error_free (error);
+		query_request_free (request);
+		return;
+	}
+
+	task = g_task_new (cursor, request->endpoint->cancellable, finish_query, NULL);
+	g_task_set_task_data (task, request, (GDestroyNotify) query_request_free);
+	g_task_run_in_thread (task, handle_cursor_reply);
+	g_object_unref (task);
 }
 
 static void
@@ -328,12 +352,21 @@ stmt_execute_cb (GObject      *object,
 	QueryRequest *request = user_data;
 	TrackerSparqlCursor *cursor;
 	GError *error = NULL;
+	GTask *task;
 
 	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
 	                                                  res, &error);
-	handle_cursor_reply (request, cursor, error);
-	query_request_free (request);
-	g_clear_error (&error);
+	if (!cursor) {
+		g_dbus_method_invocation_return_gerror (request->invocation, error);
+		g_error_free (error);
+		query_request_free (request);
+		return;
+	}
+
+	task = g_task_new (cursor, request->endpoint->cancellable, finish_query, NULL);
+	g_task_set_task_data (task, request, (GDestroyNotify) query_request_free);
+	g_task_run_in_thread (task, handle_cursor_reply);
+	g_object_unref (task);
 }
 
 static void

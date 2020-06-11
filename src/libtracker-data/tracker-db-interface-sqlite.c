@@ -1740,16 +1740,23 @@ generate_uuid (sqlite3_context *context,
 {
 	gchar *uuid = NULL;
 	sqlite3_stmt *stmt;
+	gboolean store_auxdata = FALSE;
 	sqlite3 *db;
 	gint result;
 
-	db = sqlite3_context_db_handle (context);
+	stmt = sqlite3_get_auxdata (context, 1);
 
-	result = sqlite3_prepare_v2 (db, "SELECT ID FROM Resource WHERE Uri=?",
-				     -1, &stmt, NULL);
-	if (result != SQLITE_OK) {
-		sqlite3_result_error (context, sqlite3_errstr (result), -1);
-		return;
+	if (stmt == NULL) {
+		db = sqlite3_context_db_handle (context);
+
+		result = sqlite3_prepare_v2 (db, "SELECT ID FROM Resource WHERE Uri=?",
+		                             -1, &stmt, NULL);
+		if (result != SQLITE_OK) {
+			sqlite3_result_error (context, sqlite3_errstr (result), -1);
+			return;
+		}
+
+		store_auxdata = TRUE;
 	}
 
 	do {
@@ -1761,7 +1768,10 @@ generate_uuid (sqlite3_context *context,
 		result = stmt_step (stmt);
 	} while (result == SQLITE_ROW);
 
-	sqlite3_finalize (stmt);
+	if (store_auxdata) {
+		sqlite3_set_auxdata (context, 1, stmt,
+		                     (void (*) (void*)) sqlite3_finalize);
+	}
 
 	if (result != SQLITE_DONE) {
 		sqlite3_result_error (context, sqlite3_errstr (result), -1);
@@ -1798,6 +1808,57 @@ function_sparql_bnode (sqlite3_context *context,
 	}
 
 	generate_uuid (context, "urn:bnode");
+}
+
+static void
+function_sparql_print_iri (sqlite3_context *context,
+                           int              argc,
+                           sqlite3_value   *argv[])
+{
+	if (argc > 1) {
+		sqlite3_result_error (context, "Invalid argument count", -1);
+		return;
+	}
+
+	if (sqlite3_value_type (argv[0]) == SQLITE_INTEGER) {
+		sqlite3_stmt *stmt;
+		gboolean store_auxdata = FALSE;
+		sqlite3 *db;
+		gint result;
+
+		stmt = sqlite3_get_auxdata (context, 1);
+
+		if (stmt == NULL) {
+			store_auxdata = TRUE;
+			db = sqlite3_context_db_handle (context);
+
+			result = sqlite3_prepare_v2 (db, "SELECT Uri FROM Resource WHERE ID = ?",
+			                             -1, &stmt, NULL);
+			if (result != SQLITE_OK) {
+				sqlite3_result_error (context, sqlite3_errstr (result), -1);
+				return;
+			}
+		}
+
+		sqlite3_reset (stmt);
+		sqlite3_bind_value (stmt, 1, argv[0]);
+		result = stmt_step (stmt);
+
+		if (result == SQLITE_DONE) {
+			sqlite3_result_null (context);
+		} else if (result == SQLITE_ROW) {
+			sqlite3_result_value (context, sqlite3_column_value (stmt, 0));
+		} else {
+			sqlite3_result_error (context, sqlite3_errstr (result), -1);
+		}
+
+		if (store_auxdata) {
+			sqlite3_set_auxdata (context, 1, stmt,
+			                     (void (*) (void*)) sqlite3_finalize);
+		}
+	} else {
+		sqlite3_result_value (context, argv[0]);
+	}
 }
 
 static int
@@ -1874,6 +1935,8 @@ initialize_functions (TrackerDBInterface *db_interface)
 		  function_sparql_langmatches },
 		{ "SparqlStrLang", 2, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_strlang },
+		{ "SparqlPrintIRI", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
+		  function_sparql_print_iri },
 		/* Numbers */
 		{ "SparqlCeil", 1, SQLITE_ANY | SQLITE_DETERMINISTIC,
 		  function_sparql_ceil },
@@ -3590,9 +3653,12 @@ tracker_db_interface_attach_database (TrackerDBInterface  *db_interface,
 		uri = g_file_get_path (file);
 	} else if (db_interface->shared_cache_key &&
 	           (db_interface->flags & TRACKER_DB_INTERFACE_IN_MEMORY) != 0) {
+		gchar *md5;
+
+		md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, name, -1);
 		uri = g_strdup_printf ("file:%s-%s?mode=memory&cache=shared",
-					db_interface->shared_cache_key,
-					name);
+		                       db_interface->shared_cache_key, md5);
+		g_free (md5);
 	}
 
 	sql = g_strdup_printf ("ATTACH DATABASE \"%s\" AS \"%s\"",

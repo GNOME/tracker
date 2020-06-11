@@ -5119,3 +5119,9 @@ tracker_data_manager_copy_graph (TrackerDataManager  *manager,
 
 	return TRUE;
 }
+
+guint
+tracker_data_manager_get_generation (TrackerDataManager *manager)
+{
+	return manager->generation;
+}

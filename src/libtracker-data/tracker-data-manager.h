@@ -101,6 +101,8 @@ gint                 tracker_data_manager_find_graph       (TrackerDataManager *
 const gchar *        tracker_data_manager_find_graph_by_id (TrackerDataManager *manager,
                                                             gint                id);
 
+guint                tracker_data_manager_get_generation   (TrackerDataManager *manager);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_DATA_MANAGER_H__ */

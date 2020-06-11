@@ -346,9 +346,18 @@ service_filter (sqlite3_vtab_cursor  *vtab_cursor,
 		                                  &bus_name, &object_path)) {
 			g_set_error (&error,
 			             TRACKER_SPARQL_ERROR,
-			             TRACKER_SPARQL_ERROR_UNSUPPORTED,
+			             TRACKER_SPARQL_ERROR_PARSE,
 			             "Failed to parse uri '%s'",
 			             cursor->service);
+			goto fail;
+		}
+
+		if (!g_dbus_is_name (bus_name)) {
+			g_set_error (&error,
+			             TRACKER_SPARQL_ERROR,
+			             TRACKER_SPARQL_ERROR_PARSE,
+			             "Invalid bus name '%s'",
+			             bus_name);
 			goto fail;
 		}
 
