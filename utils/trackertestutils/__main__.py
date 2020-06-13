@@ -297,7 +297,7 @@ class MinerStatusWatch():
     def setup(self):
         log.debug(f"Set up status watch on {self.dbus_name}")
         self._proxy = Gio.DBusProxy.new_sync(
-            self._sandbox.get_connection(),
+            self._sandbox.get_session_bus_connection(),
             Gio.DBusProxyFlags.NONE, None,
             self.dbus_name, self.object_path, 'org.freedesktop.Tracker3.Miner',
             None)
