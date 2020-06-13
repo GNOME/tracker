@@ -134,12 +134,18 @@ nmm:beatsPerMinute a rdf:Property ;
 	rdfs:domain nmm:MusicPiece ;
 	rdfs:range xsd:integer .
 
-# Todo: change cardinality
+nmm:artist a rdf:Property ;
+	rdfs:label "Artist" ;
+	rdfs:comment "main artist of the MusicPiece" ;
+	rdfs:subPropertyOf nco:contributor ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nmm:MusicPiece ;
+	rdfs:range nmm:Artist .
+
 nmm:performer a rdf:Property ;
 	rdfs:label "Performer" ;
 	rdfs:comment "Performer" ;
 	rdfs:subPropertyOf nco:contributor ;
-	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicPiece ;
 	rdfs:range nmm:Artist ;
 	tracker:weight 4 ;
