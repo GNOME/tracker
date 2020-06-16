@@ -32,6 +32,6 @@ foreach m : manpages
     input: xml,
     output: manpage,
     install: true,
-    install_dir: get_option('mandir'),
+    install_dir: get_option('mandir') / 'man1',
   )
 endforeach
