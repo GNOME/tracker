@@ -12,9 +12,7 @@ if get_option('test_utils')
   testutils_dir = get_option('test_utils_dir')
 
   if testutils_dir == ''
-    arch_independent_libdir = \
-      get_option('prefix') / 'lib' / 'tracker-' + tracker_api_version
-    testutils_dir = join_paths(arch_independent_libdir)
+    testutils_dir = tracker_internal_libs_dir
   endif
 
   install_data(sources, install_dir: testutils_dir / 'trackertestutils')
