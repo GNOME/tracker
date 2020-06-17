@@ -492,6 +492,7 @@ nco:title a rdf:Property ;
 	rdfs:label "title" ;
 	rdfs:domain nco:Affiliation ;
 	rdfs:range xsd:string ;
+	nrl:maxCardinality 1 ;
 	tracker:fulltextIndexed true ;
 	tracker:weight 10 .
 
@@ -529,6 +530,7 @@ nco:contactMediumComment a rdf:Property ;
 nco:foafUrl a rdf:Property ;
 	rdfs:label "foafUrl" ;
 	rdfs:comment "The URL of the FOAF file." ;
+	nrl:maxCardinality 1 ;
 	rdfs:subPropertyOf nco:url ;
 	rdfs:domain nco:Role ;
 	rdfs:range rdfs:Resource .

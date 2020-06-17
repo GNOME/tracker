@@ -14,6 +14,7 @@ tracker: a tracker:Ontology ;
 
 tracker:isDefaultTag a rdf:Property ;
 	rdfs:domain nao:Tag ;
+	nrl:maxCardinality 1 ;
 	rdfs:range xsd:boolean .
 
 tracker:tagRelatedTo a rdf:Property ;
