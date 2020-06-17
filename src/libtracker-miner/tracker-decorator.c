@@ -80,7 +80,7 @@ struct _TrackerDecoratorPrivate {
 
 	/* Arrays of tracker IDs */
 	GArray *prepended_ids;
-	GSequence *blacklist_items;
+	GSequence *blocklist_items;
 
 	GHashTable *tasks; /* Associative array of GTasks */
 	GArray *sparql_buffer; /* Array of SparqlUpdate */
@@ -221,13 +221,13 @@ sequence_compare_func (gconstpointer data1,
 }
 
 static void
-decorator_blacklist_add (TrackerDecorator *decorator,
+decorator_blocklist_add (TrackerDecorator *decorator,
                          gint              id)
 {
 	TrackerDecoratorPrivate *priv = decorator->priv;
 	GSequenceIter *iter;
 
-	iter = g_sequence_search (priv->blacklist_items,
+	iter = g_sequence_search (priv->blocklist_items,
 	                          GINT_TO_POINTER (id),
 	                          sequence_compare_func,
 	                          NULL);
@@ -238,13 +238,13 @@ decorator_blacklist_add (TrackerDecorator *decorator,
 }
 
 static void
-decorator_blacklist_remove (TrackerDecorator *decorator,
+decorator_blocklist_remove (TrackerDecorator *decorator,
                             gint              id)
 {
 	TrackerDecoratorPrivate *priv = decorator->priv;
 	GSequenceIter *iter;
 
-	iter = g_sequence_lookup (priv->blacklist_items,
+	iter = g_sequence_lookup (priv->blocklist_items,
 	                          GINT_TO_POINTER (id),
 	                          sequence_compare_func,
 	                          NULL);
@@ -367,7 +367,7 @@ decorator_commit_cb (GObject      *object,
 			if (!child_error)
 				continue;
 
-			decorator_blacklist_add (decorator, update->id);
+			decorator_blocklist_add (decorator, update->id);
 			item_warn (conn, update->id, update->sparql, child_error);
 		}
 
@@ -538,8 +538,8 @@ decorator_task_done (GObject      *object,
 	sparql = g_task_propagate_pointer (G_TASK (result), &error);
 
 	if (!sparql) {
-		/* Blacklist item */
-		decorator_blacklist_add (decorator, info->id);
+		/* Blocklist item */
+		decorator_blocklist_add (decorator, info->id);
 
 		if (error) {
 			g_warning ("Task for '%s' finished with error: %s\n",
@@ -604,18 +604,18 @@ query_append_id (GString *string,
 }
 
 static void
-query_add_blacklisted_filter (TrackerDecorator *decorator,
+query_add_blocklisted_filter (TrackerDecorator *decorator,
                               GString          *query)
 {
 	TrackerDecoratorPrivate *priv = decorator->priv;
 	GSequenceIter *iter;
 
-	if (g_sequence_get_length (priv->blacklist_items) == 0)
+	if (g_sequence_get_length (priv->blocklist_items) == 0)
 		return;
 
 	g_string_append (query, "&& tracker:id(?urn) NOT IN (");
 
-	iter = g_sequence_get_begin_iter (priv->blacklist_items);
+	iter = g_sequence_get_begin_iter (priv->blocklist_items);
 
 	while (!g_sequence_iter_is_end (iter)) {
 		query_append_id (query, GPOINTER_TO_INT (g_sequence_get (iter)));
@@ -739,7 +739,7 @@ create_query_string (TrackerDecorator  *decorator,
 			                        "  FILTER (! EXISTS { ?urn nie:dataSource <%s> } ",
 			                        priv->data_source);
 
-			query_add_blacklisted_filter (decorator, query);
+			query_add_blocklisted_filter (decorator, query);
 			query_add_processing_filter (decorator, query);
 
 			if (for_prepended && priv->prepended_ids->len > 0) {
@@ -1080,7 +1080,7 @@ notifier_events_cb (TrackerDecorator *decorator,
 			break;
 		case TRACKER_NOTIFIER_EVENT_DELETE:
 			decorator_item_cache_remove (decorator, id);
-			decorator_blacklist_remove (decorator, id);
+			decorator_blocklist_remove (decorator, id);
 			break;
 		}
 	}
@@ -1156,7 +1156,7 @@ tracker_decorator_finalize (GObject *object)
 	g_array_unref (priv->prepended_ids);
 	g_clear_pointer (&priv->sparql_buffer, g_array_unref);
 	g_clear_pointer (&priv->commit_buffer, g_array_unref);
-	g_sequence_free (priv->blacklist_items);
+	g_sequence_free (priv->blocklist_items);
 	g_free (priv->data_source);
 	g_timer_destroy (priv->timer);
 
@@ -1302,7 +1302,7 @@ tracker_decorator_init (TrackerDecorator *decorator)
 	decorator->priv = priv = tracker_decorator_get_instance_private (decorator);
 	priv->classes = g_array_new (FALSE, FALSE, sizeof (ClassInfo));
 	g_array_set_clear_func (priv->classes, (GDestroyNotify) class_info_clear);
-	priv->blacklist_items = g_sequence_new (NULL);
+	priv->blocklist_items = g_sequence_new (NULL);
 	priv->prepended_ids = g_array_new (FALSE, FALSE, sizeof (gint));
 	priv->batch_size = DEFAULT_BATCH_SIZE;
 	priv->timer = g_timer_new ();
@@ -1407,8 +1407,8 @@ tracker_decorator_prepend_id (TrackerDecorator *decorator,
 	priv = decorator->priv;
 	g_array_append_val (priv->prepended_ids, id);
 
-	/* The resource was explicitly requested, remove it from blacklists */
-	decorator_blacklist_remove (decorator, id);
+	/* The resource was explicitly requested, remove it from blocklists */
+	decorator_blocklist_remove (decorator, id);
 }
 
 /**
@@ -1440,8 +1440,8 @@ tracker_decorator_delete_id (TrackerDecorator *decorator,
 		}
 	}
 
-	/* Blacklist the item so it's not processed in the future */
-	decorator_blacklist_add (decorator, id);
+	/* Blocklist the item so it's not processed in the future */
+	decorator_blocklist_add (decorator, id);
 }
 
 /**
