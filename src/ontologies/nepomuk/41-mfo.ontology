@@ -4,12 +4,11 @@
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix nie: <http://tracker.api.gnome.org/ontology/v3/nie#> .
 @prefix nfo: <http://tracker.api.gnome.org/ontology/v3/nfo#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix mfo: <http://tracker.api.gnome.org/ontology/v3/mfo#> .
 
-mfo: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "mfo" ;
-	tracker:lastModified "2010-02-16T11:00:00Z" .
+mfo: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "mfo" ;
+	nrl:lastModified "2010-02-16T11:00:00Z" .
 
 mfo:FeedElement a rdfs:Class;
 	rdfs:label "Feed element";
@@ -17,13 +16,13 @@ mfo:FeedElement a rdfs:Class;
 	rdfs:subClassOf nie:InformationElement .
 
 mfo:FeedChannel a rdfs:Class ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:label "Feed channel" ;
 	rdfs:comment "Represents feed channel transfer, typically a download of RSS or ATOM." ;
 	rdfs:subClassOf mfo:FeedElement .
 
 mfo:FeedMessage a rdfs:Class ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:label "Feed entry" ;
 	rdfs:comment "Represents feed entry. May have enclosures attached and certain settings that allow deviation from feed channel's setup" ;
 	rdfs:subClassOf mfo:FeedElement .
@@ -31,7 +30,7 @@ mfo:FeedMessage a rdfs:Class ;
 mfo:Enclosure a rdfs:Class ;
 	rdfs:label "Message enclosure" ;
 	rdfs:comment "Represents an enclosure of a feed message" ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf mfo:FeedElement .
 
 mfo:FeedSettings a rdfs:Class ;

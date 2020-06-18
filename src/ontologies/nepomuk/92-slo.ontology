@@ -5,16 +5,15 @@
 @prefix nie: <http://tracker.api.gnome.org/ontology/v3/nie#> .
 @prefix nco: <http://tracker.api.gnome.org/ontology/v3/nco#> .
 @prefix slo: <http://tracker.api.gnome.org/ontology/v3/slo#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 
-slo: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "slo" ;
-	tracker:lastModified "2011-06-08T12:09:00Z" .
+slo: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "slo" ;
+	nrl:lastModified "2011-06-08T12:09:00Z" .
 
 slo:LandmarkCategory a rdfs:Class ;
 	rdfs:label "Landmark category";
 	rdfs:comment "Predefined set of instances for categories of landmarks";
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nie:InformationElement.
 
 slo:isRemovable a rdf:Property ;
@@ -34,7 +33,7 @@ slo:categoryIconUrl a rdf:Property ;
 slo:Landmark a rdfs:Class ;
 	rdfs:label "Point with special relevance for the user" ;
 	rdfs:subClassOf nie:InformationElement ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:comment "Use the nie title, description, ... properties" .
 
 slo:belongsToCategory a rdf:Property ;
@@ -59,7 +58,7 @@ slo:iconUrl a rdf:Property ;
 slo:GeoLocation a rdfs:Class ;
 	rdfs:label "Location" ;
 	rdfs:comment "A place in the space, can be defined by coordinates or text";
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nie:InformationElement.
 
 #Properties of GeoLocation
@@ -143,18 +142,17 @@ slo:timestamp a rdf:Property ;
 slo:postalAddress a rdf:Property ;
 	rdfs:label "As postal address" ;
 	rdfs:comment "Representation of the location as text address" ;
-	tracker:indexed true ;
+	nrl:indexed true ;
 	rdfs:domain slo:GeoLocation ;
 	nrl:maxCardinality 1 ;
 	rdfs:range nco:PostalAddress .
 
 # FIXME Domain rdfs:Resource?? to link files and not only content?
 slo:location a rdf:Property ;
-	tracker:writeback true ;
 	rdfs:label "Property linking something to a location" ;
 	rdfs:comment "This can be subclassed to add semantics" ;
 	rdfs:domain nie:InformationElement ;
-	tracker:indexed true ;
+	nrl:indexed true ;
 	nrl:maxCardinality 1 ;
 	rdfs:range slo:GeoLocation .
 

@@ -5,24 +5,23 @@
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-nfo: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "nfo" ;
-	tracker:lastModified "2014-10-06T13:05:00Z" .
+nfo: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "nfo" ;
+	nrl:lastModified "2014-10-06T13:05:00Z" .
 
 nfo:Document a rdfs:Class ;
 	rdfs:label "Document" ;
 	rdfs:comment "A generic document. A common superclass for all documents on the desktop." ;
-	tracker:notify true;
+	nrl:notify true;
 	rdfs:subClassOf nie:InformationElement .
 
 nfo:FileDataObject a rdfs:Class ;
 	rdfs:label "FileDataObject" ;
 	rdfs:comment "A resource containing a finite sequence of bytes with arbitrary information, that is available to a computer program and is usually based on some kind of durable storage. A file is durable in the sense that it remains available for programs to use after the current program has finished." ;
 	rdfs:subClassOf nie:DataObject ;
-	tracker:notify true .
+	nrl:notify true .
 
 nfo:Software a rdfs:Class ;
 	rdfs:label "Software" ;
@@ -37,13 +36,13 @@ nfo:Media a rdfs:Class ;
 nfo:Visual a rdfs:Class ;
 	rdfs:label "Visual" ;
 	rdfs:comment "File containing visual content." ;
-	tracker:domainIndex nie:contentCreated ;
+	nrl:domainIndex nie:contentCreated ;
 	rdfs:subClassOf nfo:Media .
 
 nfo:Image a rdfs:Class ;
 	rdfs:label "Image" ;
 	rdfs:comment "A file containing an image." ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nfo:Visual .
 
 nfo:RasterImage a rdfs:Class ;
@@ -54,7 +53,7 @@ nfo:RasterImage a rdfs:Class ;
 nfo:DataContainer a rdfs:Class ;
 	rdfs:label "DataContainer" ;
 	rdfs:comment "A superclass for all entities, whose primary purpose is to serve as containers for other data object. They usually don't have any 'meaning' by themselves. Examples include folders, archives and optical disc images." ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nie:InformationElement .
 
 nfo:RemotePortAddress a rdfs:Class ;
@@ -75,7 +74,7 @@ nfo:VectorImage a rdfs:Class ;
 nfo:Audio a rdfs:Class ;
 	rdfs:label "Audio" ;
 	rdfs:comment "A file containing audio content" ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nfo:Media .
 
 nfo:CompressionType a rdfs:Class ;
@@ -161,7 +160,7 @@ nfo:PaginatedTextDocument a rdfs:Class ;
 nfo:Video a rdfs:Class ;
 	rdfs:label "Video" ;
 	rdfs:comment "A video file." ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nfo:Visual .
 
 nfo:Spreadsheet a rdfs:Class ;
@@ -222,7 +221,7 @@ nfo:MediaStream a rdfs:Class ;
 nfo:BookmarkFolder a rdfs:Class ;
 	rdfs:label "Bookmark Folder" ;
 	rdfs:comment "A folder with bookmarks of a webbrowser. Use nfo:containsBookmark to relate Bookmarks. Folders can contain subfolders, use containsBookmarkFolder to relate them." ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nie:InformationElement .
 
 nfo:FilesystemImage a rdfs:Class ;
@@ -243,7 +242,7 @@ nfo:Cursor a rdfs:Class ;
 nfo:Bookmark a rdfs:Class ;
 	rdfs:label "Bookmark" ;
 	rdfs:comment "A bookmark of a webbrowser. Use nie:title for the name/label, nie:contentCreated to represent the date when the user added the bookmark, and nie:contentLastModified for modifications. nfo:bookmarks to store the link." ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nie:InformationElement .
 
 nfo:DeletedResource a rdfs:Class ;
@@ -259,7 +258,7 @@ nfo:Website a rdfs:Class ;
 nfo:WebHistory a rdfs:Class ;
 	rdfs:label "Web History" ;
 	rdfs:comment "A web history entry" ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nie:InformationElement .
 
 nfo:count a rdf:Property ;
@@ -347,7 +346,6 @@ nfo:heading a rdf:Property ;
 	rdfs:label "Heading" ;
 	rdfs:comment "Specifies the direction of travelling while capturing image/video. The range of values from 0.00 to 359.99 (where 0 is due North, 90 is East, 180 South and 270 is West)";
 	nrl:maxCardinality 1;
-	tracker:writeback true ;
 	rdfs:domain nfo:Visual ;
 	rdfs:range xsd:double .
 
@@ -441,8 +439,7 @@ nfo:hasMediaFileListEntry a rdf:Property ;
 	rdfs:label "hasMediaFileListEntry" ;
 	rdfs:comment "This property is intended to point to an RDF list of MediaFiles." ;
 	rdfs:domain nfo:MediaList ;
-	rdfs:range nfo:MediaFileListEntry ;
-	tracker:writeback true .
+	rdfs:range nfo:MediaFileListEntry .
 
 # Propose in nepomuk
 nfo:entryCounter a rdf:Property ;
@@ -450,16 +447,14 @@ nfo:entryCounter a rdf:Property ;
 	rdfs:comment "Number of entries in the list. Optimize some common queries" ;
 	rdfs:domain nfo:MediaList ;
 	rdfs:range xsd:integer ;
-	nrl:maxCardinality 1 ;
-	tracker:writeback true .
+	nrl:maxCardinality 1 .
 
 nfo:listDuration a rdf:Property ;
 	rdfs:label "List duration" ;
 	rdfs:comment "Sum of the duration of all items in the list. Optimize some common queries. In seconds";
 	rdfs:domain nfo:MediaList ;
 	rdfs:range xsd:integer ;
-	nrl:maxCardinality 1 ;
-	tracker:writeback true .
+	nrl:maxCardinality 1 .
 
 # Propose in nepomuk
 nfo:listPosition a rdf:Property ;
@@ -467,8 +462,7 @@ nfo:listPosition a rdf:Property ;
 	rdfs:comment "Position of an entry in a list. Double, to optimize the poor insertions" ;
  	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:MediaFileListEntry ;
-	rdfs:range xsd:double ;
-	tracker:writeback true .
+	rdfs:range xsd:double .
 
 
 # Propose in nepomuk
@@ -478,8 +472,7 @@ nfo:entryUrl a rdf:Property ;
 	rdfs:comment "URL to the element in certain position of the list" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:MediaFileListEntry ;
-	rdfs:range xsd:string ;
-	tracker:writeback true .
+	rdfs:range xsd:string .
 
 nfo:height a rdf:Property ;
 	rdfs:label "height" ;
@@ -501,9 +494,9 @@ nfo:fileName a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:FileDataObject ;
 	rdfs:range xsd:string ;
-	tracker:indexed true ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 7 .
+	nrl:indexed true ;
+	nrl:fulltextIndexed true ;
+	nrl:weight 7 .
 
 nfo:encoding a rdf:Property ;
 	rdfs:label "encoding" ;
@@ -562,8 +555,8 @@ nfo:tableOfContents a rdf:Property ;
         nrl:maxCardinality 1 ;
         rdfs:domain nfo:Document ;
         rdfs:range xsd:string ;
-       	tracker:fulltextIndexed true ;
-	tracker:weight 5 .
+       	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 # Not in upstream Nepomuk. Pending to submit there.
 nfo:Note a rdfs:Class ;
@@ -637,8 +630,8 @@ nfo:fontFamily a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:Font ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 5 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 nfo:frontChannels a rdf:Property ;
 	rdfs:label "frontChannels" ;
@@ -721,7 +714,7 @@ nfo:fileLastModified a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:FileDataObject ;
 	rdfs:range xsd:dateTime ;
-	tracker:indexed true .
+	nrl:indexed true .
 
 nfo:containsBookmark a rdf:Property ;
 	rdfs:label "contains bookmark" ;
@@ -801,8 +794,8 @@ nfo:genre a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:Media ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 4 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 4 .
 
 nfo:gain a rdf:Property ;
 	rdfs:label "Gain" ;
@@ -852,7 +845,7 @@ nfo:domain a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:WebHistory ;
 	rdfs:range xsd:string ;
-	tracker:weight 3 .
+	nrl:weight 3 .
 
 # Addtion to nepomuk
 nfo:uri a rdf:Property ;
@@ -860,7 +853,7 @@ nfo:uri a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:WebHistory ;
 	rdfs:range xsd:string ;
-	tracker:weight 5 .
+	nrl:weight 5 .
 
 # Addition to nepomuk
 nfo:ImageCategory a rdfs:Class ;
@@ -889,7 +882,7 @@ nfo:SoftwareApplication a rdfs:Class ;
 	rdfs:label "Application" ;
 	rdfs:comment "An application" ;
 	rdfs:subClassOf nfo:Software ;
-	tracker:notify true .
+	nrl:notify true .
 
 # Addition to nepomuk
 nfo:softwareIcon a rdf:Property ;
@@ -906,7 +899,7 @@ nfo:softwareCmdLine a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:Software ;
 	rdfs:range xsd:string ;
-	tracker:weight 3 .
+	nrl:weight 3 .
 
 # Addition to nepomuk
 nfo:Orientation a rdfs:Class ;
@@ -927,8 +920,7 @@ nfo:orientation-left a nfo:Orientation .
 nfo:orientation a rdf:Property ;
 	rdfs:domain nfo:Image ;
 	rdfs:range nfo:Orientation ;
-	nrl:maxCardinality 1 ;
-	tracker:writeback true .
+	nrl:maxCardinality 1 .
 
 # Addition to nepomuk
 nfo:mediaListEntry a rdf:Property ;

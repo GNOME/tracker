@@ -1,5 +1,5 @@
 ex:name a rdf:Property;
         rdfs:domain ex:Mammal;
         rdfs:range xsd:string;
-        tracker:fulltextIndexed true;
-        tracker:weight 10.
+        nrl:fulltextIndexed true;
+        nrl:weight 10.

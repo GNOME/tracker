@@ -3,26 +3,24 @@
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-nao: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "nao" ;
-	tracker:lastModified "2010-12-25T16:00:00Z" .
+nao: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "nao" ;
+	nrl:lastModified "2010-12-25T16:00:00Z" .
 
 nao:Tag a rdfs:Class ;
 	rdfs:comment "Represents a generic tag" ;
 	rdfs:subClassOf rdfs:Resource ;
-	tracker:notify true .
+	nrl:notify true .
 
 nao:prefLabel a rdf:Property ;
 	rdfs:comment "A preferred label for a resource" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nao:Tag ;
 	rdfs:range xsd:string ;
-	tracker:writeback true ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 10 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 10 .
 
 nao:description a rdf:Property ;
 	nrl:maxCardinality 1 ;
@@ -30,15 +28,14 @@ nao:description a rdf:Property ;
 	rdfs:range xsd:string ;
 	rdfs:subPropertyOf rdfs:comment ;
 	rdfs:comment "In the context of the social semantic desktop the textual annotation provided via rdfs:comment is meant for technical users, the textual annotation here is aimed at average users and is meant to be used to define custom descriptions of resources on the desktop" ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 3 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 3 .
 
 nao:hasTag a rdf:Property ;
 	rdfs:comment "Defines an existing tag for a resource" ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range rdfs:Resource ;
-	tracker:writeback true ;
-	tracker:indexed true .
+	nrl:indexed true .
 
 nao:identifier a rdf:Property ;
 	rdfs:comment "Defines a generic identifier for a resource" ;
