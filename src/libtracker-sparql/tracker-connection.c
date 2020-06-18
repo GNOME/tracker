@@ -245,7 +245,6 @@ tracker_sparql_connection_query_finish (TrackerSparqlConnection  *connection,
  * tracker_sparql_connection_update:
  * @connection: a #TrackerSparqlConnection
  * @sparql: string containing the SPARQL update query
- * @priority: the priority for the operation
  * @cancellable: a #GCancellable used to cancel the operation
  * @error: #GError for error reporting.
  *
@@ -259,7 +258,6 @@ tracker_sparql_connection_query_finish (TrackerSparqlConnection  *connection,
 void
 tracker_sparql_connection_update (TrackerSparqlConnection  *connection,
                                   const gchar              *sparql,
-                                  gint                      priority,
                                   GCancellable             *cancellable,
                                   GError                  **error)
 {
@@ -270,7 +268,6 @@ tracker_sparql_connection_update (TrackerSparqlConnection  *connection,
 
 	return TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->update (connection,
 	                                                                 sparql,
-	                                                                 priority,
 	                                                                 cancellable,
 	                                                                 error);
 }
@@ -426,7 +423,6 @@ tracker_sparql_connection_update_array_finish (TrackerSparqlConnection  *connect
  * tracker_sparql_connection_update_blank:
  * @connection: a #TrackerSparqlConnection
  * @sparql: string containing the SPARQL update query
- * @priority: the priority for the operation
  * @cancellable: a #GCancellable used to cancel the operation
  * @error: #GError for error reporting.
  *
@@ -443,7 +439,6 @@ tracker_sparql_connection_update_array_finish (TrackerSparqlConnection  *connect
 GVariant *
 tracker_sparql_connection_update_blank (TrackerSparqlConnection  *connection,
                                         const gchar              *sparql,
-                                        gint                      priority,
                                         GCancellable             *cancellable,
                                         GError                  **error)
 {
@@ -454,7 +449,6 @@ tracker_sparql_connection_update_blank (TrackerSparqlConnection  *connection,
 
 	return TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->update_blank (connection,
 	                                                                       sparql,
-	                                                                       priority,
 	                                                                       cancellable,
 	                                                                       error);
 }
