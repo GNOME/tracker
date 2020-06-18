@@ -475,7 +475,7 @@ class StoreHelper():
         return result
 
     def update(self, update_sparql):
-        self.conn.update(update_sparql, 0, None)
+        self.conn.update(update_sparql, None)
 
     def count_instances(self, ontology_class):
         QUERY = """

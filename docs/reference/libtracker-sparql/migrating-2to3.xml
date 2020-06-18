@@ -190,4 +190,12 @@ SELECT ?url ?tag {
       Use a dedicated DBus TrackerSparqlConnection to the specific domain.
     </para>
   </section>
+  <section>
+    <title>No priority argument on SPARQL updates</title>
+    <para>
+      All TrackerSparqlConnection updates API has been dropped the priority
+      argument. Updates are processed sequentially, and asynchronous tasks
+      are handled by the main loop with the default priority.
+    </para>
+  </section>
 </chapter>

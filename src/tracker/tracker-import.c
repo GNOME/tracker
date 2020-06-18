@@ -110,7 +110,7 @@ import_run (void)
 		uri = g_file_get_uri (file);
 		update = g_strdup_printf ("LOAD <%s>", uri);
 
-		tracker_sparql_connection_update (connection, update, 0, NULL, &error);
+		tracker_sparql_connection_update (connection, update, NULL, &error);
 
 		if (error) {
 			g_printerr ("%s, %s\n",
