@@ -186,7 +186,7 @@
       <para>
 	It may be the case that SPARQL queries performed on the endpoint are
 	known to match, sort, or filter on certain properties more often than others.
-	In this case, the ontology may use tracker:domainIndex in the class definition:
+	In this case, the ontology may use nrl:domainIndex in the class definition:
       </para>
       <programlisting><xi:include href="./examples/ontologies/defining-indexes-1.txt" parse="text"/></programlisting>
       <para>
@@ -202,12 +202,12 @@
       <title>Defining full-text search properties</title>
       <para>
 	Tracker provides nonstandard full-text search capabilities, in order to use
-	these, the string properties can use tracker:fulltextIndexed:
+	these, the string properties can use nrl:fulltextIndexed:
       </para>
       <programlisting><xi:include href="./examples/ontologies/defining-fts-indexes-1.txt" parse="text"/></programlisting>
       <para>
 	Weighting can also be applied, so certain properties rank higher than others
-	in full-text search queries. With tracker:fulltextIndexed in place, sparql
+	in full-text search queries. With nrl:fulltextIndexed in place, sparql
 	queries may use full-text search capabilities:
       </para>
       <programlisting><xi:include href="./examples/ontologies/defining-fts-indexes-2.rq" parse="text"/></programlisting>
@@ -277,13 +277,13 @@
       </variablelist>
     </formalpara>
     <formalpara>
-      <title><systemitem>Adding and removing tracker:domainIndex from a class.</systemitem></title>
+      <title><systemitem>Adding and removing nrl:domainIndex from a class.</systemitem></title>
     </formalpara>
     <formalpara>
-      <title><systemitem>Adding and removing tracker:fulltextIndexed from a property.</systemitem></title>
+      <title><systemitem>Adding and removing nrl:fulltextIndexed from a property.</systemitem></title>
     </formalpara>
     <formalpara>
-      <title><systemitem>Changing the tracker:weight on a property.</systemitem></title>
+      <title><systemitem>Changing the nrl:weight on a property.</systemitem></title>
     </formalpara>
     <formalpara>
       <title><systemitem>Removing nrl:maxCardinality from a property.</systemitem></title>

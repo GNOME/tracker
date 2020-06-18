@@ -1,3 +1,4 @@
+@prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -6,30 +7,29 @@
 @prefix f: <http://example.org/ns3#> .
 @prefix b: <http://example.org/b2#> .
 @prefix bz: <http://example.org/b2> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix bar: <bar#> .
 
-foo: a tracker:Namespace ;
-	tracker:prefix "foo" .
+foo: a nrl:Namespace ;
+	nrl:prefix "foo" .
 
-: a tracker:Namespace ;
-	tracker:prefix "" .
+: a nrl:Namespace ;
+	nrl:prefix "" .
 
 foo: a rdf:Property ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range rdfs:Resource .
 
-b: a tracker:Namespace ;
-	tracker:prefix "b" .
+b: a nrl:Namespace ;
+	nrl:prefix "b" .
 
-bar: a tracker:Namespace ;
-	tracker:prefix "bar" .
+bar: a nrl:Namespace ;
+	nrl:prefix "bar" .
 
-bz: a tracker:Namespace ;
-	tracker:prefix "bz" .
+bz: a nrl:Namespace ;
+	nrl:prefix "bz" .
 
-f: a tracker:Namespace ;
-	tracker:prefix "a" .
+f: a nrl:Namespace ;
+	nrl:prefix "a" .
 
 <http://other.example.org/ns#>  a rdf:Property ;
 	rdfs:domain rdfs:Resource ;

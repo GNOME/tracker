@@ -155,9 +155,9 @@ class OntologyChangeTestTemplate (ut.TestCase):
         def get_ontology_date(ontology):
             with open(ontology, 'r') as f:
                 for line in f:
-                    if "tracker:lastModified" in line:
+                    if "nrl:lastModified" in line:
                         getmodtime = re.compile(
-                            'tracker:lastModified\ \"' + ISO9601_REGEX + '\"')
+                            'nrl:lastModified\ \"' + ISO9601_REGEX + '\"')
                         modtime_match = getmodtime.search(line)
 
                         if (modtime_match):
@@ -172,7 +172,7 @@ class OntologyChangeTestTemplate (ut.TestCase):
         second_date = get_ontology_date(
             self.ontology_path(second).joinpath("91-test.ontology"))
         if first_date >= second_date:
-            self.fail("tracker:lastModified in '%s' is not more recent in the second ontology" % (
+            self.fail("nrl:lastModified in '%s' is not more recent in the second ontology" % (
                 "91-test.ontology"))
 
 
@@ -365,7 +365,7 @@ class PropertyMaxCardinalityNto1 (OntologyChangeTestTemplate):
 
 class ClassNotifySet (OntologyChangeTestTemplate):
     """
-    Set tracker:notify to true in a class and check there is no data loss
+    Set nrl:notify to true in a class and check there is no data loss
     """
 
     def test_property_notify_set(self):
@@ -382,7 +382,7 @@ class ClassNotifySet (OntologyChangeTestTemplate):
 
     def validate_status(self):
         result = self.tracker.query(
-            "SELECT ?notify WHERE { test:A tracker:notify ?notify}")
+            "SELECT ?notify WHERE { test:A nrl:notify ?notify}")
         self.assertEqual(str(result[0][0]), "true")
 
         result = self.tracker.query("SELECT ?u WHERE { ?u a test:A. }")
@@ -391,7 +391,7 @@ class ClassNotifySet (OntologyChangeTestTemplate):
 
 class ClassNotifyUnset (OntologyChangeTestTemplate):
     """
-    Set tracker:notify to true in a class and check there is no data loss
+    Set nrl:notify to true in a class and check there is no data loss
     """
 
     def test_property_notify_set(self):
@@ -408,7 +408,7 @@ class ClassNotifyUnset (OntologyChangeTestTemplate):
 
     def validate_status(self):
         result = self.tracker.query(
-            "SELECT ?notify WHERE { test:A tracker:notify ?notify}")
+            "SELECT ?notify WHERE { test:A nrl:notify ?notify}")
         if (len(result) == 1):
             # Usually is (none) but it was "true" before so now has value.
             self.assertEqual(result[0][0], "false")
@@ -421,7 +421,7 @@ class ClassNotifyUnset (OntologyChangeTestTemplate):
 
 class PropertyIndexedSet (OntologyChangeTestTemplate):
     """
-    Set tracker:indexed true to single and multiple valued properties.
+    Set nrl:indexed true to single and multiple valued properties.
     Check that instances and content of the property are still in the DB
     """
 
@@ -446,7 +446,7 @@ class PropertyIndexedSet (OntologyChangeTestTemplate):
     def validate_status(self):
         # Check ontology and instance for the single valued property
         result = self.tracker.query(
-            "SELECT ?indexed WHERE { test:a_string tracker:indexed ?indexed}")
+            "SELECT ?indexed WHERE { test:a_string nrl:indexed ?indexed}")
         self.assertEqual(str(result[0][0]), "true")
 
         result = self.tracker.query("SELECT ?content WHERE { <%s> a test:A; test:a_string ?content. }"
@@ -455,7 +455,7 @@ class PropertyIndexedSet (OntologyChangeTestTemplate):
 
         # Check ontology and instance for the multiple valued property
         result = self.tracker.query(
-            "SELECT ?indexed WHERE { test:a_n_cardinality tracker:indexed ?indexed}")
+            "SELECT ?indexed WHERE { test:a_n_cardinality nrl:indexed ?indexed}")
         self.assertEqual(str(result[0][0]), "true")
 
         result = self.tracker.query("SELECT ?content WHERE { <%s> a test:A; test:a_n_cardinality ?content. }"
@@ -465,7 +465,7 @@ class PropertyIndexedSet (OntologyChangeTestTemplate):
 
 class PropertyIndexedUnset (OntologyChangeTestTemplate):
     """
-    tracker:indexed property from true to false in single and multiple valued properties.
+    nrl:indexed property from true to false in single and multiple valued properties.
     Check that instances and content of the property are still in the DB.
     """
 
@@ -489,12 +489,12 @@ class PropertyIndexedUnset (OntologyChangeTestTemplate):
 
     def validate_status(self):
         #
-        # NOTE: tracker:indexed can be 'false' or None. In both cases is fine.
+        # NOTE: nrl:indexed can be 'false' or None. In both cases is fine.
         #
 
         # Check ontology and instance for the single valued property
         result = self.tracker.query(
-            "SELECT ?indexed WHERE { test:a_string tracker:indexed ?indexed}")
+            "SELECT ?indexed WHERE { test:a_string nrl:indexed ?indexed}")
         self.assertEqual(str(result[0][0]), "false")
 
         result = self.tracker.query("SELECT ?content WHERE { <%s> a test:A; test:a_string ?content. }"
@@ -503,7 +503,7 @@ class PropertyIndexedUnset (OntologyChangeTestTemplate):
 
         # Check ontology and instance for the multiple valued property
         result = self.tracker.query(
-            "SELECT ?indexed WHERE { test:a_n_cardinality tracker:indexed ?indexed}")
+            "SELECT ?indexed WHERE { test:a_n_cardinality nrl:indexed ?indexed}")
         self.assertEqual(str(result[0][0]), "false")
 
         result = self.tracker.query("SELECT ?content WHERE { <%s> a test:A; test:a_n_cardinality ?content. }"
@@ -666,7 +666,7 @@ class OntologyRemovePropertyTest (OntologyChangeTestTemplate):
 
 class DomainIndexAddTest (OntologyChangeTestTemplate):
     """
-    Add tracker:domainIndex to a class and check there is no data loss.
+    Add nrl:domainIndex to a class and check there is no data loss.
     """
     @ut.skip("Fails with: basic-future/91-test.ontology: Unsupported ontology change for test:b_property: can't change rdfs:domain (old=test:A, attempted new=test:B) ")
     def test_domain_index_add(self):
@@ -692,11 +692,11 @@ class DomainIndexAddTest (OntologyChangeTestTemplate):
     def validate_status(self):
         # Check the ontology
         has_domainIndex = self.tracker.ask(
-            "ASK { test:B tracker:domainIndex test:a_string }")
+            "ASK { test:B nrl:domainIndex test:a_string }")
         self.assertTrue(has_domainIndex)
 
         has_domainIndex = self.tracker.ask(
-            "ASK { test:C tracker:domainIndex test:a_n_cardinality }")
+            "ASK { test:C nrl:domainIndex test:a_n_cardinality }")
         self.assertTrue(has_domainIndex)
 
         # Check the data
@@ -711,7 +711,7 @@ class DomainIndexAddTest (OntologyChangeTestTemplate):
 
 class DomainIndexRemoveTest (OntologyChangeTestTemplate):
     """
-    Remove tracker:domainIndex to a class and check there is no data loss.
+    Remove nrl:domainIndex to a class and check there is no data loss.
     """
 
     def test_domain_index_remove(self):
@@ -737,11 +737,11 @@ class DomainIndexRemoveTest (OntologyChangeTestTemplate):
     def validate_status(self):
         # Check the ontology
         has_domainIndex = self.tracker.ask(
-            "ASK { test:B tracker:domainIndex test:a_string }")
+            "ASK { test:B nrl:domainIndex test:a_string }")
         self.assertFalse(has_domainIndex)
 
         has_domainIndex = self.tracker.ask(
-            "ASK { test:C tracker:domainIndex test:a_n_cardinality }")
+            "ASK { test:C nrl:domainIndex test:a_n_cardinality }")
         self.assertFalse(has_domainIndex)
 
         # Check the data

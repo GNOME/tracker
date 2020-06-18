@@ -1,31 +1,31 @@
+@prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-xsd: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "xsd" ;
-	tracker:lastModified "2010-02-16T11:00:00Z" .
+xsd: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "xsd" ;
+	nrl:lastModified "2010-02-16T11:00:00Z" .
 
 xsd:string a rdfs:Class ;
 	rdfs:comment "The type of string properties." ;
-	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#string" .
+	nrl:classSpecification "https://www.w3.org/TR/xmlschema-2/#string" .
 
 xsd:boolean a rdfs:Class ;
 	rdfs:comment "The type of true / false properties." ;
-	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#boolean" .
+	nrl:classSpecification "https://www.w3.org/TR/xmlschema-2/#boolean" .
 
 xsd:integer a rdfs:Class ;
 	rdfs:comment "The type of integer properties." ;
-	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#integer" .
+	nrl:classSpecification "https://www.w3.org/TR/xmlschema-2/#integer" .
 
 xsd:double a rdfs:Class ;
 	rdfs:comment "The type of floating point properties." ;
-	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#double" .
+	nrl:classSpecification "https://www.w3.org/TR/xmlschema-2/#double" .
 
 xsd:date a rdfs:Class ;
 	rdfs:comment "The type of date properties." ;
-	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#date" .
+	nrl:classSpecification "https://www.w3.org/TR/xmlschema-2/#date" .
 
 xsd:dateTime a rdfs:Class ;
 	rdfs:comment "The type of date-time properties." ;
-	tracker:classSpecification "https://www.w3.org/TR/xmlschema-2/#dateTime" .
+	nrl:classSpecification "https://www.w3.org/TR/xmlschema-2/#dateTime" .

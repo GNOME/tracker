@@ -265,7 +265,7 @@ export_run_default (void)
 	        "        ?u ?p ?v "
 	        "        FILTER NOT EXISTS { ?u a rdf:Property } "
 	        "        FILTER NOT EXISTS { ?u a rdfs:Class } "
-	        "        FILTER NOT EXISTS { ?u a tracker:Namespace } "
+	        "        FILTER NOT EXISTS { ?u a nrl:Namespace } "
 	        "    } "
 	        "} ORDER BY ?g ?u";
 

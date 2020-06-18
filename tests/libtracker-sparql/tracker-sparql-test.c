@@ -49,11 +49,11 @@ static GCancellable *cancellables[N_QUERIES] = { NULL, };
  */
 static const gchar *queries[N_QUERIES] = {
 	/* #1 */
-	"SELECT ?p WHERE { ?p tracker:indexed true }",
+	"SELECT ?p WHERE { ?p nrl:indexed true }",
 	/* #2 */
-	"SELECT ?prefix ?ns WHERE { ?ns a tracker:Namespace ; tracker:prefix ?prefix }",
+	"SELECT ?prefix ?ns WHERE { ?ns a nrl:Namespace ; nrl:prefix ?prefix }",
 	/* #3 */
-	"SELECT ?p WHERE { ?p tracker:fulltextIndexed true }",
+	"SELECT ?p WHERE { ?p nrl:fulltextIndexed true }",
 };
 
 TrackerSparqlConnection *

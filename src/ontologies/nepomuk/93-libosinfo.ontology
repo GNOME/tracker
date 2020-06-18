@@ -4,12 +4,11 @@
 @prefix osinfo: <http://tracker.api.gnome.org/ontology/v3/osinfo#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-osinfo: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "osinfo" ;
-	tracker:lastModified "2011-12-16T08:00:00Z" .
+osinfo: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "osinfo" ;
+	nrl:lastModified "2011-12-16T08:00:00Z" .
 
 osinfo:Installer a rdfs:Class ;
 	rdfs:label "Operating System Installer" ;

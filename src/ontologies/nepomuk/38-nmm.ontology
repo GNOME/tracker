@@ -6,25 +6,24 @@
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-nmm: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "nmm" ;
-	tracker:lastModified "2014-09-19T11:05:00Z" .
+nmm: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "nmm" ;
+	nrl:lastModified "2014-09-19T11:05:00Z" .
 
 nmm:MusicPiece a rdfs:Class ;
 	rdfs:label "Music" ;
 	rdfs:comment "Used to assign music-specific properties such as BPM to video and audio" ;
-	tracker:notify true ;
-	tracker:domainIndex nie:title ;
+	nrl:notify true ;
+	nrl:domainIndex nie:title ;
 	rdfs:subClassOf nfo:Media .
 
 nmm:MusicAlbum a rdfs:Class ;
 	rdfs:label "Music album" ;
 	rdfs:comment "The music album as provided by the publisher. Not to be confused with media lists or collections" ;
-	tracker:notify true ;
-	tracker:domainIndex nie:title ;
+	nrl:notify true ;
+	nrl:domainIndex nie:title ;
 	rdfs:subClassOf nfo:MediaList .
 
 # Addition to nepomuk
@@ -48,7 +47,7 @@ nmm:SynchronizedText a rdfs:Class ;
 # Addition to nepomuk
 nmm:Video a rdfs:Class ;
 	rdfs:label "Video" ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nfo:Video ;
 	rdfs:subClassOf nfo:Audio .
 
@@ -56,14 +55,14 @@ nmm:Video a rdfs:Class ;
 nmm:Artist a rdfs:Class ;
 	rdfs:label "Artist" ;
 	rdfs:comment "An artist." ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nie:InformationElement , nco:Role .
 
 # Addition to nepomuk
 nmm:Playlist a rdfs:Class ;
 	rdfs:label "Media playlist" ;
 	rdfs:comment "Specific class to split MediaList in Albums and playlists." ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nfo:MediaList .
 
 nmm:Movie a rdfs:Class ;
@@ -94,9 +93,9 @@ nmm:artistName a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Artist ;
 	rdfs:range xsd:string ;
-	tracker:indexed true ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 6 .
+	nrl:indexed true ;
+	nrl:fulltextIndexed true ;
+	nrl:weight 6 .
 
 nmm:musicAlbum a rdf:Property ;
 	rdfs:label "album" ;
@@ -105,9 +104,8 @@ nmm:musicAlbum a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicPiece ;
 	rdfs:range nmm:MusicAlbum ;
-	tracker:writeback true ;
-	tracker:indexed true ;
-	tracker:weight 6 .
+	nrl:indexed true ;
+	nrl:weight 6 .
 
 # Addition to nepomuk
 nmm:musicAlbumDisc a rdf:Property ;
@@ -125,7 +123,7 @@ nmm:albumArtist a rdf:Property ;
 	rdfs:comment "main artists of the album" ;
 	rdfs:domain nmm:MusicAlbum ;
 	rdfs:range nmm:Artist ;
-	tracker:weight 6 .
+	nrl:weight 6 .
 
 nmm:beatsPerMinute a rdf:Property ;
 	rdfs:label "Beats per minute" ;
@@ -148,9 +146,8 @@ nmm:performer a rdf:Property ;
 	rdfs:subPropertyOf nco:contributor ;
 	rdfs:domain nmm:MusicPiece ;
 	rdfs:range nmm:Artist ;
-	tracker:weight 4 ;
-	tracker:writeback true ;
-	tracker:indexed true .
+	nrl:weight 4 ;
+	nrl:indexed true .
 
 nmm:composer a rdf:Property ;
 	rdfs:label "Composer" ;
@@ -159,7 +156,7 @@ nmm:composer a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicPiece ;
 	rdfs:range nmm:Artist ;
-	tracker:weight 4 .
+	nrl:weight 4 .
 
 nmm:lyricist a rdf:Property ;
 	rdfs:label "Lyricist" ;
@@ -168,7 +165,7 @@ nmm:lyricist a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:MusicPiece ;
 	rdfs:range nmm:Artist ;
-	tracker:weight 4 .
+	nrl:weight 4 .
 
 # Addition to nepomuk
 nmm:lyrics a rdf:Property ;
@@ -284,22 +281,22 @@ nmm:category a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Video ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 4 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 4 .
 
 nmm:genre a rdf:Property ;
 	rdfs:label "Genre" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nfo:Media ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 4 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 4 .
 
 nmm:director a rdf:Property ;
 	rdfs:label "Director" ;
 	rdfs:domain nmm:Video ;
 	rdfs:range nmm:Artist ;
-	tracker:weight 4 .
+	nrl:weight 4 .
 
 # Addition to nepomuk, it has nmm:producer though
 nmm:producedBy a rdf:Property ;
@@ -307,14 +304,14 @@ nmm:producedBy a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Video ;
 	rdfs:range nmm:Artist ;
-	tracker:weight 3 .
+	nrl:weight 3 .
 
 # Addition to nepomuk
 nmm:leadActor a rdf:Property ;
 	rdfs:label "Lead actor" ;
 	rdfs:domain nmm:Video ;
 	rdfs:range nmm:Artist ;
-	tracker:weight 4 .
+	nrl:weight 4 .
 
 # Addition to nepomuk
 nmm:hasSubtitle a rdf:Property ;
@@ -328,7 +325,7 @@ nmm:subtitle a rdf:Property ;
 	rdfs:label "Subtitle file relevant for the video" ;
 	rdfs:domain nmm:Video ;
 	rdfs:range nmm:SynchronizedText ;
-	tracker:weight 5 .
+	nrl:weight 5 .
 
 # Addition to nepomuk
 nmm:isContentEncrypted a rdf:Property ;
@@ -350,14 +347,14 @@ nmm:skipCounter a rdf:Property ;
 nmm:ImageList a rdfs:Class ;
 	rdfs:subClassOf nfo:MediaList ;
 	rdfs:label "Image album" ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:comment "An album of images" .
 
 # Addition to nepomuk
 nmm:Photo a rdfs:Class ;
 	rdfs:subClassOf nfo:Image ;
 	rdfs:label "Photo" ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:comment "A photo" .
 
 # Properties
@@ -368,8 +365,7 @@ nmm:exposureTime a rdf:Property ;
 	rdfs:comment "Exposure time of the photo" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Photo ;
-	rdfs:range xsd:double ;
-	tracker:writeback true .
+	rdfs:range xsd:double .
 
 nmm:Flash a rdfs:Class ;
 	rdfs:label "Flash values" ;
@@ -384,32 +380,28 @@ nmm:flash a rdf:Property ;
 	rdfs:comment "Specifies whether flash was used" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Photo ;
-	rdfs:range nmm:Flash ;
-	tracker:writeback true .
+	rdfs:range nmm:Flash .
 
 nmm:fnumber a rdf:Property ;
 	rdfs:label "F number" ;
 	rdfs:comment "The diameter of the entrance pupil in terms of the focal length of the lens" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Photo ;
-	rdfs:range xsd:double ;
-	tracker:writeback true .
+	rdfs:range xsd:double .
 
 nmm:focalLength a rdf:Property ;
 	rdfs:label "Focal length" ;
 	rdfs:comment "A measure of how strongly the lens converges light" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Photo ;
-	rdfs:range xsd:double ;
-	tracker:writeback true .
+	rdfs:range xsd:double .
 
 nmm:isoSpeed a rdf:Property ;
 	rdfs:label "ISO speed" ;
 	rdfs:comment "Measure of a photographic film's sensitivity to light as ISO value" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Photo ;
-	rdfs:range xsd:double ;
-	tracker:writeback true .
+	rdfs:range xsd:double .
 
 nmm:MeteringMode a rdfs:Class ;
 	rdfs:label "Metering mode values" ;
@@ -428,8 +420,7 @@ nmm:meteringMode a rdf:Property ;
 	rdfs:comment "Metering mode refers to the way in which a camera determines the exposure." ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Photo ;
-	rdfs:range nmm:MeteringMode ;
-	tracker:writeback true .
+	rdfs:range nmm:MeteringMode .
 
 nmm:WhiteBalance a rdfs:Class ;
 	rdfs:label "White balance" ;
@@ -442,8 +433,7 @@ nmm:white-balance-manual a nmm:WhiteBalance .
 nmm:whiteBalance a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nmm:Photo ;
-	rdfs:range nmm:WhiteBalance ;
-	tracker:writeback true .
+	rdfs:range nmm:WhiteBalance .
 
 nmm:isCropped a rdf:Property ;
 	nrl:maxCardinality 1 ;
@@ -460,7 +450,7 @@ nmm:RadioStation a rdfs:Class ;
 	rdfs:label "Radio station" ;
 	rdfs:comment "The Radio station in user terms: BBC3, Radio5, YLEX, ... It is linked with 1 or more carriers (different FM frenquencies, online sources in different qualities, etc.). Some RDS information is represented with nie properties, nie:identifier for PI, nie:title for PS" ;
 	rdfs:subClassOf nfo:Audio ;
-	tracker:notify true .
+	nrl:notify true .
 
 nmm:radioIcon a rdf:Property ;
 	rdfs:label "Radio station icon" ;

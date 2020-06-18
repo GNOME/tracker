@@ -308,8 +308,8 @@ check_result (TrackerDBCursor *cursor,
 				 * test reproduceability in DESCRIBE and other unrestricted
 				 * queries.
 				 */
-				if (g_strcmp0 (str, TRACKER_PREFIX_TRACKER "modified") == 0 ||
-				    g_strcmp0 (str, TRACKER_PREFIX_TRACKER "added") == 0) {
+				if (g_strcmp0 (str, TRACKER_PREFIX_NRL "modified") == 0 ||
+				    g_strcmp0 (str, TRACKER_PREFIX_NRL "added") == 0) {
 					g_string_free (row_str, TRUE);
 					row_str = NULL;
 					break;

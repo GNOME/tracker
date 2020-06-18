@@ -494,7 +494,7 @@ tracker_data_update_get_next_modseq (TrackerData *data)
 	temp_iface = tracker_data_manager_get_writable_db_interface (data->manager);
 
 	stmt = tracker_db_interface_create_statement (temp_iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &error,
-	                                              "SELECT MAX(\"tracker:modified\") AS A FROM \"rdfs:Resource\"");
+	                                              "SELECT MAX(\"nrl:modified\") AS A FROM \"rdfs:Resource\"");
 
 	if (stmt) {
 		cursor = tracker_db_statement_start_cursor (stmt, &error);
@@ -634,7 +634,7 @@ cache_ensure_table (TrackerData *data,
 	TrackerDataUpdateBufferTable *table;
 
 	if (!data->resource_buffer->modified) {
-		/* first modification of this particular resource, update tracker:modified */
+		/* first modification of this particular resource, update nrl:modified */
 
 		GValue gvalue = { 0 };
 
@@ -642,7 +642,7 @@ cache_ensure_table (TrackerData *data,
 
 		g_value_init (&gvalue, G_TYPE_INT64);
 		g_value_set_int64 (&gvalue, get_transaction_modseq (data));
-		cache_insert_value (data, "rdfs:Resource", "tracker:modified",
+		cache_insert_value (data, "rdfs:Resource", "nrl:modified",
 		                    &gvalue, FALSE, FALSE, FALSE);
 	}
 
@@ -986,7 +986,7 @@ tracker_data_resource_buffer_flush (TrackerData                      *data,
 				g_string_append (sql, " (ID");
 
 				if (strcmp (table_name, "rdfs:Resource") == 0) {
-					g_string_append (sql, ", \"tracker:added\", \"tracker:modified\"");
+					g_string_append (sql, ", \"nrl:added\", \"nrl:modified\"");
 					g_string_append (values_sql, ", ?, ?");
 				}
 			} else {

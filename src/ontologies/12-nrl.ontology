@@ -1,12 +1,11 @@
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-nrl: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "nrl" ;
-	tracker:lastModified "2010-02-16T11:00:00Z" .
+nrl: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "nrl" ;
+	nrl:lastModified "2010-02-16T11:00:00Z" .
 
 nrl:InverseFunctionalProperty a rdfs:Class ;
 	rdfs:comment "A marker class to identify inverse functional properties" .
@@ -17,3 +16,101 @@ nrl:maxCardinality a rdf:Property ;
 	rdfs:domain rdf:Property ;
 	rdfs:range xsd:integer .
 
+nrl:Namespace a rdfs:Class ;
+	rdfs:label "Namespace" ;
+	rdfs:comment "Specifies a namespace. This is a Tracker extension" ;
+	rdfs:subClassOf rdfs:Resource .
+
+nrl:Ontology a rdfs:Class ;
+	rdfs:label "Ontology" ;
+	rdfs:comment "An ontology" ;
+	rdfs:subClassOf rdfs:Resource .
+
+nrl:lastModified a rdf:Property ;
+	rdfs:label "lastModified" ;
+	rdfs:comment "last modification date. This is a Tracker extension" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nrl:Ontology ;
+	rdfs:range xsd:dateTime .
+
+nrl:prefix a rdf:Property ;
+	rdfs:label "Base prefix of the subject namespace" ;
+	rdfs:comment "This is a Tracker extension" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain nrl:Namespace ;
+	rdfs:range xsd:string .
+
+nrl:domainIndex a rdf:Property ;
+	rdfs:label "Domain Index" ;
+	rdfs:comment "Property is a domain index for the subject class. This is a Tracker extension" ;
+	rdfs:domain rdfs:Class ;
+	rdfs:range rdf:Property .
+
+nrl:indexed a rdf:Property ;
+	rdfs:label "Indexed" ;
+	rdfs:comment "Whether a property has an index. This is a Tracker extension" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdf:Property ;
+	rdfs:range xsd:boolean .
+
+nrl:secondaryIndex a rdf:Property ;
+	rdfs:label "Secondary indexed" ;
+	rdfs:comment "Whether subject and object properties share an index. This is a Tracker extension" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdf:Property ;
+	rdfs:range rdf:Property .
+
+nrl:fulltextIndexed a rdf:Property ;
+	rdfs:label "Full-text indexed" ;
+	rdfs:comment "Whether the property is full-text indexed. This is a Tracker extension" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdf:Property ;
+	rdfs:range xsd:boolean .
+
+nrl:weight a rdf:Property ;
+	rdfs:label "Full-text index weight" ;
+	rdfs:comment "Property weight on full-text search relevance. This is a Tracker extension" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdf:Property ;
+	rdfs:range xsd:integer .
+
+nrl:added a rdf:Property ;
+	rdfs:label "Insertion time" ;
+	rdfs:comment "Time of insertion of the resource. This is a Tracker extension" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdfs:Resource ;
+	rdfs:range xsd:dateTime ;
+	nrl:indexed true .
+
+nrl:modified a rdf:Property ;
+	rdfs:label "Modification sequence" ;
+	rdfs:comment "Modification sequence number. This is a Tracker extension" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdfs:Resource ;
+	rdfs:range xsd:integer .
+
+nrl:notify a rdf:Property ;
+	rdfs:label "Event notification" ;
+	rdfs:comment "Whether resources of this class emits notifications on changes. This is a Tracker extension" ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdfs:Class ;
+	rdfs:range xsd:boolean .
+
+nrl:deprecated a rdf:Property;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdfs:Resource;
+	rdfs:range xsd:boolean;
+	rdfs:label "deprecated";
+	rdfs:comment "If this property is assigned, the subject class, property, or resource, is deprecated and should not be used in production systems any longer. It may be removed without further notice. This property is a Tracker extension" .
+
+nrl:classSpecification a rdf:Property ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdfs:Class ;
+	rdfs:range xsd:string ;
+	rdfs:comment "Link to upstream specification for an ontology class. This is a Tracker extension" .
+
+nrl:propertySpecification a rdf:Property ;
+	nrl:maxCardinality 1 ;
+	rdfs:domain rdf:Property ;
+	rdfs:range xsd:string ;
+	rdfs:comment "Link to upstream specification for an ontology property. This is a Tracker extension" .
