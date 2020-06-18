@@ -2,5 +2,5 @@ SELECT ?u {
   SERVICE <dbus:%s> {
     ?u a rdfs:Resource
   }
-  ?u tracker:indexed true
+  ?u nrl:indexed true
 }

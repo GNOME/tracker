@@ -1,13 +1,12 @@
 @prefix example: <http://example/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 
-example: a tracker:Namespace, tracker:Ontology ;
-	tracker:lastModified "2010-03-23T11:00:03Z" ;
-	tracker:prefix "example" .
+example: a nrl:Namespace, nrl:Ontology ;
+	nrl:lastModified "2010-03-23T11:00:03Z" ;
+	nrl:prefix "example" .
 
 example:A a rdfs:Class ;
 	rdfs:subClassOf rdfs:Resource .
@@ -34,4 +33,4 @@ example:single1 a rdf:Property ;
 	rdfs:domain example:A ;
 	rdfs:range xsd:integer ;
 	nrl:maxCardinality 1 ;
-	tracker:indexed true .
+	nrl:indexed true .
