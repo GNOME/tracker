@@ -85,7 +85,6 @@ struct _TrackerNotifierSubscription {
 
 struct _TrackerNotifierPrivate {
 	TrackerSparqlConnection *connection;
-	TrackerNotifierFlags flags;
 	GHashTable *subscriptions; /* guint -> TrackerNotifierSubscription */
 	GCancellable *cancellable;
 };
@@ -107,7 +106,6 @@ struct _TrackerNotifierEvent {
 enum {
 	PROP_0,
 	PROP_CONNECTION,
-	PROP_FLAGS,
 	N_PROPS
 };
 
@@ -323,12 +321,10 @@ static gchar *
 create_extra_info_query (TrackerNotifier           *notifier,
                          TrackerNotifierEventCache *cache)
 {
-	TrackerNotifierPrivate *priv;
 	GString *sparql, *filter;
 	gboolean has_elements = FALSE;
 	GSequenceIter *iter;
 
-	priv = tracker_notifier_get_instance_private (notifier);
 	filter = g_string_new (NULL);
 
 	for (iter = g_sequence_get_begin_iter (cache->sequence);
@@ -350,10 +346,7 @@ create_extra_info_query (TrackerNotifier           *notifier,
 		return NULL;
 	}
 
-	sparql = g_string_new ("SELECT ?id ");
-
-	if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
-		g_string_append (sparql, "tracker:uri(xsd:integer(?id)) ");
+	sparql = g_string_new ("SELECT ?id tracker:uri(xsd:integer(?id)) ");
 
 	g_string_append_printf (sparql,
 	                        "{ VALUES ?id { %s } } "
@@ -370,7 +363,6 @@ query_extra_info_cb (GObject      *object,
 {
 	TrackerNotifierEventCache *cache = user_data;
 	TrackerSparqlConnection *conn;
-	TrackerNotifierPrivate *priv;
 	TrackerSparqlCursor *cursor;
 	TrackerNotifierEvent *event;
 	GSequenceIter *iter;
@@ -378,7 +370,6 @@ query_extra_info_cb (GObject      *object,
 	gint col;
 	gint64 id;
 
-	priv = tracker_notifier_get_instance_private (cache->notifier);
 	conn = TRACKER_SPARQL_CONNECTION (object);
 	cursor = tracker_sparql_connection_query_finish (conn, res, &error);
 
@@ -413,8 +404,7 @@ query_extra_info_cb (GObject      *object,
 			break;
 		}
 
-		if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN)
-			event->urn = g_strdup (tracker_sparql_cursor_get_string (cursor, col++, NULL));
+		event->urn = g_strdup (tracker_sparql_cursor_get_string (cursor, col++, NULL));
 	}
 
 	g_object_unref (cursor);
@@ -445,18 +435,13 @@ void
 _tracker_notifier_event_cache_flush_events (TrackerNotifierEventCache *cache)
 {
 	TrackerNotifier *notifier = cache->notifier;
-	TrackerNotifierPrivate *priv = tracker_notifier_get_instance_private (notifier);
 
 	if (g_sequence_is_empty (cache->sequence)) {
 		_tracker_notifier_event_cache_free (cache);
 		return;
 	}
 
-	if (priv->flags & TRACKER_NOTIFIER_FLAG_QUERY_URN) {
-		tracker_notifier_query_extra_info (notifier, cache);
-	} else {
-		tracker_notifier_emit_events_in_idle (cache);
-	}
+	tracker_notifier_query_extra_info (notifier, cache);
 }
 
 static void
@@ -500,9 +485,6 @@ tracker_notifier_set_property (GObject      *object,
 	case PROP_CONNECTION:
 		priv->connection = g_value_dup_object (value);
 		break;
-	case PROP_FLAGS:
-		priv->flags = g_value_get_flags (value);
-		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -521,9 +503,6 @@ tracker_notifier_get_property (GObject    *object,
 	switch (prop_id) {
 	case PROP_CONNECTION:
 		g_value_set_object (value, priv->connection);
-		break;
-	case PROP_FLAGS:
-		g_value_set_flags (value, priv->flags);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -591,20 +570,6 @@ tracker_notifier_class_init (TrackerNotifierClass *klass)
 		                     G_PARAM_READWRITE |
 		                     G_PARAM_STATIC_STRINGS |
 		                     G_PARAM_CONSTRUCT_ONLY);
-	/**
-	 * TrackerNotifier:flags:
-	 *
-	 * Flags affecting #TrackerNotifier behavior.
-	 */
-	pspecs[PROP_FLAGS] =
-		g_param_spec_flags ("flags",
-		                    "Flags",
-		                    "Flags",
-		                    TRACKER_TYPE_NOTIFIER_FLAGS,
-		                    TRACKER_NOTIFIER_FLAG_NONE,
-		                    G_PARAM_READWRITE |
-		                    G_PARAM_STATIC_STRINGS |
-		                    G_PARAM_CONSTRUCT_ONLY);
 
 	g_object_class_install_properties (object_class, N_PROPS, pspecs);
 }

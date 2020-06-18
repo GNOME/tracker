@@ -28,7 +28,6 @@ int main (int argc, const char **argv)
   /* Run a synchronous update query */
   tracker_sparql_connection_update (connection,
                                     query,
-                                    G_PRIORITY_DEFAULT,
                                     NULL,
                                     &error);
   if (error) {

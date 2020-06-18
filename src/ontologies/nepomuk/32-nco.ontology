@@ -5,12 +5,11 @@
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-nco: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "nco" ;
-	tracker:lastModified "2016-02-28T21:30:00Z" .
+nco: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "nco" ;
+	nrl:lastModified "2016-02-28T21:30:00Z" .
 
 nco:Role a rdfs:Class ;
 	rdfs:label "Role" ;
@@ -31,13 +30,13 @@ nco:ContactGroup a rdfs:Class ;
 	rdfs:label "ContactGroup" ;
 	rdfs:comment "A group of Contacts. Could be used to express a group in an addressbook or on a contact list of an IM application. One contact can belong to many groups." ;
 	rdfs:subClassOf nie:InformationElement ;
-	tracker:notify true .
+	nrl:notify true .
 
 nco:ContactList a rdfs:Class ;
 	rdfs:label "ContactList" ;
 	rdfs:comment "A contact list, this class represents an addressbook or a contact list of an IM application. Contacts inside a contact list can belong to contact groups." ;
 	rdfs:subClassOf nie:InformationElement ;
-	tracker:notify true .
+	nrl:notify true .
 
 # Maybe a bug? Shouldnt it be a subclass of nie:InformationElement?
 nco:ContactMedium a rdfs:Class ;
@@ -53,13 +52,13 @@ nco:EmailAddress a rdfs:Class ;
 nco:IMAddress a rdfs:Class ;
 	rdfs:label "IM Address" ;
 	rdfs:comment "An instant messaging address such as xmpp:foo@bar.com." ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nco:ContactMedium .
 
 nco:IMAccount a rdfs:Class ;
 	rdfs:label "IMAccount" ;
 	rdfs:comment "An account in an Instant Messaging system. This refers to IM accounts of the user 'me'." ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nie:InformationElement .
 
 nco:OrganizationContact a rdfs:Class ;
@@ -70,7 +69,7 @@ nco:OrganizationContact a rdfs:Class ;
 nco:PersonContact a rdfs:Class ;
 	rdfs:label "PersonContact" ;
 	rdfs:comment "A Contact that denotes a Person. A person can have multiple Affiliations." ;
-	tracker:notify true ;
+	nrl:notify true ;
 	rdfs:subClassOf nco:Contact .
 
 nco:default-contact-me a nco:PersonContact.
@@ -186,9 +185,9 @@ nco:nameFamily a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PersonContact ;
 	rdfs:range xsd:string ;
-	tracker:indexed true ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 4 .
+	nrl:indexed true ;
+	nrl:fulltextIndexed true ;
+	nrl:weight 4 .
 
 nco:nameGiven a rdf:Property ;
 	rdfs:label "nameGiven" ;
@@ -196,8 +195,8 @@ nco:nameGiven a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PersonContact ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 5 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 nco:nameAdditional a rdf:Property ;
 	rdfs:label "nameAdditional" ;
@@ -205,8 +204,8 @@ nco:nameAdditional a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PersonContact ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 5 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 nco:fullname a rdf:Property ;
 	rdfs:label "fullname" ;
@@ -215,8 +214,8 @@ nco:fullname a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:Contact ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 6 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 6 .
 
 nco:hasContactMedium a rdf:Property ;
 	rdfs:label "hasContactMedium" ;
@@ -230,15 +229,14 @@ nco:url a rdf:Property ;
 	rdfs:comment "A uniform resource locator associated with the given role of a Contact. Inspired by the 'URL' property defined in RFC 2426 Sec. 3.6.8." ;
 	rdfs:domain nco:Role ;
 	rdfs:range rdfs:Resource ;
-	tracker:weight 4 .
+	nrl:weight 4 .
 
 nco:contributor a rdf:Property ;
 	rdfs:label "contributor" ;
 	rdfs:comment "An entity responsible for making contributions to the content of the InformationElement." ;
 	rdfs:subPropertyOf dc:contributor ;
 	rdfs:domain nie:InformationElement ;
-	rdfs:range nco:Contact ;
-	tracker:writeback true .
+	rdfs:range nco:Contact .
 
 nco:creator a rdf:Property ;
 	rdfs:label "creator" ;
@@ -246,8 +244,7 @@ nco:creator a rdf:Property ;
 	rdfs:subPropertyOf dc:creator , nco:contributor ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range nco:Contact ;
-	tracker:weight 4 ;
-	tracker:writeback true .
+	nrl:weight 4 .
 
 nco:region a rdf:Property ;
 	rdfs:label "region" ;
@@ -255,8 +252,8 @@ nco:region a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PostalAddress ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 3 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 3 .
 
 nco:key a rdf:Property ;
 	rdfs:label "key" ;
@@ -271,7 +268,7 @@ nco:nameHonorificSuffix a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PersonContact ;
 	rdfs:range xsd:string ;
-	tracker:weight 3 .
+	nrl:weight 3 .
 
 nco:contactUID a rdf:Property ;
 	rdfs:label "contactUID" ;
@@ -280,7 +277,7 @@ nco:contactUID a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:Contact ;
 	rdfs:range xsd:string ;
-	tracker:weight 5 .
+	nrl:weight 5 .
 
 nco:contactLocalUID a rdf:Property;
 	rdfs:label "local contact UID";
@@ -296,7 +293,7 @@ nco:publisher a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range nco:Contact ;
-	tracker:weight 2 .
+	nrl:weight 2 .
 
 nco:country a rdf:Property ;
 	rdfs:label "country" ;
@@ -304,8 +301,8 @@ nco:country a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PostalAddress ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 3 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 3 .
 
 nco:nameHonorificPrefix a rdf:Property ;
 	rdfs:label "nameHonorificPrefix" ;
@@ -313,7 +310,7 @@ nco:nameHonorificPrefix a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PersonContact ;
 	rdfs:range xsd:string ;
-	tracker:weight 3 .
+	nrl:weight 3 .
 
 nco:extendedAddress a rdf:Property ;
 	rdfs:label "extendedAddress" ;
@@ -321,8 +318,8 @@ nco:extendedAddress a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PostalAddress ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 6 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 6 .
 
 nco:hasIMContact a rdf:Property ;
 	rdfs:label "hasIMAccount" ;
@@ -343,9 +340,9 @@ nco:phoneNumber a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PhoneNumber ;
 	rdfs:range xsd:string ;
-	tracker:indexed true ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 5 .
+	nrl:indexed true ;
+	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 nco:nickname a rdf:Property ;
 	rdfs:label "nickname" ;
@@ -353,8 +350,8 @@ nco:nickname a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:Contact ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 5 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 nco:containsContact a rdf:Property ;
 	rdfs:label "containsContact" ;
@@ -369,8 +366,8 @@ nco:department a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:Affiliation ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 4 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 4 .
 
 nco:imID a rdf:Property ;
 	rdfs:label "imID" ;
@@ -379,8 +376,8 @@ nco:imID a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:IMAddress ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 5 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 nco:imAccountAddress a rdf:Property ;
 	a nrl:InverseFunctionalProperty ;
@@ -397,15 +394,15 @@ nco:addressLocation a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PostalAddress ;
 	rdfs:range rdfs:Resource ;
-	tracker:weight 3 .
+	nrl:weight 3 .
 
 nco:note a rdf:Property ;
 	rdfs:label "note" ;
 	rdfs:comment "A note about the object represented by this Contact. An equivalent for the 'NOTE' property defined in RFC 2426 Sec. 3.6.2" ;
 	rdfs:domain nco:Contact ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 4 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 4 .
 
 nco:representative a rdf:Property ;
 	rdfs:label "representative" ;
@@ -420,8 +417,8 @@ nco:streetAddress a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PostalAddress ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 6 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 6 .
 
 nco:hasPhoneNumber a rdf:Property ;
 	rdfs:label "hasPhoneNumber" ;
@@ -452,7 +449,7 @@ nco:websiteUrl a rdf:Property ;
 	rdfs:subPropertyOf nco:url ;
 	rdfs:domain nco:Role ;
 	rdfs:range rdfs:Resource ;
-	tracker:weight 5 .
+	nrl:weight 5 .
 
 nco:birthDate a rdf:Property ;
 	rdfs:label "birthDate" ;
@@ -461,7 +458,7 @@ nco:birthDate a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:Contact ;
 	rdfs:range xsd:dateTime ;
-	tracker:weight 5 .
+	nrl:weight 5 .
 
 nco:hasEmailAddress a rdf:Property ;
 	rdfs:label "hasEmailAddress" ;
@@ -469,7 +466,7 @@ nco:hasEmailAddress a rdf:Property ;
 	rdfs:subPropertyOf nco:hasContactMedium ;
 	rdfs:domain nco:Role ;
 	rdfs:range nco:EmailAddress ;
-	tracker:indexed true .
+	nrl:indexed true .
 
 nco:postalcode a rdf:Property ;
 	rdfs:label "postalcode" ;
@@ -477,8 +474,8 @@ nco:postalcode a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PostalAddress ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 6 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 6 .
 
 nco:org a rdf:Property ;
 	rdfs:label "org" ;
@@ -486,15 +483,15 @@ nco:org a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:Affiliation ;
 	rdfs:range nco:OrganizationContact ;
-	tracker:weight 4 .
+	nrl:weight 4 .
 
 nco:title a rdf:Property ;
 	rdfs:label "title" ;
 	rdfs:domain nco:Affiliation ;
 	rdfs:range xsd:string ;
 	nrl:maxCardinality 1 ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 10 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 10 .
 
 nco:voiceMail a rdf:Property ;
 	rdfs:label "voiceMail" ;
@@ -516,8 +513,8 @@ nco:contactGroupName a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:ContactGroup ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 4 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 4 .
 
 nco:contactMediumComment a rdf:Property ;
 	rdfs:label "contactMediumComment" ;
@@ -542,8 +539,8 @@ nco:emailAddress a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:EmailAddress ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 4 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 4 .
 
 nco:locality a rdf:Property ;
 	rdfs:label "locality" ;
@@ -551,8 +548,8 @@ nco:locality a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PostalAddress ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 4 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 4 .
 
 nco:county a rdf:Property ;
            rdfs:label "County" ;
@@ -560,8 +557,8 @@ nco:county a rdf:Property ;
            nrl:maxCardinality 1 ;
            rdfs:domain nco:PostalAddress ;
            rdfs:range xsd:string ;
-           tracker:fulltextIndexed true ;
-           tracker:weight 2 .
+           nrl:fulltextIndexed true ;
+           nrl:weight 2 .
 
 nco:district a rdf:Property ;
            rdfs:label "District" ;
@@ -569,8 +566,8 @@ nco:district a rdf:Property ;
            nrl:maxCardinality 1 ;
            rdfs:domain nco:PostalAddress ;
            rdfs:range xsd:string ;
-           tracker:fulltextIndexed true ;
-           tracker:weight 2 .
+           nrl:fulltextIndexed true ;
+           nrl:weight 2 .
 
 nco:sound a rdf:Property ;
 	rdfs:label "sound" ;
@@ -585,8 +582,8 @@ nco:imNickname a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:IMAddress ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 5 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 nco:imAvatar a rdf:Property ;
 	rdfs:label "imAvatar" ;
@@ -601,7 +598,7 @@ nco:hobby a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PersonContact ;
 	rdfs:range xsd:string ;
-	tracker:weight 2 .
+	nrl:weight 2 .
 
 # Same remarks as in url
 nco:blogUrl a rdf:Property ;
@@ -616,8 +613,8 @@ nco:role a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:Affiliation ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 2 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 2 .
 
 nco:hasPostalAddress a rdf:Property ;
 	rdfs:label "hasPostalAddress" ;
@@ -625,7 +622,7 @@ nco:hasPostalAddress a rdf:Property ;
 	rdfs:subPropertyOf nco:hasContactMedium ;
 	rdfs:domain nco:Role ;
 	rdfs:range nco:PostalAddress ;
-	tracker:indexed true .
+	nrl:indexed true .
 
 nco:imAccountType a rdf:Property ;
 	rdfs:label "imAccountType" ;
@@ -647,8 +644,8 @@ nco:pobox a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nco:PostalAddress ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 5 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 nco:imStatusMessage a rdf:Property ;
 	rdfs:label "imStatusMessage" ;

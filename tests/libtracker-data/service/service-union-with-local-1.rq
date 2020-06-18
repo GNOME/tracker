@@ -1,9 +1,9 @@
 SELECT ?u {
   {
-    ?u tracker:indexed true;
+    ?u nrl:indexed true;
   } UNION {
     SERVICE <dbus:%s> {
-      ?u tracker:indexed true;
+      ?u nrl:indexed true;
     }
   }
 }

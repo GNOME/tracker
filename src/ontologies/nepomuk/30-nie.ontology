@@ -3,12 +3,11 @@
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-nie: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "nie" ;
-	tracker:lastModified "2018-08-25T11:00:00Z" .
+nie: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "nie" ;
+	nrl:lastModified "2018-08-25T11:00:00Z" .
 
 nie:DataObject a rdfs:Class ;
 	rdfs:label "Data Object" ;
@@ -32,9 +31,8 @@ nie:title a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 10 ;
-	tracker:writeback true .
+	nrl:fulltextIndexed true ;
+	nrl:weight 10 .
 
 nie:url a rdf:Property ;
 	a nrl:InverseFunctionalProperty ;
@@ -43,7 +41,7 @@ nie:url a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:DataObject ;
 	rdfs:range xsd:string ;
-	tracker:indexed true .
+	nrl:indexed true .
 
 nie:informationElementDate a rdf:Property ;
 	rdfs:comment "A point or period of time associated with an event in the lifecycle of an Information Element. A common superproperty for all date-related properties of InformationElements in the NIE Framework" ;
@@ -65,8 +63,8 @@ nie:subject a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 5 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 nie:mimeType a rdf:Property ;
 	rdfs:label "Mime Type" ;
@@ -74,7 +72,7 @@ nie:mimeType a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:string ;
-	tracker:indexed true .
+	nrl:indexed true .
 
 nie:byteSize a rdf:Property ;
 	rdfs:label "Size" ;
@@ -96,8 +94,8 @@ nie:plainTextContent a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 2 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 2 .
 
 nie:legal a rdf:Property ;
 	rdfs:comment "A common superproperty for all properties that point at legal information about an Information Element";
@@ -123,9 +121,8 @@ nie:description a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 3 ;
-	tracker:writeback true .
+	nrl:fulltextIndexed true ;
+	nrl:weight 3 .
 
 # Bug in nepomuk specification. Taking domain from superproperty
 nie:disclaimer a rdf:Property ;
@@ -161,28 +158,27 @@ nie:copyright a rdf:Property ;
 	rdfs:comment "Content copyright" ;
 	rdfs:subPropertyOf dc:rights , nie:legal ;
 	rdfs:domain nie:InformationElement ;
-	rdfs:range xsd:string ;
-	tracker:writeback true .
+	rdfs:range xsd:string .
 
 nie:comment a rdf:Property ;
 	rdfs:comment "A user comment about an InformationElement" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 2 .
+	nrl:fulltextIndexed true ;
+	nrl:weight 2 .
 
 nie:interpretedAs a rdf:Property ;
 	rdfs:comment "Links the DataObject with the InformationElement it is interpreted as" ;
 	rdfs:domain nie:DataObject ;
 	rdfs:range nie:InformationElement ;
-	tracker:indexed true .
+	nrl:indexed true .
 
 nie:isStoredAs a rdf:Property ;
 	rdfs:comment "Links the information element with the DataObject it is stored in" ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range nie:DataObject ;
-	tracker:indexed true .
+	nrl:indexed true .
 
 nie:version a rdf:Property ;
 	rdfs:comment "The current version of the given data object. Exact semantics is unspecified at this level. Use more specific subproperties if needed" ;
@@ -195,8 +191,7 @@ nie:contentCreated a rdf:Property ;
 	rdfs:subPropertyOf nie:informationElementDate ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:InformationElement ;
-	rdfs:range xsd:dateTime ;
-	tracker:writeback true .
+	rdfs:range xsd:dateTime .
 
 # Addition to nepomuk
 nie:contentAccessed a rdf:Property ;
@@ -236,9 +231,8 @@ nie:keyword a rdf:Property ;
 	rdfs:comment "Adapted DublinCore: The topic of the content of the resource, as keyword. No sentences here. Recommended best practice is to select a value from a controlled vocabulary or formal classification scheme" ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true ;
-	tracker:weight 5 ;
-	tracker:writeback true .
+	nrl:fulltextIndexed true ;
+	nrl:weight 5 .
 
 nie:hasLogicalPart a rdf:Property ;
 	rdfs:comment "Generic property used to express 'logical' containment relationships between InformationElements. NIE extensions are encouraged to provide more specific subproperties of this one. It is advisable for actual instances of InformationElement to use those specific subproperties. Note the difference between 'physical' containment (hasPart) and logical containment (hasLogicalPart)" ;
@@ -292,4 +286,4 @@ nie:usageCounter a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain nie:InformationElement ;
 	rdfs:range xsd:integer ;
-	tracker:weight 3 .
+	nrl:weight 3 .

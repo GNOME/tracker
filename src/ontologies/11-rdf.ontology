@@ -1,96 +1,99 @@
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 
-rdf: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "rdf" ;
-	tracker:lastModified "2019-06-09T21:00:00Z" .
+rdf: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "rdf" ;
+	nrl:lastModified "2019-06-09T21:00:00Z" .
 
-rdfs: a tracker:Namespace ;
-	tracker:prefix "rdfs" .
+rdfs: a nrl:Namespace ;
+	nrl:prefix "rdfs" .
+
+tracker: a nrl:Namespace ;
+	nrl:prefix "tracker" .
 
 rdfs:Resource a rdfs:Class ;
 	rdfs:label "All Resources" ;
 	rdfs:comment "All resources" ;
-	tracker:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_resource" .
+	nrl:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_resource" .
 
 rdfs:Class a rdfs:Class ;
 	rdfs:label "Class" ;
 	rdfs:comment "The class of classes" ;
 	rdfs:subClassOf rdfs:Resource ;
-	tracker:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_class" .
+	nrl:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_class" .
 
 rdf:Property a rdfs:Class ;
 	rdfs:label "Property" ;
 	rdfs:comment "The class of RDF properties" ;
 	rdfs:subClassOf rdfs:Resource ;
-	tracker:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_property" .
+	nrl:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_property" .
 
 rdfs:Literal a rdfs:Class ;
 	rdfs:label "Literal" ;
 	rdfs:comment "The class of literal values, eg. textual strings and integers" ;
 	rdfs:subClassOf rdfs:Resource ;
-	tracker:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_literal" .
+	nrl:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_literal" .
 
 rdfs:Datatype a rdfs:Class ;
 	rdfs:label "Datatype" ;
 	rdfs:comment "The class of RDF datatypes." ;
 	rdfs:subClassOf rdfs:Class ;
-	tracker:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_datatype" .
+	nrl:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_datatype" .
 
 rdf:langString a rdfs:Class, rdfs:Datatype ;
 	rdfs:subClassOf rdfs:Literal ;
 	rdfs:label "langString" ;
 	rdfs:comment "The datatype of language-tagged string values" ;
-	tracker:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_langstring" .
+	nrl:classSpecification "https://www.w3.org/TR/rdf-schema/#ch_langstring" .
 
 rdf:type a rdf:Property ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:comment "The subject is an instance of a class" ;
 	rdfs:range rdfs:Class ;
-	tracker:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_type" .
+	nrl:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_type" .
 
 rdfs:subClassOf a rdf:Property ;
 	rdfs:comment "The subject is a subclass of a class" ;
 	rdfs:domain rdfs:Class ;
 	rdfs:range rdfs:Class ;
-	tracker:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_subclassof" .
+	nrl:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_subclassof" .
 
 rdfs:subPropertyOf a rdf:Property ;
 	rdfs:comment "The subject is a subproperty of a property" ;
 	rdfs:domain rdf:Property ;
 	rdfs:range rdf:Property ;
-	tracker:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_subpropertyof" .
+	nrl:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_subpropertyof" .
 
 rdfs:comment a rdf:Property ;
 	rdfs:comment "A description of the subject resource" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string ;
-	tracker:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_comment" .
+	nrl:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_comment" .
 
 rdfs:label a rdf:Property ;
 	rdfs:comment "A human-readable name for the subject" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string ;
-	tracker:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_label" .
+	nrl:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_label" .
 
 rdfs:domain a rdf:Property ;
 	rdfs:comment "A domain of the subject property" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range rdfs:Resource ;
-	tracker:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_domain" .
+	nrl:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_domain" .
 
 rdfs:range a rdf:Property ;
 	rdfs:comment "A range of the subject property" ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdf:Property ;
 	rdfs:range rdfs:Class ;
-	tracker:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_range" .
+	nrl:propertySpecification "https://www.w3.org/TR/rdf-schema/#ch_range" .
 
 rdf:List a rdfs:Class ;
 	rdfs:label "List" ;
@@ -114,100 +117,3 @@ rdf:rest a rdf:Property ;
 	rdfs:domain rdf:List ;
 	rdfs:range rdf:List ;
 	nrl:maxCardinality 1 .
-
-tracker: a tracker:Namespace ;
-	tracker:prefix "tracker" .
-
-tracker:Namespace a rdfs:Class ;
-	rdfs:label "Namespace" ;
-	rdfs:subClassOf rdfs:Resource .
-
-tracker:Ontology a rdfs:Class ;
-	rdfs:label "Ontology" ;
-	rdfs:comment "An ontology" ;
-	rdfs:subClassOf rdfs:Resource .
-
-tracker:lastModified a rdf:Property ;
-	rdfs:label "lastModified" ;
-	rdfs:comment "last modification date" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain tracker:Ontology ;
-	rdfs:range xsd:dateTime .
-
-tracker:prefix a rdf:Property ;
-	rdfs:label "Base prefix of the subject namespace" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain tracker:Namespace ;
-	rdfs:range xsd:string .
-
-tracker:domainIndex a rdf:Property ;
-	rdfs:comment "Property is a domain index for the subject class" ;
-	rdfs:domain rdfs:Class ;
-	rdfs:range rdf:Property .
-
-tracker:indexed a rdf:Property ;
-	rdfs:comment "Whether a property has an index" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdf:Property ;
-	rdfs:range xsd:boolean .
-
-tracker:secondaryIndex a rdf:Property ;
-	rdfs:comment "Whether subject and object properties share an index" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdf:Property ;
-	rdfs:range rdf:Property .
-
-tracker:fulltextIndexed a rdf:Property ;
-	rdfs:comment "Whether the property is full-text indexed" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdf:Property ;
-	rdfs:range xsd:boolean .
-
-tracker:weight a rdf:Property ;
-	rdfs:comment "Property weight on full-text search relevance" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdf:Property ;
-	rdfs:range xsd:integer .
-
-tracker:added a rdf:Property ;
-	rdfs:comment "Time of insertion of the resource" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdfs:Resource ;
-	rdfs:range xsd:dateTime ;
-	tracker:indexed true .
-
-tracker:modified a rdf:Property ;
-	rdfs:comment "Modification sequence number" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdfs:Resource ;
-	rdfs:range xsd:integer .
-
-tracker:notify a rdf:Property ;
-	rdfs:comment "Whether resources of this class emits notifications on changes" ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdfs:Class ;
-	rdfs:range xsd:boolean .
-
-tracker:writeback a rdf:Property ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdf:Property ;
-	rdfs:range xsd:boolean .
-
-tracker:deprecated a rdf:Property;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdfs:Resource;
-	rdfs:range xsd:boolean;
-	rdfs:label "deprecated";
-	rdfs:comment "If this property is assigned, the subject class, property, or resource, is deprecated and should not be used in production systems any longer. It may be removed without further notice." .
-
-tracker:classSpecification a rdf:Property ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdfs:Class ;
-	rdfs:range xsd:string ;
-	rdfs:comment "Link to upstream specification for an ontology class." .
-
-tracker:propertySpecification a rdf:Property ;
-	nrl:maxCardinality 1 ;
-	rdfs:domain rdf:Property ;
-	rdfs:range xsd:string ;
-	rdfs:comment "Link to upstream specification for an ontology property." .

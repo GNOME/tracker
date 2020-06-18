@@ -711,7 +711,6 @@ tracker_direct_connection_query_statement (TrackerSparqlConnection  *self,
 static void
 tracker_direct_connection_update (TrackerSparqlConnection  *self,
                                   const gchar              *sparql,
-                                  gint                      priority,
                                   GCancellable             *cancellable,
                                   GError                  **error)
 {
@@ -731,7 +730,6 @@ tracker_direct_connection_update (TrackerSparqlConnection  *self,
 static void
 tracker_direct_connection_update_async (TrackerSparqlConnection *self,
                                         const gchar             *sparql,
-                                        gint                     priority,
                                         GCancellable            *cancellable,
                                         GAsyncReadyCallback      callback,
                                         gpointer                 user_data)
@@ -744,7 +742,6 @@ tracker_direct_connection_update_async (TrackerSparqlConnection *self,
 	priv = tracker_direct_connection_get_instance_private (conn);
 
 	task = g_task_new (self, cancellable, callback, user_data);
-	g_task_set_priority (task, priority);
 	g_task_set_task_data (task,
 	                      task_data_query_new (TASK_TYPE_UPDATE, sparql),
 	                      (GDestroyNotify) task_data_free);
@@ -764,7 +761,6 @@ static void
 tracker_direct_connection_update_array_async (TrackerSparqlConnection  *self,
                                               gchar                   **updates,
                                               gint                      n_updates,
-                                              gint                      priority,
                                               GCancellable             *cancellable,
                                               GAsyncReadyCallback       callback,
                                               gpointer                  user_data)
@@ -789,7 +785,6 @@ tracker_direct_connection_update_array_async (TrackerSparqlConnection  *self,
 	task_data->query = concatenated;
 
 	task = g_task_new (self, cancellable, callback, user_data);
-	g_task_set_priority (task, priority);
 	g_task_set_task_data (task, task_data,
 	                      (GDestroyNotify) task_data_free);
 
@@ -807,7 +802,6 @@ tracker_direct_connection_update_array_finish (TrackerSparqlConnection  *self,
 static GVariant *
 tracker_direct_connection_update_blank (TrackerSparqlConnection  *self,
                                         const gchar              *sparql,
-                                        gint                      priority,
                                         GCancellable             *cancellable,
                                         GError                  **error)
 {
@@ -830,7 +824,6 @@ tracker_direct_connection_update_blank (TrackerSparqlConnection  *self,
 static void
 tracker_direct_connection_update_blank_async (TrackerSparqlConnection *self,
                                               const gchar             *sparql,
-                                              gint                     priority,
                                               GCancellable            *cancellable,
                                               GAsyncReadyCallback      callback,
                                               gpointer                 user_data)
@@ -843,7 +836,6 @@ tracker_direct_connection_update_blank_async (TrackerSparqlConnection *self,
 	priv = tracker_direct_connection_get_instance_private (conn);
 
 	task = g_task_new (self, cancellable, callback, user_data);
-	g_task_set_priority (task, priority);
 	g_task_set_task_data (task,
 	                      task_data_query_new (TASK_TYPE_UPDATE_BLANK, sparql),
 	                      (GDestroyNotify) task_data_free);
@@ -870,8 +862,7 @@ tracker_direct_connection_get_namespace_manager (TrackerSparqlConnection *self)
 }
 
 static TrackerNotifier *
-tracker_direct_connection_create_notifier (TrackerSparqlConnection *self,
-					   TrackerNotifierFlags     flags)
+tracker_direct_connection_create_notifier (TrackerSparqlConnection *self)
 {
 	TrackerDirectConnectionPrivate *priv;
 	TrackerNotifier *notifier;
@@ -881,7 +872,6 @@ tracker_direct_connection_create_notifier (TrackerSparqlConnection *self,
 
 	notifier = g_object_new (TRACKER_TYPE_NOTIFIER,
 	                         "connection", self,
-				 "flags", flags,
 				 NULL);
 
 	tracker_data = tracker_data_manager_get_data (priv->data_manager);

@@ -88,7 +88,7 @@ test_sparql_query (gconstpointer test_data)
 	g_file_get_contents (update_filename, &update, NULL, &error);
 	g_assert_no_error (error);
 
-	tracker_sparql_connection_update (conn, update, G_PRIORITY_DEFAULT, NULL, &error);
+	tracker_sparql_connection_update (conn, update, NULL, &error);
 	g_assert_no_error (error);
 
 	g_free (update_filename);

@@ -50,7 +50,7 @@ delete_test_data (DataFixture   *fixture,
 	                           "<urn:testdata4> a rdfs:Resource ."
 	                           "}";
 
-	tracker_sparql_connection_update (connection, delete_query, 0, NULL, &error);
+	tracker_sparql_connection_update (connection, delete_query, NULL, &error);
 	g_assert_no_error (error);
 }
 
@@ -76,7 +76,7 @@ insert_test_data (DataFixture   *fixture,
 	                                "    <urn:testdata4> a nmm:Photo ; nao:identifier \"%s\" ."
 	                                "}", longName);
 
-	tracker_sparql_connection_update (connection, filled_query, 0, NULL, &error);
+	tracker_sparql_connection_update (connection, filled_query, NULL, &error);
 	g_assert_no_error (error);
 
 	g_free (filled_query);
@@ -298,7 +298,7 @@ test_tracker_sparql_update_fast_small (DataFixture  *fixture,
 	GError *error = NULL;
 	const gchar *query = "INSERT { _:x a nfo:Image }";
 
-	tracker_sparql_connection_update (connection, query, 0, NULL, &error);
+	tracker_sparql_connection_update (connection, query, NULL, &error);
 
 	g_assert_no_error (error);
 }
@@ -317,7 +317,7 @@ test_tracker_sparql_update_fast_large (DataFixture  *fixture,
 
 	query = g_strdup_printf ("INSERT { _:x a nfo:Image; nao:identifier \"%s\" }", lots);
 
-	tracker_sparql_connection_update (connection, query, 0, NULL, &error);
+	tracker_sparql_connection_update (connection, query, NULL, &error);
 
 	g_free (lots);
 	g_free (query);
@@ -365,7 +365,6 @@ test_tracker_sparql_update_array_async (DataFixture   *fixture,
 	tracker_sparql_connection_update_array_async (connection,
 	                                              (char**) queries,
 	                                              6,
-	                                              0,
 	                                              NULL,
 	                                              async_update_array_callback,
 	                                              data);
@@ -384,7 +383,7 @@ test_tracker_sparql_update_fast_error (DataFixture  *fixture,
 	GError *error = NULL;
 	const gchar *query = "blork blork blork";
 
-	tracker_sparql_connection_update (connection, query, 0, NULL, &error);
+	tracker_sparql_connection_update (connection, query, NULL, &error);
 
 	g_assert (error != NULL && error->domain == TRACKER_SPARQL_ERROR);
 	g_error_free (error);
@@ -398,7 +397,7 @@ test_tracker_sparql_update_blank_fast_small (DataFixture  *fixture,
 	const gchar *query = "INSERT { _:x a nfo:Image }";
 	GVariant *results;
 
-	results = tracker_sparql_connection_update_blank (connection, query, 0, NULL, &error);
+	results = tracker_sparql_connection_update_blank (connection, query, NULL, &error);
 
 	g_assert_no_error (error);
 	g_assert (results);
@@ -421,7 +420,7 @@ test_tracker_sparql_update_blank_fast_large (DataFixture  *fixture,
 
 	query = g_strdup_printf ("INSERT { _:x a nfo:Image; nao:identifier \"%s\" }", lots);
 
-	results = tracker_sparql_connection_update_blank (connection, query, 0, NULL, &error);
+	results = tracker_sparql_connection_update_blank (connection, query, NULL, &error);
 
 	g_free (lots);
 	g_free (query);
@@ -440,7 +439,7 @@ test_tracker_sparql_update_blank_fast_error (DataFixture  *fixture,
 	const gchar *query = "blork blork blork";
 	GVariant *results;
 
-	results = tracker_sparql_connection_update_blank (connection, query, 0, NULL, &error);
+	results = tracker_sparql_connection_update_blank (connection, query, NULL, &error);
 
 	g_assert (error != NULL && error->domain == TRACKER_SPARQL_ERROR);
 	g_assert (!results);
@@ -456,7 +455,7 @@ test_tracker_sparql_update_blank_fast_no_blanks (DataFixture  *fixture,
 	const gchar *query = "INSERT { <urn:not_blank> a nfo:Image }";
 	GVariant *results;
 
-	results = tracker_sparql_connection_update_blank (connection, query, 0, NULL, &error);
+	results = tracker_sparql_connection_update_blank (connection, query, NULL, &error);
 
 	/* FIXME: Properly test once we get update_blank implemented */
 
@@ -608,7 +607,6 @@ test_tracker_sparql_update_async (DataFixture  *fixture,
 
 	tracker_sparql_connection_update_async (connection,
 	                                        query,
-	                                        0,
 	                                        NULL,
 	                                        async_update_callback,
 	                                        data);
@@ -647,7 +645,6 @@ test_tracker_sparql_update_async_cancel (DataFixture  *fixture,
 
 	tracker_sparql_connection_update_async (connection,
 	                                        query,
-	                                        0,
 	                                        cancellable,
 	                                        cancel_update_cb,
 	                                        main_loop);
@@ -690,7 +687,6 @@ test_tracker_sparql_update_blank_async (DataFixture *fixture,
 
 	tracker_sparql_connection_update_blank_async (connection,
 	                                              query,
-	                                              0,
 	                                              NULL,
 	                                              async_update_blank_callback,
 	                                              data);

@@ -145,9 +145,9 @@ ROOT
   |  --> rdf:type (P)
   |  --> rdfs:comment (P)
   |  --> rdfs:label (P)
-  |  --> tracker:added (P)
-  |  --> tracker:damaged (P)
-  |  --> tracker:modified (P)
+  |  --> nrl:added (P)
+  |  --> nrl:damaged (P)
+  |  --> nrl:modified (P)
   |  +-- nie:DataObject (C)
   |  |  --> nfo:belongsToContainer (P)
   |  |  --> nie:byteSize (P)
@@ -230,8 +230,8 @@ List all class namespace prefixes::
 +
 ----
 $ tracker sparql -q "SELECT ?prefix ?ns WHERE {
-    ?ns a tracker:Namespace ;
-    tracker:prefix ?prefix
+    ?ns a nrl:Namespace ;
+    nrl:prefix ?prefix
 }"
 ----
 

@@ -20,7 +20,6 @@ int main (int argc, const char **argv)
   /* Run a synchronous blank node update query */
   v = tracker_sparql_connection_update_blank (connection,
                                               query,
-                                              G_PRIORITY_DEFAULT,
                                               NULL,
                                               &error);
 

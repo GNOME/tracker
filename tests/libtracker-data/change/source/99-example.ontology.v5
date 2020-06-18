@@ -1,20 +1,19 @@
 @prefix example: <http://example/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 
-example: a tracker:Namespace, tracker:Ontology ;
-	tracker:lastModified "2010-03-23T11:00:05Z" ;
-	tracker:prefix "example" .
+example: a nrl:Namespace, nrl:Ontology ;
+	nrl:lastModified "2010-03-23T11:00:05Z" ;
+	nrl:prefix "example" .
 
 example:A a rdfs:Class ;
 	rdfs:subClassOf rdfs:Resource .
 
 # Adding two domainIndexes to a class
 example:DomA a rdfs:Class ;
-	tracker:domainIndex example:single1, example:single2 ;
+	nrl:domainIndex example:single1, example:single2 ;
 	rdfs:subClassOf example:A .
 
 example:B a rdfs:Class ;
@@ -36,13 +35,13 @@ example:single1 a rdf:Property ;
 	rdfs:domain example:A ;
 	rdfs:range xsd:integer ;
 	nrl:maxCardinality 1 ;
-	tracker:indexed false .
+	nrl:indexed false .
 
 example:single2 a rdf:Property ;
 	rdfs:domain example:A ;
 	rdfs:range xsd:integer ;
 	nrl:maxCardinality 1 ;
-	tracker:indexed false .
+	nrl:indexed false .
 
 example:ib a rdf:Property ;
 	rdfs:domain example:B ;

@@ -42,12 +42,10 @@ struct _TrackerSparqlConnectionClass
                                                 GError                  **error);
         void (* update) (TrackerSparqlConnection  *connection,
                          const gchar              *sparql,
-                         gint                      priority,
                          GCancellable             *cancellable,
                          GError                  **error);
         void (* update_async) (TrackerSparqlConnection *connection,
                                const gchar             *sparql,
-                               gint                     priority,
                                GCancellable            *cancellable,
                                GAsyncReadyCallback      callback,
                                gpointer                 user_data);
@@ -57,7 +55,6 @@ struct _TrackerSparqlConnectionClass
         void (* update_array_async) (TrackerSparqlConnection  *connection,
                                      gchar                   **sparql,
                                      gint                      sparql_length,
-                                     gint                      priority,
                                      GCancellable             *cancellable,
                                      GAsyncReadyCallback       callback,
                                      gpointer                  user_data);
@@ -66,12 +63,10 @@ struct _TrackerSparqlConnectionClass
                                           GError                  **error);
         GVariant* (* update_blank) (TrackerSparqlConnection  *connection,
                                     const gchar              *sparql,
-                                    gint                      priority,
                                     GCancellable             *cancellable,
                                     GError                  **error);
         void (* update_blank_async) (TrackerSparqlConnection *connection,
                                      const gchar             *sparql,
-                                     gint                     priority,
                                      GCancellable            *cancellable,
                                      GAsyncReadyCallback      callback,
                                      gpointer                 user_data);
@@ -83,8 +78,7 @@ struct _TrackerSparqlConnectionClass
                                                       const gchar              *sparql,
                                                       GCancellable             *cancellable,
                                                       GError                  **error);
-	TrackerNotifier * (* create_notifier) (TrackerSparqlConnection *connection,
-	                                       TrackerNotifierFlags     flags);
+	TrackerNotifier * (* create_notifier) (TrackerSparqlConnection *connection);
 
 	void (* close) (TrackerSparqlConnection *connection);
         void (* close_async) (TrackerSparqlConnection *connection,

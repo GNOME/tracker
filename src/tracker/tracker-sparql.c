@@ -218,8 +218,8 @@ tracker_sparql_get_prefixes (TrackerSparqlConnection *connection)
 	 */
 	query = "SELECT ?ns ?prefix "
 	        "WHERE {"
-	        "  ?ns a tracker:Namespace ;"
-	        "  tracker:prefix ?prefix "
+	        "  ?ns a nrl:Namespace ;"
+	        "  nrl:prefix ?prefix "
 	        "}";
 
 	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
@@ -271,8 +271,8 @@ get_class_from_prefix (TrackerSparqlConnection *connection,
 
 	query = "SELECT ?prefix ?ns "
 		"WHERE {"
-		"  ?ns a tracker:Namespace ;"
-		"  tracker:prefix ?prefix "
+		"  ?ns a nrl:Namespace ;"
+		"  nrl:prefix ?prefix "
 		"}";
 
 	/* We have namespace prefix, get full name */
@@ -1138,8 +1138,8 @@ sparql_run (void)
 
 		query = "SELECT ?prefix ?ns "
 		        "WHERE {"
-		        "  ?ns a tracker:Namespace ;"
-		        "  tracker:prefix ?prefix "
+		        "  ?ns a nrl:Namespace ;"
+		        "  nrl:prefix ?prefix "
 		        "}";
 
 		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
@@ -1232,13 +1232,13 @@ sparql_run (void)
 			query = g_strdup_printf ("SELECT ?c "
 			                         "WHERE {"
 			                         "  ?c a rdfs:Class ."
-			                         "  ?c tracker:notify true ."
+			                         "  ?c nrl:notify true ."
 			                         "}");
 		} else {
 			query = g_strdup_printf ("SELECT ?c "
 			                         "WHERE {"
 			                         "  ?c a rdfs:Class ."
-			                         "  ?c tracker:notify true "
+			                         "  ?c nrl:notify true "
 			                         "  FILTER regex (?c, \"%s\", \"i\") "
 			                         "}",
 			                         list_notifies);
@@ -1267,12 +1267,12 @@ sparql_run (void)
 		if (*list_indexes == '\0') {
 			query = g_strdup_printf ("SELECT ?p "
 			                         "WHERE {"
-			                         "  ?p tracker:indexed true ."
+			                         "  ?p nrl:indexed true ."
 			                         "}");
 		} else {
 			query = g_strdup_printf ("SELECT ?p "
 			                         "WHERE {"
-			                         "  ?p tracker:indexed true "
+			                         "  ?p nrl:indexed true "
 			                         "  FILTER regex (?p, \"%s\", \"i\") "
 			                         "}",
 			                         list_indexes);
@@ -1431,7 +1431,7 @@ sparql_run (void)
 
 	if (query) {
 		if (G_UNLIKELY (update)) {
-			tracker_sparql_connection_update (connection, query, 0, NULL, &error);
+			tracker_sparql_connection_update (connection, query, NULL, &error);
 
 			if (error) {
 				g_printerr ("%s, %s\n",

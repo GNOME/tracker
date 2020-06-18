@@ -3,17 +3,16 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix test: <http://www.example.org/test#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-test: a tracker:Ontology ;
-	tracker:lastModified "2018-09-30T13:00:00Z" .
+test: a nrl:Ontology ;
+	nrl:lastModified "2018-09-30T13:00:00Z" .
 
-fts: a tracker:Namespace ;
-	tracker:prefix "fts" .
+fts: a nrl:Namespace ;
+	nrl:prefix "fts" .
 
-test: a tracker:Namespace ;
-	tracker:prefix "test" .
+test: a nrl:Namespace ;
+	nrl:prefix "test" .
 
 test:A a rdfs:Class ;
 	rdfs:subClassOf rdfs:Resource .
@@ -22,10 +21,10 @@ test:p a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain test:A ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true .
+	nrl:fulltextIndexed true .
 
 test:o a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain test:A ;
 	rdfs:range xsd:string ;
-	tracker:fulltextIndexed true .
+	nrl:fulltextIndexed true .

@@ -72,11 +72,11 @@ namespace Tracker {
 		public abstract Cursor query (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
 		public async abstract Cursor query_async (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
 
-		public virtual void update (string sparql, int priority = GLib.Priority.DEFAULT, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
-		public async virtual void update_async (string sparql, int priority = GLib.Priority.DEFAULT, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
-		public async virtual bool update_array_async (string[] sparql, int priority = GLib.Priority.DEFAULT, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
-		public virtual GLib.Variant? update_blank (string sparql, int priority = GLib.Priority.DEFAULT, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
-		public async virtual GLib.Variant? update_blank_async (string sparql, int priority = GLib.Priority.DEFAULT, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public virtual void update (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public async virtual void update_async (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public async virtual bool update_array_async (string[] sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public virtual GLib.Variant? update_blank (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
+		public async virtual GLib.Variant? update_blank_async (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
 
 		public virtual NamespaceManager? get_namespace_manager ();
 
@@ -88,7 +88,7 @@ namespace Tracker {
 
 		public virtual Statement? query_statement (string sparql, GLib.Cancellable? cancellable = null) throws Sparql.Error;
 
-                public virtual Notifier? create_notifier (NotifierFlags flags);
+                public virtual Notifier? create_notifier ();
                 public virtual void close ();
                 public async virtual bool close_async () throws GLib.IOError;
 	}

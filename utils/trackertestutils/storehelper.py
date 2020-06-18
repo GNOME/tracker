@@ -87,7 +87,7 @@ class await_insert():
         self._check_inserted = _check_inserted
 
         self.loop = mainloop.MainLoop()
-        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.NONE)
+        self.notifier = self.conn.create_notifier()
 
         self.result = InsertedResource(None, 0)
 
@@ -183,7 +183,7 @@ class await_property_update():
         self.timeout = timeout
 
         self.loop = mainloop.MainLoop()
-        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.NONE)
+        self.notifier = self.conn.create_notifier()
         self.matched = False
 
     def __enter__(self):
@@ -262,7 +262,7 @@ class await_content_update():
         self.timeout = timeout
 
         self.loop = mainloop.MainLoop()
-        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.NONE)
+        self.notifier = self.conn.create_notifier()
         self.matched = False
 
         self.result = InsertedResource(None, 0)
@@ -355,7 +355,7 @@ class await_delete():
         self.timeout = timeout
 
         self.loop = mainloop.MainLoop()
-        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.NONE)
+        self.notifier = self.conn.create_notifier()
         self.matched = False
 
     def __enter__(self):
@@ -475,7 +475,7 @@ class StoreHelper():
         return result
 
     def update(self, update_sparql):
-        self.conn.update(update_sparql, 0, None)
+        self.conn.update(update_sparql, None)
 
     def count_instances(self, ontology_class):
         QUERY = """

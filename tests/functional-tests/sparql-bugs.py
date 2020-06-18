@@ -180,7 +180,7 @@ class TrackerStoreSparqlBugsTests (fixtures.TrackerSparqlDirectTest):
         """
         NB222645 - Inserting a resource using an non-existing class, doesn't rollback completely
         """
-        query = "SELECT tracker:modified (?u) ?u  WHERE { ?u a nco:Contact }"
+        query = "SELECT nrl:modified (?u) ?u  WHERE { ?u a nco:Contact }"
         original_data = self.tracker.query(query)
 
         wrong_insert = "INSERT { <test://nb222645-wrong-class-contact> a nco:IMContact. } "

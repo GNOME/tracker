@@ -136,13 +136,13 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		bus.send_message_with_reply.begin (message, DBusSendMessageFlags.NONE, int.MAX, null, cancellable, callback);
 	}
 
-	public override void update (string sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public override void update (string sparql, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
 		// use separate main context for sync operation
 		var context = new MainContext ();
 		var loop = new MainLoop (context, false);
 		context.push_thread_default ();
 		AsyncResult async_res = null;
-		update_async.begin (sparql, priority, cancellable, (o, res) => {
+		update_async.begin (sparql, cancellable, (o, res) => {
 			async_res = res;
 			loop.quit ();
 		});
@@ -151,7 +151,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		update_async.end (async_res);
 	}
 
-	public async override void update_async (string sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public async override void update_async (string sparql, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
 		UnixInputStream input;
 		UnixOutputStream output;
 		pipe (out input, out output);
@@ -159,7 +159,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		// send D-Bus request
 		AsyncResult dbus_res = null;
 		bool sent_update = false;
-		send_update (priority <= GLib.Priority.DEFAULT ? "Update" : "BatchUpdate", input, cancellable, (o, res) => {
+		send_update ("Update", input, cancellable, (o, res) => {
 			dbus_res = res;
 			if (sent_update) {
 				update_async.callback ();
@@ -183,7 +183,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		handle_error_reply (reply);
 	}
 
-	public async override bool update_array_async (string[] sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public async override bool update_array_async (string[] sparql, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
 		UnixInputStream input;
 		UnixOutputStream output;
 		pipe (out input, out output);
@@ -220,13 +220,13 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
                 return true;
 	}
 
-	public override GLib.Variant? update_blank (string sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public override GLib.Variant? update_blank (string sparql, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
 		// use separate main context for sync operation
 		var context = new MainContext ();
 		var loop = new MainLoop (context, false);
 		context.push_thread_default ();
 		AsyncResult async_res = null;
-		update_blank_async.begin (sparql, priority, cancellable, (o, res) => {
+		update_blank_async.begin (sparql, cancellable, (o, res) => {
 			async_res = res;
 			loop.quit ();
 		});
@@ -235,7 +235,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		return update_blank_async.end (async_res);
 	}
 
-	public async override GLib.Variant? update_blank_async (string sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public async override GLib.Variant? update_blank_async (string sparql, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
 		UnixInputStream input;
 		UnixOutputStream output;
 		pipe (out input, out output);
@@ -268,10 +268,10 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		return reply.get_body ().get_child_value (0);
 	}
 
-	public override Tracker.Notifier? create_notifier (Tracker.NotifierFlags flags) {
+	public override Tracker.Notifier? create_notifier () {
 		var notifier = (Tracker.Notifier) Object.new (typeof (Tracker.Notifier),
 		                                              "connection", this,
-		                                              "flags", flags, null);
+		                                              null);
 
 		notifier.signal_subscribe (this.bus, this.dbus_name, null);
 

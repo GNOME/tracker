@@ -36,18 +36,6 @@ G_DECLARE_DERIVABLE_TYPE (TrackerNotifier, tracker_notifier, TRACKER, NOTIFIER, 
 typedef struct _TrackerNotifierEvent TrackerNotifierEvent;
 
 /**
- * TrackerNotifierFlags:
- * @TRACKER_NOTIFIER_FLAG_NONE: No flags
- * @TRACKER_NOTIFIER_FLAG_QUERY_URN: Query URN of notified elements
- *
- * Flags affecting #TrackerNotifier behavior.
- */
-typedef enum {
-	TRACKER_NOTIFIER_FLAG_NONE               = 0,
-	TRACKER_NOTIFIER_FLAG_QUERY_URN          = 1 << 1,
-} TrackerNotifierFlags;
-
-/**
  * TrackerNotifierEventType:
  * @TRACKER_NOTIFIER_EVENT_CREATE: An element was created.
  * @TRACKER_NOTIFIER_EVENT_DELETE: An element was deleted.

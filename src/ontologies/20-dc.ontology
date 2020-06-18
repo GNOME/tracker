@@ -2,12 +2,11 @@
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-dc: a tracker:Namespace, tracker:Ontology ;
-	tracker:prefix "dc" ;
-	tracker:lastModified "2018-08-25T11:00:00Z" .
+dc: a nrl:Namespace, nrl:Ontology ;
+	nrl:prefix "dc" ;
+	nrl:lastModified "2018-08-25T11:00:00Z" .
 
 dc:title a rdf:Property ;
 	rdfs:label "Title" ;
@@ -15,7 +14,7 @@ dc:title a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string ;
-	tracker:weight 10 .
+	nrl:weight 10 .
 
 dc:creator a rdf:Property ;
 	rdfs:label "Creator" ;
@@ -23,7 +22,7 @@ dc:creator a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string ;
-	tracker:weight 4 .
+	nrl:weight 4 .
 
 dc:subject a rdf:Property ;
 	rdfs:label "Subject" ;
@@ -31,7 +30,7 @@ dc:subject a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string ;
-	tracker:weight 5 .
+	nrl:weight 5 .
 
 dc:description a rdf:Property ;
 	rdfs:label "Description" ;
@@ -39,7 +38,7 @@ dc:description a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string ;
-	tracker:weight 3 .
+	nrl:weight 3 .
 
 dc:publisher a rdf:Property ;
 	rdfs:label "Publisher" ;
@@ -47,14 +46,14 @@ dc:publisher a rdf:Property ;
 	nrl:maxCardinality 1 ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string ;
-	tracker:weight 4 .
+	nrl:weight 4 .
 
 dc:contributor a rdf:Property ;
 	rdfs:label "Contributor" ;
 	rdfs:comment "An entity responsible for making contributions to the resource." ;
 	rdfs:domain rdfs:Resource ;
 	rdfs:range xsd:string ;
-	tracker:weight 4 .
+	nrl:weight 4 .
 
 dc:date a rdf:Property ;
 	rdfs:label "Date" ;

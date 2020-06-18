@@ -1,1 +1,1 @@
-select ?index { example:DomA tracker:domainIndex ?index }
+select ?index { example:DomA nrl:domainIndex ?index }

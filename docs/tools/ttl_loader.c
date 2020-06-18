@@ -35,16 +35,15 @@
 #define RDFS_LABEL "http://www.w3.org/2000/01/rdf-schema#label"
 #define RDFS_SUBPROPERTYOF "http://www.w3.org/2000/01/rdf-schema#subPropertyOf"
 
-#define NRL_MAX_CARDINALITY "http://tracker.api.gnome.org/ontology/v3/nrl#maxCardinality"
+#define NRL_NS "http://tracker.api.gnome.org/ontology/v3/nrl#"
+#define NRL_MAX_CARDINALITY NRL_NS "maxCardinality"
 
-/* #define TRACKER_NAMESPACE "http://tracker.api.gnome.org/ontology/v3/tracker#Namespace" */
-#define TRACKER_NS "http://tracker.api.gnome.org/ontology/v3/tracker#"
-#define TRACKER_CLASS_SPECIFICATION TRACKER_NS "classSpecification"
-#define TRACKER_PROPERTY_SPECIFICATION TRACKER_NS "propertySpecification"
-#define TRACKER_NOTIFY TRACKER_NS "notify"
-#define TRACKER_FTS_INDEXED TRACKER_NS "fulltextIndexed"
-#define TRACKER_FTS_WEIGHT TRACKER_NS "weight"
-#define TRACKER_DEPRECATED TRACKER_NS "deprecated"
+#define NRL_CLASS_SPECIFICATION NRL_NS "classSpecification"
+#define NRL_PROPERTY_SPECIFICATION NRL_NS "propertySpecification"
+#define NRL_NOTIFY NRL_NS "notify"
+#define NRL_FTS_INDEXED NRL_NS "fulltextIndexed"
+#define NRL_FTS_WEIGHT NRL_NS "weight"
+#define NRL_DEPRECATED NRL_NS "deprecated"
 
 /* Ontology description */
 #define DSC_PREFIX "http://tracker.api.gnome.org/ontology/v3/dsc#"
@@ -130,9 +129,9 @@ load_in_memory (Ontology    *ontology,
 			def->subclasses = g_list_prepend (def->subclasses,
 			                                  g_strdup (turtle_subject));
 		}
-	} else if (!g_strcmp0 (turtle_predicate, TRACKER_NOTIFY)) {
+	} else if (!g_strcmp0 (turtle_predicate, NRL_NOTIFY)) {
 		/*
-		 * A tracker:notify TRUE
+		 * A nrl:notify TRUE
 		 */
 		OntologyClass *def;
 
@@ -143,9 +142,9 @@ load_in_memory (Ontology    *ontology,
 
 		def->notify = string_to_boolean (turtle_object);
 
-	} else if (!g_strcmp0 (turtle_predicate, TRACKER_FTS_INDEXED)) {
+	} else if (!g_strcmp0 (turtle_predicate, NRL_FTS_INDEXED)) {
 		/*
-		 * A tracker:fulltextIndexed TRUE
+		 * A nrl:fulltextIndexed TRUE
 		 */
 		OntologyProperty *prop;
 
@@ -156,9 +155,9 @@ load_in_memory (Ontology    *ontology,
 
 		prop->fulltextIndexed = string_to_boolean (turtle_object);
 
-	} else if (!g_strcmp0 (turtle_predicate, TRACKER_FTS_WEIGHT)) {
+	} else if (!g_strcmp0 (turtle_predicate, NRL_FTS_WEIGHT)) {
 		/*
-		 * A tracker:weight X
+		 * A nrl:weight X
 		 */
 		OntologyProperty *prop;
 
@@ -185,7 +184,7 @@ load_in_memory (Ontology    *ontology,
 			}
 		}
 
-	} else if (!g_strcmp0 (turtle_predicate, TRACKER_CLASS_SPECIFICATION)) {
+	} else if (!g_strcmp0 (turtle_predicate, NRL_CLASS_SPECIFICATION)) {
 		OntologyClass *klass;
 
 		klass = g_hash_table_lookup (ontology->classes, turtle_subject);
@@ -195,7 +194,7 @@ load_in_memory (Ontology    *ontology,
 			g_error ("Error in specification (class %s doesn't exist)", turtle_subject);
 		}
 
-	} else if (!g_strcmp0 (turtle_predicate, TRACKER_PROPERTY_SPECIFICATION)) {
+	} else if (!g_strcmp0 (turtle_predicate, NRL_PROPERTY_SPECIFICATION)) {
 		OntologyProperty *prop;
 
 		prop = g_hash_table_lookup (ontology->properties, turtle_subject);
@@ -280,9 +279,9 @@ load_in_memory (Ontology    *ontology,
 			                                       g_strdup (turtle_subject));
 		}
 
-	} else if (!g_strcmp0 (turtle_predicate, TRACKER_DEPRECATED)) {
+	} else if (!g_strcmp0 (turtle_predicate, NRL_DEPRECATED)) {
 		/*
-		 * X tracker:deprecated true
+		 * X nrl:deprecated true
 		 *
 		 * This can apply to classes OR properties OR
 		 * namespaces!

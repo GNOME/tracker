@@ -50,7 +50,7 @@ class TrackerNotifierTests():
         self.results_inserts = []
         self.results_updates = []
 
-        self.notifier = self.conn.create_notifier(Tracker.NotifierFlags.QUERY_URN)
+        self.notifier = self.conn.create_notifier()
         self.notifier.connect('events', self.__signal_received_cb)
 
     def __wait_for_signal(self):
