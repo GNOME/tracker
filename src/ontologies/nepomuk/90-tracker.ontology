@@ -54,6 +54,12 @@ tracker:extractor-data-source a nie:DataSource ;
 
 nao:predefined-tag-favorite a nao:Tag .
 
+tracker:Game a rdfs:Class ;
+        rdfs:label "Game" ;
+        rdfs:comment "A game" ;
+        rdfs:subClassOf nie:InformationElement ;
+        rdfs:subClassOf nfo:SoftwareApplication .
+
 tracker:ExternalReference a rdfs:Class ;
         rdfs:label "External reference" ;
         rdfs:comment "External reference to online services" ;
