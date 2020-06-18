@@ -1,6 +1,6 @@
 SELECT ?g ?p ?v WHERE {
 	GRAPH ?g {
 		example:resource ?p ?v .
-		FILTER (?p != tracker:added && ?p != tracker:modified)
+		FILTER (?p != nrl:added && ?p != nrl:modified)
 	}
 } ORDER BY ?g ?p ?v

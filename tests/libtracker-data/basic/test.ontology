@@ -1,19 +1,19 @@
 @prefix ns: <http://example.org/ns#> .
+@prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix x:  <http://example.org/x/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix z:  <http://example.org/x/#> .
 
-ns: a tracker:Namespace ;
-	tracker:prefix "ns" .
+ns: a nrl:Namespace ;
+	nrl:prefix "ns" .
 
-x: a tracker:Namespace ;
-	tracker:prefix "x" .
+x: a nrl:Namespace ;
+	nrl:prefix "x" .
 
-z: a tracker:Namespace ;
-	tracker:prefix "z" .
+z: a nrl:Namespace ;
+	nrl:prefix "z" .
 
 x:A a rdfs:Class ;
 	rdfs:subClassOf rdfs:Resource .

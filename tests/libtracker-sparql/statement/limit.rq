@@ -1,5 +1,5 @@
 SELECT ?s {
-  ?s tracker:indexed true
+  ?s nrl:indexed true
 }
 ORDER BY ?s
 LIMIT ~arg1
