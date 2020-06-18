@@ -79,3 +79,10 @@ tracker:hasExternalReference a rdf:Property ;
         rdfs:comment "Links the information element with the external reference" ;
         rdfs:domain nie:InformationElement ;
         rdfs:range tracker:ExternalReference .
+
+tracker:extractorHash a rdf:Property ;
+        rdfs:label "Extractor hash" ;
+        rdfs:comment "Hash identifying the extractor of the metadata" ;
+        nrl:maxCardinality 1 ;
+        rdfs:domain nfo:FileDataObject ;
+        rdfs:range xsd:string .
