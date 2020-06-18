@@ -288,10 +288,10 @@ get_fts_weights (TrackerDBInterface *iface,
 		weights = g_hash_table_new (g_str_hash, g_str_equal);
 		db = sqlite3_context_db_handle (context);
 		rc = sqlite3_prepare_v2 (db,
-		                         "SELECT \"rdf:Property\".\"tracker:weight\", "
+		                         "SELECT \"rdf:Property\".\"nrl:weight\", "
 		                         "(SELECT Uri FROM Resource where Resource.ID=\"rdf:Property\".ID) "
 		                         "FROM \"rdf:Property\" "
-		                         "WHERE \"rdf:Property\".\"tracker:fulltextIndexed\" = 1 ",
+		                         "WHERE \"rdf:Property\".\"nrl:fulltextIndexed\" = 1 ",
 		                         -1, &stmt, NULL);
 
 		manager = tracker_db_interface_get_user_data (iface);

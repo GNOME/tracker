@@ -60,7 +60,7 @@
 #define NRL_INVERSE_FUNCTIONAL_PROPERTY TRACKER_PREFIX_NRL "InverseFunctionalProperty"
 #define NRL_MAX_CARDINALITY             TRACKER_PREFIX_NRL "maxCardinality"
 
-#define TRACKER_LAST_MODIFIED           TRACKER_PREFIX_TRACKER "lastModified"
+#define NRL_LAST_MODIFIED           TRACKER_PREFIX_NRL "lastModified"
 
 #define ZLIBBUFSIZ 8192
 
@@ -767,7 +767,6 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 					tracker_property_set_indexed (property, FALSE);
 					tracker_property_set_cardinality_changed (property, FALSE);
 					tracker_property_set_secondary_index (property, NULL);
-					tracker_property_set_writeback (property, FALSE);
 					tracker_property_set_is_inverse_functional_property (property, FALSE);
 					tracker_property_set_multiple_values (property, TRUE);
 					tracker_property_set_fulltext_indexed (property, FALSE);
@@ -805,7 +804,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 			}
 
 			tracker_property_set_is_inverse_functional_property (property, TRUE);
-		} else if (g_strcmp0 (object, TRACKER_PREFIX_TRACKER "Namespace") == 0) {
+		} else if (g_strcmp0 (object, TRACKER_PREFIX_NRL "Namespace") == 0) {
 			TrackerNamespace *namespace;
 
 			if (tracker_ontologies_get_namespace_by_uri (manager->ontologies, subject) != NULL) {
@@ -821,7 +820,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 			tracker_ontologies_add_namespace (manager->ontologies, namespace);
 			g_object_unref (namespace);
 
-		} else if (g_strcmp0 (object, TRACKER_PREFIX_TRACKER "Ontology") == 0) {
+		} else if (g_strcmp0 (object, TRACKER_PREFIX_NRL "Ontology") == 0) {
 			TrackerOntology *ontology;
 
 			if (tracker_ontologies_get_ontology_by_uri (manager->ontologies, subject) != NULL) {
@@ -916,7 +915,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 
 		tracker_class_add_super_class (class, super_class);
 
-	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "notify") == 0) {
+	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_NRL "notify") == 0) {
 		TrackerClass *class;
 
 		class = tracker_ontologies_get_class_by_uri (manager->ontologies, subject);
@@ -927,7 +926,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		}
 
 		tracker_class_set_notify (class, (strcmp (object, "true") == 0));
-	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "domainIndex") == 0) {
+	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_NRL "domainIndex") == 0) {
 		TrackerClass *class;
 		TrackerProperty *property;
 		TrackerProperty **properties;
@@ -947,7 +946,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		if (property == NULL) {
 
 			/* In this case the import of the TTL will still make the introspection
-			 * have the URI set as a tracker:domainIndex for class. The critical
+			 * have the URI set as a nrl:domainIndex for class. The critical
 			 * will have happened, but future operations might not cope with this
 			 * situation. TODO: add error handling so that the entire ontology
 			 * change operation is discarded, for example ignore the entire
@@ -959,14 +958,14 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 			 * not. Let's just not make mistakes when changing the .ontology
 			 * files for now. */
 
-			g_critical ("%s: Unknown property %s for tracker:domainIndex in %s."
+			g_critical ("%s: Unknown property %s for nrl:domainIndex in %s."
 			            "Don't release this .ontology change!",
 			            ontology_path, object, subject);
 			return;
 		}
 
 		if (tracker_property_get_multiple_values (property)) {
-			g_critical ("%s: Property %s has multiple values while trying to add it as tracker:domainIndex in %s, this isn't supported",
+			g_critical ("%s: Property %s has multiple values while trying to add it as nrl:domainIndex in %s, this isn't supported",
 			            ontology_path, object, subject);
 			return;
 		}
@@ -975,7 +974,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		for (i = 0; i < n_props; i++) {
 			if (tracker_property_get_domain (properties[i]) == class &&
 			    properties[i] == property) {
-				g_critical ("%s: Property %s is already a first-class property of %s while trying to add it as tracker:domainIndex",
+				g_critical ("%s: Property %s is already a first-class property of %s while trying to add it as nrl:domainIndex",
 				            ontology_path, object, subject);
 			}
 		}
@@ -984,7 +983,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		while (*properties) {
 			if (property == *properties) {
 				TRACKER_NOTE (ONTOLOGY_CHANGES,
-				              g_message ("%s: Property %s already a tracker:domainIndex in %s",
+				              g_message ("%s: Property %s already a nrl:domainIndex in %s",
 				                         ontology_path, object, subject));
 				ignore = TRUE;
 			}
@@ -1001,9 +1000,9 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 			}
 		}
 
-		/* This doesn't detect removed tracker:domainIndex situations, it
+		/* This doesn't detect removed nrl:domainIndex situations, it
 		 * only checks whether no new ones are being added. For
-		 * detecting the removal of a tracker:domainIndex, please check the
+		 * detecting the removal of a nrl:domainIndex, please check the
 		 * tracker_data_ontology_process_changes_pre_db stuff */
 
 		if (!ignore) {
@@ -1014,17 +1013,6 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 			tracker_property_add_domain_index (property, class);
 		}
 
-	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "writeback") == 0) {
-		TrackerProperty *property;
-
-		property = tracker_ontologies_get_property_by_uri (manager->ontologies, subject);
-
-		if (property == NULL) {
-			g_critical ("%s: Unknown property %s", ontology_path, subject);
-			return;
-		}
-
-		tracker_property_set_writeback (property, (strcmp (object, "true") == 0));
 	} else if (g_strcmp0 (predicate, RDFS_SUB_PROPERTY_OF) == 0) {
 		TrackerProperty *property, *super_property;
 		gboolean is_new;
@@ -1185,7 +1173,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 			tracker_property_set_last_multiple_values (property, TRUE);
 		}
 
-	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "indexed") == 0) {
+	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_NRL "indexed") == 0) {
 		TrackerProperty *property;
 
 		property = tracker_ontologies_get_property_by_uri (manager->ontologies, subject);
@@ -1195,7 +1183,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		}
 
 		tracker_property_set_indexed (property, (strcmp (object, "true") == 0));
-	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "secondaryIndex") == 0) {
+	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_NRL "secondaryIndex") == 0) {
 		TrackerProperty *property, *secondary_index;
 
 		property = tracker_ontologies_get_property_by_uri (manager->ontologies, subject);
@@ -1211,7 +1199,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		}
 
 		tracker_property_set_secondary_index (property, secondary_index);
-	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "fulltextIndexed") == 0) {
+	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_NRL "fulltextIndexed") == 0) {
 		TrackerProperty *property;
 
 		property = tracker_ontologies_get_property_by_uri (manager->ontologies, subject);
@@ -1222,7 +1210,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 
 		tracker_property_set_fulltext_indexed (property,
 		                                       strcmp (object, "true") == 0);
-	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "prefix") == 0) {
+	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_NRL "prefix") == 0) {
 		TrackerNamespace *namespace;
 
 		namespace = tracker_ontologies_get_namespace_by_uri (manager->ontologies, subject);
@@ -1236,7 +1224,7 @@ tracker_data_ontology_load_statement (TrackerDataManager  *manager,
 		}
 
 		tracker_namespace_set_prefix (namespace, object);
-	} else if (g_strcmp0 (predicate, TRACKER_LAST_MODIFIED) == 0) {
+	} else if (g_strcmp0 (predicate, NRL_LAST_MODIFIED) == 0) {
 		TrackerOntology *ontology;
 
 		ontology = tracker_ontologies_get_ontology_by_uri (manager->ontologies, subject);
@@ -1315,7 +1303,7 @@ check_for_deleted_domain_index (TrackerDataManager *manager,
 		for (l = hfound; l != NULL; l = l->next) {
 			TrackerProperty *prop = l->data;
 			TRACKER_NOTE (ONTOLOGY_CHANGES,
-			              g_message ("Ontology change: keeping tracker:domainIndex: %s",
+			              g_message ("Ontology change: keeping nrl:domainIndex: %s",
 			                         tracker_property_get_name (prop)));
 			tracker_property_set_is_new_domain_index (prop, class, TRUE);
 		}
@@ -1327,7 +1315,7 @@ check_for_deleted_domain_index (TrackerDataManager *manager,
 			GBytes *bytes;
 
 			TRACKER_NOTE (ONTOLOGY_CHANGES,
-			              g_message ("Ontology change: deleting tracker:domainIndex: %s",
+			              g_message ("Ontology change: deleting nrl:domainIndex: %s",
 			                         tracker_property_get_name (prop)));
 			tracker_property_del_domain_index (prop, class);
 			tracker_class_del_domain_index (class, prop);
@@ -1336,7 +1324,7 @@ check_for_deleted_domain_index (TrackerDataManager *manager,
 			bytes = g_bytes_new (uri, strlen (uri) + 1);
 			tracker_data_delete_statement (manager->data_update, NULL,
 			                               tracker_class_get_uri (class),
-			                               TRACKER_PREFIX_TRACKER "domainIndex",
+			                               TRACKER_PREFIX_NRL "domainIndex",
 			                               bytes,
 			                               &error);
 			g_bytes_unref (bytes);
@@ -1589,7 +1577,7 @@ tracker_data_ontology_process_changes_post_db (TrackerDataManager  *manager,
 
 	/* This updates property-property changes and marks classes for necessity
 	 * of having their tables recreated later. There's support for
-	 * tracker:notify, tracker:writeback and tracker:indexed */
+	 * nrl:notify and nrl:indexed */
 
 	if (seen_classes) {
 		for (i = 0; i < seen_classes->len; i++) {
@@ -1601,16 +1589,16 @@ tracker_data_ontology_process_changes_post_db (TrackerDataManager  *manager,
 
 			if (tracker_class_get_notify (class)) {
 				update_property_value (manager, ontology_path,
-				                       "tracker:notify",
+				                       "nrl:notify",
 				                       subject,
-				                       TRACKER_PREFIX_TRACKER "notify",
+				                       TRACKER_PREFIX_NRL "notify",
 				                       "true", allowed_boolean_conversions,
 				                       class, NULL, &n_error);
 			} else {
 				update_property_value (manager, ontology_path,
-				                       "tracker:notify",
+				                       "nrl:notify",
 				                       subject,
-				                       TRACKER_PREFIX_TRACKER "notify",
+				                       TRACKER_PREFIX_NRL "notify",
 				                       "false", allowed_boolean_conversions,
 				                       class, NULL, &n_error);
 			}
@@ -1666,33 +1654,11 @@ tracker_data_ontology_process_changes_post_db (TrackerDataManager  *manager,
 				g_object_unref (cursor);
 			}
 
-			/* Check for possibly supported changes */
-			if (tracker_property_get_writeback (property)) {
-				update_property_value (manager, ontology_path,
-				                       "tracker:writeback",
-				                       subject,
-				                       TRACKER_PREFIX_TRACKER "writeback",
-				                       "true", allowed_boolean_conversions,
-				                       NULL, property, &n_error);
-			} else {
-				update_property_value (manager, ontology_path,
-				                       "tracker:writeback",
-				                       subject,
-				                       TRACKER_PREFIX_TRACKER "writeback",
-				                       "false", allowed_boolean_conversions,
-				                       NULL, property, &n_error);
-			}
-
-			if (n_error) {
-				g_propagate_error (error, n_error);
-				return;
-			}
-
 			if (tracker_property_get_indexed (property)) {
 				if (update_property_value (manager, ontology_path,
-				                           "tracker:indexed",
+				                           "nrl:indexed",
 				                           subject,
-				                           TRACKER_PREFIX_TRACKER "indexed",
+				                           TRACKER_PREFIX_NRL "indexed",
 				                           "true", allowed_boolean_conversions,
 				                           NULL, property, &n_error)) {
 					fix_indexed (manager, property, TRUE, &n_error);
@@ -1700,9 +1666,9 @@ tracker_data_ontology_process_changes_post_db (TrackerDataManager  *manager,
 				}
 			} else {
 				if (update_property_value (manager, ontology_path,
-				                           "tracker:indexed",
+				                           "nrl:indexed",
 				                           subject,
-				                           TRACKER_PREFIX_TRACKER "indexed",
+				                           TRACKER_PREFIX_NRL "indexed",
 				                           "false", allowed_boolean_conversions,
 				                           NULL, property, &n_error)) {
 					fix_indexed (manager, property, TRUE, &n_error);
@@ -1719,9 +1685,9 @@ tracker_data_ontology_process_changes_post_db (TrackerDataManager  *manager,
 
 			if (secondary_index) {
 				if (update_property_value (manager, ontology_path,
-				                           "tracker:secondaryIndex",
+				                           "nrl:secondaryIndex",
 				                           subject,
-				                           TRACKER_PREFIX_TRACKER "secondaryIndex",
+				                           TRACKER_PREFIX_NRL "secondaryIndex",
 				                           tracker_property_get_uri (secondary_index), NULL,
 				                           NULL, property, &n_error)) {
 					if (!indexed_set) {
@@ -1730,9 +1696,9 @@ tracker_data_ontology_process_changes_post_db (TrackerDataManager  *manager,
 				}
 			} else {
 				if (update_property_value (manager, ontology_path,
-				                           "tracker:secondaryIndex",
+				                           "nrl:secondaryIndex",
 				                           subject,
-				                           TRACKER_PREFIX_TRACKER "secondaryIndex",
+				                           TRACKER_PREFIX_NRL "secondaryIndex",
 				                           NULL, NULL,
 				                           NULL, property, &n_error)) {
 					if (!indexed_set) {
@@ -1860,7 +1826,7 @@ get_ontology_from_file (TrackerDataManager *manager,
 	                                   &subject, &predicate, &object,
 	                                   NULL, &error)) {
 		if (g_strcmp0 (predicate, RDF_TYPE) == 0) {
-			if (g_strcmp0 (object, TRACKER_PREFIX_TRACKER "Ontology") == 0) {
+			if (g_strcmp0 (object, TRACKER_PREFIX_NRL "Ontology") == 0) {
 				TrackerOntology *ontology;
 
 				ontology = tracker_ontology_new ();
@@ -1872,7 +1838,7 @@ get_ontology_from_file (TrackerDataManager *manager,
 				                     g_strdup (subject),
 				                     ontology);
 			}
-		} else if (g_strcmp0 (predicate, TRACKER_LAST_MODIFIED) == 0) {
+		} else if (g_strcmp0 (predicate, NRL_LAST_MODIFIED) == 0) {
 			TrackerOntology *ontology;
 
 			ontology = g_hash_table_lookup (ontology_uris, subject);
@@ -1903,7 +1869,7 @@ get_ontology_from_file (TrackerDataManager *manager,
 
 	if (ret == NULL) {
 		gchar *uri = g_file_get_uri (file);
-		g_critical ("Ontology file has no tracker:lastModified header: %s", uri);
+		g_critical ("Ontology file has no nrl:lastModified header: %s", uri);
 		g_free (uri);
 	}
 
@@ -1938,7 +1904,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 			if (prop && tracker_property_get_is_new (prop) != in_update) {
 				return;
 			}
-		} else if (g_strcmp0 (object, TRACKER_PREFIX_TRACKER "Namespace") == 0) {
+		} else if (g_strcmp0 (object, TRACKER_PREFIX_NRL "Namespace") == 0) {
 			TrackerNamespace *namespace;
 
 			namespace = tracker_ontologies_get_namespace_by_uri (manager->ontologies, subject);
@@ -1946,7 +1912,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 			if (namespace && tracker_namespace_get_is_new (namespace) != in_update) {
 				return;
 			}
-		} else if (g_strcmp0 (object, TRACKER_PREFIX_TRACKER "Ontology") == 0) {
+		} else if (g_strcmp0 (object, TRACKER_PREFIX_NRL "Ontology") == 0) {
 			TrackerOntology *ontology;
 
 			ontology = tracker_ontologies_get_ontology_by_uri (manager->ontologies, subject);
@@ -1967,8 +1933,8 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 	           g_strcmp0 (predicate, RDFS_DOMAIN) == 0                   ||
 	           g_strcmp0 (predicate, RDFS_RANGE) == 0                    ||
 	           /* g_strcmp0 (predicate, NRL_MAX_CARDINALITY) == 0        || */
-	           g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "indexed") == 0      ||
-	           g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "fulltextIndexed") == 0) {
+	           g_strcmp0 (predicate, TRACKER_PREFIX_NRL "indexed") == 0      ||
+	           g_strcmp0 (predicate, TRACKER_PREFIX_NRL "fulltextIndexed") == 0) {
 		TrackerProperty *prop;
 
 		prop = tracker_ontologies_get_property_by_uri (manager->ontologies, subject);
@@ -1976,7 +1942,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 		if (prop && tracker_property_get_is_new (prop) != in_update) {
 			return;
 		}
-	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_TRACKER "prefix") == 0) {
+	} else if (g_strcmp0 (predicate, TRACKER_PREFIX_NRL "prefix") == 0) {
 		TrackerNamespace *namespace;
 
 		namespace = tracker_ontologies_get_namespace_by_uri (manager->ontologies, subject);
@@ -1984,7 +1950,7 @@ tracker_data_ontology_process_statement (TrackerDataManager *manager,
 		if (namespace && tracker_namespace_get_is_new (namespace) != in_update) {
 			return;
 		}
-	} else if (g_strcmp0 (predicate, TRACKER_LAST_MODIFIED) == 0) {
+	} else if (g_strcmp0 (predicate, NRL_LAST_MODIFIED) == 0) {
 		TrackerOntology *ontology;
 
 		ontology = tracker_ontologies_get_ontology_by_uri (manager->ontologies, subject);
@@ -2099,8 +2065,8 @@ class_add_domain_indexes_from_db (TrackerDBInterface *iface,
 	GError *error = NULL;
 
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &error,
-	                                              "SELECT (SELECT Uri FROM Resource WHERE ID = \"tracker:domainIndex\") "
-	                                              "FROM \"rdfs:Class_tracker:domainIndex\" "
+	                                              "SELECT (SELECT Uri FROM Resource WHERE ID = \"nrl:domainIndex\") "
+	                                              "FROM \"rdfs:Class_nrl:domainIndex\" "
 	                                              "WHERE ID = (SELECT ID FROM Resource WHERE Uri = ?)");
 
 	if (!stmt) {
@@ -2178,9 +2144,9 @@ db_get_static_data (TrackerDBInterface  *iface,
 	GError *internal_error = NULL;
 
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &internal_error,
-	                                              "SELECT (SELECT Uri FROM Resource WHERE ID = \"tracker:Ontology\".ID), "
-	                                              "       \"tracker:lastModified\" "
-	                                              "FROM \"tracker:Ontology\"");
+	                                              "SELECT (SELECT Uri FROM Resource WHERE ID = \"nrl:Ontology\".ID), "
+	                                              "       \"nrl:lastModified\" "
+	                                              "FROM \"nrl:Ontology\"");
 
 	if (stmt) {
 		cursor = tracker_db_statement_start_cursor (stmt, &internal_error);
@@ -2217,9 +2183,9 @@ db_get_static_data (TrackerDBInterface  *iface,
 	}
 
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &internal_error,
-	                                              "SELECT (SELECT Uri FROM Resource WHERE ID = \"tracker:Namespace\".ID), "
-	                                              "\"tracker:prefix\" "
-	                                              "FROM \"tracker:Namespace\"");
+	                                              "SELECT (SELECT Uri FROM Resource WHERE ID = \"nrl:Namespace\".ID), "
+	                                              "\"nrl:prefix\" "
+	                                              "FROM \"nrl:Namespace\"");
 
 	if (stmt) {
 		cursor = tracker_db_statement_start_cursor (stmt, &internal_error);
@@ -2258,7 +2224,7 @@ db_get_static_data (TrackerDBInterface  *iface,
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &internal_error,
 	                                              "SELECT \"rdfs:Class\".ID, "
 	                                              "(SELECT Uri FROM Resource WHERE ID = \"rdfs:Class\".ID), "
-	                                              "\"tracker:notify\" "
+	                                              "\"nrl:notify\" "
 	                                              "FROM \"rdfs:Class\" ORDER BY ID");
 
 	if (stmt) {
@@ -2320,10 +2286,9 @@ db_get_static_data (TrackerDBInterface  *iface,
 	                                              "(SELECT Uri FROM Resource WHERE ID = \"rdfs:domain\"), "
 	                                              "(SELECT Uri FROM Resource WHERE ID = \"rdfs:range\"), "
 	                                              "\"nrl:maxCardinality\", "
-	                                              "\"tracker:indexed\", "
-	                                              "(SELECT Uri FROM Resource WHERE ID = \"tracker:secondaryIndex\"), "
-	                                              "\"tracker:fulltextIndexed\", "
-	                                              "\"tracker:writeback\", "
+	                                              "\"nrl:indexed\", "
+	                                              "(SELECT Uri FROM Resource WHERE ID = \"nrl:secondaryIndex\"), "
+	                                              "\"nrl:fulltextIndexed\", "
 	                                              "(SELECT 1 FROM \"rdfs:Resource_rdf:type\" WHERE ID = \"rdf:Property\".ID AND "
 	                                              "\"rdf:type\" = (SELECT ID FROM Resource WHERE Uri = '" NRL_INVERSE_FUNCTIONAL_PROPERTY "')) "
 	                                              "FROM \"rdf:Property\" ORDER BY ID");
@@ -2340,7 +2305,6 @@ db_get_static_data (TrackerDBInterface  *iface,
 			const gchar     *uri, *domain_uri, *range_uri, *secondary_index_uri;
 			gboolean         multi_valued, indexed, fulltext_indexed;
 			gboolean         is_inverse_functional_property;
-			gboolean         writeback;
 			gint             id;
 
 			property = tracker_property_new (FALSE);
@@ -2383,19 +2347,8 @@ db_get_static_data (TrackerDBInterface  *iface,
 				fulltext_indexed = FALSE;
 			}
 
-			/* tracker:writeback column */
-			tracker_db_cursor_get_value (cursor, 8, &value);
-
-			if (G_VALUE_TYPE (&value) != 0) {
-				writeback = (g_value_get_int64 (&value) == 1);
-				g_value_unset (&value);
-			} else {
-				/* NULL */
-				writeback = FALSE;
-			}
-
 			/* NRL_INVERSE_FUNCTIONAL_PROPERTY column */
-			tracker_db_cursor_get_value (cursor, 9, &value);
+			tracker_db_cursor_get_value (cursor, 8, &value);
 
 			if (G_VALUE_TYPE (&value) != 0) {
 				is_inverse_functional_property = TRUE;
@@ -2418,7 +2371,6 @@ db_get_static_data (TrackerDBInterface  *iface,
 			tracker_property_set_indexed (property, indexed);
 
 			tracker_property_set_db_schema_changed (property, FALSE);
-			tracker_property_set_writeback (property, writeback);
 
 			if (secondary_index_uri) {
 				tracker_property_set_secondary_index (property, tracker_ontologies_get_property_by_uri (manager->ontologies, secondary_index_uri));
@@ -3890,8 +3842,8 @@ update_ontology_last_modified (TrackerDataManager  *manager,
 	ontology_uri = tracker_ontology_get_uri (ontology);
 	last_mod = tracker_ontology_get_last_modified (ontology);
 	stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_UPDATE, error,
-	                                              "UPDATE \"tracker:Ontology\" SET \"tracker:lastModified\"= ? "
-	                                              "WHERE \"tracker:Ontology\".ID = "
+	                                              "UPDATE \"nrl:Ontology\" SET \"nrl:lastModified\"= ? "
+	                                              "WHERE \"nrl:Ontology\".ID = "
 	                                              "(SELECT Resource.ID FROM Resource WHERE "
 	                                              "Resource.Uri = ?)");
 	if (stmt) {
@@ -4287,13 +4239,13 @@ tracker_data_manager_initable_init (GInitable     *initable,
 
 		/* check ontology against database */
 
-		/* Get a map of tracker:Ontology v. tracker:lastModified so that we can test
+		/* Get a map of nrl:Ontology v. nrl:lastModified so that we can test
 		 * for all the ontology files in ontology_location whether the last-modified
 		 * has changed since we dealt with the file last time. */
 
 		stmt = tracker_db_interface_create_statement (iface, TRACKER_DB_STATEMENT_CACHE_TYPE_SELECT, &n_error,
-		        "SELECT Resource.Uri, \"tracker:Ontology\".\"tracker:lastModified\" FROM \"tracker:Ontology\" "
-		        "INNER JOIN Resource ON Resource.ID = \"tracker:Ontology\".ID ");
+		        "SELECT Resource.Uri, \"nrl:Ontology\".\"nrl:lastModified\" FROM \"nrl:Ontology\" "
+		        "INNER JOIN Resource ON Resource.ID = \"nrl:Ontology\".ID ");
 
 		if (stmt) {
 			cursor = tracker_db_statement_start_cursor (stmt, &n_error);

@@ -2,19 +2,18 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tracker: <http://tracker.api.gnome.org/ontology/v3/tracker#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix nrl: <http://tracker.api.gnome.org/ontology/v3/nrl#> .
 @prefix example: <http://example.org/things#> .
 
-foaf: a tracker:Namespace ;
-	tracker:prefix "foaf" .
+foaf: a nrl:Namespace ;
+	nrl:prefix "foaf" .
 
-owl: a tracker:Namespace ;
-	tracker:prefix "owl" .
+owl: a nrl:Namespace ;
+	nrl:prefix "owl" .
 
-example: a tracker:Namespace ;
-	tracker:prefix "example" .
+example: a nrl:Namespace ;
+	nrl:prefix "example" .
 
 owl:Thing a rdfs:Class ;
 	rdfs:subClassOf rdfs:Resource .
