@@ -164,7 +164,6 @@ TrackerSparqlCursor * tracker_sparql_connection_query_finish (TrackerSparqlConne
 TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_connection_update (TrackerSparqlConnection  *connection,
                                        const gchar              *sparql,
-                                       gint                      priority,
                                        GCancellable             *cancellable,
                                        GError                  **error);
 TRACKER_AVAILABLE_IN_ALL
@@ -193,7 +192,6 @@ gboolean tracker_sparql_connection_update_array_finish (TrackerSparqlConnection 
 TRACKER_AVAILABLE_IN_ALL
 GVariant * tracker_sparql_connection_update_blank (TrackerSparqlConnection  *connection,
                                                    const gchar              *sparql,
-                                                   gint                      priority,
                                                    GCancellable             *cancellable,
                                                    GError                  **error);
 TRACKER_AVAILABLE_IN_ALL

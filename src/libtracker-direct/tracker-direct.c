@@ -711,7 +711,6 @@ tracker_direct_connection_query_statement (TrackerSparqlConnection  *self,
 static void
 tracker_direct_connection_update (TrackerSparqlConnection  *self,
                                   const gchar              *sparql,
-                                  gint                      priority,
                                   GCancellable             *cancellable,
                                   GError                  **error)
 {
@@ -807,7 +806,6 @@ tracker_direct_connection_update_array_finish (TrackerSparqlConnection  *self,
 static GVariant *
 tracker_direct_connection_update_blank (TrackerSparqlConnection  *self,
                                         const gchar              *sparql,
-                                        gint                      priority,
                                         GCancellable             *cancellable,
                                         GError                  **error)
 {

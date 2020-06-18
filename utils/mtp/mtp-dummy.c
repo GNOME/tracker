@@ -149,7 +149,6 @@ update_store (const gchar *sparql)
 	/* Run a synchronous update query */
 	tracker_sparql_connection_update (connection,
 	                                  sparql,
-	                                  G_PRIORITY_DEFAULT,
 	                                  NULL,
 	                                  &error);
 
