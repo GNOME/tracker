@@ -169,7 +169,6 @@ void tracker_sparql_connection_update (TrackerSparqlConnection  *connection,
 TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_connection_update_async (TrackerSparqlConnection *connection,
                                              const gchar             *sparql,
-                                             gint                     priority,
                                              GCancellable            *cancellable,
                                              GAsyncReadyCallback      callback,
                                              gpointer                 user_data);
@@ -181,7 +180,6 @@ TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_connection_update_array_async (TrackerSparqlConnection  *connection,
                                                    gchar                   **sparql,
                                                    gint                      sparql_length,
-                                                   gint                      priority,
                                                    GCancellable             *cancellable,
                                                    GAsyncReadyCallback       callback,
                                                    gpointer                  user_data);
@@ -197,7 +195,6 @@ GVariant * tracker_sparql_connection_update_blank (TrackerSparqlConnection  *con
 TRACKER_AVAILABLE_IN_ALL
 void tracker_sparql_connection_update_blank_async (TrackerSparqlConnection *connection,
                                                    const gchar             *sparql,
-                                                   gint                     priority,
                                                    GCancellable            *cancellable,
                                                    GAsyncReadyCallback      callback,
                                                    gpointer                 user_data);

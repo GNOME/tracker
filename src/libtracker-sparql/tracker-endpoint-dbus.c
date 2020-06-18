@@ -409,7 +409,6 @@ read_update_cb (GObject      *object,
 		tracker_sparql_connection_update_array_async (conn,
 		                                              (gchar **) request->queries->pdata,
 		                                              request->queries->len,
-		                                              G_PRIORITY_DEFAULT,
 		                                              request->endpoint->cancellable,
 		                                              update_cb,
 		                                              request);
@@ -460,7 +459,6 @@ read_update_blank_cb (GObject      *object,
 	conn = tracker_endpoint_get_sparql_connection (TRACKER_ENDPOINT (request->endpoint));
 	tracker_sparql_connection_update_blank_async (conn,
 	                                              g_ptr_array_index (request->queries, 0),
-	                                              G_PRIORITY_DEFAULT,
 	                                              request->endpoint->cancellable,
 	                                              update_blank_cb,
 	                                              request);

@@ -365,7 +365,6 @@ test_tracker_sparql_update_array_async (DataFixture   *fixture,
 	tracker_sparql_connection_update_array_async (connection,
 	                                              (char**) queries,
 	                                              6,
-	                                              0,
 	                                              NULL,
 	                                              async_update_array_callback,
 	                                              data);
@@ -608,7 +607,6 @@ test_tracker_sparql_update_async (DataFixture  *fixture,
 
 	tracker_sparql_connection_update_async (connection,
 	                                        query,
-	                                        0,
 	                                        NULL,
 	                                        async_update_callback,
 	                                        data);
@@ -647,7 +645,6 @@ test_tracker_sparql_update_async_cancel (DataFixture  *fixture,
 
 	tracker_sparql_connection_update_async (connection,
 	                                        query,
-	                                        0,
 	                                        cancellable,
 	                                        cancel_update_cb,
 	                                        main_loop);
@@ -690,7 +687,6 @@ test_tracker_sparql_update_blank_async (DataFixture *fixture,
 
 	tracker_sparql_connection_update_blank_async (connection,
 	                                              query,
-	                                              0,
 	                                              NULL,
 	                                              async_update_blank_callback,
 	                                              data);
