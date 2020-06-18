@@ -68,7 +68,7 @@ class ConcurrentQueryTests():
         UPDATE = "INSERT { <test-09:picture-%d> a nmm:Photo. }"
         for i in range(0, AMOUNT_OF_QUERIES):
             self.conn.query_async(QUERY, None, self.query_cb)
-            self.conn.update_async(UPDATE % (i), 0, None, self.update_cb)
+            self.conn.update_async(UPDATE % (i), None, self.update_cb)
 
         # Safeguard of 60 seconds. The last reply should quit the loop
         GLib.timeout_add_seconds(60, self.timeout_cb)

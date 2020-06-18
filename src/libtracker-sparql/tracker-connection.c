@@ -276,7 +276,6 @@ tracker_sparql_connection_update (TrackerSparqlConnection  *connection,
  * tracker_sparql_connection_update_async:
  * @connection: a #TrackerSparqlConnection
  * @sparql: string containing the SPARQL update query
- * @priority: the priority for the asynchronous operation
  * @cancellable: a #GCancellable used to cancel the operation
  * @callback: user-defined #GAsyncReadyCallback to be called when
  *            asynchronous operation is finished.
@@ -287,7 +286,6 @@ tracker_sparql_connection_update (TrackerSparqlConnection  *connection,
 void
 tracker_sparql_connection_update_async (TrackerSparqlConnection *connection,
                                         const gchar             *sparql,
-                                        gint                     priority,
                                         GCancellable            *cancellable,
                                         GAsyncReadyCallback      callback,
                                         gpointer                 user_data)
@@ -298,7 +296,6 @@ tracker_sparql_connection_update_async (TrackerSparqlConnection *connection,
 
 	TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->update_async (connection,
 	                                                                sparql,
-	                                                                priority,
 	                                                                cancellable,
 	                                                                callback,
 	                                                                user_data);
@@ -331,7 +328,6 @@ tracker_sparql_connection_update_finish (TrackerSparqlConnection  *connection,
  * @connection: a #TrackerSparqlConnection
  * @sparql: an array of strings containing the SPARQL update queries
  * @sparql_length: the amount of strings you pass as @sparql
- * @priority: the priority for the asynchronous operation
  * @cancellable: a #GCancellable used to cancel the operation
  * @callback: user-defined #GAsyncReadyCallback to be called when
  *            asynchronous operation is finished.
@@ -345,7 +341,6 @@ void
 tracker_sparql_connection_update_array_async (TrackerSparqlConnection  *connection,
                                               gchar                   **sparql,
                                               gint                      sparql_length,
-                                              gint                      priority,
                                               GCancellable             *cancellable,
                                               GAsyncReadyCallback       callback,
                                               gpointer                  user_data)
@@ -357,7 +352,6 @@ tracker_sparql_connection_update_array_async (TrackerSparqlConnection  *connecti
 	TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->update_array_async (connection,
 	                                                                      sparql,
 	                                                                      sparql_length,
-	                                                                      priority,
 	                                                                      cancellable,
 	                                                                      callback,
 	                                                                      user_data);
@@ -457,7 +451,6 @@ tracker_sparql_connection_update_blank (TrackerSparqlConnection  *connection,
  * tracker_sparql_connection_update_blank_async:
  * @connection: a #TrackerSparqlConnection
  * @sparql: string containing the SPARQL update query
- * @priority: the priority for the asynchronous operation
  * @cancellable: a #GCancellable used to cancel the operation
  * @callback: user-defined #GAsyncReadyCallback to be called when
  *            asynchronous operation is finished.
@@ -468,7 +461,6 @@ tracker_sparql_connection_update_blank (TrackerSparqlConnection  *connection,
 void
 tracker_sparql_connection_update_blank_async (TrackerSparqlConnection *connection,
                                               const gchar             *sparql,
-                                              gint                     priority,
                                               GCancellable            *cancellable,
                                               GAsyncReadyCallback      callback,
                                               gpointer                 user_data)
@@ -479,7 +471,6 @@ tracker_sparql_connection_update_blank_async (TrackerSparqlConnection *connectio
 
 	TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->update_blank_async (connection,
 	                                                                      sparql,
-	                                                                      priority,
 	                                                                      cancellable,
 	                                                                      callback,
 	                                                                      user_data);

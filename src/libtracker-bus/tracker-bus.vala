@@ -142,7 +142,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		var loop = new MainLoop (context, false);
 		context.push_thread_default ();
 		AsyncResult async_res = null;
-		update_async.begin (sparql, GLib.Priority.DEFAULT, cancellable, (o, res) => {
+		update_async.begin (sparql, cancellable, (o, res) => {
 			async_res = res;
 			loop.quit ();
 		});
@@ -151,7 +151,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		update_async.end (async_res);
 	}
 
-	public async override void update_async (string sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public async override void update_async (string sparql, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
 		UnixInputStream input;
 		UnixOutputStream output;
 		pipe (out input, out output);
@@ -183,7 +183,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		handle_error_reply (reply);
 	}
 
-	public async override bool update_array_async (string[] sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public async override bool update_array_async (string[] sparql, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
 		UnixInputStream input;
 		UnixOutputStream output;
 		pipe (out input, out output);
@@ -226,7 +226,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		var loop = new MainLoop (context, false);
 		context.push_thread_default ();
 		AsyncResult async_res = null;
-		update_blank_async.begin (sparql, GLib.Priority.DEFAULT, cancellable, (o, res) => {
+		update_blank_async.begin (sparql, cancellable, (o, res) => {
 			async_res = res;
 			loop.quit ();
 		});
@@ -235,7 +235,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		return update_blank_async.end (async_res);
 	}
 
-	public async override GLib.Variant? update_blank_async (string sparql, int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
+	public async override GLib.Variant? update_blank_async (string sparql, Cancellable? cancellable = null) throws Sparql.Error, GLib.Error, GLib.IOError, DBusError {
 		UnixInputStream input;
 		UnixOutputStream output;
 		pipe (out input, out output);
