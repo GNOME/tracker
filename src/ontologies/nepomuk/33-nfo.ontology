@@ -1084,3 +1084,9 @@ nfo:roiRefersTo a rdf:Property;
         nrl:maxCardinality 1 ;
         rdfs:domain nfo:RegionOfInterest ;
         rdfs:range nie:InformationElement.
+
+# Addition to nepomuk
+nfo:GameImage a rdfs:Class ;
+        rdfs:label "Game" ;
+        rdfs:comment "A game image. This is a Tracker extension" ;
+        rdfs:subClassOf nfo:SoftwareApplication .
