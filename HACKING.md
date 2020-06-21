@@ -52,13 +52,12 @@ Tracker test suite. Note that Meson will not print log output from tests by
 default, use `meson test --verbose` or `meson test --print-errorlogs` to
 enable.
 
-The functional tests understand an additional variable, `TRACKER_TESTS_VERBOSE`
-with can be set to `1` or `yes` to see detailed logging from the test harness
-itself, and full log output from the internal D-Bus daemon. By default, these
-tests filter output from the D-Bus daemon to only show log messages from
-Tracker processes. Anything written directly to stdout, for example by
-`g_print()` or by the dbus-daemon itself, will not be displayed unless
-`TRACKER_TESTS_VERBOSE` is set.
+You can use `TRACKER_DEBUG=tests` to see logging from the test harness,
+including full log output from the internal D-Bus daemon for functional-tests.
+Note that by default, functional tests filter output from the D-Bus daemon to
+only show log messages from Tracker processes. Anything written directly to
+stdout, for example by `g_print()` or by the dbus-daemon itself, will not be
+displayed unless `TRACKER_DEBUG=tests` is set.
 
 When working with GitLab CI, you can use the
 [Run Pipeline dialog](https://gitlab.gnome.org/GNOME/tracker/pipelines/new)

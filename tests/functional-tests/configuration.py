@@ -18,6 +18,8 @@
 # 02110-1301, USA.
 #
 
+from gi.repository import GLib
+
 import json
 import logging
 import os
@@ -49,25 +51,12 @@ def tracker_version():
     return config['TRACKER_VERSION']
 
 
-def get_environment_boolean(variable):
-    '''Parse a yes/no boolean passed through the environment.'''
-
-    value = os.environ.get(variable, 'no').lower()
-    if value in ['no', '0', 'false']:
-        return False
-    elif value in ['yes', '1', 'true']:
-        return True
-    else:
-        raise RuntimeError('Unexpected value for %s: %s' %
-                           (variable, value))
-
-
-def get_environment_int(variable, default=0):
-    try:
-        return int(os.environ.get(variable))
-    except (TypeError, ValueError):
-        return default
-
+TRACKER_DEBUG_TESTS = 1
 
 def tests_verbose():
-    return get_environment_boolean('TRACKER_TESTS_VERBOSE')
+    tracker_debug_tests = GLib.DebugKey()
+    tracker_debug_tests.key = "tests"
+    tracker_debug_tests.value = TRACKER_DEBUG_TESTS
+
+    flags = GLib.parse_debug_string (os.environ.get('TRACKER_DEBUG', ''), [tracker_debug_tests])
+    return (flags & TRACKER_DEBUG_TESTS)
