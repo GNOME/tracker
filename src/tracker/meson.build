@@ -3,6 +3,7 @@ sources = [
     'tracker-config.c',
     'tracker-daemon.c',
     'tracker-dbus.c',
+    'tracker-export.c',
     'tracker-extract.c',
     'tracker-help.c',
     'tracker-index.c',

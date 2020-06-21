@@ -1,0 +1,51 @@
+.TH tracker-export 1 "Mar 2020" GNU "User Commands"
+
+.SH NAME
+tracker-export \- Export all data from a Tracker database.
+
+.SH SYNOPSIS
+\fBtracker export\fR [\fIoptions\fR...]
+
+.SH DESCRIPTION
+.B tracker export
+exports all data stored in a Tracker database, in Turtle format.
+
+The output is intended to be machine-readable, not human readable.
+Use a tool such as rapper(1) to convert the data to different formats.
+
+.SH OPTIONS
+.TP
+.B \-g, \-\-show-graphs
+This flag causes the relevant GRAPH statements to be output along with
+the data.
+
+In this mode the output is TriG syntax rather than Turtle, due to
+the extra GRAPH statements. Some tools which understand Turtle do not
+understand TriG.
+.TP
+.B \-t, \-\-type\fR=<\fITYPE\fR>
+Used for exporting a specific type of user data from a Tracker database.
+
+The possible \fITYPE\fR options are:
+.sp
+\fIfiles-starred\fR
+\- Export starred files (as created by GNOME Files)
+.sp
+\fIphotos-albums\fR
+\- Export photo albums (as created by GNOME Photos)
+.sp
+\fIphotos-favorites\fR
+\- Export starred photos (as created by GNOME Photos)
+
+.SH EXAMPLES
+.TP
+Export all data from Tracker Index and prettify the output using rapper(1).
+
+.BR
+.nf
+$ tracker export -b org.freedesktop.Tracker1.Miner.Files | rapper - -I . -i turtle -o turtle
+.fi
+
+.SH SEE ALSO
+.BR tracker-import (1),
+.BR tracker-sparql (1).

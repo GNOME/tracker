@@ -1,3 +1,4 @@
+install_man('tracker-export.1')
 install_man('tracker-info.1')
 install_man('tracker-daemon.1')
 install_man('tracker-search.1')
