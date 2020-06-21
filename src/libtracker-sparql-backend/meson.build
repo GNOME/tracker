@@ -1,7 +1,11 @@
+subdir('bus')
+subdir('direct')
+subdir('remote')
+
 libtracker_sparql = library('tracker-sparql-' + tracker_api_version,
     '../libtracker-common/libtracker-common.vapi',
     '../libtracker-data/libtracker-data.vapi',
-    '../libtracker-direct/tracker-direct.vapi',
+    'direct/tracker-direct.vapi',
     'tracker-backend.vala',
 
     gnu_symbol_visibility: 'hidden',

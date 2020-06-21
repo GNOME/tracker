@@ -4,7 +4,7 @@ sources = [
     'tracker-json-cursor.vala',
     'tracker-xml-cursor.vala',
     'tracker-remote.vala',
-    '../libtracker-common/libtracker-common.vapi'
+    '../../libtracker-common/libtracker-common.vapi'
 ]
 
 libtracker_remote = static_library('tracker-remote', sources,

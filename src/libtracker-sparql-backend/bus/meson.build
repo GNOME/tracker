@@ -3,7 +3,7 @@ libtracker_bus = static_library('tracker-bus',
     'tracker-namespace.vala',
     'tracker-bus-fd-cursor.vala',
     'tracker-bus-statement.vala',
-    '../libtracker-common/libtracker-common.vapi',
+    '../../libtracker-common/libtracker-common.vapi',
     tracker_common_enum_header,
     c_args: tracker_c_args + [
         '-include', 'libtracker-sparql/tracker-private.h',
