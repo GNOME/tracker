@@ -405,7 +405,7 @@ lookup_event_cache (TrackerNotifier *notifier,
 	cache = g_hash_table_lookup (events, GINT_TO_POINTER (graph_id));
 
 	if (!cache) {
-		cache = _tracker_notifier_event_cache_new (notifier, NULL, graph);
+		cache = _tracker_notifier_event_cache_new (notifier, graph);
 		g_hash_table_insert (events, GINT_TO_POINTER (graph_id), cache);
 	}
 

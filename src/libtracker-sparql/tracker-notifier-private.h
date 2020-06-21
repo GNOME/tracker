@@ -27,7 +27,6 @@
 typedef struct _TrackerNotifierEventCache TrackerNotifierEventCache;
 
 TrackerNotifierEventCache * _tracker_notifier_event_cache_new (TrackerNotifier *notifier,
-                                                               const gchar     *service,
                                                                const gchar     *graph);
 void _tracker_notifier_event_cache_free (TrackerNotifierEventCache *event_cache);
 

@@ -71,6 +71,7 @@
 #include "tracker-private.h"
 #include "tracker-sparql-enum-types.h"
 #include <libtracker-common/tracker-common.h>
+#include <libtracker-bus/tracker-bus.h>
 
 typedef struct _TrackerNotifierPrivate TrackerNotifierPrivate;
 typedef struct _TrackerNotifierSubscription TrackerNotifierSubscription;
@@ -79,7 +80,10 @@ typedef struct _TrackerNotifierEventCache TrackerNotifierEventCache;
 struct _TrackerNotifierSubscription {
 	GDBusConnection *connection;
 	TrackerNotifier *notifier;
+	TrackerSparqlStatement *statement;
+	gint n_statement_slots;
 	gchar *service;
+	gchar *object_path;
 	guint handler_id;
 };
 
@@ -87,10 +91,12 @@ struct _TrackerNotifierPrivate {
 	TrackerSparqlConnection *connection;
 	GHashTable *subscriptions; /* guint -> TrackerNotifierSubscription */
 	GCancellable *cancellable;
+	TrackerSparqlStatement *local_statement;
+	gint n_local_statement_slots;
 };
 
 struct _TrackerNotifierEventCache {
-	gchar *service;
+	TrackerNotifierSubscription *subscription;
 	gchar *graph;
 	TrackerNotifier *notifier;
 	GSequence *sequence;
@@ -116,13 +122,16 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0 };
 
+#define DEFAULT_OBJECT_PATH "/org/freedesktop/Tracker3/Endpoint"
+
 G_DEFINE_TYPE_WITH_CODE (TrackerNotifier, tracker_notifier, G_TYPE_OBJECT,
                          G_ADD_PRIVATE (TrackerNotifier))
 
 static TrackerNotifierSubscription *
 tracker_notifier_subscription_new (TrackerNotifier *notifier,
                                    GDBusConnection *connection,
-                                   const gchar     *service)
+                                   const gchar     *service,
+                                   const gchar     *object_path)
 {
 	TrackerNotifierSubscription *subscription;
 
@@ -130,6 +139,7 @@ tracker_notifier_subscription_new (TrackerNotifier *notifier,
 	subscription->connection = g_object_ref (connection);
 	subscription->notifier = notifier;
 	subscription->service = g_strdup (service);
+	subscription->object_path = g_strdup (object_path);
 
 	return subscription;
 }
@@ -140,7 +150,9 @@ tracker_notifier_subscription_free (TrackerNotifierSubscription *subscription)
 	g_dbus_connection_signal_unsubscribe (subscription->connection,
 	                                      subscription->handler_id);
 	g_object_unref (subscription->connection);
+	g_clear_object (&subscription->statement);
 	g_free (subscription->service);
+	g_free (subscription->object_path);
 	g_free (subscription);
 }
 
@@ -186,20 +198,27 @@ compare_event_cb (gconstpointer a,
 	return event1->id - event2->id;
 }
 
-TrackerNotifierEventCache *
-_tracker_notifier_event_cache_new (TrackerNotifier *notifier,
-                                   const gchar     *service,
-                                   const gchar     *graph)
+static TrackerNotifierEventCache *
+_tracker_notifier_event_cache_new_full (TrackerNotifier             *notifier,
+                                        TrackerNotifierSubscription *subscription,
+                                        const gchar                 *graph)
 {
 	TrackerNotifierEventCache *event_cache;
 
 	event_cache = g_new0 (TrackerNotifierEventCache, 1);
 	event_cache->notifier = g_object_ref (notifier);
-	event_cache->service = g_strdup (service);
+	event_cache->subscription = subscription;
 	event_cache->graph = g_strdup (graph);
 	event_cache->sequence = g_sequence_new ((GDestroyNotify) tracker_notifier_event_unref);
 
 	return event_cache;
+}
+
+TrackerNotifierEventCache *
+_tracker_notifier_event_cache_new (TrackerNotifier *notifier,
+                                   const gchar     *graph)
+{
+	return _tracker_notifier_event_cache_new_full (notifier, NULL, graph);
 }
 
 void
@@ -208,7 +227,6 @@ _tracker_notifier_event_cache_free (TrackerNotifierEventCache *event_cache)
 	g_sequence_free (event_cache->sequence);
 	g_object_unref (event_cache->notifier);
 	g_free (event_cache->graph);
-	g_free (event_cache->service);
 	g_free (event_cache);
 }
 
@@ -293,16 +311,63 @@ tracker_notifier_event_cache_take_events (TrackerNotifierEventCache *cache)
 	return events;
 }
 
+static gchar *
+compose_uri (const gchar *service,
+             const gchar *object_path)
+{
+	if (object_path && g_strcmp0 (object_path, DEFAULT_OBJECT_PATH) != 0)
+		return g_strdup_printf ("dbus:%s:%s", service, object_path);
+	else
+		return g_strdup_printf ("dbus:%s", service);
+}
+
+static gchar *
+get_service_name (TrackerNotifier           *notifier,
+                  TrackerNotifierEventCache *cache)
+{
+	TrackerNotifierSubscription *subscription;
+	TrackerNotifierPrivate *priv;
+
+	priv = tracker_notifier_get_instance_private (notifier);
+	subscription = cache->subscription;
+
+	if (!subscription)
+		return NULL;
+
+	if (TRACKER_BUS_IS_CONNECTION (priv->connection)) {
+		gchar *bus_name, *bus_object_path;
+		gboolean is_self;
+
+		g_object_get (priv->connection,
+		              "bus-name", &bus_name,
+		              "bus-object-path", &bus_object_path,
+		              NULL);
+
+		is_self = (g_strcmp0 (bus_name, subscription->service) == 0 &&
+		           g_strcmp0 (bus_object_path, subscription->object_path) == 0);
+		g_free (bus_name);
+		g_free (bus_object_path);
+
+		if (is_self)
+			return NULL;
+	}
+
+	return compose_uri (subscription->service, subscription->object_path);
+}
+
 static gboolean
 tracker_notifier_emit_events (TrackerNotifierEventCache *cache)
 {
 	GPtrArray *events;
+	gchar *service;
 
 	events = tracker_notifier_event_cache_take_events (cache);
 
 	if (events) {
-		g_signal_emit (cache->notifier, signals[EVENTS], 0, cache->service, cache->graph, events);
+		service = get_service_name (cache->notifier, cache);
+		g_signal_emit (cache->notifier, signals[EVENTS], 0, service, cache->graph, events);
 		g_ptr_array_unref (events);
+		g_free (service);
 	}
 
 	return G_SOURCE_REMOVE;
@@ -319,41 +384,89 @@ tracker_notifier_emit_events_in_idle (TrackerNotifierEventCache *cache)
 
 static gchar *
 create_extra_info_query (TrackerNotifier           *notifier,
-                         TrackerNotifierEventCache *cache)
+                         TrackerNotifierEventCache *cache,
+                         gint                       n_slots)
 {
-	GString *sparql, *filter;
-	gboolean has_elements = FALSE;
-	GSequenceIter *iter;
+	GString *sparql;
+	gchar *service;
+	gint i;
 
-	filter = g_string_new (NULL);
+	sparql = g_string_new ("SELECT ?id ?uri ");
 
-	for (iter = g_sequence_get_begin_iter (cache->sequence);
-	     !g_sequence_iter_is_end (iter);
-	     iter = g_sequence_iter_next (iter)) {
-		TrackerNotifierEvent *event;
+	service = get_service_name (notifier, cache);
 
-		event = g_sequence_get (iter);
-
-		if (has_elements)
-			g_string_append_c (filter, ' ');
-
-		g_string_append_printf (filter, "%" G_GINT64_FORMAT, event->id);
-		has_elements = TRUE;
+	if (service) {
+		g_string_append_printf (sparql,
+		                        "{ SERVICE <%s> ",
+		                        service);
 	}
 
-	if (!has_elements) {
-		g_string_free (filter, TRUE);
+	g_string_append (sparql, "{ VALUES ?id { ");
+
+	for (i = 0; i < n_slots; i++) {
+		g_string_append_printf (sparql, "~arg%d ", i + 1);
+	}
+
+	g_string_append (sparql,
+	                 "  } ."
+	                 "  BIND (tracker:uri(xsd:integer(?id)) AS ?uri)"
+	                 "} ");
+
+	if (service)
+		g_string_append (sparql, "} ");
+
+	g_string_append (sparql, "ORDER BY ?id");
+
+	g_free (service);
+
+	return g_string_free (sparql, FALSE);
+}
+
+static TrackerSparqlStatement *
+ensure_extra_info_statement (TrackerNotifier           *notifier,
+                             TrackerNotifierEventCache *cache,
+                             gint                      *n_slots_out)
+{
+	TrackerSparqlStatement **ptr;
+	TrackerNotifierPrivate *priv;
+	gchar *sparql;
+	gint *n_slots, new_slots;
+	GError *error = NULL;
+
+	priv = tracker_notifier_get_instance_private (notifier);
+
+	if (cache->subscription) {
+		ptr = &cache->subscription->statement;
+		n_slots = &cache->subscription->n_statement_slots;
+	} else {
+		ptr = &priv->local_statement;
+		n_slots = &priv->n_local_statement_slots;
+	}
+
+	if (*ptr && *n_slots >= g_sequence_get_length (cache->sequence)) {
+		*n_slots_out = *n_slots;
+		return *ptr;
+	}
+
+	g_clear_object (ptr);
+	new_slots = g_sequence_get_length (cache->sequence);
+	sparql = create_extra_info_query (notifier, cache, new_slots);
+	*ptr = tracker_sparql_connection_query_statement (priv->connection,
+	                                                  sparql,
+	                                                  priv->cancellable,
+	                                                  &error);
+	g_free (sparql);
+
+	if (error) {
+		g_warning ("Error querying notifier info: %s\n", error->message);
+		g_error_free (error);
 		return NULL;
 	}
 
-	sparql = g_string_new ("SELECT ?id tracker:uri(xsd:integer(?id)) ");
+	*n_slots = new_slots;
+	*n_slots_out = new_slots;
 
-	g_string_append_printf (sparql,
-	                        "{ VALUES ?id { %s } } "
-	                        "ORDER BY ?id", filter->str);
-	g_string_free (filter, TRUE);
-
-	return g_string_free (sparql, FALSE);
+	return *ptr;
 }
 
 static void
@@ -362,16 +475,15 @@ query_extra_info_cb (GObject      *object,
                      gpointer      user_data)
 {
 	TrackerNotifierEventCache *cache = user_data;
-	TrackerSparqlConnection *conn;
+	TrackerSparqlStatement *statement;
 	TrackerSparqlCursor *cursor;
 	TrackerNotifierEvent *event;
 	GSequenceIter *iter;
 	GError *error = NULL;
-	gint col;
 	gint64 id;
 
-	conn = TRACKER_SPARQL_CONNECTION (object);
-	cursor = tracker_sparql_connection_query_finish (conn, res, &error);
+	statement = TRACKER_SPARQL_STATEMENT (object);
+	cursor = tracker_sparql_statement_execute_finish (statement, res, &error);
 
 	if (!cursor) {
 		if (!g_error_matches (error,
@@ -393,8 +505,10 @@ query_extra_info_cb (GObject      *object,
 	 * clause.
 	 */
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		col = 0;
-		id = tracker_sparql_cursor_get_integer (cursor, col++);
+		id = tracker_sparql_cursor_get_integer (cursor, 0);
+		if (id == 0)
+			continue;
+
 		event = g_sequence_get (iter);
 		iter = g_sequence_iter_next (iter);
 
@@ -404,7 +518,7 @@ query_extra_info_cb (GObject      *object,
 			break;
 		}
 
-		event->urn = g_strdup (tracker_sparql_cursor_get_string (cursor, col++, NULL));
+		event->urn = g_strdup (tracker_sparql_cursor_get_string (cursor, 1, NULL));
 	}
 
 	g_object_unref (cursor);
@@ -413,22 +527,54 @@ query_extra_info_cb (GObject      *object,
 }
 
 static void
+bind_arguments (TrackerSparqlStatement    *statement,
+                TrackerNotifierEventCache *cache,
+                gint                       n_slots)
+{
+	GSequenceIter *iter;
+	gchar *arg_name;
+	gint i = 0;
+
+	for (iter = g_sequence_get_begin_iter (cache->sequence);
+	     !g_sequence_iter_is_end (iter);
+	     iter = g_sequence_iter_next (iter)) {
+		TrackerNotifierEvent *event;
+
+		event = g_sequence_get (iter);
+
+		arg_name = g_strdup_printf ("arg%d", i + 1);
+		tracker_sparql_statement_bind_int (statement, arg_name, event->id);
+		g_free (arg_name);
+		i++;
+	}
+
+	/* Fill in missing slots with 0's */
+	while (i < n_slots) {
+		arg_name = g_strdup_printf ("arg%d", i + 1);
+		tracker_sparql_statement_bind_int (statement, arg_name, 0);
+		g_free (arg_name);
+		i++;
+	}
+}
+
+static void
 tracker_notifier_query_extra_info (TrackerNotifier           *notifier,
                                    TrackerNotifierEventCache *cache)
 {
 	TrackerNotifierPrivate *priv;
-	gchar *sparql;
+	TrackerSparqlStatement *statement;
+	gint n_slots;
 
-	sparql = create_extra_info_query (notifier, cache);
-	if (!sparql)
+	statement = ensure_extra_info_statement (notifier, cache, &n_slots);
+	if (!statement)
 		return;
 
+	bind_arguments (statement, cache, n_slots);
 	priv = tracker_notifier_get_instance_private (notifier);
-	tracker_sparql_connection_query_async (priv->connection, sparql,
-					       priv->cancellable,
-	                                       query_extra_info_cb,
-	                                       cache);
-	g_free (sparql);
+	tracker_sparql_statement_execute_async (statement,
+	                                        priv->cancellable,
+	                                        query_extra_info_cb,
+	                                        cache);
 }
 
 void
@@ -458,14 +604,10 @@ graph_updated_cb (GDBusConnection *connection,
 	TrackerNotifierEventCache *cache;
 	GVariantIter *events;
 	const gchar *graph;
-	gchar *service;
 
 	g_variant_get (parameters, "(sa{ii})", &graph, &events);
 
-	service = g_strdup_printf ("dbus:%s", subscription->service);
-	cache = _tracker_notifier_event_cache_new (notifier, service, graph);
-	g_free (service);
-
+	cache = _tracker_notifier_event_cache_new_full (notifier, subscription, graph);
 	handle_events (notifier, cache, events);
 	g_variant_iter_free (events);
 
@@ -519,6 +661,7 @@ tracker_notifier_finalize (GObject *object)
 
 	g_cancellable_cancel (priv->cancellable);
 	g_clear_object (&priv->cancellable);
+	g_clear_object (&priv->local_statement);
 
 	if (priv->connection)
 		g_object_unref (priv->connection);
@@ -585,10 +728,31 @@ tracker_notifier_init (TrackerNotifier *notifier)
 	priv->cancellable = g_cancellable_new ();
 }
 
+/**
+ * tracker_notifier_signal_subscribe:
+ * @notifier: a #TrackerNotifier
+ * @connection: a #GDBusConnection
+ * @service: DBus service name to subscribe to events for
+ * @object_path: DBus object path to subscribe to events for, or %NULL
+ * @graph: graph to listen events for, or %NULL
+ *
+ * Listens to notification events from a remote SPARQL endpoint as a DBus
+ * service (see #TrackerEndpointDBus). If the @object_path argument is
+ * %NULL, the default "/org/freedesktop/Tracker3/Endpoint" path will be
+ * used. If @graph is %NULL, all graphs will be listened for.
+ *
+ * The signal subscription can be removed with
+ * tracker_notifier_signal_unsubscribe().
+ *
+ * Returns: An ID for this subscription
+ *
+ * Since: 3.0
+ **/
 guint
 tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
                                    GDBusConnection *connection,
                                    const gchar     *service,
+                                   const gchar     *object_path,
                                    const gchar     *graph)
 {
 	TrackerNotifierSubscription *subscription;
@@ -600,13 +764,17 @@ tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
 
 	priv = tracker_notifier_get_instance_private (notifier);
 
-	subscription = tracker_notifier_subscription_new (notifier, connection, service);
+	subscription = tracker_notifier_subscription_new (notifier, connection,
+	                                                  service, object_path);
+	if (!object_path)
+		object_path = DEFAULT_OBJECT_PATH;
+
 	subscription->handler_id =
 		g_dbus_connection_signal_subscribe (connection,
 		                                    service,
 		                                    "org.freedesktop.Tracker3.Endpoint",
 		                                    "GraphUpdated",
-		                                    "/org/freedesktop/Tracker3/Endpoint",
+		                                    object_path,
 		                                    graph,
 		                                    G_DBUS_SIGNAL_FLAGS_NONE,
 		                                    graph_updated_cb,
@@ -619,6 +787,16 @@ tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
 	return subscription->handler_id;
 }
 
+/**
+ * tracker_notifier_signal_unsubscribe:
+ * @notifier: a #TrackerNotifier
+ * @handler_id: a handler ID obtained with tracker_notifier_signal_subscribe()
+ *
+ * Undoes a DBus signal subscription, the @handler_id argument was previously
+ * obtained with a tracker_notifier_signal_subscribe() call.
+ *
+ * Since: 3.0
+ **/
 void
 tracker_notifier_signal_unsubscribe (TrackerNotifier *notifier,
                                      guint            handler_id)

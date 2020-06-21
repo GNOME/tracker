@@ -215,7 +215,7 @@ namespace Tracker {
 			public string get_location ();
 		}
 
-		public uint signal_subscribe (GLib.DBusConnection dbus_conn, string dbus_name, string? graph);
+		public uint signal_subscribe (GLib.DBusConnection dbus_conn, string dbus_name, string? object_path, string? graph);
 		public void signal_unsubscribe (uint handler_id);
 	}
 
