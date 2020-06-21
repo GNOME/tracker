@@ -37,11 +37,11 @@
 #include "tracker-sql.h"
 
 const char usage_string[] =
-	"tracker [--version] [--help]\n"
-	"               <command> [<args>]";
+	"tracker3 [--version] [--help]\n"
+	"                <command> [<args>]";
 
 const char usage_more_info_string[] =
-	N_("See “tracker help <command>” to read about a specific subcommand.");
+	N_("See “tracker3 help <command>” to read about a specific subcommand.");
 
 const char about[] =
 	"Tracker " PACKAGE_VERSION "\n"
@@ -136,7 +136,7 @@ handle_command (int argc, const char **argv)
 		exit (run_builtin (p, argc, argv));
 	}
 
-	g_printerr (_("“%s” is not a tracker command. See “tracker --help”"), argv[0]);
+	g_printerr (_("“%s” is not a tracker3 command. See “tracker3 --help”"), argv[0]);
 	g_printerr ("\n");
 	g_free (cmd);
 	exit (EXIT_FAILURE);
@@ -171,7 +171,7 @@ print_usage_list_cmds (void)
 			longest = strlen(commands[i].cmd);
 	}
 
-	puts (_("Available tracker commands are:"));
+	puts (_("Available tracker3 commands are:"));
 
 	for (i = 0; i < G_N_ELEMENTS(commands); i++) {
 		g_print ("   %s   ", commands[i].cmd);
