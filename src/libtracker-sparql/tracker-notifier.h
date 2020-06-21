@@ -53,6 +53,7 @@ TRACKER_AVAILABLE_IN_ALL
 guint tracker_notifier_signal_subscribe   (TrackerNotifier *notifier,
                                            GDBusConnection *connection,
                                            const gchar     *service,
+                                           const gchar     *object_path,
                                            const gchar     *graph);
 TRACKER_AVAILABLE_IN_ALL
 void  tracker_notifier_signal_unsubscribe (TrackerNotifier *notifier,

@@ -281,7 +281,7 @@ public class Tracker.Bus.Connection : Tracker.Sparql.Connection {
 		                                              "connection", this,
 		                                              null);
 
-		notifier.signal_subscribe (this.bus, this.dbus_name, null);
+		notifier.signal_subscribe (this.bus, this.dbus_name, null, null);
 
 		return notifier;
 	}

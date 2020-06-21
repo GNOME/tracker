@@ -80,6 +80,7 @@ struct _TrackerNotifierSubscription {
 	GDBusConnection *connection;
 	TrackerNotifier *notifier;
 	gchar *service;
+	gchar *object_path;
 	guint handler_id;
 };
 
@@ -116,13 +117,16 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0 };
 
+#define DEFAULT_OBJECT_PATH "/org/freedesktop/Tracker3/Endpoint"
+
 G_DEFINE_TYPE_WITH_CODE (TrackerNotifier, tracker_notifier, G_TYPE_OBJECT,
                          G_ADD_PRIVATE (TrackerNotifier))
 
 static TrackerNotifierSubscription *
 tracker_notifier_subscription_new (TrackerNotifier *notifier,
                                    GDBusConnection *connection,
-                                   const gchar     *service)
+                                   const gchar     *service,
+                                   const gchar     *object_path)
 {
 	TrackerNotifierSubscription *subscription;
 
@@ -130,6 +134,7 @@ tracker_notifier_subscription_new (TrackerNotifier *notifier,
 	subscription->connection = g_object_ref (connection);
 	subscription->notifier = notifier;
 	subscription->service = g_strdup (service);
+	subscription->object_path = g_strdup (object_path);
 
 	return subscription;
 }
@@ -141,6 +146,7 @@ tracker_notifier_subscription_free (TrackerNotifierSubscription *subscription)
 	                                      subscription->handler_id);
 	g_object_unref (subscription->connection);
 	g_free (subscription->service);
+	g_free (subscription->object_path);
 	g_free (subscription);
 }
 
@@ -291,6 +297,16 @@ tracker_notifier_event_cache_take_events (TrackerNotifierEventCache *cache)
 	}
 
 	return events;
+}
+
+static gchar *
+compose_uri (const gchar *service,
+             const gchar *object_path)
+{
+	if (object_path && g_strcmp0 (object_path, DEFAULT_OBJECT_PATH) != 0)
+		return g_strdup_printf ("dbus:%s:%s", service, object_path);
+	else
+		return g_strdup_printf ("dbus:%s", service);
 }
 
 static gboolean
@@ -462,7 +478,7 @@ graph_updated_cb (GDBusConnection *connection,
 
 	g_variant_get (parameters, "(sa{ii})", &graph, &events);
 
-	service = g_strdup_printf ("dbus:%s", subscription->service);
+	service = compose_uri (subscription->service, subscription->object_path);
 	cache = _tracker_notifier_event_cache_new (notifier, service, graph);
 	g_free (service);
 
@@ -589,6 +605,7 @@ guint
 tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
                                    GDBusConnection *connection,
                                    const gchar     *service,
+                                   const gchar     *object_path,
                                    const gchar     *graph)
 {
 	TrackerNotifierSubscription *subscription;
@@ -600,13 +617,17 @@ tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
 
 	priv = tracker_notifier_get_instance_private (notifier);
 
-	subscription = tracker_notifier_subscription_new (notifier, connection, service);
+	subscription = tracker_notifier_subscription_new (notifier, connection,
+	                                                  service, object_path);
+	if (!object_path)
+		object_path = DEFAULT_OBJECT_PATH;
+
 	subscription->handler_id =
 		g_dbus_connection_signal_subscribe (connection,
 		                                    service,
 		                                    "org.freedesktop.Tracker3.Endpoint",
 		                                    "GraphUpdated",
-		                                    "/org/freedesktop/Tracker3/Endpoint",
+		                                    object_path,
 		                                    graph,
 		                                    G_DBUS_SIGNAL_FLAGS_NONE,
 		                                    graph_updated_cb,
