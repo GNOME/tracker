@@ -71,6 +71,7 @@
 #include "tracker-private.h"
 #include "tracker-sparql-enum-types.h"
 #include <libtracker-common/tracker-common.h>
+#include <libtracker-bus/tracker-bus.h>
 
 typedef struct _TrackerNotifierPrivate TrackerNotifierPrivate;
 typedef struct _TrackerNotifierSubscription TrackerNotifierSubscription;
@@ -309,15 +310,47 @@ compose_uri (const gchar *service,
 		return g_strdup_printf ("dbus:%s", service);
 }
 
+static const gchar *
+get_service_name (TrackerNotifier           *notifier,
+                  TrackerNotifierEventCache *cache)
+{
+	TrackerNotifierPrivate *priv;
+
+	priv = tracker_notifier_get_instance_private (notifier);
+
+	if (TRACKER_BUS_IS_CONNECTION (priv->connection)) {
+		gchar *bus_name, *bus_object_path, *uri;
+		gboolean is_self;
+
+		g_object_get (priv->connection,
+		              "bus-name", &bus_name,
+		              "bus-object-name", &bus_object_path,
+		              NULL);
+
+		uri = compose_uri (bus_name, bus_object_path);
+
+		is_self = g_strcmp0 (uri, cache->service) == 0;
+		g_free (bus_name);
+		g_free (bus_object_path);
+		g_free (uri);
+
+		return is_self ? NULL : cache->service;
+	}
+
+	return cache->service;
+}
+
 static gboolean
 tracker_notifier_emit_events (TrackerNotifierEventCache *cache)
 {
 	GPtrArray *events;
+	const gchar *service;
 
 	events = tracker_notifier_event_cache_take_events (cache);
 
 	if (events) {
-		g_signal_emit (cache->notifier, signals[EVENTS], 0, cache->service, cache->graph, events);
+		service = get_service_name (cache->notifier, cache);
+		g_signal_emit (cache->notifier, signals[EVENTS], 0, service, cache->graph, events);
 		g_ptr_array_unref (events);
 	}
 
@@ -339,6 +372,7 @@ create_extra_info_query (TrackerNotifier           *notifier,
 {
 	GString *sparql, *filter;
 	gboolean has_elements = FALSE;
+	const gchar *service;
 	GSequenceIter *iter;
 
 	filter = g_string_new (NULL);
@@ -364,10 +398,21 @@ create_extra_info_query (TrackerNotifier           *notifier,
 
 	sparql = g_string_new ("SELECT ?id tracker:uri(xsd:integer(?id)) ");
 
+	service = get_service_name (notifier, cache);
+
+	if (service) {
+		g_string_append_printf (sparql,
+		                        "{ SERVICE <%s> { SELECT ?id ",
+		                        service);
+	}
+
 	g_string_append_printf (sparql,
 	                        "{ VALUES ?id { %s } } "
 	                        "ORDER BY ?id", filter->str);
 	g_string_free (filter, TRUE);
+
+	if (service)
+		g_string_append_printf (sparql, "} } ");
 
 	return g_string_free (sparql, FALSE);
 }
