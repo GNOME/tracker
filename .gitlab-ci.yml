@@ -20,7 +20,7 @@ stages:
 
   script:
     - su tracker -c 'mkdir build'
-    - su tracker -c 'cd build; meson .. -Db_lto=true -Db_coverage=true'
+    - su tracker -c 'cd build; meson .. -Db_lto=true -Db_coverage=true -Dsystemd_user_services=false'
     - su tracker -c 'cd build; ninja'
     - |
       # Remove the many "CI_" variables from the environment. Meson dumps the
