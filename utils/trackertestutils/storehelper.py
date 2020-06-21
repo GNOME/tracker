@@ -109,27 +109,23 @@ class await_insert():
 
         query_filtered = ' '.join([
             'SELECT ?urn tracker:id(?urn) ',
-            ' FROM NAMED <%s> ',
+            f' FROM NAMED <{self.graph}> ' ,
             ' WHERE { ',
             '   ?urn a rdfs:Resource ; ',
             self.predicates,
-            #'   FILTER (tracker:id(?urn) = ~id) '
-            '   . FILTER (tracker:id(?urn) = %s) '
+            '   FILTER (tracker:id(?urn) = ~id) '
             '}'
         ])
 
-        # FIXME: doesn't work with bus backend: https://gitlab.gnome.org/GNOME/tracker/issues/179
-        #stmt = self.conn.query_statement(query, None)
+        stmt = self.conn.query_statement(query_filtered, None)
 
         def match_cb(notifier, service, graph, events):
             for event in events:
                 if event.get_event_type() in [Tracker.NotifierEventType.CREATE,
                                               Tracker.NotifierEventType.UPDATE]:
                     log.debug("Processing %s event for id %s", event.get_event_type().value_nick, event.get_id())
-                    #stmt.bind_int('~id', event.get_id())
-                    #cursor = stmt.execute(None)
-                    stmt = query_filtered % (self.graph, event.get_id())
-                    cursor = self.conn.query(stmt)
+                    stmt.bind_int('id', event.get_id())
+                    cursor = stmt.execute(None)
 
                     if cursor.next():
                         self.result.urn = cursor.get_string(0)[0]
@@ -191,33 +187,38 @@ class await_property_update():
 
         query_before = ' '.join([
             'SELECT ?urn tracker:id(?urn) ',
-            ' FROM NAMED <%s> ',
+            f' FROM NAMED <{self.graph}> ',
             ' WHERE { ',
             '   ?urn a rdfs:Resource ; ',
             self.before_predicates,
-            '   . FILTER (tracker:id(?urn) = %s) '
+            '   . FILTER (tracker:id(?urn) = ~id) '
             '}'
-        ]) % (self.graph, self.resource_id)
+        ])
 
-        cursor = self.conn.query(query_before)
+        stmt_before = self.conn.query_statement(query_before, None)
+        stmt_before.bind_int('id', self.resource_id)
+        cursor = stmt_before.execute(None)
         if not cursor.next():
             raise AwaitException("Expected data is not present in the store.")
 
         query_after = ' '.join([
             'SELECT ?urn tracker:id(?urn) '
-            ' FROM NAMED <%s> ',
+            f' FROM NAMED <{self.graph}> ',
             ' WHERE { '
            '   ?urn a rdfs:Resource ; ',
             self.after_predicates,
-            '   . FILTER (tracker:id(?urn) = %s) '
+            '   . FILTER (tracker:id(?urn) = ~id) '
             '}'
-        ]) % (self.graph, self.resource_id)
+        ])
+
+        stmt_after = self.conn.query_statement(query_after, None)
+        stmt_after.bind_int('id', self.resource_id)
 
         def match_cb(notifier, service, graph, events):
             for event in events:
                 if event.get_event_type() == Tracker.NotifierEventType.UPDATE and event.get_id() == self.resource_id:
                     log.debug("Processing %s event for id %s", event.get_event_type(), event.get_id())
-                    cursor = self.conn.query(query_after)
+                    cursor = stmt_after.execute(None)
 
                     if cursor.next():
                         log.debug("Query matched!")
@@ -272,27 +273,30 @@ class await_content_update():
 
         query_before = ' '.join([
             'SELECT nie:isStoredAs(?urn) ?urn tracker:id(?urn) '
-            ' FROM NAMED <%s> ',
+            f' FROM NAMED <{self.graph}> ',
             ' WHERE { '
             '   ?urn a rdfs:Resource ; ',
             self.before_predicates,
-            '   . FILTER (tracker:id(?urn) = %s) '
+            '   . FILTER (tracker:id(?urn) = ~id) '
             '}'
-        ]) % (self.graph, self.before_resource_id)
-        cursor = self.conn.query(query_before)
+        ])
+        stmt_before = self.conn.query_statement(query_before, None)
+        stmt_before.bind_int('id', self.before_resource_id)
+        cursor = stmt_before.execute(None)
         if not cursor.next():
             raise AwaitException("Expected data is not present in the store.")
         file_url = cursor.get_string(0)[0]
 
         query_after = ' '.join([
             'SELECT ?urn tracker:id(?urn) '
-            ' FROM NAMED <%s> ',
+            f' FROM NAMED <{self.graph}> ',
             ' WHERE { '
             '   ?urn a rdfs:Resource ; ',
-            '      nie:isStoredAs <%s> ; ',
+            f'      nie:isStoredAs <{file_url}> ; ',
             self.after_predicates,
             '}'
-        ]) % (self.graph, file_url)
+        ])
+        stmt_after = self.conn.query_statement(query_after, None)
 
         # When a file is updated, the DataObject representing the file gets
         # an UPDATE notification. The InformationElement representing the
@@ -311,7 +315,7 @@ class await_content_update():
                 # the new resource, or they may only match once the extractor
                 # processes the resource. The latter will be an UPDATE event.
                 elif self.matched_delete and event.get_event_type() in [Tracker.NotifierEventType.CREATE, Tracker.NotifierEventType.UPDATE]:
-                    cursor = self.conn.query(query_after)
+                    cursor = stmt_after.execute(None)
 
                     if cursor.next():
                         self.result.urn = cursor.get_string(0)[0]
@@ -363,13 +367,15 @@ class await_delete():
 
         query_check = ' '.join([
             'SELECT ?urn tracker:id(?urn) ',
-            'FROM NAMED <%s> ',
+            f'FROM NAMED <{self.graph}> ',
             ' WHERE { ',
             '   ?urn a rdfs:Resource ; ',
-            '   . FILTER (tracker:id(?urn) = %s) '
+            '   . FILTER (tracker:id(?urn) = ~id) '
             '}'
         ])
-        cursor = self.conn.query(query_check % (self.graph, self.resource_id))
+        stmt_check = self.conn.query_statement(query_check, None)
+        stmt_check.bind_int('id', self.resource_id)
+        cursor = stmt_check.execute(None)
         if not cursor.next():
             raise AwaitException(
                 "Resource with id %i isn't present in the store.", self.resource_id)
