@@ -646,6 +646,26 @@ tracker_notifier_init (TrackerNotifier *notifier)
 	priv->cancellable = g_cancellable_new ();
 }
 
+/**
+ * tracker_notifier_signal_subscribe:
+ * @notifier: a #TrackerNotifier
+ * @connection: a #GDBusConnection
+ * @service: DBus service name to subscribe to events for
+ * @object_path: DBus object path to subscribe to events for, or %NULL
+ * @graph: graph to listen events for, or %NULL
+ *
+ * Listens to notification events from a remote SPARQL endpoint as a DBus
+ * service (see #TrackerEndpointDBus). If the @object_path argument is
+ * %NULL, the default "/org/freedesktop/Tracker3/Endpoint" path will be
+ * used. If @graph is %NULL, all graphs will be listened for.
+ *
+ * The signal subscription can be removed with
+ * tracker_notifier_signal_unsubscribe().
+ *
+ * Returns: An ID for this subscription
+ *
+ * Since: 3.0
+ **/
 guint
 tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
                                    GDBusConnection *connection,
@@ -685,6 +705,16 @@ tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
 	return subscription->handler_id;
 }
 
+/**
+ * tracker_notifier_signal_unsubscribe:
+ * @notifier: a #TrackerNotifier
+ * @handler_id: a handler ID obtained with tracker_notifier_signal_subscribe()
+ *
+ * Undoes a DBus signal subscription, the @handler_id argument was previously
+ * obtained with a tracker_notifier_signal_subscribe() call.
+ *
+ * Since: 3.0
+ **/
 void
 tracker_notifier_signal_unsubscribe (TrackerNotifier *notifier,
                                      guint            handler_id)
