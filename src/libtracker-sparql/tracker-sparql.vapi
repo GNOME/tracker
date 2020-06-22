@@ -18,7 +18,7 @@
  */
 
 namespace Tracker {
-	[CCode (cheader_filename = "libtracker-sparql/tracker-connection.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public errordomain Sparql.Error {
 		PARSE,
 		UNKNOWN_CLASS,
@@ -31,13 +31,13 @@ namespace Tracker {
 		UNKNOWN_GRAPH
 	}
 
-	[CCode (cheader_filename = "libtracker-sparql/tracker-connection.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public enum Sparql.ConnectionFlags {
 		NONE     = 0,
 		READONLY = 1 << 0,
 	}
 
-	[CCode (cheader_filename = "libtracker-sparql/tracker-cursor.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public enum Sparql.ValueType {
 		UNBOUND,
 		URI,
@@ -62,7 +62,7 @@ namespace Tracker {
 		public static string get_uuid_urn ();
 	}
 
-	[CCode (cheader_filename = "libtracker-sparql/tracker-connection.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
         public abstract class Sparql.Connection : GLib.Object {
 		public extern static new Connection remote_new (string uri_base);
 		public extern static new Connection new (Sparql.ConnectionFlags flags, GLib.File store, GLib.File? ontology, GLib.Cancellable? cancellable = null) throws Sparql.Error, GLib.IOError;
@@ -93,7 +93,7 @@ namespace Tracker {
                 public async virtual bool close_async () throws GLib.IOError;
 	}
 
-	[CCode (cheader_filename = "libtracker-sparql/tracker-statement.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public abstract class Sparql.Statement : GLib.Object {
 		public string sparql { get; construct set; }
 		public Connection connection { get; construct set; }
@@ -108,7 +108,7 @@ namespace Tracker {
 		public async abstract Cursor execute_async (GLib.Cancellable? cancellable) throws Sparql.Error, GLib.Error, GLib.IOError, GLib.DBusError;
 	}
 
-	[CCode (cheader_filename = "libtracker-sparql/tracker-cursor.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public abstract class Sparql.Cursor : GLib.Object {
 		public Connection connection {
 			get;
@@ -135,7 +135,7 @@ namespace Tracker {
 		public virtual bool is_bound (int column);
 	}
 
-	[CCode (cheader_filename = "libtracker-sparql/tracker-namespace-manager.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public class NamespaceManager : GLib.Object {
 		public NamespaceManager ();
 		public void add_prefix (string prefix, string namespace);
@@ -146,7 +146,7 @@ namespace Tracker {
 		public static NamespaceManager get_default ();
 	}
 
-	[CCode (cheader_filename = "libtracker-sparql/tracker-resource.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public class Resource : GLib.Object {
 		public Resource (string identifier);
 
@@ -187,7 +187,7 @@ namespace Tracker {
 		public string print_sparql_update (NamespaceManager? namespace_manager, string graph);
 	}
 
-	[CCode (cprefix = "TRACKER_NOTIFIER_FLAG_", cheader_filename = "libtracker-sparql/tracker-notifier.h")]
+	[CCode (cprefix = "TRACKER_NOTIFIER_FLAG_", cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public enum NotifierFlags {
 		QUERY_URN,
 		QUERY_LOCATION,
@@ -200,7 +200,7 @@ namespace Tracker {
 		NOTIFY_UNEXTRACTED
 	}
 
-	[CCode (cheader_filename = "libtracker-sparql/tracker-notifier.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public class Notifier : GLib.Object {
 		public class NotifierEvent {
 			public enum Type {
@@ -219,12 +219,12 @@ namespace Tracker {
 		public void signal_unsubscribe (uint handler_id);
 	}
 
-	[CCode (cheader_filename = "libtracker-sparql/tracker-endpoint.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public class Endpoint : GLib.Object {
 		Sparql.Connection get_sparql_connection ();
 	}
 
-	[CCode (cheader_filename = "libtracker-sparql/tracker-endpoint-dbus.h")]
+	[CCode (cheader_filename = "libtracker-sparql/tracker-sparql.h")]
 	public class EndpointDBus : GLib.Object, GLib.Initable {
 		public EndpointDBus (Sparql.Connection sparql_conn, GLib.DBusConnection? dbus_conn, string object_path, GLib.Cancellable? cancellable) throws GLib.Error;
 	}

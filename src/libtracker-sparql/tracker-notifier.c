@@ -70,8 +70,8 @@
 #include "tracker-notifier-private.h"
 #include "tracker-private.h"
 #include "tracker-sparql-enum-types.h"
+#include "bus/tracker-bus.h"
 #include <libtracker-common/tracker-common.h>
-#include <libtracker-bus/tracker-bus.h>
 
 typedef struct _TrackerNotifierPrivate TrackerNotifierPrivate;
 typedef struct _TrackerNotifierSubscription TrackerNotifierSubscription;
