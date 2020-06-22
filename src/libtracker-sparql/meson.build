@@ -50,6 +50,7 @@ tracker_sparql_intermediate_dep = declare_dependency(
     link_with: [libtracker_sparql_intermediate],
     include_directories: [srcinc, include_directories('.')],
     dependencies: [ tracker_sparql_vapi_dep ],
+    sources: enum_types[1],
 )
 
 install_headers(
