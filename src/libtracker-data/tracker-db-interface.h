@@ -23,7 +23,7 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 
-#include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-sparql/tracker-cursor.h>
 
 #include "tracker-property.h"
 
