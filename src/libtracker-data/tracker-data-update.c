@@ -26,7 +26,6 @@
 #include <time.h>
 
 #include <libtracker-common/tracker-common.h>
-#include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-class.h"
 #include "tracker-data-manager.h"

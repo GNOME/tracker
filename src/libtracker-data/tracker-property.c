@@ -24,7 +24,7 @@
 
 #include <glib.h>
 
-#include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-sparql/tracker-ontologies.h>
 
 #include "tracker-namespace.h"
 #include "tracker-ontologies.h"

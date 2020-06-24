@@ -33,7 +33,6 @@ G_BEGIN_DECLS
 typedef struct _TrackerData TrackerData;
 typedef struct _TrackerDataClass TrackerDataClass;
 
-#include <libtracker-sparql/tracker-sparql.h>
 #include "tracker-db-interface.h"
 #include "tracker-data-manager.h"
 

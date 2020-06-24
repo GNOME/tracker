@@ -28,7 +28,7 @@
 #include <gvdb/gvdb-builder.h>
 #include <gvdb/gvdb-reader.h>
 
-#include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-sparql/tracker-ontologies.h>
 
 #include "tracker-ontologies.h"
 

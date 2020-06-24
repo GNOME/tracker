@@ -35,7 +35,7 @@ typedef struct _TrackerDataManager TrackerDataManager;
 typedef struct _TrackerDataManagerClass TrackerDataManagerClass;
 
 #include <libtracker-common/tracker-common.h>
-#include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-sparql/tracker-ontologies.h>
 
 #include <libtracker-data/tracker-data-update.h>
 #include <libtracker-data/tracker-db-interface.h>

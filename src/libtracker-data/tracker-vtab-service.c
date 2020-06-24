@@ -22,7 +22,7 @@
 
 #include "libtracker-common/tracker-utils.h"
 #include "tracker-vtab-service.h"
-#include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-sparql/tracker-connection.h>
 
 #define N_VARIABLES 100
 #define N_PARAMETERS 50
