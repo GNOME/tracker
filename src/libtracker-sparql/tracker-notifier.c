@@ -70,7 +70,6 @@
 #include "tracker-notifier-private.h"
 #include "tracker-private.h"
 #include "tracker-sparql-enum-types.h"
-#include "bus/tracker-bus.h"
 #include <libtracker-common/tracker-common.h>
 
 typedef struct _TrackerNotifierPrivate TrackerNotifierPrivate;
@@ -334,7 +333,9 @@ get_service_name (TrackerNotifier           *notifier,
 	if (!subscription)
 		return NULL;
 
-	if (TRACKER_BUS_IS_CONNECTION (priv->connection)) {
+	/* This is a hackish way to find out we are dealing with DBus connections,
+	 * without pulling its header.
+	if (g_object_class_find_property (G_OBJECT_CLASS (priv->connection), "bus-name")) {
 		gchar *bus_name, *bus_object_path;
 		gboolean is_self;
 
