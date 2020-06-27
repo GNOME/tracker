@@ -336,7 +336,7 @@ get_service_name (TrackerNotifier           *notifier,
 	/* This is a hackish way to find out we are dealing with DBus connections,
 	 * without pulling its header.
 	 */
-	if (g_object_class_find_property (G_OBJECT_CLASS (priv->connection), "bus-name")) {
+	if (g_object_class_find_property (G_OBJECT_GET_CLASS (priv->connection), "bus-name")) {
 		gchar *bus_name, *bus_object_path;
 		gboolean is_self;
 
@@ -766,10 +766,11 @@ tracker_notifier_signal_subscribe (TrackerNotifier *notifier,
 
 	priv = tracker_notifier_get_instance_private (notifier);
 
-	subscription = tracker_notifier_subscription_new (notifier, connection,
-	                                                  service, object_path);
 	if (!object_path)
 		object_path = DEFAULT_OBJECT_PATH;
+
+	subscription = tracker_notifier_subscription_new (notifier, connection,
+	                                                  service, object_path);
 
 	subscription->handler_id =
 		g_dbus_connection_signal_subscribe (connection,
