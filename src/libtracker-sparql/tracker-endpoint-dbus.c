@@ -300,6 +300,8 @@ handle_cursor_reply (GTask        *task,
 	g_free (variable_names);
 	g_clear_error (&write_error);
 
+	tracker_sparql_cursor_close (cursor);
+
 	g_task_return_boolean (task, TRUE);
 }
 
@@ -314,7 +316,6 @@ finish_query (GObject      *source_object,
 	if (!g_task_propagate_boolean (G_TASK (res), &error))
 		g_critical ("Error writing cursor: %s\n", error->message);
 
-	tracker_sparql_cursor_close (cursor);
 	g_object_unref (cursor);
 	g_clear_error (&error);
 }

@@ -55,9 +55,6 @@ void                tracker_db_interface_sqlite_fts_init               (TrackerD
                                                                         GHashTable               *multivalued,
                                                                         gboolean                  create);
 void                tracker_db_interface_sqlite_reset_collator         (TrackerDBInterface       *interface);
-void                tracker_db_interface_sqlite_wal_hook               (TrackerDBInterface       *interface,
-                                                                        TrackerDBWalCallback      callback,
-                                                                        gpointer                  user_data);
 gboolean            tracker_db_interface_sqlite_wal_checkpoint         (TrackerDBInterface       *interface,
                                                                         gboolean                  blocking,
                                                                         GError                  **error);

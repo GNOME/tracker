@@ -170,7 +170,7 @@ tracker_data_manager_ensure_graphs (TrackerDataManager  *manager,
 						      "SELECT ID, Uri FROM Resource WHERE ID IN (SELECT ID FROM Graph)");
 	if (!stmt) {
 		g_hash_table_unref (graphs);
-		return FALSE;
+		return NULL;
 	}
 
 	cursor = tracker_db_statement_start_cursor (stmt, error);

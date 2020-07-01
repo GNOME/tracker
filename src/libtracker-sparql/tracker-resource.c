@@ -1919,11 +1919,11 @@ tracker_resource_deserialize (GVariant *variant)
 			tracker_resource_set_boolean (resource, pred,
 			                              g_variant_get_boolean (obj));
 		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_INT16)) {
-			tracker_resource_set_int64 (resource, pred,
-			                            (gint64) g_variant_get_int16 (obj));
+			tracker_resource_set_int (resource, pred,
+						  (gint) g_variant_get_int16 (obj));
 		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_INT32)) {
-			tracker_resource_set_int64 (resource, pred,
-			                            (gint64) g_variant_get_int32 (obj));
+			tracker_resource_set_int (resource, pred,
+						  (gint) g_variant_get_int32 (obj));
 		} else if (g_variant_is_of_type (obj, G_VARIANT_TYPE_INT64)) {
 			tracker_resource_set_int64 (resource, pred,
 			                            (gint64) g_variant_get_int64 (obj));
@@ -1958,14 +1958,14 @@ tracker_resource_deserialize (GVariant *variant)
 					tracker_resource_add_boolean (resource, pred,
 					                              g_variant_get_boolean (elem));
 				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_INT16)) {
-					tracker_resource_add_int64 (resource, pred,
-					                            (gint64) g_variant_get_int16 (elem));
+					tracker_resource_add_int (resource, pred,
+								  (gint) g_variant_get_int16 (elem));
 				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_INT32)) {
-					tracker_resource_add_int64 (resource, pred,
-					                            (gint64) g_variant_get_int32 (elem));
+					tracker_resource_add_int (resource, pred,
+								  (gint) g_variant_get_int32 (elem));
 				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_INT64)) {
 					tracker_resource_add_int64 (resource, pred,
-					                            (gint64) g_variant_get_int16 (elem));
+					                            (gint64) g_variant_get_int64 (elem));
 				} else if (g_variant_is_of_type (elem, G_VARIANT_TYPE_DOUBLE)) {
 					tracker_resource_add_double (resource, pred,
 					                             g_variant_get_double (elem));

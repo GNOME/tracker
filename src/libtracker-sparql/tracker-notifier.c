@@ -472,32 +472,16 @@ ensure_extra_info_statement (TrackerNotifier           *notifier,
 }
 
 static void
-query_extra_info_cb (GObject      *object,
-                     GAsyncResult *res,
-                     gpointer      user_data)
+handle_cursor (GTask        *task,
+	       gpointer      source_object,
+	       gpointer      task_data,
+	       GCancellable *cancellable)
 {
-	TrackerNotifierEventCache *cache = user_data;
-	TrackerSparqlStatement *statement;
-	TrackerSparqlCursor *cursor;
+	TrackerNotifierEventCache *cache = task_data;
+	TrackerSparqlCursor *cursor = source_object;
 	TrackerNotifierEvent *event;
 	GSequenceIter *iter;
-	GError *error = NULL;
 	gint64 id;
-
-	statement = TRACKER_SPARQL_STATEMENT (object);
-	cursor = tracker_sparql_statement_execute_finish (statement, res, &error);
-
-	if (!cursor) {
-		if (!g_error_matches (error,
-				      G_IO_ERROR,
-				      G_IO_ERROR_CANCELLED)) {
-			g_critical ("Could not get cursor: %s\n", error->message);
-		}
-
-		_tracker_notifier_event_cache_free (cache);
-		g_clear_error (&error);
-		return;
-	}
 
 	iter = g_sequence_get_begin_iter (cache->sequence);
 
@@ -523,9 +507,65 @@ query_extra_info_cb (GObject      *object,
 		event->urn = g_strdup (tracker_sparql_cursor_get_string (cursor, 1, NULL));
 	}
 
-	g_object_unref (cursor);
+	tracker_sparql_cursor_close (cursor);
 
 	tracker_notifier_emit_events_in_idle (cache);
+
+	g_task_return_boolean (task, TRUE);
+}
+
+static void
+finish_query (GObject      *source_object,
+              GAsyncResult *res,
+              gpointer      user_data)
+{
+	TrackerSparqlCursor *cursor = TRACKER_SPARQL_CURSOR (source_object);
+	GError *error = NULL;
+
+	if (!g_task_propagate_boolean (G_TASK (res), &error)) {
+		if (!g_error_matches (error,
+				      G_IO_ERROR,
+				      G_IO_ERROR_CANCELLED)) {
+			g_critical ("Error querying notified data: %s\n", error->message);
+		}
+	}
+
+	g_object_unref (cursor);
+	g_clear_error (&error);
+}
+
+static void
+query_extra_info_cb (GObject      *object,
+                     GAsyncResult *res,
+                     gpointer      user_data)
+{
+	TrackerNotifierEventCache *cache = user_data;
+	TrackerSparqlStatement *statement;
+	TrackerNotifierPrivate *priv;
+	TrackerSparqlCursor *cursor;
+	GError *error = NULL;
+	GTask *task;
+
+	statement = TRACKER_SPARQL_STATEMENT (object);
+	cursor = tracker_sparql_statement_execute_finish (statement, res, &error);
+	priv = tracker_notifier_get_instance_private (cache->notifier);
+
+	if (!cursor) {
+		if (!g_error_matches (error,
+				      G_IO_ERROR,
+				      G_IO_ERROR_CANCELLED)) {
+			g_critical ("Could not get cursor: %s\n", error->message);
+		}
+
+		_tracker_notifier_event_cache_free (cache);
+		g_clear_error (&error);
+		return;
+	}
+
+	task = g_task_new (cursor, priv->cancellable, finish_query, NULL);
+	g_task_set_task_data (task, cache, NULL);
+	g_task_run_in_thread (task, handle_cursor);
+	g_object_unref (task);
 }
 
 static void

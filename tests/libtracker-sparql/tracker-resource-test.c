@@ -156,7 +156,8 @@ test_resource_serialization (void)
 	tracker_resource_set_string (res, "nie:title", "foo");
 	tracker_resource_set_double (res, "nfo:duration", 25.4);
 	tracker_resource_set_boolean (res, "nfo:isBootable", TRUE);
-	tracker_resource_set_int64 (res, "nie:usageCounter", 4);
+	tracker_resource_set_int (res, "nie:usageCounter", 4);
+	tracker_resource_set_int64 (res, "nie:contentSize", 42);
 	tracker_resource_add_uri (res, "rdf:type", "nfo:Audio");
 	tracker_resource_add_uri (res, "rdf:type", "nfo:Media");
 
@@ -183,7 +184,8 @@ test_resource_serialization (void)
 	g_assert_true (tracker_resource_get_first_boolean (copy, "nfo:isBootable"));
 	g_assert_true (strncmp (tracker_resource_get_identifier (copy), "_:", 2) == 0);
 	g_assert_cmpstr (tracker_resource_get_first_string (copy, "nie:title"), ==, "foo");
-	g_assert_cmpint (tracker_resource_get_first_int64 (copy, "nie:usageCounter"), ==, 4);
+	g_assert_cmpint (tracker_resource_get_first_int (copy, "nie:usageCounter"), ==, 4);
+	g_assert_cmpint (tracker_resource_get_first_int64 (copy, "nie:contentSize"), ==, 42);
 
 	child = tracker_resource_get_first_relation (copy, "nie:isStoredAs");
 	g_assert_true (child != NULL);
