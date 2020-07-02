@@ -28,8 +28,6 @@
 #include "ttl_xml.h"
 #include "ttlresource2xml.h"
 
-#define TRACKER_ONTOLOGY_CLASS "http://tracker.api.gnome.org/ontology/v3/tracker#Ontology"
-
 static void
 class_get_parent_hierarchy (Ontology       *ontology,
                             const gchar    *class_name,
@@ -544,7 +542,7 @@ print_property_table (FILE          *f,
 		g_fprintf (f, "<entry>");
 
 		if (prop->deprecated) {
-			print_flag (f, "tracker-deprecated", "icon-deprecated.svg",
+			print_flag (f, "nrl-deprecated", "icon-deprecated.svg",
 			            "This property is deprecated.");
 		}
 
@@ -561,7 +559,6 @@ print_property_table (FILE          *f,
 				print_flag (f, superprop_id, "icon-superproperty.svg", message);
 			}
 		}
-		g_fprintf (f, "</entry>");
 
 		if (prop->max_cardinality != NULL && atoi (prop->max_cardinality) == 1) {
 			/* Single valued properties are most common, so we don't display this. */
@@ -577,9 +574,11 @@ print_property_table (FILE          *f,
 		}
 
 		if (prop->fulltextIndexed) {
-			print_flag (f, "tracker-fulltextIndexed", "icon-fulltextindexed.svg",
+			print_flag (f, "nrl-fulltextIndexed", "icon-fulltextindexed.svg",
 			            "This property is full-text-indexed, and can be looked up through <literal>fts:match</literal>");
 		}
+
+		g_fprintf (f, "</entry>");
 
 		/* Description column */
 		g_fprintf (f, "<entry>");
@@ -624,14 +623,14 @@ print_ontology_class (Ontology      *ontology,
 
 		if (klass->deprecated) {
 			g_fprintf (f, "<para>");
-			print_flag (f, "tracker-deprecated", "icon-deprecated.svg", "Deprecated icon");
+			print_flag (f, "nrl-deprecated", "icon-deprecated.svg", "Deprecated icon");
 			g_fprintf (f, "This class is deprecated.");
 			g_fprintf (f, "</para>");
 		}
 
 		if (klass->notify) {
 			g_fprintf (f, "<para>");
-			print_flag (f, "tracker-notify", "icon-notify.svg", "Notify icon");
+			print_flag (f, "nrl-notify", "icon-notify.svg", "Notify icon");
 			g_fprintf (f, "This class emits notifications about changes, and can "
 			             "be monitored using <link linkend=\"TrackerNotifier\">TrackerNotifier</link>.");
 			g_fprintf (f, "</para>");
