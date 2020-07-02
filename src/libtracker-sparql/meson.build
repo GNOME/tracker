@@ -9,6 +9,8 @@ enum_types = gnome.mkenums('tracker-sparql-enum-types',
 tracker_sparql_vapi = files('tracker-sparql.vapi')
 tracker_sparql_vapi_dep = meson.get_compiler('vala').find_library('tracker-sparql', dirs: meson.current_source_dir())
 
+subdir('bus')
+
 libtracker_sparql_c_sources = files(
     'tracker-connection.c',
     'tracker-cursor.c',
@@ -71,9 +73,8 @@ install_data(
     install_dir: vapi_dir,
 )
 
-subdir('bus')
-subdir('direct')
 subdir('remote')
+subdir('direct')
 
 libtracker_sparql = library('tracker-sparql-' + tracker_api_version,
     '../libtracker-common/libtracker-common.vapi',

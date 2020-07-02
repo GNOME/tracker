@@ -15,7 +15,7 @@ libtracker_bus = static_library('tracker-bus',
         # doesn't seem to work here.
         '--target-glib', glib_required,
     ],
-    dependencies: [tracker_common_dep, tracker_sparql_intermediate_dep, tracker_sparql_vapi_dep],
+    dependencies: [tracker_common_dep, tracker_sparql_vapi_dep],
     include_directories: [commoninc, configinc, srcinc],
     gnu_symbol_visibility: 'hidden',
 )
