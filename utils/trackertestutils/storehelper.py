@@ -123,7 +123,7 @@ class await_insert():
             for event in events:
                 if event.get_event_type() in [Tracker.NotifierEventType.CREATE,
                                               Tracker.NotifierEventType.UPDATE]:
-                    log.debug("Processing %s event for id %s", event.get_event_type().value_nick, event.get_id())
+                    log.debug("Processing %s event for id %s %s", event.get_event_type().value_nick, event.get_id(), event.get_urn())
                     stmt.bind_int('id', event.get_id())
                     cursor = stmt.execute(None)
 

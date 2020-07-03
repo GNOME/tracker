@@ -137,6 +137,8 @@ struct _TrackerSparql
 	GPtrArray *named_graphs;
 	gchar *base;
 
+	GMutex mutex;
+
 	struct {
 		TrackerContext *context;
 		TrackerContext *select_context;
@@ -8795,6 +8797,7 @@ tracker_sparql_init (TrackerSparql *sparql)
 	sparql->anon_graphs = g_ptr_array_new_with_free_func (g_free);
 	sparql->named_graphs = g_ptr_array_new_with_free_func (g_free);
 	sparql->cacheable = TRUE;
+	g_mutex_init (&sparql->mutex);
 }
 
 static gboolean
@@ -8967,10 +8970,12 @@ tracker_sparql_execute_cursor (TrackerSparql  *sparql,
 {
 	TrackerDBStatement *stmt;
 	TrackerDBInterface *iface;
-	TrackerDBCursor *cursor;
+	TrackerDBCursor *cursor = NULL;
 	TrackerPropertyType *types;
 	const gchar * const *names;
 	guint n_types, n_names;
+
+	g_mutex_lock (&sparql->mutex);
 
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (SPARQL)) {
@@ -8985,14 +8990,14 @@ tracker_sparql_execute_cursor (TrackerSparql  *sparql,
 
 	if (sparql->parser_error) {
 		g_propagate_error (error, sparql->parser_error);
-		return NULL;
+		goto error;
 	}
 
 	if (tracker_sparql_needs_update (sparql)) {
 		tracker_sparql_reset_state (sparql);
 
 		if (!_call_rule_func (sparql, NAMED_RULE_Query, error))
-			return NULL;
+			goto error;
 	}
 
 	iface = tracker_data_manager_get_db_interface (sparql->data_manager);
@@ -9002,7 +9007,7 @@ tracker_sparql_execute_cursor (TrackerSparql  *sparql,
 	                      sparql->cacheable,
 	                      error);
 	if (!stmt)
-		return NULL;
+		goto error;
 
 	types = (TrackerPropertyType *) sparql->var_types->data;
 	n_types = sparql->var_types->len;
@@ -9015,7 +9020,11 @@ tracker_sparql_execute_cursor (TrackerSparql  *sparql,
 							   error);
 	g_object_unref (stmt);
 
+error:
+	g_mutex_unlock (&sparql->mutex);
+
 	return TRACKER_SPARQL_CURSOR (cursor);
+
 }
 
 TrackerSparql *
