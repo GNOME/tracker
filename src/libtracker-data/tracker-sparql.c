@@ -2835,7 +2835,7 @@ translate_ConstraintDecl (TrackerSparql  *sparql,
 	gboolean graph = FALSE;
 	gboolean filter_unnamed_graph = TRUE;
 
-	/* ConstraintDecl ::= 'CONSTRAINT' ( 'GRAPH' | 'SERVICE' ) ( ( IRIREF | 'DEFAULT' | 'ALL' ) ( ',' ( IRIREF | 'DEFAULT' | 'ALL' ) )* )?
+	/* ConstraintDecl ::= 'CONSTRAINT' ( 'GRAPH' | 'SERVICE' ) ( ( PNAME_LN | IRIREF | 'DEFAULT' | 'ALL' ) ( ',' ( PNAME_LN | IRIREF | 'DEFAULT' | 'ALL' ) )* )?
 	 *
 	 * TRACKER EXTENSION
 	 */
@@ -2855,7 +2855,8 @@ translate_ConstraintDecl (TrackerSparql  *sparql,
 	do {
 		gchar *elem;
 
-		if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_IRIREF)) {
+		if (_accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_IRIREF) ||
+		    _accept (sparql, RULE_TYPE_TERMINAL, TERMINAL_TYPE_PNAME_LN)) {
 			if (set) {
 				elem = _dup_last_string (sparql);
 				g_ptr_array_add (set, elem);
