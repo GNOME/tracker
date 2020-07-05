@@ -1509,12 +1509,12 @@ static const TrackerGrammarRule rule_SelectQuery[] = { R(SelectClause), GTE0(hel
  */
 static const TrackerGrammarRule rule_PrefixDecl[] = { L(PREFIX), T(PNAME_NS), T(IRIREF), NIL };
 
-/* ConstraintDecl ::= 'CONSTRAINT' ( 'GRAPH' | 'SERVICE' ) ( ( IRIREF | 'DEFAULT' | 'ALL' ) ( ',' ( IRIREF | 'DEFAULT' | 'ALL' ) )* )?
+/* ConstraintDecl ::= 'CONSTRAINT' ( 'GRAPH' | 'SERVICE' ) ( ( PNAME_LN | IRIREF | 'DEFAULT' | 'ALL' ) ( ',' ( PNAME_LN | IRIREF | 'DEFAULT' | 'ALL' ) )* )?
  *
  * TRACKER EXTENSION
  */
 static const TrackerGrammarRule helper_ConstraintDecl_or_1[] = { L(GRAPH), L(SERVICE), NIL };
-static const TrackerGrammarRule helper_ConstraintDecl_or_2[] = { T(IRIREF), L(DEFAULT), L(ALL), NIL };
+static const TrackerGrammarRule helper_ConstraintDecl_or_2[] = { T(PNAME_LN), T(IRIREF), L(DEFAULT), L(ALL), NIL };
 static const TrackerGrammarRule helper_ConstraintDecl_seq_1[] = { L(COMMA), OR(helper_ConstraintDecl_or_2), NIL };
 static const TrackerGrammarRule helper_ConstraintDecl_gte0_1[] = { S(helper_ConstraintDecl_seq_1), NIL };
 static const TrackerGrammarRule helper_ConstraintDecl_opt_1[] = { OR(helper_ConstraintDecl_or_2), GTE0(helper_ConstraintDecl_gte0_1), NIL };
