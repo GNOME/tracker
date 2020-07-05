@@ -115,11 +115,13 @@ tracker_portal_endpoint_add_prologue (TrackerEndpointDBus *endpoint_dbus)
 				g_string_append (str, ", ");
 
 			if (g_strcmp0 (endpoint->graphs[i], GRAPH_ALL) == 0)
-				g_string_append (str, "ALL");
+				g_string_append (str, "ALL ");
 			else if (g_strcmp0 (endpoint->graphs[i], GRAPH_DEFAULT) == 0)
-				g_string_append (str, "DEFAULT");
+				g_string_append (str, "DEFAULT ");
+			else if (strstr (endpoint->graphs[i], ":/"))
+				g_string_append_printf (str, "<%s> ", endpoint->graphs[i]);
 			else
-				g_string_append_printf (str, "<%s>", endpoint->graphs[i]);
+				g_string_append_printf (str, "%s ", endpoint->graphs[i]);
 		}
 
 		endpoint->prologue = g_string_free (str, FALSE);
