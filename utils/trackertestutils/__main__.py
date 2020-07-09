@@ -24,7 +24,6 @@
 #
 
 import argparse
-import collections
 import contextlib
 import locale
 import logging
@@ -35,9 +34,7 @@ import signal
 import subprocess
 import sys
 import tempfile
-import time
 
-from gi.repository import Gio
 from gi.repository import GLib
 
 from . import dconf
@@ -223,12 +220,6 @@ def argument_parser():
     index_group.add_argument('--index-recursive-tmpdir', action='store_true',
                              help="create a temporary directory and configure Tracker "
                                   "to only index that location (useful for automated testing)")
-    parser.add_argument('--wait-for-miner', type=str, action='append',
-                        help="wait for one or more daemons to start, and "
-                             "return to idle for at least 1 second, before "
-                             "exiting. Usually used with `tracker index` where "
-                             "you should pass --wait-for-miner=Files and "
-                             "--wait-for-miner=Extract")
     parser.add_argument('-d', '--dbus-session-bus', metavar='ADDRESS',
                         help="use an existing D-Bus session bus. This can be "
                              "used to run commands inside an existing sandbox")
@@ -272,77 +263,6 @@ def init_logging(debug_sandbox, debug_dbus):
         dbus_stdout.addHandler(dbus_handler)
 
 
-class MinerStatusWatch():
-    """This class provides a way to block waiting for miners to finish.
-
-    This is needed because of a deficiency in `tracker index`, see:
-    https://gitlab.gnome.org/GNOME/tracker/issues/122
-
-    """
-    def __init__(self, sandbox, miner_name):
-        self.dbus_name = 'org.freedesktop.Tracker3.Miner.' + miner_name
-        self.object_path = '/org/freedesktop/Tracker3/Miner/' + miner_name
-
-        self._sandbox = sandbox
-
-        # Stores a list of (time, status) pairs. This is used to determine
-        # if the miner has been idle continuously over a time peroid.
-        self._status_log = collections.deque()
-
-    def _log_status(self, time, status):
-        self._status_log.append((time, status))
-        if len(self._status_log) > 100:
-            self._status_log.popleft()
-
-    def setup(self):
-        log.debug(f"Set up status watch on {self.dbus_name}")
-        self._proxy = Gio.DBusProxy.new_sync(
-            self._sandbox.get_session_bus_connection(),
-            Gio.DBusProxyFlags.NONE, None,
-            self.dbus_name, self.object_path, 'org.freedesktop.Tracker3.Miner',
-            None)
-
-        # FIXME: this doesn't appear to work, so we have to use polling.
-        #proxy.connect('g-signal', miner_signal_cb)
-
-        # This call will raise GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown
-        # if the miner name is invalid.
-        status = self._proxy.GetStatus()
-        self._log_status(time.time(), status)
-        log.debug(f"{self.dbus_name}: Current status: {status}")
-
-    def check_was_idle_for_time_period(self, period_seconds):
-        now = time.time()
-
-        status = self._proxy.GetStatus()
-        self._log_status(now, status)
-        log.debug(f"{self.dbus_name}: Current status: {status}")
-
-        cursor = len(self._status_log) - 1
-        previous_delta_from_now = 0
-        while True:
-            if cursor < 0 or self._status_log[cursor][1] != 'Idle':
-                if previous_delta_from_now >= period_seconds:
-                    return True
-                else:
-                    return False
-            previous_delta_from_now = (now - self._status_log[cursor][0])
-            cursor -= 1
-
-
-def wait_for_miners(watches):
-    # We wait 1 second after "Idle" status is seen before exiting, because the
-    # extractor goes to/from Idle frequently.
-    wait_for_idle_time = 1
-    while True:
-        status = [watch.check_was_idle_for_time_period(wait_for_idle_time) for watch in watches.values()]
-        if all(status):
-            break
-        else:
-            log.debug(f"Waiting for idle.")
-            time.sleep(0.1)
-
-
 @contextlib.contextmanager
 def ignore_sigint():
     handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -374,10 +294,6 @@ def main():
             "You cannot specify --dbus-config and --prefix at the same time. "
             "Note that running Tracker from the build tree implies "
             "--dbus-config.")
-
-    if args.command is None and args.wait_for_miner is not None:
-        raise RuntimeError("--wait-for-miner cannot be used when opening an "
-                           "interactive shell.")
 
     use_session_dirs = False
     store_location = None
@@ -424,12 +340,6 @@ def main():
         config_set(sandbox, index_recursive_directories)
         link_to_mime_data()
 
-    miner_watches = {}
-    for miner in (args.wait_for_miner or []):
-        watch = MinerStatusWatch(sandbox, miner)
-        watch.setup()
-        miner_watches[miner] = watch
-
     try:
         if interactive:
             if args.dbus_config:
@@ -450,9 +360,6 @@ def main():
                 result = subprocess.run(command)
             except KeyboardInterrupt:
                 interrupted = True
-
-            if len(miner_watches) > 0:
-                wait_for_miners(miner_watches)
 
             if interrupted:
                 log.debug("Process exited due to SIGINT")

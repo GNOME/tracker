@@ -114,11 +114,9 @@ Now check that it runs the correct version of the Tracker CLI:
     ./run-uninstalled -- tracker --version
 
 Let's try and index some content. (Subtitute ~/Music for any other location
-where you have interesting data). We need to explicitly tell the script to wait
-for the miners to finish, or it will exit too soon. (This is a workaround for
-[issue #122](https://gitlab.gnome.org/GNOME/tracker/issues/122).)
+where you have interesting data).
 
-    ./run-uninstalled --wait-for-miner=Files --wait-for-miner=Extract -- tracker index --file ~/Music
+    ./run-uninstalled -- tracker index --file ~/Music
 
 Let's see what files were found!
 
