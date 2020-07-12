@@ -31,6 +31,7 @@ typedef enum {
 	NAMED_RULE_Prologue,
 	NAMED_RULE_BaseDecl,
 	NAMED_RULE_PrefixDecl,
+	NAMED_RULE_ConstraintDecl,
 	NAMED_RULE_SelectQuery,
 	NAMED_RULE_SubSelect,
 	NAMED_RULE_ConstructQuery,
@@ -191,6 +192,7 @@ typedef enum {
 	LITERAL_COLON,
 	LITERAL_CONCAT,
 	LITERAL_CONTAINS,
+	LITERAL_CONSTRAINT,
 	LITERAL_COMMA,
 	LITERAL_CONSTRUCT,
 	LITERAL_COPY,
@@ -341,6 +343,7 @@ static const gchar literals[][N_LITERALS] = {
 	":", /* LITERAL_COLON */
 	"concat", /* LITERAL_CONCAT */
 	"contains", /* LITERAL_CONTAINS */
+	"constraint", /* LITERAL_CONSTRAINT */
 	",", /* LITERAL_COMMA */
 	"construct", /* LITERAL_CONSTRUCT */
 	"copy", /* LITERAL_COPY */
@@ -1506,14 +1509,27 @@ static const TrackerGrammarRule rule_SelectQuery[] = { R(SelectClause), GTE0(hel
  */
 static const TrackerGrammarRule rule_PrefixDecl[] = { L(PREFIX), T(PNAME_NS), T(IRIREF), NIL };
 
+/* ConstraintDecl ::= 'CONSTRAINT' ( 'GRAPH' | 'SERVICE' ) ( ( PNAME_LN | IRIREF | 'DEFAULT' | 'ALL' ) ( ',' ( PNAME_LN | IRIREF | 'DEFAULT' | 'ALL' ) )* )?
+ *
+ * TRACKER EXTENSION
+ */
+static const TrackerGrammarRule helper_ConstraintDecl_or_1[] = { L(GRAPH), L(SERVICE), NIL };
+static const TrackerGrammarRule helper_ConstraintDecl_or_2[] = { T(PNAME_LN), T(IRIREF), L(DEFAULT), L(ALL), NIL };
+static const TrackerGrammarRule helper_ConstraintDecl_seq_1[] = { L(COMMA), OR(helper_ConstraintDecl_or_2), NIL };
+static const TrackerGrammarRule helper_ConstraintDecl_gte0_1[] = { S(helper_ConstraintDecl_seq_1), NIL };
+static const TrackerGrammarRule helper_ConstraintDecl_opt_1[] = { OR(helper_ConstraintDecl_or_2), GTE0(helper_ConstraintDecl_gte0_1), NIL };
+static const TrackerGrammarRule rule_ConstraintDecl[] = { L(CONSTRAINT), OR(helper_ConstraintDecl_or_1), OPT(helper_ConstraintDecl_opt_1), NIL };
 
 /* BaseDecl ::= 'BASE' IRIREF
  */
 static const TrackerGrammarRule rule_BaseDecl[] = { L(BASE), T(IRIREF), NIL };
 
-/* Prologue ::= ( BaseDecl | PrefixDecl )*
+/* Prologue ::= ( BaseDecl | PrefixDecl | ConstraintDecl )*
+ *
+ * TRACKER EXTENSION:
+ * ConstraintDecl entirely.
  */
-static const TrackerGrammarRule helper_Prologue_or[] = { R(BaseDecl), R(PrefixDecl), NIL };
+static const TrackerGrammarRule helper_Prologue_or[] = { R(BaseDecl), R(PrefixDecl), R(ConstraintDecl), NIL };
 static const TrackerGrammarRule helper_Prologue_gte0[] = { OR(helper_Prologue_or), NIL };
 static const TrackerGrammarRule rule_Prologue[] = { GTE0 (helper_Prologue_gte0), NIL };
 
@@ -2152,6 +2168,7 @@ static const TrackerGrammarRule *named_rules[N_NAMED_RULES] = {
 	rule_Prologue,
 	rule_BaseDecl,
 	rule_PrefixDecl,
+	rule_ConstraintDecl,
 	rule_SelectQuery,
 	rule_SubSelect,
 	rule_ConstructQuery,

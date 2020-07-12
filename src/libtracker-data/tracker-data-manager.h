@@ -98,8 +98,6 @@ GHashTable *         tracker_data_manager_get_graphs       (TrackerDataManager *
 
 gint                 tracker_data_manager_find_graph       (TrackerDataManager *manager,
                                                             const gchar        *name);
-const gchar *        tracker_data_manager_find_graph_by_id (TrackerDataManager *manager,
-                                                            gint                id);
 
 guint                tracker_data_manager_get_generation   (TrackerDataManager *manager);
 

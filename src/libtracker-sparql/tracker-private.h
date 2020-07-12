@@ -21,6 +21,7 @@
 #define __TRACKER_PRIVATE_H__
 
 #include "tracker-cursor.h"
+#include "tracker-endpoint-dbus.h"
 
 typedef struct _TrackerSparqlConnectionClass TrackerSparqlConnectionClass;
 
@@ -132,10 +133,34 @@ struct _TrackerEndpointClass {
 	GObjectClass parent_class;
 };
 
+typedef struct _TrackerEndpointDBus TrackerEndpointDBus;
+
+struct _TrackerEndpointDBus {
+	TrackerEndpoint parent_instance;
+	GDBusConnection *dbus_connection;
+	gchar *object_path;
+	guint register_id;
+	GDBusNodeInfo *node_info;
+	GCancellable *cancellable;
+	TrackerNotifier *notifier;
+};
+
 typedef struct _TrackerEndpointDBusClass TrackerEndpointDBusClass;
+
+typedef enum {
+	TRACKER_OPERATION_TYPE_SELECT,
+	TRACKER_OPERATION_TYPE_UPDATE,
+} TrackerOperationType;
 
 struct _TrackerEndpointDBusClass {
 	struct _TrackerEndpointClass parent_class;
+
+	gboolean (* forbid_operation) (TrackerEndpointDBus   *endpoint_dbus,
+	                               GDBusMethodInvocation *invocation,
+	                               TrackerOperationType   operation_type);
+	gboolean (* filter_graph) (TrackerEndpointDBus *endpoint_dbus,
+	                           const gchar         *graph_name);
+	gchar * (* add_prologue) (TrackerEndpointDBus *endpoint_dbus);
 };
 
 typedef struct _TrackerResourceClass TrackerResourceClass;

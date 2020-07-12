@@ -50,6 +50,7 @@ json_glib = dependency('json-glib-1.0', version: '>= 1.0', required: true)
 libsoup = dependency('libsoup-2.4', version: '> 2.40', required: true)
 libxml2 = dependency('libxml-2.0', version: '> 2.6')
 sqlite = dependency('sqlite3', version: '>' + sqlite_required)
+dbus = dependency('dbus-1')
 
 libmath = cc.find_library('m', required: false)
 
@@ -179,6 +180,38 @@ if unicode_library_name == ''
     error('libunistring explicitly requested, but not found')
   else
     error('Neither libicu or libunistring were found for Unicode support.')
+  endif
+endif
+
+####################################################################
+# D-Bus service files
+####################################################################
+
+if get_option('dbus_services_dir') == ''
+  dbus_services_dir = dbus.get_pkgconfig_variable('session_bus_services_dir',
+                                                  define_variable: [ 'datadir', datadir ])
+else
+  dbus_services_dir = get_option('dbus_services_dir')
+endif
+
+####################################################################
+# systemd user services
+####################################################################
+
+install_systemd_user_services = get_option('systemd_user_services')
+if install_systemd_user_services
+  systemd_user_services_dir = get_option('systemd_user_services_dir')
+
+  if systemd_user_services_dir == ''
+    systemd = dependency('systemd', version: '>= 242', required: false)
+    if systemd.found()
+      systemd_user_services_dir = systemd.get_pkgconfig_variable('systemduserunitdir',
+                                                                 define_variable: ['prefix', get_option('prefix')])
+    else
+      error('systemd user services were enabled, but systemd was not found. ' +
+            'Please set the systemd_user_services_dir option if you want to ' +
+            'install them, or set systemd_user_services=false to disable.')
+    endif
   endif
 endif
 

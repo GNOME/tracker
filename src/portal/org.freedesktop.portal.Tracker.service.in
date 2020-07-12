@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.freedesktop.portal.Tracker
+Exec=@libexecdir@/tracker-xdg-portal-3
+SystemdService=tracker-xdg-portal-3.service

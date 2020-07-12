@@ -123,7 +123,7 @@ run_endpoint (TrackerSparqlConnection  *connection,
 {
 	TrackerEndpoint *endpoint = NULL;
 	GDBusConnection *dbus_connection;
-	g_autoptr(GMainLoop) main_loop;
+	g_autoptr(GMainLoop) main_loop = NULL;
 	GError *inner_error = NULL;
 
 	g_print (_("Creating endpoint at %s…"), dbus_service);

@@ -1,0 +1,17 @@
+INSERT {
+	GRAPH <A> {
+		<a> a example:A ;
+		    example:p 42
+	}
+	GRAPH <B> {
+		<b> a example:A ;
+		    example:p 21
+	}
+	GRAPH <C> {
+		<c> a example:A ;
+		    example:p 7
+	}
+
+        <d> a example:A ;
+            example:p 3;
+}
