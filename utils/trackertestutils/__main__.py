@@ -320,20 +320,21 @@ class MinerStatusWatch():
 
         cursor = len(self._status_log) - 1
         previous_delta_from_now = 0
-        while True:
-            if cursor < 0 or self._status_log[cursor][1] != 'Idle':
-                if previous_delta_from_now >= period_seconds:
+        while cursor >= 0:
+            if self._status_log[cursor][1] != 'Idle':
+                return False
+
+            if self._status_log[cursor][1] == 'Idle':
+                if (now - self._status_log[cursor][0]) >= period_seconds:
                     return True
-                else:
-                    return False
-            previous_delta_from_now = (now - self._status_log[cursor][0])
+
             cursor -= 1
 
 
 def wait_for_miners(watches):
     # We wait 1 second after "Idle" status is seen before exiting, because the
     # extractor goes to/from Idle frequently.
-    wait_for_idle_time = 1
+    wait_for_idle_time = 2
     while True:
         status = [watch.check_was_idle_for_time_period(wait_for_idle_time) for watch in watches.values()]
         if all(status):
