@@ -241,6 +241,7 @@ conf.set('HAVE_BUILTIN_FTS', sqlite3_has_builtin_fts5)
 conf.set('HAVE_LIBICU', unicode_library_name == 'icu')
 conf.set('HAVE_LIBSTEMMER', have_libstemmer)
 conf.set('HAVE_LIBUNISTRING', unicode_library_name == 'unistring')
+conf.set('DOMAIN', get_option('domain'))
 
 conf.set('HAVE_POSIX_FADVISE', cc.has_function('posix_fadvise', prefix : '#include <fcntl.h>'))
 conf.set('HAVE_STATVFS64', cc.has_header_symbol('sys/statvfs.h', 'statvfs64', args: '-D_LARGEFILE64_SOURCE'))
@@ -260,6 +261,7 @@ conf.set('TRACKER_BINARY_AGE', 100 * tracker_minor_version + tracker_micro_versi
 # Config that goes in some other generated files (.desktop, .service, etc)
 conf.set('abs_top_builddir', meson.current_build_dir())
 conf.set('libexecdir', join_paths(get_option('prefix'), get_option('libexecdir')))
+conf.set('datadir', join_paths(get_option('prefix'), get_option('datadir')))
 
 configure_file(input: 'config.h.meson.in',
                output: 'config.h',
@@ -294,6 +296,7 @@ vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi
 typelib_dir = gobject_introspection.get_pkgconfig_variable('typelibdir',
                                                            define_variable:  [ 'libdir', libdir ])
 
+subdir('data')
 subdir('src')
 subdir('docs')
 subdir('examples')

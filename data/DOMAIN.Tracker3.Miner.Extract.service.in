@@ -1,0 +1,7 @@
+[D-BUS Service]
+Name=@DOMAIN@.Tracker3.Miner.Extract
+Exec=@libexecdir@/tracker-extract-3 --domain-ontology @datadir@/tracker3/domain-ontologies/@DOMAIN@.domain.rule
+
+# Miner details needed for tracker-control
+Path=/org/freedesktop/Tracker3/Miner/Extract
+NameSuffix=Miner.Extract

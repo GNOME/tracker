@@ -1,0 +1,7 @@
+[D-BUS Service]
+Name=@DOMAIN@.Tracker3.Miner.Files
+Exec=@libexecdir@/tracker-miner-fs-3 --domain-ontology @datadir@/tracker3/domain-ontologies/@DOMAIN@.domain.rule --initial-sleep 0
+
+# Miner details needed for tracker-control
+Path=/org/freedesktop/Tracker3/Miner/Files
+NameSuffix=Miner.Files

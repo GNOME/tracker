@@ -4,6 +4,8 @@ option('man', type: 'boolean', value: true, yield: true,
        description: 'Install man pages')
 option('override_sqlite_version_check', type: 'boolean', value: false,
        description: 'Override checks for broken sqlite versions')
+option('domain', type: 'string', value: '',
+       description: 'Domain prefix to use for sandboxed')
 
 option('network_manager', type: 'feature', value: 'auto',
        description: 'Connection detection through NetworkManager')
