@@ -2315,11 +2315,12 @@ tracker_db_interface_sqlite_fts_create_delete_all_query (TrackerDBInterface *db_
 	g_string_append_printf (insert_str,
 	                        "INSERT INTO \"%s\".fts5 (fts5, rowid %s) "
 	                        "SELECT 'delete', rowid %s FROM \"%s\".fts_view "
-	                        "WHERE rowid = ?",
+	                        "WHERE rowid = ? AND COALESCE(NULL %s) IS NOT NULL",
 				database,
 	                        db_interface->fts_properties,
 	                        db_interface->fts_properties,
-	                        database);
+	                        database,
+				db_interface->fts_properties);
 	return g_string_free (insert_str, FALSE);
 }
 

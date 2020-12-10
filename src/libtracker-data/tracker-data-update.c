@@ -1869,6 +1869,8 @@ cache_delete_resource_type_full (TrackerData  *data,
 		if (strcmp (tracker_class_get_uri (class), TRACKER_PREFIX_RDFS "Resource") == 0 &&
 		    g_hash_table_size (data->resource_buffer->tables) == 0) {
 			tracker_db_interface_sqlite_fts_delete_id (iface, database, data->resource_buffer->id);
+			data->resource_buffer->fts_updated = TRUE;
+
 			/* skip subclass query when deleting whole resource
 			   to improve performance */
 
