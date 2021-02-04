@@ -56,13 +56,13 @@ tracker_term_ellipsize (const gchar          *str,
 	begin = str;
 	end = &str[size];
 
-	if (mode == TRACKER_ELLIPSIZE_START) {
+	if (mode == TRACKER_ELLIPSIZE_END) {
 		pos = begin;
 		for (i = 0; i < max_len; i++)
 			pos = g_utf8_find_next_char (pos, end);
 
 		substr = g_strndup (begin, pos - begin);
-		retval = g_strdup_printf ("…%s", substr);
+		retval = g_strdup_printf ("%s…", substr);
 		g_free (substr);
 	} else {
 		pos = end;
@@ -70,7 +70,7 @@ tracker_term_ellipsize (const gchar          *str,
 			pos = g_utf8_find_prev_char (begin, pos);
 
 		substr = g_strndup (pos, end - pos);
-		retval = g_strdup_printf ("%s…", substr);
+		retval = g_strdup_printf ("…%s", substr);
 		g_free (substr);
 	}
 
