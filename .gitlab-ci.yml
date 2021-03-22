@@ -20,7 +20,7 @@ stages:
   script:
     - mkdir build
     - cd build
-    - meson .. -Db_lto=true -Db_coverage=true -Dsystemd_user_services=false
+    - meson .. -Db_lto=true -Db_coverage=true -Dsystemd_user_services=false -Dtap_tests=true
     - ninja
     - |
       # Remove the many "CI_" variables from the environment. Meson dumps the
@@ -65,11 +65,6 @@ test-ubuntu-rolling:
 
 test-fedora-rawhide:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:rawhide
-  before_script:
-    - git clone https://github.com/mesonbuild/meson
-    - cd meson
-    - pip3 install --user .
-    - cd ..
   <<: *test
 
 coverage-analysis:
