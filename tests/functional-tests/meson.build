@@ -9,6 +9,7 @@ testconf.set('TEST_ONTOLOGIES_DIR', tracker_uninstalled_nepomuk_ontologies_dir)
 testconf.set('TEST_DBUS_DAEMON_CONFIG_FILE', build_root / 'tests' / 'test-bus.conf')
 testconf.set('TEST_PORTAL_FLATPAK_INFO', source_root / 'tests' / 'flatpak-info')
 testconf.set('TRACKER_VERSION', meson.project_version())
+testconf.set('TEST_TAP_ENABLED', get_option('tap_tests'))
 
 config_json = configure_file(
   input: 'configuration.json.in',
@@ -39,12 +40,18 @@ test_env.prepend('LD_LIBRARY_PATH', tracker_sparql_uninstalled_dir)
 test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
 
+if get_option('tap_tests')
+  protocol = 'tap'
+else
+  protocol = 'exitcode'
+endif
+
 foreach test_name: functional_tests
   file = meson.current_source_dir() / '@0@.py'.format(test_name)
   test(test_name, python,
     args: [file],
     env: test_env,
-    protocol: 'tap',
+    protocol: protocol,
     suite: ['functional'],
     timeout: 60)
 endforeach

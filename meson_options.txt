@@ -24,3 +24,5 @@ option('test_utils', type: 'boolean', value: true,
        description: 'Whether to install the trackertestutils Python package')
 option('test_utils_dir', type: 'string', value: '',
        description: 'Directory to install trackertestutils Python package (or empty to use the default)')
+option('tap_tests', type: 'boolean', value: false,
+       description: 'Whether to enable TAP protocol on tests')

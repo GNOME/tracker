@@ -15,6 +15,12 @@ subdir('libtracker-sparql')
 subdir('functional-tests')
 subdir('services')
 
+if get_option('tap_tests')
+  protocol = 'tap'
+else
+  protocol = 'exitcode'
+endif
+
 foreach t: tests
   test_name = t.get('name')
   test_exe = t.get('exe')
@@ -32,7 +38,7 @@ foreach t: tests
   test(test_name, test_exe,
     env: test_env,
     timeout: test_timeout,
-    protocol: 'tap',
+    protocol: protocol,
     suite: test_suite,
     is_parallel: test_is_parallel)
 endforeach

@@ -53,6 +53,10 @@ def tracker_version():
     return config['TRACKER_VERSION']
 
 
+def tap_tests_enabled():
+    return config['TEST_TAP_ENABLED']
+
+
 TRACKER_DEBUG_TESTS = 1
 
 def tests_verbose():

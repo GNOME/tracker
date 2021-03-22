@@ -65,12 +65,14 @@ def tracker_test_main():
 
     runner = None
 
-    try:
-        from tap import TAPTestRunner
-        runner = TAPTestRunner()
-        runner.set_stream(True)
-    except ImportError as e:
-        log.info('No TAP test runner found: %s', e)
+    if cfg.tap_tests_enabled():
+        try:
+            from tap import TAPTestRunner
+            runner = TAPTestRunner()
+            runner.set_stream(True)
+        except ImportError as e:
+            log.error('No TAP test runner found: %s', e)
+            raise
 
     ut.main(testRunner=runner, verbosity=2)
 
