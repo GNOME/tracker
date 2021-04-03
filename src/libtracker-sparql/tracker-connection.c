@@ -69,6 +69,8 @@
 #include "tracker-connection.h"
 #include "tracker-private.h"
 
+#include "direct/tracker-direct.h"
+
 G_DEFINE_ABSTRACT_TYPE (TrackerSparqlConnection, tracker_sparql_connection,
                         G_TYPE_OBJECT)
 
@@ -805,4 +807,50 @@ tracker_sparql_connection_create_batch (TrackerSparqlConnection *connection)
 		return NULL;
 
 	return TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->create_batch (connection);
+}
+
+/**
+ * tracker_sparql_connection_map_connection:
+ * @connection: a #TrackerSparqlConnection
+ * @handle_name: handle name for @service_connection
+ * @service_connection: a #TrackerSparqlConnection to use from @connection
+ *
+ * Maps @service_connection so it is available as a "local:@handle_name" URI
+ * in @connection. This can be accessed via the SERVICE SPARQL syntax in
+ * queries from @connection. E.g.:
+ *
+ * <example>
+ * <programlisting>
+ * SELECT ?u {
+ *   SERVICE &lt;local:other-connection&gt; {
+ *     ?u a rdfs:Resource
+ *   }
+ * }
+ * </programlisting>
+ * </example>
+ *
+ * This is useful to interrelate data from multiple
+ * #TrackerSparqlConnection<!-- -->s maintained by the same process,
+ * without creating a public endpoint for @service_connection.
+ *
+ * This call only applies to connections created via
+ * tracker_sparql_connection_new() and tracker_sparql_connection_new_async().
+ *
+ * Since: 3.2
+ **/
+void
+tracker_sparql_connection_map_connection (TrackerSparqlConnection *connection,
+					  const gchar             *handle_name,
+					  TrackerSparqlConnection *service_connection)
+{
+	g_return_if_fail (TRACKER_IS_DIRECT_CONNECTION (connection));
+	g_return_if_fail (TRACKER_IS_DIRECT_CONNECTION (service_connection));
+	g_return_if_fail (handle_name && *handle_name);
+
+	if (!TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->map_connection)
+		return;
+
+	return TRACKER_SPARQL_CONNECTION_GET_CLASS (connection)->map_connection (connection,
+	                                                                         handle_name,
+	                                                                         service_connection);
 }

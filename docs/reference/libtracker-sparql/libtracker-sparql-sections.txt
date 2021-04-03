@@ -129,6 +129,7 @@ tracker_sparql_connection_create_batch
 tracker_sparql_connection_close
 tracker_sparql_connection_close_async
 tracker_sparql_connection_close_finish
+tracker_sparql_connection_map_connection
 <SUBSECTION Standard>
 TrackerSparqlConnectionClass
 TRACKER_SPARQL_CONNECTION

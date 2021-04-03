@@ -112,6 +112,9 @@ struct _TrackerSparqlConnectionClass
 	                                  const gchar              *dbus_path,
 	                                  gchar                   **name,
 	                                  gchar                   **path);
+	void (* map_connection) (TrackerSparqlConnection  *connection,
+	                         const gchar              *handle_name,
+	                         TrackerSparqlConnection  *service_connection);
 };
 
 typedef struct _TrackerSparqlCursorClass TrackerSparqlCursorClass;
