@@ -3,4 +3,4 @@ SELECT ?u {
     ?u nrl:indexed true
   }
 }
-VALUES ?s { 'dbus:%s' }
+VALUES ?s { '%s' }

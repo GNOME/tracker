@@ -182,7 +182,7 @@ test_sparql_query (TestInfo      *test_info,
 	GError *error = NULL;
 	gchar *query, *query_filename, *service_query;
 	gchar *results_filename;
-	gchar *prefix, *test_prefix;
+	gchar *prefix, *test_prefix, *uri;
 	GFile *ontology;
 	GThread *thread;
 
@@ -212,12 +212,15 @@ test_sparql_query (TestInfo      *test_info,
 	results_filename = g_strconcat (test_prefix, ".out", NULL);
 	g_free (test_prefix);
 
+	uri = g_strdup_printf ("dbus:%s",
+	                       g_dbus_connection_get_unique_name (dbus_conn));
+
 	/* perform actual query */
-	service_query = g_strdup_printf (query,
-					 g_dbus_connection_get_unique_name (dbus_conn));
+	service_query = g_strdup_printf (query, uri);
 	cursor = tracker_sparql_connection_query (local, service_query, NULL, &error);
 	g_free (service_query);
 	g_free (query);
+	g_free (uri);
 
 	check_result (cursor, test_info, results_filename, error);
 	g_free (results_filename);

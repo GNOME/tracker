@@ -1,4 +1,4 @@
 SELECT ?u {
-  SERVICE <dbus:%s> {
+  SERVICE <%s> {
   }
 }

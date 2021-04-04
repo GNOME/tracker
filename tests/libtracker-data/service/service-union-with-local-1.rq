@@ -2,7 +2,7 @@ SELECT ?u {
   {
     ?u nrl:indexed true;
   } UNION {
-    SERVICE <dbus:%s> {
+    SERVICE <%s> {
       ?u nrl:indexed true;
     }
   }

@@ -10,7 +10,7 @@ SELECT ?u ?s {
   {
     SELECT ?u ?s {
       ?u a rdfs:Resource .
-      SERVICE <dbus:%s> {
+      SERVICE <%s> {
         SELECT ?u ('b' AS ?s) {
           ?u nrl:indexed true
         }

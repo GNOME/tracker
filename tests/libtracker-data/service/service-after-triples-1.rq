@@ -1,6 +1,6 @@
 SELECT ?u {
   ?u a rdfs:Resource .
-  SERVICE <dbus:%s> {
+  SERVICE <%s> {
     ?u nrl:indexed true
   }
 }
