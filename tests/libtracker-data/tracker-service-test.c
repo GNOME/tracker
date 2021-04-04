@@ -32,6 +32,7 @@ typedef struct _TestInfo TestInfo;
 struct _TestInfo {
 	const gchar *test_name;
 	gboolean expect_query_error;
+	gboolean local_connection;
 };
 
 const TestInfo tests[] = {
@@ -204,6 +205,10 @@ test_sparql_query (TestInfo      *test_info,
 		g_usleep (100);
 	}
 
+	tracker_sparql_connection_map_connection (local,
+	                                          "other-connection",
+	                                          remote);
+
 	query_filename = g_strconcat (test_prefix, ".rq", NULL);
 	g_file_get_contents (query_filename, &query, NULL, &error);
 	g_assert_no_error (error);
@@ -212,8 +217,12 @@ test_sparql_query (TestInfo      *test_info,
 	results_filename = g_strconcat (test_prefix, ".out", NULL);
 	g_free (test_prefix);
 
-	uri = g_strdup_printf ("dbus:%s",
-	                       g_dbus_connection_get_unique_name (dbus_conn));
+	if (test_info->local_connection) {
+		uri = g_strdup_printf ("local:other-connection");
+	} else {
+		uri = g_strdup_printf ("dbus:%s",
+		                       g_dbus_connection_get_unique_name (dbus_conn));
+	}
 
 	/* perform actual query */
 	service_query = g_strdup_printf (query, uri);
@@ -247,6 +256,16 @@ setup (TestInfo      *info,
 }
 
 static void
+setup_local (TestInfo      *info,
+             gconstpointer  context)
+{
+	const TestInfo *test = context;
+
+	*info = *test;
+	info->local_connection = TRUE;
+}
+
+static void
 teardown (TestInfo      *info,
           gconstpointer  context)
 {
@@ -266,12 +285,21 @@ main (int argc, char **argv)
 	dbus_conn = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
 	g_assert_no_error (error);
 
-	/* add test cases */
+	/* add DBus test cases */
 	for (i = 0; i < G_N_ELEMENTS (tests); i++) {
 		gchar *testpath;
 
-		testpath = g_strconcat ("/libtracker-data/", tests[i].test_name, NULL);
+		testpath = g_strconcat ("/libtracker-data/dbus/", tests[i].test_name, NULL);
 		g_test_add (testpath, TestInfo, &tests[i], setup, test_sparql_query, teardown);
+		g_free (testpath);
+	}
+
+	/* add local test cases */
+	for (i = 0; i < G_N_ELEMENTS (tests); i++) {
+		gchar *testpath;
+
+		testpath = g_strconcat ("/libtracker-data/local/", tests[i].test_name, NULL);
+		g_test_add (testpath, TestInfo, &tests[i], setup_local, test_sparql_query, teardown);
 		g_free (testpath);
 	}
 
