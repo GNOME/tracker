@@ -1,10 +1,11 @@
 project('tracker', 'c', 'vala',
         version: '3.2.0.alpha.1',
-        meson_version: '>=0.51',
+        meson_version: '>=0.57',
         default_options: [
           'c_std=c99',
           'warning_level=2'])
 
+fs = import('fs')
 gnome = import('gnome')
 i18n = import('i18n')
 pkg = import('pkgconfig')
@@ -124,6 +125,33 @@ elif optimization in ['2', '3', 's']
 endif
 
 add_project_arguments(debug_cflags, language: 'c')
+
+
+####################################################################
+# SQLite
+####################################################################
+
+sqlite3_versions_known_bad = configuration_data()
+text = fs.read('sqlite3_versions_known_bad')
+foreach line : text.split('\n')
+  parts = line.split(' ')
+  if parts.length() == 2
+    version = parts[0]
+    link = parts[1]
+    sqlite3_versions_known_bad.set(version, link)
+  endif
+endforeach
+
+if sqlite3_versions_known_bad.has(sqlite.version())
+  if get_option('override_sqlite_version_check')
+    warn('SQlite3 version @0@ is known bad. Ignoring due to -Doverride_sqlite_version_check=true'.format(
+      sqlite.version()))
+  else
+    link = sqlite3_versions_known_bad.get(sqlite.version())
+    error('SQLite3 version is unsafe (@0@).\nSee @1@ for details.\nYou can bypass this check with -Doverride_sqlite_version_check=true'.format(
+      sqlite.version(), link))
+  endif
+endif
 
 ##################################################################
 # Check for libtracker-common, make sure libstemmer exists
@@ -351,30 +379,6 @@ subdir('tests')
 subdir('examples')
 
 subdir('po')
-
-if not get_option('override_sqlite_version_check')
-    template = 'SQLite3 version is unsafe (@0@).\nSee @1@ for details.\nYou can bypass this check with -Doverride_sqlite_version_check=true'
-
-    # Make sure we're not using versions of SQLite which cause problems.
-    #
-    # Avoid versions:
-    if sqlite.version().version_compare('>= 3.7.10') and sqlite.version().version_compare('<= 3.7.13')
-        error(template.format('>=3.7.10, <= 3.7.13',
-                              'https://mail.gnome.org/archives/tracker-list/2012-October/msg00028.html'))
-    elif sqlite.version().version_compare('3.8.1')
-        error(template.format('3.8.1',
-                              'https://mail.gnome.org/archives/tracker-list/2013-November/msg00021.html'))
-    elif sqlite.version().version_compare('3.8.4.2')
-        error(template.format('3.8.4.2',
-                              'https://mail.gnome.org/archives/tracker-list/2014-April/msg00001.html'))
-    elif sqlite.version().version_compare('>= 3.24.0') and sqlite.version().version_compare('<= 3.28.0')
-        error(template.format('>=3.24.0, <= 3.28.0',
-                              'https://gitlab.gnome.org/GNOME/tracker/merge_requests/160#note_664713'))
-    elif sqlite.version().version_compare('>= 3.35.0') and sqlite.version().version_compare('<= 3.35.1')
-        error(template.format('>=3.35.0, <= 3.35.1',
-                              'https://mail.gnome.org/archives/distributor-list/2021-March/msg00000.html'))
-    endif
-endif
 
 summary = [
   '\nBuild Configuration:',
