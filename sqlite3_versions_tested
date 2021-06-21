@@ -1,0 +1,23 @@
+# List of SQLite versions that Tracker CI is testing.
+# See: https://sqlite.org/chronology.html
+
+# Released 2021-06-18
+3.36.0
+3.35.5
+3.35.4
+3.35.3
+3.35.2
+3.34.1
+3.34.0
+3.33.0
+3.32.3
+3.32.2
+3.32.1
+3.32.0
+3.31.1
+3.31.0
+# Released 2019-10-10
+3.30.1
+3.30.0
+# Released 2019-07-10
+3.29.0

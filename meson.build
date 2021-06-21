@@ -131,26 +131,44 @@ add_project_arguments(debug_cflags, language: 'c')
 # SQLite
 ####################################################################
 
+sqlite_version_status = 'supported'
+
 sqlite3_versions_known_bad = configuration_data()
 text = fs.read('sqlite3_versions_known_bad')
 foreach line : text.split('\n')
   parts = line.split(' ')
-  if parts.length() == 2
+  if parts.length() == 2 and not line.startswith('#')
     version = parts[0]
     link = parts[1]
     sqlite3_versions_known_bad.set(version, link)
   endif
 endforeach
 
+sqlite3_versions_tested = configuration_data()
+text = fs.read('sqlite3_versions_tested')
+foreach line : text.split('\n')
+  if not line.startswith('#')
+    version = line.strip()
+    sqlite3_versions_tested.set10(line, true)
+  endif
+endforeach
+
 if sqlite3_versions_known_bad.has(sqlite.version())
   if get_option('override_sqlite_version_check')
-    warn('SQlite3 version @0@ is known bad. Ignoring due to -Doverride_sqlite_version_check=true'.format(
-      sqlite.version()))
+    warning('SQLite version @0@ is known bad. Ignoring due to -Doverride_sqlite_version_check=true'.format(
+            sqlite.version()))
+    sqlite_version_status = 'KNOWN BAD'
   else
     link = sqlite3_versions_known_bad.get(sqlite.version())
-    error('SQLite3 version is unsafe (@0@).\nSee @1@ for details.\nYou can bypass this check with -Doverride_sqlite_version_check=true'.format(
-      sqlite.version(), link))
+    error('SQLite version is unsafe (@0@).\nSee @1@ for details.\nYou can bypass this check with -Doverride_sqlite_version_check=true'.format(
+          sqlite.version(), link))
   endif
+endif
+
+if not sqlite3_versions_tested.has(sqlite.version())
+  warning('SQLite version @0@ is not currently tested in Tracker CI. If this is a new release, please open a merge request adding it to `sqlite3_versions_tested`. If this is a very old release, be aware that this configuration is not supported by Tracker upstream.'.
+          format(sqlite.version()))
+  sqlite_version_status = 'unsupported'
 endif
 
 ##################################################################
@@ -387,6 +405,7 @@ summary = [
   '    Debug:                                  ' + get_option('debug').to_string(),
   '    Optimization:                           ' + get_option('optimization'),
   '    Compiler:                               ' + cc.get_id(),
+  '    SQLite version:                         ' + sqlite.version() + ': ' + sqlite_version_status,
   '\nFeature Support:',
   '    Unicode support library:                ' + unicode_library_name,
   '    Use external FTS module:                ' + (not sqlite3_has_builtin_fts5).to_string(),
